@@ -293,6 +293,23 @@ export async function listScheduleExceptionsForDate(
   }));
 }
 
+export async function listAllScheduleExceptions(db: Queryable): Promise<Array<{
+  id: string;
+  exceptionDate: string;
+  kind: ScheduleExceptionKind;
+  opensAt: string | null;
+  closesAt: string | null;
+  note: string | null;
+}>> {
+  return all(
+    db,
+    `SELECT id, exception_date AS exceptionDate, kind, opens_at AS opensAt,
+            closes_at AS closesAt, note
+       FROM schedule_exceptions
+      ORDER BY exception_date ASC`,
+  );
+}
+
 /* ── Staff ────────────────────────────────────────────────────── */
 
 export async function listActiveStaffForService(

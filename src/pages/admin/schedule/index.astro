@@ -1,54 +1,105 @@
 ---
 import AdminLayout from '../../../layouts/AdminLayout.astro';
 import { env } from 'cloudflare:workers';
-import { listBusinessHours } from '../../../server/repositories';
+import { listBusinessHours, listAllScheduleExceptions } from '../../../server/repositories';
+import { formatJalaliDate } from '../../../lib/datetime/jalali';
 
 let hours: Awaited<ReturnType<typeof listBusinessHours>> = [];
+let exceptions: Awaited<ReturnType<typeof listAllScheduleExceptions>> = [];
+
 try {
-  hours = await listBusinessHours(env.DB);
+  [hours, exceptions] = await Promise.all([
+    listBusinessHours(env.DB),
+    listAllScheduleExceptions(env.DB),
+  ]);
 } catch (e) {
-  console.error('Failed to load business hours:', e);
+  console.error('Failed to load business hours or exceptions:', e);
 }
 
-const weekdayNames = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'];
+const weekdayNames = [
+  { index: 0, name: 'شنبه' },
+  { index: 1, name: 'یکشنبه' },
+  { index: 2, name: 'دوشنبه' },
+  { index: 3, name: 'سه‌شنبه' },
+  { index: 4, name: 'چهارشنبه' },
+  { index: 5, name: 'پنجشنبه' },
+  { index: 6, name: 'جمعه' },
+];
 ---
 
-<AdminLayout title="ساعات کاری و تعطیلات" activeNav="schedule">
+<AdminLayout title="ساعات کاری و زمان‌بندی" activeNav="schedule">
   <div class="admin-content-pad">
-    <div class="page-title-row mb-4">
+    <!-- 3D Header Row -->
+    <div class="dashboard-header-row">
       <div>
-        <h1 class="text-xl font-bold">ساعات کاری و زمان‌بندی کلینیک</h1>
-        <p class="text-muted small">تنظیم بازه‌های مجاز نوبت‌دهی هفتگی و روزهای تعطیل رسمی</p>
+        <h1 class="admin-page-title">⏱️ تنظیمات ساعات کاری و زمان‌بندی کلینیک</h1>
+        <p class="section-block-sub">
+          مدیریت بازه‌های نوبت‌دهی هفتگی، تغییر ساعات کاری و تقویم تعطیلات رسمی (کاملاً API First و بلادرنگ)
+        </p>
+      </div>
+      <div class="actions">
+        <button type="button" id="openExceptionModalBtn" class="btn-3d-refresh" style="display: inline-flex; align-items: center; gap: 8px;">
+          <span>+</span> ثبت روز تعطیل یا استثنا
+        </button>
       </div>
     </div>
 
-    <!-- Business Hours Card (§19) -->
-    <div class="card p-4 mb-4">
-      <h3 class="font-bold text-lg mb-3">ساعات کاری هفتگی کلینیک</h3>
-      <div class="table-responsive">
+    <!-- Alert / Status -->
+    <div id="scheduleAlert" class="alert-3d-danger" style="display: none; margin-bottom: 20px;">
+      <span id="scheduleAlertText"></span>
+    </div>
+
+    <!-- 1. Weekly Business Hours Table -->
+    <div class="admin-section-block" style="padding: 24px; margin-bottom: 30px;">
+      <h3 class="section-block-title" style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+        <span>📅</span> برنامه کاری هفتگی کلینیک تهران لیزر
+      </h3>
+
+      <div class="today-table-wrapper" style="border: none; border-radius: 0;">
         <table class="admin-table">
           <thead>
             <tr>
               <th>روز هفته</th>
-              <th>ساعت شروع</th>
-              <th>ساعت پایان</th>
+              <th>ساعت شروع فعالیت</th>
+              <th>ساعت پایان فعالیت</th>
               <th>وضعیت پذیرش</th>
+              <th>عملیات ویرایش</th>
             </tr>
           </thead>
           <tbody>
-            {weekdayNames.map((name, index) => {
-              const day = hours.find((h) => h.weekday === index);
-              const isOpen = day && day.segments.length > 0;
+            {weekdayNames.map((w) => {
+              const day = hours.find((h) => h.weekday === w.index);
+              const isOpen = !!day && day.segments.length > 0;
+              const opensAt = isOpen ? day.segments[0]?.opensAt : '09:00';
+              const closesAt = isOpen ? day.segments[day.segments.length - 1]?.closesAt : '21:00';
 
               return (
                 <tr>
-                  <td class="font-bold">{name}</td>
-                  <td>{isOpen ? day.segments[0]?.opensAt : '—'}</td>
-                  <td>{isOpen ? day.segments[day.segments.length - 1]?.closesAt : '—'}</td>
+                  <td style={{ fontWeight: 800, color: '#ffffff', fontSize: '1rem' }}>{w.name}</td>
+                  <td dir="ltr" style={{ fontWeight: 700, color: isOpen ? '#38bdf8' : '#64748b' }}>
+                    {isOpen ? `⏱ ${opensAt}` : '—'}
+                  </td>
+                  <td dir="ltr" style={{ fontWeight: 700, color: isOpen ? '#38bdf8' : '#64748b' }}>
+                    {isOpen ? `⏱ ${closesAt}` : '—'}
+                  </td>
                   <td>
-                    <span class={`badge ${isOpen ? 'badge-success' : 'badge-danger'}`}>
+                    <span class={`badge-status ${isOpen ? 'badge-status-completed' : 'badge-status-rejected'}`}>
                       {isOpen ? 'فعال و باز' : 'تعطیل هفتگی'}
                     </span>
+                  </td>
+                  <td>
+                    <button
+                      type="button"
+                      class="btn-table-action edit-hour-btn"
+                      style="border-color: rgba(212, 175, 55, 0.45); color: #f5d77f;"
+                      data-weekday={w.index}
+                      data-name={w.name}
+                      data-is-open={isOpen ? 'true' : 'false'}
+                      data-opens-at={opensAt}
+                      data-closes-at={closesAt}
+                    >
+                      ✏️ ویرایش ساعت کاری
+                    </button>
                   </td>
                 </tr>
               );
@@ -57,5 +108,383 @@ const weekdayNames = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنب
         </table>
       </div>
     </div>
+
+    <!-- 2. Exceptions and Holidays Table -->
+    <div class="admin-section-block" style="padding: 24px;">
+      <h3 class="section-block-title" style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+        <span>🏖️</span> تعطیلات رسمی، تغییرات مقطعی و مسدودی‌های تقویم
+      </h3>
+
+      {exceptions.length === 0 ? (
+        <div class="empty-state-card" style="border: none; margin: 10px;">
+          <span class="empty-icon">🏖️</span>
+          <p class="empty-text">هیچ روز تعطیل یا استثنای فعالی ثبت نشده است.</p>
+        </div>
+      ) : (
+        <div class="today-table-wrapper" style="border: none; border-radius: 0;">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>تاریخ (شمسی و میلادی)</th>
+                <th>نوع استثنا</th>
+                <th>ساعت اختصاصی</th>
+                <th>علت / یادداشت</th>
+                <th>عملیات</th>
+              </tr>
+            </thead>
+            <tbody>
+              {exceptions.map((ex) => (
+                <tr>
+                  <td>
+                    <div style={{ fontWeight: 700, color: '#f5d77f' }}>
+                      {formatJalaliDate(ex.exceptionDate)}
+                    </div>
+                    <span dir="ltr" style={{ fontSize: '0.78rem', color: '#94a3b8', fontFamily: 'monospace' }}>
+                      {ex.exceptionDate}
+                    </span>
+                  </td>
+                  <td>
+                    <span class={`badge-status ${ex.kind === 'holiday' ? 'badge-status-rejected' : 'badge-status-pending'}`}>
+                      {ex.kind === 'holiday' && 'تعطیل رسمی'}
+                      {ex.kind === 'closed' && 'تعطیل کلینیک'}
+                      {ex.kind === 'special_hours' && 'ساعات کاری ویژه'}
+                      {ex.kind === 'blocked_time' && 'مسدودی موقت'}
+                      {ex.kind === 'temporary_change' && 'تغییر موقت'}
+                    </span>
+                  </td>
+                  <td dir="ltr" style={{ color: ex.opensAt ? '#38bdf8' : '#94a3b8' }}>
+                    {ex.opensAt && ex.closesAt ? `${ex.opensAt} تا ${ex.closesAt}` : 'تمام روز تعطیل'}
+                  </td>
+                  <td style={{ color: '#cbd5e1' }}>{ex.note || '—'}</td>
+                  <td>
+                    <button
+                      type="button"
+                      class="btn-3d-reject delete-exception-btn"
+                      style="padding: 6px 14px; font-size: 0.8rem;"
+                      data-id={ex.id}
+                    >
+                      ✕ حذف
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+
+    <!-- 3D Edit Hours Modal -->
+    <div id="hourEditModal" class="modal-backdrop" style="display: none;">
+      <div class="modal-dialog">
+        <h3 class="modal-title">✏️ تنظیم ساعت کاری <span id="modalDayName"></span></h3>
+        <p style="color: rgba(226, 232, 240, 0.7); font-size: 0.86rem; margin: 0 0 18px;">
+          تغییرات مستقیماً در دیتابیس D1 اعمال شده و موتور نوبت‌دهی بلافاصله بر این اساس اسلات‌های آزاد را محاسبه می‌کند.
+        </p>
+
+        <form id="editHourForm">
+          <input type="hidden" id="editWeekday" />
+
+          <div style="margin-bottom: 16px;">
+            <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #e2e8f0; margin-bottom: 6px;">
+              وضعیت فعالیت در این روز:
+            </label>
+            <select id="editDayIsOpen" class="form-control-modal">
+              <option value="true">فعال و باز (نوبت‌دهی فعال)</option>
+              <option value="false">تعطیل (عدم امکان رزرو)</option>
+            </select>
+          </div>
+
+          <div id="hoursInputGroup" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px;">
+            <div>
+              <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #e2e8f0; margin-bottom: 6px;">
+                ساعت شروع فعالیت:
+              </label>
+              <input
+                type="time"
+                id="editOpensAt"
+                class="form-control-modal"
+                dir="ltr"
+              />
+            </div>
+
+            <div>
+              <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #e2e8f0; margin-bottom: 6px;">
+                ساعت پایان فعالیت:
+              </label>
+              <input
+                type="time"
+                id="editClosesAt"
+                class="form-control-modal"
+                dir="ltr"
+              />
+            </div>
+          </div>
+
+          <div class="modal-actions-row">
+            <button type="button" id="cancelHourBtn" class="btn-table-action">
+              انصراف
+            </button>
+            <button type="submit" id="saveHourBtn" class="btn-3d-accept" style="flex: none; padding: 12px 24px;">
+              ✓ ذخیره تغییرات ساعت
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- 3D New Exception / Holiday Modal -->
+    <div id="newExceptionModal" class="modal-backdrop" style="display: none;">
+      <div class="modal-dialog">
+        <h3 class="modal-title">🏖️ ثبت روز تعطیل یا بازه استثنا</h3>
+        <p style="color: rgba(226, 232, 240, 0.7); font-size: 0.86rem; margin: 0 0 18px;">
+          بستن نوبت‌دهی برای یک تاریخ مشخص یا تنظیم ساعات کاری ویژه در روزهای خاص.
+        </p>
+
+        <form id="newExceptionForm">
+          <div style="margin-bottom: 14px;">
+            <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #e2e8f0; margin-bottom: 6px;">
+              تاریخ مورد نظر (YYYY-MM-DD):
+            </label>
+            <input
+              type="date"
+              id="exDate"
+              class="form-control-modal"
+              dir="ltr"
+              required
+            />
+          </div>
+
+          <div style="margin-bottom: 14px;">
+            <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #e2e8f0; margin-bottom: 6px;">
+              نوع رویداد:
+            </label>
+            <select id="exKind" class="form-control-modal">
+              <option value="holiday">تعطیل رسمی / مناسبتی</option>
+              <option value="closed">تعطیلی داخلی کلینیک / استراحت</option>
+              <option value="special_hours">ساعات کاری ویژه (نیمه‌وقت)</option>
+              <option value="blocked_time">تعمیرات دستگاه یا مسدودی نوبت</option>
+            </select>
+          </div>
+
+          <div id="exHoursGroup" style="display: none; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+            <div>
+              <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #e2e8f0; margin-bottom: 6px;">
+                ساعت شروع:
+              </label>
+              <input type="time" id="exOpensAt" class="form-control-modal" dir="ltr" />
+            </div>
+            <div>
+              <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #e2e8f0; margin-bottom: 6px;">
+                ساعت پایان:
+              </label>
+              <input type="time" id="exClosesAt" class="form-control-modal" dir="ltr" />
+            </div>
+          </div>
+
+          <div style="margin-bottom: 18px;">
+            <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #e2e8f0; margin-bottom: 6px;">
+              توضیحات و علت (مثال: عید نوروز):
+            </label>
+            <input
+              type="text"
+              id="exNote"
+              class="form-control-modal"
+              placeholder="توضیح جهت نمایش به پرسنل و مراجعین..."
+            />
+          </div>
+
+          <div class="modal-actions-row">
+            <button type="button" id="cancelExBtn" class="btn-table-action">
+              انصراف
+            </button>
+            <button type="submit" id="saveExBtn" class="btn-3d-accept" style="flex: none; padding: 12px 24px;">
+              ✓ ثبت رویداد در تقویم
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
+
+  <script>
+    // Hours Modal Elements
+    const hourModal = document.getElementById('hourEditModal');
+    const hourForm = document.getElementById('editHourForm') as HTMLFormElement;
+    const cancelHourBtn = document.getElementById('cancelHourBtn');
+    const saveHourBtn = document.getElementById('saveHourBtn') as HTMLButtonElement;
+    const modalDayName = document.getElementById('modalDayName');
+    const editWeekday = document.getElementById('editWeekday') as HTMLInputElement;
+    const editDayIsOpen = document.getElementById('editDayIsOpen') as unknown as HTMLSelectElement;
+    const editOpensAt = document.getElementById('editOpensAt') as HTMLInputElement;
+    const editClosesAt = document.getElementById('editClosesAt') as HTMLInputElement;
+    const hoursInputGroup = document.getElementById('hoursInputGroup');
+
+    // Exception Modal Elements
+    const exModal = document.getElementById('newExceptionModal');
+    const openExBtn = document.getElementById('openExceptionModalBtn');
+    const exForm = document.getElementById('newExceptionForm') as HTMLFormElement;
+    const cancelExBtn = document.getElementById('cancelExBtn');
+    const saveExBtn = document.getElementById('saveExBtn') as HTMLButtonElement;
+    const exDate = document.getElementById('exDate') as HTMLInputElement;
+    const exKind = document.getElementById('exKind') as unknown as HTMLSelectElement;
+    const exOpensAt = document.getElementById('exOpensAt') as HTMLInputElement;
+    const exClosesAt = document.getElementById('exClosesAt') as HTMLInputElement;
+    const exNote = document.getElementById('exNote') as HTMLInputElement;
+    const exHoursGroup = document.getElementById('exHoursGroup');
+
+    // Toggle hours inputs when status changes
+    if (editDayIsOpen && hoursInputGroup) {
+      editDayIsOpen.addEventListener('change', () => {
+        hoursInputGroup.style.display = editDayIsOpen.value === 'true' ? 'grid' : 'none';
+      });
+    }
+
+    if (exKind && exHoursGroup) {
+      exKind.addEventListener('change', () => {
+        exHoursGroup.style.display = exKind.value === 'special_hours' ? 'grid' : 'none';
+      });
+    }
+
+    // Hook edit buttons for weekdays
+    document.querySelectorAll('.edit-hour-btn').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        const target = e.currentTarget as HTMLElement;
+        if (!target || !hourModal) return;
+
+        const weekday = target.dataset.weekday || '0';
+        const name = target.dataset.name || '';
+        const isOpen = target.dataset.isOpen === 'true';
+        const opensAt = target.dataset.opensAt || '09:00';
+        const closesAt = target.dataset.closesAt || '21:00';
+
+        if (modalDayName) modalDayName.innerText = name;
+        editWeekday.value = weekday;
+        editDayIsOpen.value = isOpen ? 'true' : 'false';
+        editOpensAt.value = opensAt;
+        editClosesAt.value = closesAt;
+
+        if (hoursInputGroup) {
+          hoursInputGroup.style.display = isOpen ? 'grid' : 'none';
+        }
+
+        hourModal.style.display = 'flex';
+      });
+    });
+
+    if (cancelHourBtn && hourModal) {
+      cancelHourBtn.addEventListener('click', () => {
+        hourModal.style.display = 'none';
+      });
+    }
+
+    if (hourForm && hourModal) {
+      hourForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const weekday = editWeekday.value;
+        const isOpen = editDayIsOpen.value === 'true';
+
+        saveHourBtn.disabled = true;
+        saveHourBtn.innerText = 'در حال ذخیره...';
+
+        try {
+          const res = await fetch(`/api/v1/admin/schedule/hours/${weekday}`, {
+            method: 'PUT',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({
+              isOpen,
+              opensAt: isOpen ? editOpensAt.value : undefined,
+              closesAt: isOpen ? editClosesAt.value : undefined,
+            }),
+          });
+
+          if (res.ok) {
+            saveHourBtn.innerText = '✓ ذخیره شد!';
+            setTimeout(() => window.location.reload(), 400);
+          } else {
+            alert('خطا در ذخیره ساعت کاری.');
+            saveHourBtn.disabled = false;
+            saveHourBtn.innerText = '✓ ذخیره تغییرات ساعت';
+          }
+        } catch {
+          alert('خطای ارتباط با سرور.');
+          saveHourBtn.disabled = false;
+          saveHourBtn.innerText = '✓ ذخیره تغییرات ساعت';
+        }
+      });
+    }
+
+    // Exception Modal Handlers
+    if (openExBtn && exModal) {
+      openExBtn.addEventListener('click', () => {
+        exModal.style.display = 'flex';
+      });
+    }
+
+    if (cancelExBtn && exModal) {
+      cancelExBtn.addEventListener('click', () => {
+        exModal.style.display = 'none';
+      });
+    }
+
+    if (exForm && exModal) {
+      exForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        saveExBtn.disabled = true;
+        saveExBtn.innerText = 'در حال ثبت...';
+
+        try {
+          const res = await fetch('/api/v1/admin/schedule/exceptions', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({
+              exceptionDate: exDate.value,
+              kind: exKind.value,
+              opensAt: exKind.value === 'special_hours' ? exOpensAt.value : null,
+              closesAt: exKind.value === 'special_hours' ? exClosesAt.value : null,
+              note: exNote.value.trim() || null,
+            }),
+          });
+
+          if (res.ok) {
+            saveExBtn.innerText = '✓ ثبت شد!';
+            setTimeout(() => window.location.reload(), 400);
+          } else {
+            alert('خطا در ثبت رویداد.');
+            saveExBtn.disabled = false;
+            saveExBtn.innerText = '✓ ثبت رویداد در تقویم';
+          }
+        } catch {
+          alert('خطای ارتباط با سرور.');
+          saveExBtn.disabled = false;
+          saveExBtn.innerText = '✓ ثبت رویداد در تقویم';
+        }
+      });
+    }
+
+    // Delete Exception Handlers
+    document.querySelectorAll('.delete-exception-btn').forEach((btn) => {
+      btn.addEventListener('click', async (e) => {
+        const target = e.currentTarget as HTMLElement;
+        const id = target.dataset.id;
+        if (!id) return;
+
+        if (!confirm('آیا از حذف این رویداد یا بازه اطمینان دارید؟')) return;
+
+        try {
+          const res = await fetch(`/api/v1/admin/schedule/exceptions/${id}`, {
+            method: 'DELETE',
+          });
+
+          if (res.ok) {
+            window.location.reload();
+          } else {
+            alert('خطا در حذف رویداد.');
+          }
+        } catch {
+          alert('خطای ارتباط با سرور.');
+        }
+      });
+    });
+  </script>
 </AdminLayout>

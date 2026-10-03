@@ -38,6 +38,8 @@ import {
   rejectBookingSchema,
   updateBookingSchema,
   updateCustomerSchema,
+  updateWeekdayHoursSchema,
+  createExceptionSchema,
 } from '../../domain/validation/schemas';
 import {
   findPublicBlogPostBySlug,
@@ -833,6 +835,63 @@ export async function handleApiRequest(
 
       await writeAuditLog(env.DB, auth.id, 'faq.updated', 'faq', id);
       return ok({ id, updated: true });
+    }
+
+    /* ── Admin: Schedule & Hours ───────────────────────────────── */
+    if (pathname.match(/^\/api\/v1\/admin\/schedule\/hours\/[0-6]$/) && method === 'PUT') {
+      const auth = requirePermission(locals, 'schedule.write');
+      const weekday = Number(pathname.split('/')[6]);
+      const body = await parseBody(request, updateWeekdayHoursSchema);
+
+      await run(env.DB, `DELETE FROM business_hours WHERE weekday = ?`, weekday);
+
+      if (body.isOpen && body.opensAt && body.closesAt) {
+        await run(
+          env.DB,
+          `INSERT INTO business_hours (id, weekday, opens_at, closes_at, display_order)
+           VALUES (?, ?, ?, ?, ?)`,
+          crypto.randomUUID(),
+          weekday,
+          body.opensAt,
+          body.closesAt,
+          0,
+        );
+      }
+
+      await writeAuditLog(env.DB, auth.id, 'schedule.updated', 'business_hours', String(weekday));
+      return ok({ weekday, updated: true });
+    }
+
+    if (pathname === '/api/v1/admin/schedule/exceptions' && method === 'POST') {
+      const auth = requirePermission(locals, 'schedule.write');
+      const body = await parseBody(request, createExceptionSchema);
+      const id = crypto.randomUUID();
+      const nowIso = new Date().toISOString();
+
+      await run(
+        env.DB,
+        `INSERT INTO schedule_exceptions (id, exception_date, kind, opens_at, closes_at, note, created_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        id,
+        body.exceptionDate,
+        body.kind,
+        body.opensAt ?? null,
+        body.closesAt ?? null,
+        body.note ?? null,
+        nowIso,
+      );
+
+      await writeAuditLog(env.DB, auth.id, 'schedule_exception.created', 'schedule_exception', id);
+      return okWithStatus({ id }, 201);
+    }
+
+    if (pathname.startsWith('/api/v1/admin/schedule/exceptions/') && method === 'DELETE') {
+      const auth = requirePermission(locals, 'schedule.write');
+      const id = pathname.slice('/api/v1/admin/schedule/exceptions/'.length);
+
+      await run(env.DB, `DELETE FROM schedule_exceptions WHERE id = ?`, id);
+      await writeAuditLog(env.DB, auth.id, 'schedule_exception.deleted', 'schedule_exception', id);
+      return ok({ id, deleted: true });
     }
 
     /* ── Admin: Settings (§74, §76, §121) ─────────────────────── */

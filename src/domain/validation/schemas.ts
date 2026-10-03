@@ -196,6 +196,20 @@ export const scheduleWriteSchema = z.object({
     .max(400),
 });
 
+export const updateWeekdayHoursSchema = z.object({
+  isOpen: z.boolean(),
+  opensAt: timeSchema.optional(),
+  closesAt: timeSchema.optional(),
+});
+
+export const createExceptionSchema = z.object({
+  exceptionDate: localDateSchema,
+  kind: z.enum(['holiday', 'closed', 'special_hours', 'blocked_time', 'temporary_change']),
+  opensAt: timeSchema.nullable().optional(),
+  closesAt: timeSchema.nullable().optional(),
+  note: z.string().trim().max(300).nullable().optional(),
+});
+
 /** ── Blog (admin) ───────────────────────────────────────────── */
 
 export const blogWriteSchema = z.object({
