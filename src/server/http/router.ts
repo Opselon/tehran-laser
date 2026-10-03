@@ -67,7 +67,7 @@ import { calculateAvailability } from '../../domain/schedule/availability';
 import { parseOperationalSettings } from '../../domain/settings/settings.types';
 import { slotStaffKey } from '../../domain/booking/booking.slots';
 import { dispatchNotification } from '../notifications';
-import { one, run } from '../../db/query';
+import { all, one, run } from '../../db/query';
 import { localDateOf } from '../../lib/datetime/timezone';
 
 export async function handleApiRequest(
@@ -186,13 +186,42 @@ export async function handleApiRequest(
     /* ── Public: Availability (§16, §17) ─────────────────────── */
     if (pathname === '/api/v1/availability' && method === 'GET') {
       const q = getSearchParams(request);
-      const serviceSlug = slugSchema.parse(q.service);
       const category = pricingCategorySchema.parse(q.category);
       const localDate = localDateSchema.parse(q.date);
       const staffId = typeof q.staffId === 'string' && q.staffId ? q.staffId : null;
 
-      const service = await findPublicServiceBySlug(env.DB, serviceSlug);
-      if (!service) throw new ApiError('NOT_FOUND', 'خدمت یافت نشد.');
+      const servicesParam =
+        typeof q.services === 'string' && q.services
+          ? q.services
+          : typeof q.service === 'string'
+            ? q.service
+            : '';
+      const rawSlugs = servicesParam.split(',').map((s) => s.trim()).filter(Boolean);
+      if (rawSlugs.length === 0) {
+        throw new ApiError('VALIDATION_ERROR', 'حداقل یک خدمت برای استعلام الزامی است.');
+      }
+      const slugs = rawSlugs.map((s) => slugSchema.parse(s));
+
+      const placeholders = slugs.map(() => '?').join(',');
+      const services = await all<{
+        id: string;
+        slug: string;
+        name: string;
+        durationMinutes: number;
+        active: number;
+      }>(
+        env.DB,
+        `SELECT id, slug, name, duration_minutes AS durationMinutes, active
+           FROM services
+          WHERE slug IN (${placeholders})`,
+        ...slugs,
+      );
+      if (services.length === 0) throw new ApiError('NOT_FOUND', 'خدمت یا خدمات یافت نشد.');
+
+      // Preserve the requested order of slugs
+      services.sort((a, b) => slugs.indexOf(a.slug) - slugs.indexOf(b.slug));
+
+      const totalDuration = services.reduce((acc, s) => acc + s.durationMinutes, 0);
 
       const [rawSettings, hours, exceptions, occupied] = await Promise.all([
         getPublicSettings(env.DB),
@@ -212,7 +241,7 @@ export async function handleApiRequest(
         timezone: settings.timezone,
         hours: toHoursRows(hours),
         exceptions,
-        durationMinutes: service.durationMinutes,
+        durationMinutes: totalDuration,
         granularityMinutes: settings.slotGranularityMinutes,
         bufferMinutes: settings.bookingBufferMinutes,
         occupiedSlots: new Set(occupied),
@@ -221,10 +250,12 @@ export async function handleApiRequest(
       });
 
       return ok({
-        serviceSlug: service.slug,
+        serviceSlug: slugs[0],
+        serviceSlugs: slugs,
+        serviceNames: services.map((s) => s.name),
         date: localDate,
         pricingCategory: category,
-        durationMinutes: service.durationMinutes,
+        durationMinutes: totalDuration,
         granularityMinutes: settings.slotGranularityMinutes,
         timezone: settings.timezone,
         slots: availability,
@@ -244,6 +275,7 @@ export async function handleApiRequest(
       const body = await parseBody(request, createBookingSchema);
       const booking = await createBooking(env.DB, {
         serviceSlug: body.serviceSlug,
+        serviceSlugs: body.serviceSlugs,
         pricingCategory: body.pricingCategory,
         startsAtIso: body.startsAt,
         customerName: body.customerName,

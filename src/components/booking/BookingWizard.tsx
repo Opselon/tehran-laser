@@ -27,8 +27,10 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
   const [services, setServices] = useState<PublicServiceDto[]>(initialServices);
   const [loadingServices, setLoadingServices] = useState<boolean>(initialServices.length === 0);
 
-  // Form selections
-  const [selectedServiceSlug, setSelectedServiceSlug] = useState<string>(preselectedSlug ?? '');
+  // Form selections: multiple services supported!
+  const [selectedServiceSlugs, setSelectedServiceSlugs] = useState<string[]>(
+    preselectedSlug ? [preselectedSlug] : [],
+  );
   const [pricingCategory, setPricingCategory] = useState<PricingCategory>('female');
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [availableSlots, setAvailableSlots] = useState<AvailabilitySlotDto[]>([]);
@@ -54,7 +56,7 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
       .then((data: any) => {
         if (data.data) {
           setServices(data.data);
-          if (preselectedSlug) setSelectedServiceSlug(preselectedSlug);
+          if (preselectedSlug) setSelectedServiceSlugs([preselectedSlug]);
         }
       })
       .catch(() => setErrorMessage('خطا در دریافت لیست خدمات. لطفاً صفحه را تازه‌سازی کنید.'))
@@ -67,14 +69,12 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
   for (let i = 1; i <= 21 && availableDates.length < 14; i++) {
     const d = new Date(today);
     d.setDate(today.getDate() + i);
-    // Friday is day 5 in js Date (0 is Sunday, 5 is Friday in UTC/local)
     const yyyy = d.getFullYear();
     const mm = String(d.getMonth() + 1).padStart(2, '0');
     const dd = String(d.getDate()).padStart(2, '0');
     const isoDate = `${yyyy}-${mm}-${dd}`;
     const dayOfWeek = d.getDay();
-    // 5 = Friday in standard JS getDay
-    if (dayOfWeek === 5) continue;
+    if (dayOfWeek === 5) continue; // Friday
 
     const weekdayNames = ['یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه', 'شنبه'];
     availableDates.push({
@@ -84,9 +84,9 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
     });
   }
 
-  // Load slots when service + category + date change
+  // Load slots when selected services + category + date change
   useEffect(() => {
-    if (!selectedServiceSlug || !selectedDate) {
+    if (selectedServiceSlugs.length === 0 || !selectedDate) {
       setAvailableSlots([]);
       return;
     }
@@ -94,7 +94,10 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
     setErrorMessage(null);
     setSelectedSlot('');
 
-    fetch(`/api/v1/availability?service=${encodeURIComponent(selectedServiceSlug)}&category=${pricingCategory}&date=${selectedDate}`)
+    const slugsParam = encodeURIComponent(selectedServiceSlugs.join(','));
+    fetch(
+      `/api/v1/availability?services=${slugsParam}&category=${pricingCategory}&date=${selectedDate}`,
+    )
       .then((res) => res.json())
       .then((data: any) => {
         if (data.data && data.data.slots) {
@@ -105,26 +108,56 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
       })
       .catch(() => setErrorMessage('خطا در دریافت زمان‌های خالی.'))
       .finally(() => setLoadingSlots(false));
-  }, [selectedServiceSlug, pricingCategory, selectedDate]);
+  }, [selectedServiceSlugs, pricingCategory, selectedDate]);
 
-  const selectedService = services.find((s) => s.slug === selectedServiceSlug);
-  const currentPrice = selectedService?.prices.find((p) => p.pricingCategory === pricingCategory);
+  // Multi-service toggle logic
+  const toggleServiceSlug = (slug: string) => {
+    setSelectedServiceSlugs((prev) => {
+      if (prev.includes(slug)) {
+        return prev.filter((s) => s !== slug);
+      } else {
+        return [...prev, slug];
+      }
+    });
+  };
 
-  // Quote calculation for display
-  const basePrice = currentPrice?.amount ?? 0;
-  // 15% discount for full-body on site
-  const discountAmount = selectedService?.slug === 'full-body' ? Math.round(basePrice * 0.15) : 0;
-  const finalPrice = Math.max(0, basePrice - discountAmount);
+  const selectPopularFemale = () => {
+    setSelectedServiceSlugs(['underarm', 'bikini', 'full-legs']);
+  };
+
+  const clearAllServices = () => {
+    setSelectedServiceSlugs([]);
+  };
+
+  const selectedServices = services.filter((s) => selectedServiceSlugs.includes(s.slug));
+  const totalDurationMinutes = selectedServices.reduce((sum, s) => sum + s.durationMinutes, 0);
+
+  // Quote calculation for all selected services
+  const selectedPrices = selectedServices.map((s) => {
+    const p = s.prices.find((pr) => pr.pricingCategory === pricingCategory);
+    return {
+      service: s,
+      amount: p?.amount ?? 0,
+      hasPrice: Boolean(p),
+    };
+  });
+
+  const totalBasePrice = selectedPrices.reduce((sum, item) => sum + item.amount, 0);
+  const fullBodyPriceItem = selectedPrices.find((pr) => pr.service.slug === 'full-body');
+  const discountAmount = fullBodyPriceItem ? Math.round(fullBodyPriceItem.amount * 0.15) : 0;
+  const finalPrice = Math.max(0, totalBasePrice - discountAmount);
 
   // Handlers
   const handleNext = () => {
     setErrorMessage(null);
-    if (step === 1 && !selectedServiceSlug) {
-      setErrorMessage('لطفاً یک خدمت را انتخاب فرمایید.');
+    if (step === 1 && selectedServiceSlugs.length === 0) {
+      setErrorMessage('لطفاً حداقل یک ناحیه یا خدمت را انتخاب فرمایید.');
       return;
     }
-    if (step === 2 && pricingCategory === 'male' && !currentPrice) {
-      setErrorMessage('تعرفه خدمات آقایان نیازمند مشاوره تلفنی است. لطفاً با کلینیک تماس حاصل فرمایید.');
+    if (step === 2 && pricingCategory === 'male' && selectedPrices.some((p) => !p.hasPrice)) {
+      setErrorMessage(
+        'تعرفه خدمات آقایان نیازمند مشاوره تلفنی است. لطفاً با کلینیک تماس حاصل فرمایید.',
+      );
       return;
     }
     if (step === 3 && !selectedDate) {
@@ -163,7 +196,8 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
-          serviceSlug: selectedServiceSlug,
+          serviceSlugs: selectedServiceSlugs,
+          serviceSlug: selectedServiceSlugs[0],
           pricingCategory,
           startsAt: selectedSlot,
           customerName: customerName.trim(),
@@ -177,8 +211,10 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
       if (res.status === 201 && body.data) {
         setSuccessResult(body.data);
       } else if (res.status === 409) {
-        setErrorMessage('متأسفانه این زمان توسط مراجعه‌کننده دیگری رزرو شد. لطفاً ساعت دیگری را انتخاب فرمایید.');
-        setStep(4); // Go back to slot selection
+        setErrorMessage(
+          'متأسفانه این زمان توسط مراجعه‌کننده دیگری رزرو شد. لطفاً ساعت دیگری را انتخاب فرمایید.',
+        );
+        setStep(4);
       } else {
         setErrorMessage(body.error?.message || 'خطا در ثبت نوبت. لطفاً دوباره تلاش فرمایید.');
       }
@@ -206,68 +242,67 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
         </div>
         <h2 className="success-title">رزرو شما با موفقیت ثبت شد</h2>
         <p className="success-subtitle">
-          اطلاعات نوبت شما در سامانه ثبت گردید و جهت تأیید نهایی برای پذیرش ارسال شد.
+          اطلاعات نوبت شما در سامانه ثبت گردید و جهت هماهنگی و پذیرش آماده است.
         </p>
 
         <div className="success-details-box">
           <div className="detail-row">
             <span className="detail-label">کد رهگیری رزرو:</span>
-            <span className="detail-value highlight-ref" dir="ltr">{successResult.reference}</span>
-          </div>
-          <div className="detail-row">
-            <span className="detail-label">خدمت:</span>
-            <span className="detail-value">{successResult.serviceName}</span>
-          </div>
-          <div className="detail-row">
-            <span className="detail-label">بخش:</span>
-            <span className="detail-value">{successResult.pricingCategory === 'female' ? 'بانوان' : 'آقایان'}</span>
-          </div>
-          <div className="detail-row">
-            <span className="detail-label">تاریخ و زمان:</span>
-            <span className="detail-value">{formatJalaliDate(slotDate)} — ساعت {timeFormatted}</span>
-          </div>
-          <div className="detail-row">
-            <span className="detail-label">مبلغ مصوب:</span>
-            <span className="detail-value">{successResult.quotedAmount.toLocaleString('fa-IR')} هزار تومان</span>
-          </div>
-          {successResult.discountAmount > 0 && (
-            <div className="detail-row text-success">
-              <span className="detail-label">تخفیف آنلاین (۱۵٪):</span>
-              <span className="detail-value">{successResult.discountAmount.toLocaleString('fa-IR')} هزار تومان</span>
-            </div>
-          )}
-          <div className="detail-row total-row">
-            <span className="detail-label">مبلغ نهایی قابل پرداخت در کلینیک:</span>
-            <span className="detail-value bold">
-              {(successResult.quotedAmount - successResult.discountAmount).toLocaleString('fa-IR')} هزار تومان
+            <span className="detail-value highlight-ref" dir="ltr">
+              {successResult.reference}
             </span>
           </div>
           <div className="detail-row">
-            <span className="detail-label">وضعیت:</span>
-            <span className="badge badge-warning">در انتظار تأیید منشی</span>
+            <span className="detail-label">نواحی و خدمات:</span>
+            <span className="detail-value font-semibold">{successResult.serviceName}</span>
+          </div>
+          <div className="detail-row">
+            <span className="detail-label">بخش پذیرش:</span>
+            <span className="detail-value">
+              {successResult.pricingCategory === 'female' ? 'بانوان' : 'آقایان'}
+            </span>
+          </div>
+          <div className="detail-row">
+            <span className="detail-label">تاریخ مراجعه:</span>
+            <span className="detail-value">{formatJalaliDate(slotDate)}</span>
+          </div>
+          <div className="detail-row">
+            <span className="detail-label">ساعت حضور:</span>
+            <span className="detail-value">{timeFormatted}</span>
+          </div>
+          <div className="detail-row">
+            <span className="detail-label">نام مراجع:</span>
+            <span className="detail-value">{successResult.customerName}</span>
+          </div>
+          <div className="detail-row">
+            <span className="detail-label">شماره همراه:</span>
+            <span className="detail-value" dir="ltr">
+              {successResult.customerPhone}
+            </span>
+          </div>
+          <div className="detail-row highlight-amount-row">
+            <span className="detail-label">مبلغ قابل پرداخت در کلینیک:</span>
+            <span className="detail-value text-gold">
+              {successResult.quotedAmount > 0
+                ? `${successResult.quotedAmount.toLocaleString('fa-IR')} هزار تومان`
+                : 'استعلام تلفنی'}
+            </span>
           </div>
         </div>
 
-        <div className="clinic-location-reminder">
-          <h4>اطلاعات کلینیک تهران لیزر:</h4>
-          <p><strong>آدرس:</strong> پاسداران، خیابان پایدارفرد، نبش بوستان هفتم</p>
-          <p><strong>شماره پشتیبانی:</strong> <a href="tel:+989035555090" dir="ltr">۰۹۰۳ ۵۵۵ ۵۰۹۰</a></p>
-          <p className="small text-muted mt-1">همکاران ما پیش از موعد نوبت جهت هماهنگی نهایی با شما تماس خواهند گرفت.</p>
+        <div className="success-guidelines">
+          <h4 className="guidelines-title">نکات مهم قبل از مراجعه:</h4>
+          <ul>
+            <li>۲۴ ساعت قبل از نوبت، موهای نواحی انتخابی را با تیغ یا ژیلت شیو بفرمایید.</li>
+            <li>از مصرف کرم، لوسیون یا بادی اسپلش در روز مراجعه بر روی پوست خودداری کنید.</li>
+            <li>حداقل ۱۰ دقیقه قبل از ساعت مقرر در محل کلینیک حضور به هم رسانید.</li>
+          </ul>
         </div>
 
-        <div className="success-actions mt-4">
-          <a href="/" className="btn btn-outline">بازگشت به صفحه اصلی</a>
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={() => {
-              setSuccessResult(null);
-              setStep(1);
-              setSelectedSlot('');
-            }}
-          >
-            ثبت رزرو جدید
-          </button>
+        <div className="success-actions mt-4 text-center">
+          <a href="/" className="btn btn-outline">
+            بازگشت به صفحه اصلی
+          </a>
         </div>
       </div>
     );
@@ -275,39 +310,70 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
 
   return (
     <div className="booking-wizard-container">
-      {/* Progress Bar */}
+      {/* Step Indicator */}
       <div className="wizard-stepper">
         <div className="stepper-track">
           <div className="stepper-fill" style={{ width: `${((step - 1) / 5) * 100}%` }}></div>
         </div>
         <div className="stepper-steps">
-          {['خدمت', 'تعرفه', 'تاریخ', 'ساعت', 'اطلاعات', 'تأیید'].map((title, idx) => (
+          {[
+            { num: 1, title: 'خدمات' },
+            { num: 2, title: 'تعرفه' },
+            { num: 3, title: 'تاریخ' },
+            { num: 4, title: 'ساعت' },
+            { num: 5, title: 'اطلاعات' },
+            { num: 6, title: 'تأیید' },
+          ].map((s) => (
             <div
-              key={idx}
-              className={`step-item ${step === idx + 1 ? 'active' : ''} ${step > idx + 1 ? 'completed' : ''}`}
+              key={s.num}
+              className={`step-item ${step === s.num ? 'active' : ''} ${step > s.num ? 'completed' : ''}`}
             >
-              <div className="step-circle">{step > idx + 1 ? '✓' : idx + 1}</div>
-              <span className="step-title">{title}</span>
+              <div className="step-circle">{step > s.num ? '✓' : s.num}</div>
+              <span className="step-title">{s.title}</span>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Error alert */}
+      {/* Error Alert */}
       {errorMessage && (
-        <div className="alert alert-danger animate-fade-in mb-4" role="alert">
+        <div className="alert alert-danger animate-shake mb-4" role="alert">
           <span className="alert-icon">⚠️</span>
           <span>{errorMessage}</span>
         </div>
       )}
 
-      {/* Wizard Steps */}
+      {/* Steps Content */}
       <div className="wizard-body">
-        {/* Step 1: Select Service */}
+        {/* Step 1: Select Service(s) */}
         {step === 1 && (
           <div className="step-content animate-fade-in">
-            <h3 className="step-heading">مرحله اول: انتخاب خدمت لیزر</h3>
-            <p className="step-desc">ناحیه مورد نظر خود را جهت انجام لیزر انتخاب فرمایید:</p>
+            <div className="step-header-with-actions">
+              <div>
+                <h3 className="step-heading">مرحله اول: انتخاب نواحی لیزر</h3>
+                <p className="step-desc">
+                  می‌توانید <strong>یک یا چند ناحیه</strong> را جهت انجام در یک جلسه انتخاب فرمایید:
+                </p>
+              </div>
+              <div className="quick-action-pills">
+                <button
+                  type="button"
+                  className="pill-quick-btn"
+                  onClick={selectPopularFemale}
+                >
+                  ✨ پکیج محبوب (زیر بغل + بیکینی + پا)
+                </button>
+                {selectedServiceSlugs.length > 0 && (
+                  <button
+                    type="button"
+                    className="pill-quick-btn text-muted"
+                    onClick={clearAllServices}
+                  >
+                    ✕ پاک کردن ({selectedServiceSlugs.length})
+                  </button>
+                )}
+              </div>
+            </div>
 
             {loadingServices ? (
               <div className="loading-state py-5 text-center">
@@ -319,25 +385,25 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
                 {services.map((s) => {
                   const fPrice = s.prices.find((p) => p.pricingCategory === 'female');
                   const isPromo = s.slug === 'full-body';
-                  const isSelected = selectedServiceSlug === s.slug;
+                  const isSelected = selectedServiceSlugs.includes(s.slug);
 
                   return (
                     <div
                       key={s.slug}
                       className={`service-select-card ${isSelected ? 'selected' : ''}`}
-                      onClick={() => setSelectedServiceSlug(s.slug)}
+                      onClick={() => toggleServiceSlug(s.slug)}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' || e.key === ' ') {
                           e.preventDefault();
-                          setSelectedServiceSlug(s.slug);
+                          toggleServiceSlug(s.slug);
                         }
                       }}
                       role="button"
                       tabIndex={0}
                       aria-pressed={isSelected}
                     >
-                      <div className="card-radio">
-                        <span className={`radio-indicator ${isSelected ? 'checked' : ''}`}>
+                      <div className="card-checkbox">
+                        <span className={`checkbox-indicator ${isSelected ? 'checked' : ''}`}>
                           {isSelected ? '✓' : ''}
                         </span>
                       </div>
@@ -345,7 +411,7 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
                         <div className="card-title-row">
                           <span className="service-name">{s.name}</span>
                           {isPromo && <span className="badge badge-promo">تخفیف ویژه ۱۵٪</span>}
-                          {isSelected && <span className="badge badge-selected">انتخاب شده ✓</span>}
+                          {isSelected && <span className="badge badge-selected">انتخاب شد ✓</span>}
                         </div>
                         <p className="service-short-desc">{s.shortDescription || s.description}</p>
                         <div className="card-price-row">
@@ -361,17 +427,50 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
               </div>
             )}
 
-            {selectedService && (
-              <div className="selection-confirmation-banner animate-fade-in mt-4">
-                <div className="banner-text">
-                  <span className="banner-icon">✓</span>
-                  <span>
-                    خدمت انتخابی: <strong>{selectedService.name}</strong>
-                  </span>
+            {/* Multi-service summary drawer */}
+            {selectedServices.length > 0 && (
+              <div className="multi-service-summary-bar animate-fade-in mt-4">
+                <div className="summary-bar-header">
+                  <div className="summary-bar-count">
+                    <span className="badge-count">{selectedServices.length}</span>
+                    <strong>نواحی انتخاب‌شده برای این جلسه:</strong>
+                  </div>
+                  <div className="selected-chips-list">
+                    {selectedServices.map((s) => (
+                      <span key={s.slug} className="service-chip">
+                        {s.name}
+                        <button
+                          type="button"
+                          className="chip-remove-btn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleServiceSlug(s.slug);
+                          }}
+                          aria-label={`حذف ${s.name}`}
+                          title={`حذف ${s.name}`}
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                  </div>
                 </div>
-                <button type="button" className="btn btn-primary btn-sm" onClick={handleNext}>
-                  تأیید و انتخاب بخش (بانوان / آقایان) ←
-                </button>
+                <div className="summary-bar-footer">
+                  <div className="summary-stats">
+                    <span className="stat-pill">
+                      ⏱ مدت زمان کل: <strong>{totalDurationMinutes} دقیقه</strong>
+                    </span>
+                    <span className="stat-pill">
+                      💳 برآورد تعرفه بانوان:{' '}
+                      <strong className="highlight-gold">
+                        {finalPrice > 0 ? `${finalPrice.toLocaleString('fa-IR')} هزار تومان` : 'استعلام'}
+                      </strong>
+                    </span>
+                  </div>
+                  <button type="button" className="btn btn-primary btn-advance" onClick={handleNext}>
+                    تأیید نواحی ({selectedServices.length} مورد) و ادامه ←
+                  </button>
+                </div>
               </div>
             )}
           </div>
@@ -382,6 +481,26 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
           <div className="step-content animate-fade-in">
             <h3 className="step-heading">مرحله دوم: تعیین بخش مراجعین</h3>
             <p className="step-desc">بخش مورد نظر جهت ارائه خدمات را انتخاب فرمایید:</p>
+
+            {/* Recap of selected services */}
+            <div className="selected-areas-recap mb-4">
+              <h4 className="recap-title">
+                نواحی انتخاب‌شده شما ({selectedServices.length} ناحیه — ⏱ مجموع {totalDurationMinutes} دقیقه):
+              </h4>
+              <div className="recap-chips">
+                {selectedServices.map((s) => {
+                  const p = s.prices.find((pr) => pr.pricingCategory === 'female');
+                  return (
+                    <div key={s.slug} className="recap-item">
+                      <span className="recap-name">{s.name}</span>
+                      <span className="recap-price">
+                        {p ? `${p.amount.toLocaleString('fa-IR')} هزار تومان` : 'استعلام'}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
 
             <div className="gender-selection-cards">
               <div
@@ -403,18 +522,14 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
                 </div>
                 <p className="gender-desc">دستگاه اختصاصی، اپراتور مجرب خانم، تعرفه مصوب</p>
                 <div className="gender-price-preview">
-                  {currentPrice ? (
-                    <span className="price-highlight">
-                      {basePrice.toLocaleString('fa-IR')} هزار تومان
-                      {discountAmount > 0 && (
-                        <span className="discount-badge">
-                          با تخفیف سایت: {finalPrice.toLocaleString('fa-IR')}
-                        </span>
-                      )}
-                    </span>
-                  ) : (
-                    <span>تعرفه استاندارد کلینیک</span>
-                  )}
+                  <span className="price-highlight">
+                    مجموع: {totalBasePrice.toLocaleString('fa-IR')} هزار تومان
+                    {discountAmount > 0 && (
+                      <span className="discount-badge">
+                        با تخفیف ویژه: {finalPrice.toLocaleString('fa-IR')} هزار تومان
+                      </span>
+                    )}
+                  </span>
                 </div>
               </div>
 
@@ -442,14 +557,6 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
               </div>
             </div>
 
-            {pricingCategory === 'male' && (
-              <div className="alert alert-info mt-4">
-                <span>
-                  نکته: تعرفه خدمات آقایان به دلیل تفاوت در تعداد شات و دستگاه، در هنگام مراجعه یا با تماس تلفنی (۰۹۰۳ ۵۵۵ ۵۰۹۰) اعلام می‌گردد. ثبت نوبت به صورت اولیه و رایگان انجام می‌شود.
-                </span>
-              </div>
-            )}
-
             <div className="selection-confirmation-banner animate-fade-in mt-4">
               <div className="banner-text">
                 <span className="banner-icon">✓</span>
@@ -468,28 +575,32 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
         {step === 3 && (
           <div className="step-content animate-fade-in">
             <h3 className="step-heading">مرحله سوم: انتخاب روز مراجعه</h3>
-            <p className="step-desc">تاریخ مد نظر خود را برای حضور در کلینیک پاسداران مشخص فرمایید:</p>
+            <p className="step-desc">روز مورد نظر خود را جهت حضور در کلینیک مشخص فرمایید:</p>
+
+            <div className="duration-info-notice mb-3">
+              ℹ️ جهت انجام <strong>{selectedServices.length} ناحیه انتخابی</strong> ({selectedServices.map((s) => s.name).join('، ')})، نوبت متوالی به مدت <strong>{totalDurationMinutes} دقیقه</strong> تنظیم می‌شود.
+            </div>
 
             <div className="dates-grid">
-              {availableDates.map((d) => {
-                const isSelected = selectedDate === d.isoDate;
+              {availableDates.map((item) => {
+                const isSelected = selectedDate === item.isoDate;
                 return (
                   <div
-                    key={d.isoDate}
+                    key={item.isoDate}
                     className={`date-slot-card ${isSelected ? 'selected' : ''}`}
-                    onClick={() => setSelectedDate(d.isoDate)}
+                    onClick={() => setSelectedDate(item.isoDate)}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
-                        setSelectedDate(d.isoDate);
+                        setSelectedDate(item.isoDate);
                       }
                     }}
                     role="button"
                     tabIndex={0}
                     aria-pressed={isSelected}
                   >
-                    <span className="date-weekday">{d.weekdayName}</span>
-                    <span className="date-jalali">{d.jalaliLabel}</span>
+                    <span className="date-weekday">{item.weekdayName}</span>
+                    <span className="date-jalali">{item.jalaliLabel}</span>
                     {isSelected && <span className="date-selected-check">✓</span>}
                   </div>
                 );
@@ -501,7 +612,7 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
                 <div className="banner-text">
                   <span className="banner-icon">✓</span>
                   <span>
-                    روز انتخابی: <strong>{formatJalaliDate(selectedDate)}</strong>
+                    تاریخ انتخابی: <strong>{formatJalaliDate(selectedDate)}</strong>
                   </span>
                 </div>
                 <button type="button" className="btn btn-primary btn-sm" onClick={handleNext}>
@@ -517,18 +628,18 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
           <div className="step-content animate-fade-in">
             <h3 className="step-heading">مرحله چهارم: انتخاب ساعت نوبت</h3>
             <p className="step-desc">
-              ساعت‌های آزاد کلینیک در تاریخ {formatJalaliDate(selectedDate)}:
+              ساعت‌های آزاد برای نوبت {totalDurationMinutes} دقیقه‌ای در تاریخ {formatJalaliDate(selectedDate)}:
             </p>
 
             {loadingSlots ? (
               <div className="loading-state py-5 text-center">
                 <div className="spinner"></div>
-                <p className="mt-3">در حال استعلام زمان‌های در دسترس...</p>
+                <p className="mt-3">در حال جستجوی ساعت‌های خالی کلینیک...</p>
               </div>
             ) : availableSlots.filter((s) => s.available).length === 0 ? (
-              <div className="empty-slots-box">
-                <p>متأسفانه در این تاریخ تمامی نوبت‌ها تکمیل شده است.</p>
-                <button type="button" className="btn btn-outline btn-sm mt-2" onClick={() => setStep(3)}>
+              <div className="empty-state py-4 text-center">
+                <p>متأسفانه در این تاریخ ظرفیت خالی پیوسته برای {totalDurationMinutes} دقیقه وجود ندارد.</p>
+                <button type="button" className="btn btn-outline mt-2" onClick={() => setStep(3)}>
                   انتخاب تاریخ دیگر
                 </button>
               </div>
@@ -565,7 +676,14 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
                 <div className="banner-text">
                   <span className="banner-icon">✓</span>
                   <span>
-                    ساعت انتخابی: <strong>{new Date(selectedSlot).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Tehran' })}</strong>
+                    ساعت انتخابی:{' '}
+                    <strong>
+                      {new Date(selectedSlot).toLocaleTimeString('fa-IR', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        timeZone: 'Asia/Tehran',
+                      })}
+                    </strong>
                   </span>
                 </div>
                 <button type="button" className="btn btn-primary btn-sm" onClick={handleNext}>
@@ -584,7 +702,9 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
 
             <div className="booking-form-fields">
               <div className="form-group mb-3">
-                <label htmlFor="custName" className="form-label required">نام و نام خانوادگی:</label>
+                <label htmlFor="custName" className="form-label required">
+                  نام و نام خانوادگی:
+                </label>
                 <input
                   id="custName"
                   type="text"
@@ -597,7 +717,9 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
               </div>
 
               <div className="form-group mb-3">
-                <label htmlFor="custPhone" className="form-label required">شماره تلفن همراه:</label>
+                <label htmlFor="custPhone" className="form-label required">
+                  شماره تلفن همراه:
+                </label>
                 <input
                   id="custPhone"
                   type="tel"
@@ -612,7 +734,9 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
               </div>
 
               <div className="form-group mb-3">
-                <label htmlFor="custEmail" className="form-label">آدرس ایمیل (اختیاری):</label>
+                <label htmlFor="custEmail" className="form-label">
+                  آدرس ایمیل (اختیاری):
+                </label>
                 <input
                   id="custEmail"
                   type="email"
@@ -625,7 +749,9 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
               </div>
 
               <div className="form-group mb-3">
-                <label htmlFor="custNote" className="form-label">توضیحات یا یادداشت (اختیاری):</label>
+                <label htmlFor="custNote" className="form-label">
+                  توضیحات یا یادداشت (اختیاری):
+                </label>
                 <textarea
                   id="custNote"
                   className="form-control"
@@ -646,17 +772,32 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
             <p className="step-desc">اطلاعات نوبت خود را بررسی و با فشردن دکمه زیر نهایی فرمایید:</p>
 
             <div className="summary-invoice-card">
-              <div className="summary-row">
-                <span className="label">خدمت انتخابی:</span>
-                <span className="value font-semibold">{selectedService?.name}</span>
+              <div className="summary-row-header mb-3">
+                <span className="font-bold">نواحی و خدمات انتخابی ({selectedServices.length} مورد):</span>
               </div>
+              <div className="itemized-services-list mb-3">
+                {selectedServices.map((s) => {
+                  const p = s.prices.find((pr) => pr.pricingCategory === pricingCategory);
+                  return (
+                    <div key={s.slug} className="itemized-row">
+                      <span className="item-name">
+                        • {s.name} <span className="item-duration text-muted">({s.durationMinutes} دقیقه)</span>
+                      </span>
+                      <span className="item-price">
+                        {p ? `${p.amount.toLocaleString('fa-IR')} هزار تومان` : 'استعلام'}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+
               <div className="summary-row">
-                <span className="label">بخش:</span>
+                <span className="label">بخش پذیرش:</span>
                 <span className="value">{pricingCategory === 'female' ? 'بانوان' : 'آقایان'}</span>
               </div>
               <div className="summary-row">
-                <span className="label">مدت زمان تقریبی:</span>
-                <span className="value">⏱ {selectedService?.durationMinutes} دقیقه</span>
+                <span className="label">مدت زمان کل:</span>
+                <span className="value">⏱ {totalDurationMinutes} دقیقه</span>
               </div>
               <div className="summary-row">
                 <span className="label">تاریخ نوبت:</span>
@@ -679,22 +820,24 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
               </div>
               <div className="summary-row">
                 <span className="label">شماره همراه:</span>
-                <span className="value" dir="ltr">{customerPhone}</span>
+                <span className="value" dir="ltr">
+                  {customerPhone}
+                </span>
               </div>
 
               <hr className="summary-divider" />
 
               <div className="summary-row">
-                <span className="label">تعرفه مصوب:</span>
+                <span className="label">مجموع تعرفه مصوب:</span>
                 <span className="value">
                   {pricingCategory === 'female'
-                    ? `${basePrice.toLocaleString('fa-IR')} هزار تومان`
+                    ? `${totalBasePrice.toLocaleString('fa-IR')} هزار تومان`
                     : 'استعلام حضوری / تلفنی'}
                 </span>
               </div>
               {discountAmount > 0 && (
                 <div className="summary-row text-success">
-                  <span className="label">تخفیف ویژه سایت (۱۵٪):</span>
+                  <span className="label">تخفیف پکیج کل بدن (۱۵٪):</span>
                   <span className="value">-{discountAmount.toLocaleString('fa-IR')} هزار تومان</span>
                 </div>
               )}
@@ -724,11 +867,11 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
 
         {step < 6 ? (
           <button type="button" className="btn btn-primary mr-auto" onClick={handleNext}>
-            {step === 1 && 'مرحله بعد (تعیین بخش بانوان / آقایان) →'}
-            {step === 2 && 'مرحله بعد (انتخاب تاریخ) →'}
-            {step === 3 && 'مرحله بعد (انتخاب ساعت) →'}
-            {step === 4 && 'مرحله بعد (اطلاعات مراجع) →'}
-            {step === 5 && 'مرحله بعد (پیش‌فاکتور و تأیید) →'}
+            {step === 1 && `مرحله بعد: تعیین بخش (${selectedServices.length} ناحیه) →`}
+            {step === 2 && 'مرحله بعد: انتخاب تاریخ →'}
+            {step === 3 && 'مرحله بعد: انتخاب ساعت →'}
+            {step === 4 && 'مرحله بعد: اطلاعات مراجع →'}
+            {step === 5 && 'مرحله بعد: پیش‌فاکتور و تأیید →'}
           </button>
         ) : (
           <button

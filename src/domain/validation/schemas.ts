@@ -62,27 +62,42 @@ export const noteSchema = z.string().trim().max(500, 'متن طولانی است
 
 /** ── Public booking creation ────────────────────────────────── */
 
-export const createBookingSchema = z.object({
-  serviceSlug: slugSchema,
-  pricingCategory: pricingCategorySchema,
-  startsAt: isoInstantSchema,
-  customerName: nameSchema,
-  customerPhone: phoneSchema,
-  customerEmail: emailSchema.optional(),
-  note: noteSchema.optional(),
-  /** Client-generated token that dedupes accidental double submits. */
-  idempotencyKey: z.string().trim().min(8).max(64).optional(),
-});
+export const createBookingSchema = z
+  .object({
+    serviceSlug: slugSchema.optional(),
+    serviceSlugs: z.array(slugSchema).min(1).optional(),
+    pricingCategory: pricingCategorySchema,
+    startsAt: isoInstantSchema,
+    customerName: nameSchema,
+    customerPhone: phoneSchema,
+    customerEmail: emailSchema.optional(),
+    note: noteSchema.optional(),
+    /** Client-generated token that dedupes accidental double submits. */
+    idempotencyKey: z.string().trim().min(8).max(64).optional(),
+  })
+  .refine(
+    (data) => Boolean(data.serviceSlug || (data.serviceSlugs && data.serviceSlugs.length > 0)),
+    {
+      message: 'حداقل یک خدمت باید انتخاب شود.',
+      path: ['serviceSlug'],
+    },
+  );
 export type CreateBookingInput = z.infer<typeof createBookingSchema>;
 
 /** ── Availability query ─────────────────────────────────────── */
 
-export const availabilityQuerySchema = z.object({
-  service: slugSchema,
-  date: localDateSchema,
-  category: pricingCategorySchema,
-  staffId: z.string().trim().min(1).max(64).optional(),
-});
+export const availabilityQuerySchema = z
+  .object({
+    service: slugSchema.optional(),
+    services: z.string().optional(),
+    date: localDateSchema,
+    category: pricingCategorySchema,
+    staffId: z.string().trim().min(1).max(64).optional(),
+  })
+  .refine((data) => Boolean(data.service || data.services), {
+    message: 'حداقل یک خدمت برای استعلام ظرفیت الزامی است.',
+    path: ['service'],
+  });
 export type AvailabilityQuery = z.infer<typeof availabilityQuerySchema>;
 
 /** ── Admin booking actions ──────────────────────────────────── */

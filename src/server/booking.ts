@@ -10,10 +10,10 @@
  *  - Reschedule revalidates the entire duration + hours + breaks + conflicts before moving.
  */
 
-import { one, run } from '../db/query';
+import { all, one, run } from '../db/query';
 import { canTransitionBookingState } from '../domain/booking/booking.state';
 import type { BookingStatus, PricingCategory } from '../domain/booking/booking.types';
-import { calculateQuote, hasPriceFor, PricingError } from '../domain/pricing/pricing';
+import { calculateQuote, hasPriceFor } from '../domain/pricing/pricing';
 import { calculateAvailability } from '../domain/schedule/availability';
 import { buildSlotInstants, slotStaffKey } from '../domain/booking/booking.slots';
 import { parseOperationalSettings } from '../domain/settings/settings.types';
@@ -46,7 +46,8 @@ export function generateBookingReference(): string {
 /* ── Creation (public endpoint) ───────────────────────────────── */
 
 export interface CreateBookingParams {
-  serviceSlug: string;
+  serviceSlug?: string | undefined;
+  serviceSlugs?: string[] | undefined;
   pricingCategory: PricingCategory;
   startsAtIso: string;
   customerName: string;
@@ -120,27 +121,42 @@ export async function createBooking(
     }
   }
 
-  // 1. Service lookup
-  const service = await one<{
+  // 1. Service lookup (supports multi-service or single)
+  const slugs =
+    params.serviceSlugs && params.serviceSlugs.length > 0
+      ? params.serviceSlugs
+      : params.serviceSlug
+        ? [params.serviceSlug]
+        : [];
+  if (slugs.length === 0) {
+    throw new ApiError('VALIDATION_ERROR', 'حداقل یک خدمت باید انتخاب شود.');
+  }
+
+  const placeholders = slugs.map(() => '?').join(',');
+  const services = await all<{
     id: string;
+    slug: string;
     name: string;
     durationMinutes: number;
     active: number;
   }>(
     db,
-    `SELECT id, name, duration_minutes AS durationMinutes, active
+    `SELECT id, slug, name, duration_minutes AS durationMinutes, active
        FROM services
-      WHERE slug = ?`,
-    params.serviceSlug,
+      WHERE slug IN (${placeholders})`,
+    ...slugs,
   );
-  if (!service || service.active !== 1) {
-    throw new ApiError('SERVICE_INACTIVE', 'خدمت انتخاب‌شده فعال نیست.');
+  if (services.length !== slugs.length || services.some((s) => s.active !== 1)) {
+    throw new ApiError('SERVICE_INACTIVE', 'یک یا چند خدمت انتخاب‌شده فعال یا معتبر نیست.');
   }
 
-  // 2. Settings + Authoritative price
-  const [rawSettings, priceRows] = await Promise.all([
+  // Preserve the requested order of slugs
+  services.sort((a, b) => slugs.indexOf(a.slug) - slugs.indexOf(b.slug));
+
+  // 2. Settings + Authoritative prices for all selected services
+  const [rawSettings, ...pricesPerService] = await Promise.all([
     getPublicSettings(db),
-    loadPriceRowsForService(db, service.id),
+    ...services.map((s) => loadPriceRowsForService(db, s.id)),
   ]);
   const settings = parseOperationalSettings(rawSettings);
 
@@ -148,30 +164,37 @@ export async function createBooking(
     throw new ApiError('BOOKING_DISABLED', 'سیستم رزرو آنلاین در حال حاضر غیرفعال است.');
   }
 
-  if (!hasPriceFor(priceRows, params.pricingCategory)) {
-    throw new ApiError(
-      'VALIDATION_ERROR',
-      'قیمت این خدمت برای دسته انتخابی تعریف نشده است. لطفاً با کلینیک تماس بگیرید.',
-    );
+  for (let i = 0; i < services.length; i++) {
+    const s = services[i]!;
+    const priceRows = pricesPerService[i] ?? [];
+    if (!hasPriceFor(priceRows, params.pricingCategory)) {
+      throw new ApiError(
+        'VALIDATION_ERROR',
+        `قیمت خدمت «${s.name}» برای دسته انتخابی تعریف نشده است. لطفاً با کلینیک تماس بگیرید.`,
+      );
+    }
   }
 
-  let quote;
-  try {
-    quote = calculateQuote(
-      { id: service.id, durationMinutes: service.durationMinutes, active: service.active === 1 },
-      priceRows,
+  const quotes = services.map((s, i) =>
+    calculateQuote(
+      { id: s.id, durationMinutes: s.durationMinutes, active: s.active === 1 },
+      pricesPerService[i] ?? [],
       params.pricingCategory,
       settings.discountPercent,
-    );
-  } catch (err) {
-    if (err instanceof PricingError) {
-      throw new ApiError('VALIDATION_ERROR', err.message);
-    }
-    throw err;
-  }
+    ),
+  );
+
+  const totalBaseAmount = quotes.reduce((acc, q) => acc + q.baseAmount, 0);
+  const totalDiscountAmount = quotes.reduce((acc, q) => acc + q.discountAmount, 0);
+  const totalDurationMinutes = services.reduce((acc, s) => acc + s.durationMinutes, 0);
+  const currency = quotes[0]?.currency ?? 'IRT';
 
   // 3. Availability verification (server-authoritative: client cannot pick an invalid slot)
   const localDate = localDateOf(params.startsAtIso, settings.timezone);
+  const totalEndsAtIso = new Date(
+    Date.parse(params.startsAtIso) + totalDurationMinutes * 60_000,
+  ).toISOString();
+
   const [businessHours, exceptions, occupied] = await Promise.all([
     listBusinessHours(db),
     listScheduleExceptionsForDate(db, localDate),
@@ -179,7 +202,7 @@ export async function createBooking(
       db,
       slotStaffKey(null),
       params.startsAtIso,
-      new Date(Date.parse(params.startsAtIso) + quote.durationMinutes * 60_000).toISOString(),
+      totalEndsAtIso,
     ),
   ]);
 
@@ -194,7 +217,7 @@ export async function createBooking(
     timezone: settings.timezone,
     hours: toHoursRows(businessHours),
     exceptions,
-    durationMinutes: quote.durationMinutes,
+    durationMinutes: totalDurationMinutes,
     granularityMinutes: settings.slotGranularityMinutes,
     bufferMinutes: settings.bookingBufferMinutes,
     occupiedSlots: new Set(occupied),
@@ -248,12 +271,20 @@ export async function createBooking(
   // 5. Generate slots across the service duration
   const requiredSlots = buildSlotInstants(
     params.startsAtIso,
-    quote.durationMinutes,
+    totalDurationMinutes,
     settings.slotGranularityMinutes,
   );
 
   const bookingId = crypto.randomUUID();
   const reference = generateBookingReference();
+
+  const serviceListDesc = `نواحی انتخابی (${services.length}): ${services.map((s) => s.name).join('، ')}`;
+  const finalCustomerNote =
+    services.length > 1
+      ? params.customerNote
+        ? `${serviceListDesc} — ${params.customerNote}`
+        : serviceListDesc
+      : (params.customerNote ?? null);
 
   // 6. ATOMIC D1 BATCH: booking + all booking_slots + initial event.
   // PRIMARY KEY (staff_key, slot_start) guarantees only one booking can hold any slot.
@@ -273,14 +304,14 @@ export async function createBooking(
         bookingId,
         reference,
         customer.id,
-        service.id,
+        services[0]!.id,
         params.pricingCategory,
         params.startsAtIso,
         endsAtIso,
-        quote.baseAmount,
-        quote.discountAmount,
-        quote.currency,
-        params.customerNote ?? null,
+        totalBaseAmount,
+        totalDiscountAmount,
+        currency,
+        finalCustomerNote,
         params.idempotencyKey ?? null,
         nowIso,
         nowIso,
@@ -324,11 +355,11 @@ export async function createBooking(
     status: 'pending',
     startsAt: params.startsAtIso,
     endsAt: endsAtIso,
-    serviceName: service.name,
+    serviceName: services.map((s) => s.name).join(' + '),
     pricingCategory: params.pricingCategory,
-    quotedAmount: quote.baseAmount,
-    discountAmount: quote.discountAmount,
-    currency: quote.currency,
+    quotedAmount: totalBaseAmount,
+    discountAmount: totalDiscountAmount,
+    currency,
     customerName: params.customerName,
     customerPhone: params.customerPhone,
   };

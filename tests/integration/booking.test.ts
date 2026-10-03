@@ -216,4 +216,62 @@ describe('Tehran Laser — Full Integration Flow', () => {
     const errBody = (await pricingRes.json()) as { error: { code: string } };
     expect(errBody.error.code).toBe('FORBIDDEN');
   });
+
+  it('8. Multi-service booking sums quotes and allocates combined duration slots', async () => {
+    // Check multi-service availability
+    const availReq = new Request(
+      'http://localhost/api/v1/availability?services=face,underarm,bikini&category=female&date=2026-10-11',
+    );
+    const availRes = await worker.fetch(availReq);
+    expect(availRes.status).toBe(200);
+    const availBody = (await availRes.json()) as {
+      data: {
+        durationMinutes: number;
+        serviceNames: string[];
+        slots: Array<{ startsAt: string; endsAt: string; available: boolean }>;
+      };
+    };
+    expect(availBody.data.durationMinutes).toBe(90); // 30 + 30 + 30
+    expect(availBody.data.serviceNames).toContain('صورت');
+    expect(availBody.data.serviceNames).toContain('زیر بغل');
+    expect(availBody.data.serviceNames).toContain('بیکینی');
+
+    const firstAvailable = availBody.data.slots.find((s) => s.available);
+    expect(firstAvailable).toBeDefined();
+
+    // Create multi-service booking
+    const bookRes = await worker.fetch(
+      new Request('http://localhost/api/v1/bookings', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          serviceSlugs: ['face', 'underarm', 'bikini'],
+          pricingCategory: 'female',
+          startsAt: firstAvailable!.startsAt,
+          customerName: 'فاطمه احمدی',
+          customerPhone: '09129998877',
+          customerEmail: 'fatemeh@example.com',
+          note: 'درخواست چند ناحیه هم‌زمان',
+          idempotencyKey: 'idem-multi-1',
+        }),
+      }),
+    );
+
+    expect(bookRes.status).toBe(201);
+    const bookBody = (await bookRes.json()) as {
+      data: {
+        bookingId: string;
+        serviceName: string;
+        quotedAmount: number;
+        startsAt: string;
+        endsAt: string;
+      };
+    };
+
+    expect(bookBody.data.serviceName).toBe('صورت + زیر بغل + بیکینی');
+    expect(bookBody.data.quotedAmount).toBe(1300); // 320 + 390 + 590
+    const startMs = Date.parse(bookBody.data.startsAt);
+    const endMs = Date.parse(bookBody.data.endsAt);
+    expect(endMs - startMs).toBe(90 * 60_000); // 90 minutes allocated
+  });
 });
