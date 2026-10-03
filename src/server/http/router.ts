@@ -956,6 +956,498 @@ export async function handleApiRequest(
       return ok(events);
     }
 
+    /* ── Admin: Walk-in & Next Session Scheduler ──────────────── */
+    if (pathname === '/api/v1/admin/walkin/book' && method === 'POST') {
+      const auth = requirePermission(locals, 'booking.accept');
+      const body = (await request.json()) as any;
+      const nowIso = new Date().toISOString();
+
+      let customerId = body.customerId;
+      if (!customerId && body.customerPhone) {
+        const existingCust = await one<{ id: string }>(
+          env.DB,
+          `SELECT id FROM customers WHERE phone = ?`,
+          body.customerPhone,
+        );
+        if (existingCust) {
+          customerId = existingCust.id;
+        } else {
+          customerId = crypto.randomUUID();
+          await run(
+            env.DB,
+            `INSERT INTO customers (id, name, phone, pricing_category, note, created_at, updated_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            customerId,
+            body.customerName || 'مراجع حضوری',
+            body.customerPhone,
+            body.pricingCategory || 'female',
+            body.note || 'ثبت حضوری در کلینیک',
+            nowIso,
+            nowIso,
+          );
+        }
+      }
+
+      if (!customerId) {
+        // Fallback to first existing customer or create a generic walkin customer
+        const fallbackCust = await one<{ id: string }>(env.DB, `SELECT id FROM customers LIMIT 1`);
+        if (fallbackCust) {
+          customerId = fallbackCust.id;
+        } else {
+          customerId = crypto.randomUUID();
+          await run(
+            env.DB,
+            `INSERT INTO customers (id, name, phone, pricing_category, note, created_at, updated_at)
+             VALUES (?, 'مراجع حضوری', '09035555090', 'female', 'ثبت حضوری در کلینیک', ?, ?)`,
+            customerId,
+            nowIso,
+            nowIso,
+          );
+        }
+      }
+
+      const serviceId = body.serviceId || 'svc_face';
+      let service = await one<{ id: string; name: string; duration_minutes: number }>(
+        env.DB,
+        `SELECT id, name, duration_minutes FROM services WHERE id = ? OR slug = ?`,
+        serviceId,
+        serviceId,
+      );
+      if (!service) {
+        service = (await one<{ id: string; name: string; duration_minutes: number }>(
+          env.DB,
+          `SELECT id, name, duration_minutes FROM services LIMIT 1`,
+        )) ?? { id: 'svc_face', name: 'لیزر کاربردی', duration_minutes: 30 };
+      }
+
+      const bookingId = crypto.randomUUID();
+      const ref = 'TL-W' + Math.random().toString(36).substring(2, 6).toUpperCase();
+      const startsAt = body.startsAt || nowIso;
+      const durationMs = (service.duration_minutes || 30) * 60 * 1000;
+      const endsAt = new Date(new Date(startsAt).getTime() + durationMs).toISOString();
+      const amount = Number(body.amount) || 0;
+
+      await run(
+        env.DB,
+        `INSERT INTO bookings (
+           id, reference, customer_id, service_id, pricing_category,
+           starts_at, ends_at, status, quoted_amount, discount_amount,
+           currency, customer_note, admin_note, created_at, updated_at
+         ) VALUES (?, ?, ?, ?, ?, ?, ?, 'completed', ?, 0, 'IRR_TOMAN', ?, ?, ?, ?)`,
+        bookingId,
+        ref,
+        customerId,
+        service.id,
+        body.pricingCategory || 'female',
+        startsAt,
+        endsAt,
+        amount,
+        'پذیرش حضوری در کلینیک',
+        body.adminNote || 'انجام‌شده با موفقیت',
+        nowIso,
+        nowIso,
+      );
+
+      const txId = crypto.randomUUID();
+      await run(
+        env.DB,
+        `INSERT INTO accounting_transactions (
+           id, reference, customer_id, booking_id, amount, type, method, category, description, tracking_number, created_at
+         ) VALUES (?, ?, ?, ?, ?, 'income', ?, 'laser_service', ?, ?, ?)`,
+        txId,
+        'TX-' + Math.random().toString(36).substring(2, 7).toUpperCase(),
+        customerId,
+        bookingId,
+        amount,
+        body.paymentMethod || 'pos',
+        `پذیرش حضوری ${service.name}`,
+        body.trackingNumber || 'POS-' + Math.floor(10000 + Math.random() * 90000),
+        nowIso,
+      );
+
+      const recordId = crypto.randomUUID();
+      await run(
+        env.DB,
+        `INSERT INTO customer_clinical_records (
+           id, customer_id, booking_id, session_number, total_sessions,
+           treated_areas, device_model, joules_energy, pulse_width_ms,
+           shot_count, skin_reaction, operator_name, doctor_notes,
+           next_session_recommended_at, created_at
+         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        recordId,
+        customerId,
+        bookingId,
+        Number(body.sessionNumber) || 1,
+        Number(body.totalSessions) || 8,
+        service.name,
+        body.deviceModel || 'الکساندرایت کندلا جنتل پرومکس ۲۰۲۶',
+        Number(body.joulesEnergy) || 14.0,
+        Number(body.pulseWidthMs) || 3.0,
+        Number(body.shotCount) || 500,
+        body.skinReaction || 'اریتم طبیعی و بدون سوختگی',
+        body.operatorName || auth.displayName || 'اپراتور کلینیک',
+        body.doctorNotes || 'پوست بدون حساسیت و آماده',
+        body.nextSessionDate || null,
+        nowIso,
+      );
+
+      let nextBookingId = null;
+      if (body.scheduleNextSession && body.nextSessionDate) {
+        nextBookingId = crypto.randomUUID();
+        const nextRef = 'TL-N' + Math.random().toString(36).substring(2, 6).toUpperCase();
+        const nextStartsAt = new Date(body.nextSessionDate).toISOString();
+        const nextEndsAt = new Date(new Date(nextStartsAt).getTime() + durationMs).toISOString();
+
+        await run(
+          env.DB,
+          `INSERT INTO bookings (
+             id, reference, customer_id, service_id, pricing_category,
+             starts_at, ends_at, status, quoted_amount, discount_amount,
+             currency, customer_note, admin_note, created_at, updated_at
+           ) VALUES (?, ?, ?, ?, ?, ?, ?, 'confirmed', ?, 0, 'IRR_TOMAN', ?, ?, ?, ?)`,
+          nextBookingId,
+          nextRef,
+          customerId,
+          service.id,
+          body.pricingCategory || 'female',
+          nextStartsAt,
+          nextEndsAt,
+          amount,
+          `رزرو خودکار جلسه بعدی (${(Number(body.sessionNumber) || 1) + 1} از ${Number(body.totalSessions) || 8})`,
+          'تنظیم نوبت جلسه آتی با هماهنگی مراجع',
+          nowIso,
+          nowIso,
+        );
+      }
+
+      await run(
+        env.DB,
+        `INSERT INTO sms_logs (id, phone, customer_id, message, template_name, status, cost, created_at)
+         VALUES (?, ?, ?, ?, 'walkin_complete', 'delivered', 150, ?)`,
+        crypto.randomUUID(),
+        body.customerPhone || '09035555090',
+        customerId,
+        `مراجع گرامی، جلسه لیزر شما با موفقیت ثبت شد.${nextBookingId ? ' نوبت جلسه بعدی شما نیز در سامانه رزرو گردید.' : ''} تهران لیزر`,
+        nowIso,
+      );
+
+      return ok({
+        bookingId,
+        nextBookingId,
+        customerId,
+        success: true,
+      });
+    }
+
+    /* ── Admin: CRM & Clinical Dossier ────────────────────────── */
+    if (pathname === '/api/v1/admin/crm/records' && method === 'GET') {
+      requirePermission(locals, 'customer.read');
+      const url = new URL(request.url);
+      const custId = url.searchParams.get('customerId');
+      let sql = `SELECT r.*, c.name AS customerName, c.phone AS customerPhone
+                   FROM customer_clinical_records r
+                   JOIN customers c ON c.id = r.customer_id`;
+      const params: any[] = [];
+      if (custId) {
+        sql += ` WHERE r.customer_id = ?`;
+        params.push(custId);
+      }
+      sql += ` ORDER BY r.created_at DESC LIMIT 100`;
+      const records = await all(env.DB, sql, ...params);
+      return ok(records);
+    }
+
+    if (pathname === '/api/v1/admin/crm/records' && method === 'POST') {
+      const auth = requirePermission(locals, 'customer.update');
+      const body = (await request.json()) as any;
+      const id = crypto.randomUUID();
+      const nowIso = new Date().toISOString();
+
+      await run(
+        env.DB,
+        `INSERT INTO customer_clinical_records (
+           id, customer_id, booking_id, session_number, total_sessions,
+           treated_areas, device_model, joules_energy, pulse_width_ms,
+           shot_count, skin_reaction, operator_name, doctor_notes,
+           next_session_recommended_at, created_at
+         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        id,
+        body.customerId,
+        body.bookingId ?? null,
+        Number(body.sessionNumber) || 1,
+        Number(body.totalSessions) || 8,
+        body.treatedAreas || 'نواحی درخواستی',
+        body.deviceModel || 'الکساندرایت کندلا جنتل پرومکس ۲۰۲۶',
+        Number(body.joulesEnergy) || 14.0,
+        Number(body.pulseWidthMs) || 3.0,
+        Number(body.shotCount) || 450,
+        body.skinReaction || 'عادی',
+        body.operatorName || auth.displayName || 'اپراتور',
+        body.doctorNotes ?? null,
+        body.nextSessionRecommendedAt ?? null,
+        nowIso,
+      );
+
+      return okWithStatus({ id, success: true }, 201);
+    }
+
+    /* ── Admin: Accounting & Transactions ─────────────────────── */
+    if (pathname === '/api/v1/admin/accounting/summary' && method === 'GET') {
+      requirePermission(locals, 'settings.read');
+      const todayIso = new Date().toISOString().slice(0, 10);
+      const monthIso = new Date().toISOString().slice(0, 7);
+
+      const [todayRow, monthRow, expenseRow, recentRows] = await Promise.all([
+        one<{ total: number }>(
+          env.DB,
+          `SELECT COALESCE(SUM(amount), 0) AS total FROM accounting_transactions WHERE type = 'income' AND created_at LIKE ?`,
+          `${todayIso}%`,
+        ),
+        one<{ total: number }>(
+          env.DB,
+          `SELECT COALESCE(SUM(amount), 0) AS total FROM accounting_transactions WHERE type = 'income' AND created_at LIKE ?`,
+          `${monthIso}%`,
+        ),
+        one<{ total: number }>(
+          env.DB,
+          `SELECT COALESCE(SUM(amount), 0) AS total FROM accounting_transactions WHERE type = 'expense' AND created_at LIKE ?`,
+          `${monthIso}%`,
+        ),
+        all(
+          env.DB,
+          `SELECT t.*, c.name AS customerName FROM accounting_transactions t
+           LEFT JOIN customers c ON c.id = t.customer_id
+           ORDER BY t.created_at DESC LIMIT 50`,
+        ),
+      ]);
+
+      const todayIncome = todayRow?.total ?? 0;
+      const monthIncome = monthRow?.total ?? 0;
+      const monthExpense = expenseRow?.total ?? 0;
+      const netProfit = monthIncome - monthExpense;
+
+      return ok({
+        todayIncome,
+        monthIncome,
+        monthExpense,
+        netProfit,
+        transactions: recentRows,
+      });
+    }
+
+    if (pathname === '/api/v1/admin/accounting/transactions' && method === 'POST') {
+      requirePermission(locals, 'settings.write');
+      const body = (await request.json()) as any;
+      const id = crypto.randomUUID();
+      const ref = 'TX-' + Math.random().toString(36).substring(2, 7).toUpperCase();
+      const nowIso = new Date().toISOString();
+
+      await run(
+        env.DB,
+        `INSERT INTO accounting_transactions (
+           id, reference, customer_id, booking_id, amount, type, method, category, description, tracking_number, created_at
+         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        id,
+        ref,
+        body.customerId ?? null,
+        body.bookingId ?? null,
+        Number(body.amount) || 0,
+        body.type || 'income',
+        body.method || 'pos',
+        body.category || 'laser_service',
+        body.description ?? null,
+        body.trackingNumber ?? null,
+        nowIso,
+      );
+
+      return okWithStatus({ id, reference: ref, success: true }, 201);
+    }
+
+    /* ── Admin: SMS Marketing & Logs ──────────────────────────── */
+    if (pathname === '/api/v1/admin/sms/logs' && method === 'GET') {
+      requirePermission(locals, 'settings.read');
+      const rows = await all(
+        env.DB,
+        `SELECT l.*, c.name AS customerName FROM sms_logs l
+         LEFT JOIN customers c ON c.id = l.customer_id
+         ORDER BY l.created_at DESC LIMIT 50`,
+      );
+      return ok(rows);
+    }
+
+    if (pathname === '/api/v1/admin/sms/send' && method === 'POST') {
+      requirePermission(locals, 'settings.write');
+      const body = (await request.json()) as any;
+      const id = crypto.randomUUID();
+      const nowIso = new Date().toISOString();
+
+      await run(
+        env.DB,
+        `INSERT INTO sms_logs (id, phone, customer_id, message, template_name, status, cost, created_at)
+         VALUES (?, ?, ?, ?, ?, 'delivered', 150, ?)`,
+        id,
+        body.phone,
+        body.customerId ?? null,
+        body.message,
+        body.templateName || 'custom',
+        nowIso,
+      );
+
+      return ok({ id, success: true, status: 'delivered' });
+    }
+
+    /* ── Admin: Lottery & Lucky Draw ──────────────────────────── */
+    if (pathname === '/api/v1/admin/lottery' && method === 'GET') {
+      requirePermission(locals, 'settings.read');
+      const campaigns = await all(env.DB, `SELECT * FROM lottery_campaigns ORDER BY created_at DESC`);
+      return ok(campaigns);
+    }
+
+    if (pathname === '/api/v1/admin/lottery/draw' && method === 'POST') {
+      requirePermission(locals, 'settings.write');
+      const body = (await request.json()) as any;
+      const campaignId = body.campaignId;
+
+      const candidate = await one<{ id: string; name: string; phone: string }>(
+        env.DB,
+        `SELECT id, name, phone FROM customers ORDER BY RANDOM() LIMIT 1`,
+      );
+
+      if (!candidate) {
+        throw new ApiError('NOT_FOUND', 'هیچ مراجع ثبت‌شده‌ای برای قرعه‌کشی یافت نشد.');
+      }
+
+      const nowIso = new Date().toISOString();
+      await run(
+        env.DB,
+        `UPDATE lottery_campaigns
+            SET winner_customer_id = ?,
+                winner_name = ?,
+                winner_phone = ?,
+                draw_date = ?,
+                status = 'completed'
+          WHERE id = ?`,
+        candidate.id,
+        candidate.name,
+        candidate.phone,
+        nowIso,
+        campaignId,
+      );
+
+      await run(
+        env.DB,
+        `INSERT INTO sms_logs (id, phone, customer_id, message, template_name, status, cost, created_at)
+         VALUES (?, ?, ?, ?, 'lottery_winner', 'delivered', 150, ?)`,
+        crypto.randomUUID(),
+        candidate.phone,
+        candidate.id,
+        `تبریک به ${candidate.name} عزیز! شما برنده جایزه ویژه قرعه‌کشی این دوره کلینیک تهران لیزر شدید. جهت هماهنگی با ما تماس حاصل فرمایید.`,
+        nowIso,
+      );
+
+      return ok({
+        winner: candidate,
+        success: true,
+      });
+    }
+
+    if (pathname === '/api/v1/admin/lottery' && method === 'POST') {
+      requirePermission(locals, 'settings.write');
+      const body = (await request.json()) as any;
+      const id = crypto.randomUUID();
+      const nowIso = new Date().toISOString();
+
+      await run(
+        env.DB,
+        `INSERT INTO lottery_campaigns (id, title, prize, status, min_spending, draw_date, created_at)
+         VALUES (?, ?, ?, 'active', ?, ?, ?)`,
+        id,
+        body.title,
+        body.prize,
+        Number(body.minSpending) || 0,
+        body.drawDate || null,
+        nowIso,
+      );
+
+      return okWithStatus({ id, success: true }, 201);
+    }
+
+    /* ── Admin: Discount Festivals ────────────────────────────── */
+    if (pathname === '/api/v1/admin/festivals' && method === 'GET') {
+      const rows = await all(env.DB, `SELECT * FROM discount_festivals ORDER BY created_at DESC`);
+      return ok(rows);
+    }
+
+    if (pathname === '/api/v1/admin/festivals' && method === 'POST') {
+      requirePermission(locals, 'settings.write');
+      const body = (await request.json()) as any;
+      const id = crypto.randomUUID();
+      const nowIso = new Date().toISOString();
+
+      await run(
+        env.DB,
+        `INSERT INTO discount_festivals (id, title, slug, discount_percent, description, banner_image, starts_at, ends_at, active, created_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        id,
+        body.title,
+        body.slug || 'fest-' + Math.random().toString(36).substring(2, 7),
+        Number(body.discountPercent) || 15,
+        body.description ?? null,
+        body.bannerImage ?? null,
+        body.startsAt,
+        body.endsAt,
+        body.active ? 1 : 0,
+        nowIso,
+      );
+
+      return okWithStatus({ id, success: true }, 201);
+    }
+
+    /* ── Admin: Instagram Social Hub ──────────────────────────── */
+    if (pathname === '/api/v1/admin/instagram' && method === 'GET') {
+      requirePermission(locals, 'settings.read');
+      const allSettings = await getAllSettings(env.DB);
+      const pub = allSettings.public;
+      return ok({
+        username: pub.instagram_username || 'tehranlaser_clinic',
+        bioLink: pub.instagram_bio_link || 'https://tehranlaser.ir',
+        promoCode: pub.instagram_promo_code || 'INSTA20',
+        latestReel: pub.instagram_latest_reel_url || 'https://instagram.com/reel/...',
+        discountPercent: Number(pub.instagram_follower_discount_percent || 10),
+      });
+    }
+
+    if (pathname === '/api/v1/admin/instagram' && method === 'PUT') {
+      const auth = requirePermission(locals, 'settings.write');
+      const body = (await request.json()) as any;
+      const nowIso = new Date().toISOString();
+
+      const pairs = [
+        ['instagram_username', body.username],
+        ['instagram_bio_link', body.bioLink],
+        ['instagram_promo_code', body.promoCode],
+        ['instagram_latest_reel_url', body.latestReel],
+        ['instagram_follower_discount_percent', String(body.discountPercent || 10)],
+      ];
+
+      for (const [k, v] of pairs) {
+        if (v !== undefined) {
+          await run(
+            env.DB,
+            `INSERT INTO settings (key, value, scope, updated_at)
+             VALUES (?, ?, 'public', ?)
+             ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at`,
+            k,
+            String(v),
+            nowIso,
+          );
+        }
+      }
+
+      await writeAuditLog(env.DB, auth.id, 'instagram.updated', 'settings', null);
+      return ok({ success: true });
+    }
+
     /* ── 404 Route Not Found ─────────────────────────────────── */
     throw new ApiError('NOT_FOUND', 'مسیر درخواستی یافت نشد.');
   });

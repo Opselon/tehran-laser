@@ -1,0 +1,222 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { env } from 'cloudflare:workers';
+import { formatJalaliDate } from '../../lib/datetime/jalali';
+
+let festivals: any[] = [];
+
+try {
+  const result = await env.DB.prepare(`SELECT * FROM discount_festivals ORDER BY starts_at DESC`).all();
+  festivals = result.results as any[] || [];
+} catch (e) {
+  console.error('Failed to load festivals:', e);
+}
+---
+
+<AdminLayout title="جشنواره‌ها و تخفیف‌ها" activeNav="festivals">
+  <div class="admin-content-pad">
+    <div class="dashboard-header-row">
+      <div>
+        <h1 class="admin-page-title">🎪 جشنواره‌های تخفیف و تایم‌لاین کمپین‌های فروش</h1>
+        <p class="section-block-sub">
+          مدیریت تخفیف‌های مناسبتی، کمپین‌های تبلیغاتی و تایم‌لاین فصلی کلینیک تهران لیزر (API First)
+        </p>
+      </div>
+      <div class="actions">
+        <button id="openNewFestModalBtn" class="btn-3d-gold">
+          <span>+ ایجاد جشنواره تخفیف جدید</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Active Festivals Grid & Countdown -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; margin-bottom: 32px;">
+      {festivals.map((f) => (
+        <div class="admin-section-block" style="padding: 24px; border-color: f.active ? 'rgba(212, 175, 55, 0.4)' : 'rgba(255,255,255,0.06)'; position: relative; overflow: hidden;">
+          {f.active ? (
+            <div style="position: absolute; top: 12px; left: 12px; background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); color: #34d399; font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 8px;">
+              🟢 فعال روی سایت
+            </div>
+          ) : (
+            <div style="position: absolute; top: 12px; left: 12px; background: rgba(255, 255, 255, 0.05); color: #94a3b8; font-size: 0.75rem; padding: 4px 10px; border-radius: 8px;">
+              ⚪ غیرفعال
+            </div>
+          )}
+
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 14px;">
+            <div style="font-size: 2.2rem;">🎪</div>
+            <div>
+              <h3 style="font-size: 1.2rem; font-weight: 800; color: #f5d77f; margin: 0;">{f.title}</h3>
+              <span style="font-size: 0.8rem; color: #94a3b8;">کد سیستمی: {f.slug}</span>
+            </div>
+          </div>
+
+          <div style="background: rgba(212, 175, 55, 0.08); border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 12px; padding: 14px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 0.85rem; color: #cbd5e1;">میزان تخفیف اعمالی:</span>
+            <span style="font-size: 1.4rem; font-weight: 900; color: #f5d77f;">{f.discount_percent}٪ تخفیف</span>
+          </div>
+
+          <p style="font-size: 0.85rem; color: #cbd5e1; line-height: 1.6; margin-bottom: 16px;">
+            {f.description || 'تخفیف ویژه تمامی خدمات لیزر کندلا به مدت محدود.'}
+          </p>
+
+          <div style="border-top: 1px solid rgba(255,255,255,0.06); padding-top: 12px; display: flex; justify-content: space-between; font-size: 0.78rem; color: #94a3b8;">
+            <span>شروع: {formatJalaliDate(f.starts_at)}</span>
+            <span>پایان: {formatJalaliDate(f.ends_at)}</span>
+          </div>
+        </div>
+      ))}
+      {festivals.length === 0 && (
+        <div class="admin-section-block" style="padding: 32px; text-align: center; color: #94a3b8; grid-column: 1 / -1;">
+          هنوز هیچ جشنواره‌ای تعریف نشده است.
+        </div>
+      )}
+    </div>
+
+    <!-- Visual Yearly Timeline -->
+    <div class="admin-section-block" style="padding: 28px;">
+      <h3 class="section-block-title" style="margin-bottom: 24px;">
+        📅 تایم‌لاین کمپین‌های سالانه کلینیک تهران لیزر
+      </h3>
+
+      <div style="position: relative; padding: 20px 0;">
+        <div style="position: absolute; top: 50%; right: 0; left: 0; height: 3px; background: linear-gradient(90deg, #d4af37, #38bdf8, #818cf8); transform: translateY(-50%); z-index: 1;"></div>
+
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; position: relative; z-index: 2;">
+          {[
+            { season: 'بهار (نوروزی)', date: '۱ تا ۲۰ فروردین', disc: '۲۵٪', icon: '🌸', status: 'گذشته' },
+            { season: 'تابستانه (آفتاب)', date: '۱ تا ۱۵ تیر', disc: '۱۵٪', icon: '☀️', status: 'گذشته' },
+            { season: 'پاییزه طلایی', date: 'مهر تا آبان', disc: '۲۰٪', icon: '🍂', status: 'در حال اجرا' },
+            { season: 'جشنواره شب یلدا', date: '۲۵ تا ۳۰ آذر', disc: '۳۰٪', icon: '🍉', status: 'به‌زودی' },
+          ].map((item) => (
+            <div style="background: #0f172a; border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 18px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.5);">
+              <div style="font-size: 2rem; margin-bottom: 8px;">{item.icon}</div>
+              <h4 style="color: #f8fafc; font-size: 1rem; font-weight: 700; margin-bottom: 4px;">{item.season}</h4>
+              <div style="font-size: 0.78rem; color: #94a3b8; margin-bottom: 8px;">{item.date}</div>
+              <div style="font-size: 1.1rem; font-weight: 800; color: #f5d77f; margin-bottom: 6px;">{item.disc} تخفیف</div>
+              <span class={item.status === 'در حال اجرا' ? 'badge-status-confirmed' : 'badge-status-completed'} style="font-size: 0.72rem;">
+                {item.status}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: New Festival -->
+  <div id="newFestModal" class="modal-3d-backdrop" style="display: none;">
+    <div class="modal-3d-card" style="max-width: 520px;">
+      <div class="modal-3d-header">
+        <h3 class="modal-3d-title">🎪 تعریف جشنواره تخفیف جدید</h3>
+        <button id="closeFestModalBtn" class="modal-close-btn">&times;</button>
+      </div>
+
+      <form id="festForm" style="display: flex; flex-direction: column; gap: 16px;">
+        <div>
+          <label class="form-label-modal">عنوان جشنواره:</label>
+          <input type="text" id="festTitle" class="form-control-modal" placeholder="مثال: جشنواره پاییزه طلایی تهران لیزر" required />
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div>
+            <label class="form-label-modal">درصد تخفیف (%):</label>
+            <input type="number" id="festPercent" class="form-control-modal" value="20" min="1" max="100" required />
+          </div>
+          <div>
+            <label class="form-label-modal">نامک انگلیسی (Slug):</label>
+            <input type="text" id="festSlug" dir="ltr" class="form-control-modal" placeholder="golden-autumn" required />
+          </div>
+        </div>
+
+        <div>
+          <label class="form-label-modal">توضیحات و متن کمپین:</label>
+          <textarea id="festDesc" class="form-control-modal" rows="3" placeholder="توضیحاتی برای نمایش به مراجعین..."></textarea>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div>
+            <label class="form-label-modal">تاریخ شروع:</label>
+            <input type="date" id="festStarts" class="form-control-modal" required />
+          </div>
+          <div>
+            <label class="form-label-modal">تاریخ پایان:</label>
+            <input type="date" id="festEnds" class="form-control-modal" required />
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
+          <button type="button" id="cancelFestBtn" class="btn-3d-secondary">انصراف</button>
+          <button type="submit" id="saveFestSubmitBtn" class="btn-3d-accept">ثبت و انتشار جشنواره</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const modal = document.getElementById('newFestModal');
+    const openBtn = document.getElementById('openNewFestModalBtn');
+    const closeBtn = document.getElementById('closeFestModalBtn');
+    const cancelBtn = document.getElementById('cancelFestBtn');
+    const form = document.getElementById('festForm');
+    const saveBtn = document.getElementById('saveFestSubmitBtn') as HTMLButtonElement;
+
+    // Set default dates
+    const startInput = document.getElementById('festStarts') as HTMLInputElement;
+    const endInput = document.getElementById('festEnds') as HTMLInputElement;
+    if (startInput) startInput.value = new Date().toISOString().slice(0, 10);
+    if (endInput) {
+      const d = new Date();
+      d.setDate(d.getDate() + 14);
+      endInput.value = d.toISOString().slice(0, 10);
+    }
+
+    function openModal() {
+      if (modal) modal.style.display = 'flex';
+    }
+    function closeModal() {
+      if (modal) modal.style.display = 'none';
+    }
+
+    openBtn?.addEventListener('click', openModal);
+    closeBtn?.addEventListener('click', closeModal);
+    cancelBtn?.addEventListener('click', closeModal);
+
+    form?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      saveBtn.disabled = true;
+      saveBtn.innerText = 'در حال ثبت...';
+
+      const payload = {
+        title: (document.getElementById('festTitle') as HTMLInputElement).value.trim(),
+        slug: (document.getElementById('festSlug') as HTMLInputElement).value.trim(),
+        discountPercent: Number((document.getElementById('festPercent') as HTMLInputElement).value),
+        description: (document.getElementById('festDesc') as HTMLTextAreaElement).value.trim(),
+        startsAt: new Date(startInput.value).toISOString(),
+        endsAt: new Date(endInput.value).toISOString(),
+        active: true,
+      };
+
+      try {
+        const res = await fetch('/api/v1/admin/festivals', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        if (res.ok) {
+          alert('✓ جشنواره با موفقیت ثبت و روی وب‌سایت فعال گردید.');
+          window.location.reload();
+        } else {
+          alert('خطا در ثبت جشنواره.');
+          saveBtn.disabled = false;
+          saveBtn.innerText = 'ثبت و انتشار جشنواره';
+        }
+      } catch {
+        alert('خطای اتصال به سرور.');
+        saveBtn.disabled = false;
+        saveBtn.innerText = 'ثبت و انتشار جشنواره';
+      }
+    });
+  </script>
+</AdminLayout>

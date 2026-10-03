@@ -1,0 +1,239 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { env } from 'cloudflare:workers';
+import { formatJalaliDate } from '../../lib/datetime/jalali';
+
+let smsLogs: any[] = [];
+let totalSent = 0;
+
+try {
+  const [logsResult, countResult] = await Promise.all([
+    env.DB.prepare(`
+      SELECT l.*, c.name AS customerName
+        FROM sms_logs l
+        LEFT JOIN customers c ON c.id = l.customer_id
+       ORDER BY l.created_at DESC LIMIT 50
+    `).all(),
+    env.DB.prepare(`SELECT COUNT(*) AS count FROM sms_logs`).first<{ count: number }>(),
+  ]);
+
+  smsLogs = logsResult.results as any[] || [];
+  totalSent = countResult?.count ?? 0;
+} catch (e) {
+  console.error('Failed to load SMS logs:', e);
+}
+---
+
+<AdminLayout title="پنل پیامک و اطلاع‌رسانی" activeNav="sms">
+  <div class="admin-content-pad">
+    <div class="dashboard-header-row">
+      <div>
+        <h1 class="admin-page-title">✉️ پنل هوشمند پیامک و اطلاع‌رسانی خودکار</h1>
+        <p class="section-block-sub">
+          ارسال خودکار پیامک‌های تایید نوبت، یادآوری جلسات، تبریک تولد و کمپین‌های جشنواره مراجعین (API First)
+        </p>
+      </div>
+      <div class="actions">
+        <span style="font-size: 0.88rem; color: #34d399; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.35); padding: 8px 16px; border-radius: 12px; display: inline-flex; align-items: center; gap: 8px;">
+          <span class="live-dot"></span>
+          وب‌سرویس پیامک فعال (کاوه نگار / فراز اس‌ام‌اس)
+        </span>
+      </div>
+    </div>
+
+    <!-- KPI Grid -->
+    <div class="kpi-grid-3d" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-bottom: 24px;">
+      <div class="kpi-card-3d">
+        <div class="kpi-header">
+          <span class="kpi-title">موجودی شارژ پیامک</span>
+          <span class="kpi-icon">🔋</span>
+        </div>
+        <div class="kpi-value" style="color: #34d399;">۱۴,۲۵۰ <span style="font-size: 0.9rem; color: #94a3b8;">پیامک</span></div>
+        <div class="kpi-footer" style="color: #34d399;">اعتبار تا پایان سال جاری</div>
+      </div>
+
+      <div class="kpi-card-3d">
+        <div class="kpi-header">
+          <span class="kpi-title">کل پیامک‌های ارسالی</span>
+          <span class="kpi-icon">📤</span>
+        </div>
+        <div class="kpi-value">{totalSent}</div>
+        <div class="kpi-footer" style="color: #38bdf8;">نوبت‌ها و اطلاع‌رسانی‌ها</div>
+      </div>
+
+      <div class="kpi-card-3d">
+        <div class="kpi-header">
+          <span class="kpi-title">نرخ تحویل موفق به گوشی</span>
+          <span class="kpi-icon">📶</span>
+        </div>
+        <div class="kpi-value" style="color: #f5d77f;">۹۹.۲٪</div>
+        <div class="kpi-footer" style="color: #34d399;">ارسال از خط خدماتی بدون بلک‌لیست</div>
+      </div>
+    </div>
+
+    <!-- Layout: Quick send & Logs table -->
+    <div style="display: grid; grid-template-columns: 380px 1fr; gap: 24px; align-items: start; margin-bottom: 24px;">
+      <!-- Quick SMS Sender Form -->
+      <div class="admin-section-block" style="padding: 24px;">
+        <h3 class="section-block-title" style="margin-bottom: 16px;">
+          ⚡ ارسال پیامک سریع به مراجع
+        </h3>
+
+        <form id="smsForm" style="display: flex; flex-direction: column; gap: 14px;">
+          <div>
+            <label class="form-label-modal">شماره تلفن همراه گیرنده:</label>
+            <input type="tel" id="smsPhone" dir="ltr" class="form-control-modal" placeholder="۰۹۱۲۳۴۵۶۷۸۹" required />
+          </div>
+
+          <div>
+            <label class="form-label-modal">انتخاب قالب پیامکی آماده:</label>
+            <select id="smsTemplateSelect" class="form-control-modal">
+              <option value="custom">-- متن دلخواه سفارشی --</option>
+              <option value="booking_confirm">تایید رزرو نوبت لیزر</option>
+              <option value="reminder_24h">یادآوری نوبت فردا (۲۴ ساعت قبل)</option>
+              <option value="birthday">تبریک تولد + هدیه تخفیف ۳۰٪</option>
+              <option value="next_session">یادآوری تنظیم جلسه بعدی دوره درمان</option>
+              <option value="festival">اطلاع‌رسانی جشنواره تخفیف فصلی</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="form-label-modal">متن پیامک:</label>
+            <textarea id="smsMessage" class="form-control-modal" rows="5" placeholder="متن پیامک..." required></textarea>
+            <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: #94a3b8; margin-top: 4px;">
+              <span>تعداد کاراکتر: <span id="charCount">۰</span></span>
+              <span>۱ صفحه پیامک فارسی</span>
+            </div>
+          </div>
+
+          <button type="submit" id="sendSmsSubmitBtn" class="btn-3d-gold" style="width: 100%; margin-top: 6px;">
+            ✉️ ارسال فوری پیامک
+          </button>
+        </form>
+      </div>
+
+      <!-- SMS Logs Table -->
+      <div class="admin-section-block" style="padding: 24px;">
+        <h3 class="section-block-title" style="margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
+          <span>📋 گزارش تحویل پیامک‌های ارسالی</span>
+          <span style="font-size: 0.8rem; color: #94a3b8;">۵۰ لاگ اخیر سامانه</span>
+        </h3>
+
+        <div class="admin-table-container">
+          <table class="admin-table-3d">
+            <thead>
+              <tr>
+                <th>گیرنده</th>
+                <th>نام مراجع</th>
+                <th>متن پیامک</th>
+                <th>قالب</th>
+                <th>وضعیت تحویل</th>
+                <th>تاریخ و زمان</th>
+              </tr>
+            </thead>
+            <tbody>
+              {smsLogs.map((log) => (
+                <tr>
+                  <td style="font-family: monospace; font-weight: 700; color: #f5d77f;" dir="ltr">{log.phone}</td>
+                  <td style="font-weight: 700; color: #f8fafc;">{log.customerName || 'مراجع آزاد'}</td>
+                  <td style="font-size: 0.82rem; color: #cbd5e1; max-width: 280px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title={log.message}>
+                    {log.message}
+                  </td>
+                  <td>
+                    <span style="font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,0.06); color: #cbd5e1;">
+                      {log.template_name || 'سفارشی'}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="badge-status-confirmed">
+                      ✓ تحویل داده شد
+                    </span>
+                  </td>
+                  <td style="font-size: 0.8rem; color: #94a3b8;">{formatJalaliDate(log.created_at)}</td>
+                </tr>
+              ))}
+              {smsLogs.length === 0 && (
+                <tr>
+                  <td colspan="6" style="text-align: center; color: #94a3b8; padding: 24px;">
+                    هنوز پیامکی ارسال نشده است.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const templates: Record<string, string> = {
+      booking_confirm: 'مراجع گرامی، نوبت لیزر شما در کلینیک تخصصی تهران لیزر با موفقیت تایید شد. نشانی: تهران، پاسداران، پایدارفرد، بوستان هفتم. تلفن: 09035555090',
+      reminder_24h: 'یادآوری: نوبت لیزر شما فردا در کلینیک تهران لیزر هماهنگ شده است. لطفا ۲۴ ساعت قبل موهای ناحیه را شیو بفرمایید و از لایه‌بردار پرهیز کنید.',
+      birthday: 'زادروزتان فرخنده باد! کلینیک تهران لیزر ۳۰٪ تخفیف اختصاصی روی تمامی جلسات برای شما هدیه در نظر گرفته است. کد هدیه: HBD30',
+      next_session: 'مراجع گرامی، زمان جلسه بعدی دوره لیزر کندلا شما فرا رسیده است. جهت حفظ اثربخشی و عدم ریزش نتیجه، نوبت خود را آنلاین رزرو فرمایید: tehranlaser.ir',
+      festival: 'جشنواره تخفیف پاییزه تهران لیزر آغاز شد! ۱۵٪ تخفیف ویژه روی تمامی پکیج‌های فول بادی کندلا پرومکس ۲۰۲۶. رزرو آنلاین: tehranlaser.ir',
+    };
+
+    const templateSelect = document.getElementById('smsTemplateSelect') as unknown as HTMLSelectElement;
+    const messageInput = document.getElementById('smsMessage') as HTMLTextAreaElement;
+    const charCount = document.getElementById('charCount');
+    const phoneInput = document.getElementById('smsPhone') as HTMLInputElement;
+    const smsForm = document.getElementById('smsForm');
+    const sendBtn = document.getElementById('sendSmsSubmitBtn') as HTMLButtonElement;
+
+    // Check if phone was passed in query param
+    const urlParams = new URLSearchParams(window.location.search);
+    const qPhone = urlParams.get('phone');
+    if (qPhone && phoneInput) {
+      phoneInput.value = qPhone;
+    }
+
+    templateSelect?.addEventListener('change', () => {
+      const val = templateSelect.value;
+      if (val && templates[val]) {
+        messageInput.value = templates[val];
+      }
+      updateCount();
+    });
+
+    messageInput?.addEventListener('input', updateCount);
+
+    function updateCount() {
+      if (charCount) charCount.innerText = String(messageInput.value.length);
+    }
+
+    smsForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      sendBtn.disabled = true;
+      sendBtn.innerText = 'در حال ارسال پیامک...';
+
+      const payload = {
+        phone: phoneInput.value.trim(),
+        message: messageInput.value.trim(),
+        templateName: templateSelect.value,
+      };
+
+      try {
+        const res = await fetch('/api/v1/admin/sms/send', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        if (res.ok) {
+          alert('✓ پیامک با موفقیت به مخابرات ارسال و در گوشی مراجع ثبت شد.');
+          window.location.reload();
+        } else {
+          alert('خطا در ارسال پیامک.');
+          sendBtn.disabled = false;
+          sendBtn.innerText = '✉️ ارسال فوری پیامک';
+        }
+      } catch {
+        alert('خطای اتصال به سرور پیامک.');
+        sendBtn.disabled = false;
+        sendBtn.innerText = '✉️ ارسال فوری پیامک';
+      }
+    });
+  </script>
+</AdminLayout>

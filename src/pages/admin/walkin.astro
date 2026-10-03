@@ -1,0 +1,338 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { env } from 'cloudflare:workers';
+import { listPublicServices, listAdminCustomers } from '../../server/repositories';
+
+let services: Awaited<ReturnType<typeof listPublicServices>> = [];
+let customers: Awaited<ReturnType<typeof listAdminCustomers>> = { items: [], nextCursor: null };
+
+try {
+  [services, customers] = await Promise.all([
+    listPublicServices(env.DB),
+    listAdminCustomers(env.DB, 100),
+  ]);
+} catch (e) {
+  console.error('Failed to load walkin prerequisites:', e);
+}
+---
+
+<AdminLayout title="پذیرش حضوری و جلسه بعد" activeNav="walkin">
+  <div class="admin-content-pad">
+    <div class="dashboard-header-row">
+      <div>
+        <h1 class="admin-page-title">⚡ پذیرش حضوری و تنظیم نوبت جلسه آینده</h1>
+        <p class="section-block-sub">
+          ثبت نوبت درجا برای مراجع حاضر در کلینیک، صدور خودکار تراکنش مالی و رزرو هوشمند جلسه بعد (API First)
+        </p>
+      </div>
+      <div class="actions">
+        <span style="font-size: 0.88rem; color: #34d399; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.35); padding: 8px 16px; border-radius: 12px; display: inline-flex; align-items: center; gap: 8px;">
+          <span class="live-dot"></span>
+          سامانه پذیرش مستقیم فعال
+        </span>
+      </div>
+    </div>
+
+    <div id="walkinAlert" class="alert-3d-danger" style="display: none; margin-bottom: 20px;">
+      <span id="walkinAlertText"></span>
+    </div>
+
+    <div id="walkinSuccess" style="display: none; margin-bottom: 20px; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); color: #34d399; padding: 18px 24px; border-radius: 14px; font-weight: 700;">
+      <span id="walkinSuccessText">✓ نوبت مراجع و تراکنش مالی با موفقیت ثبت شد.</span>
+    </div>
+
+    <form id="walkinForm">
+      <!-- 1. Customer Selection / Quick New -->
+      <div class="admin-section-block" style="padding: 26px; margin-bottom: 24px;">
+        <h3 class="section-block-title" style="margin-bottom: 18px; display: flex; align-items: center; gap: 10px;">
+          <span>👤</span> مشخصات مراجع حاضر در کلینیک
+        </h3>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px;">
+          <div>
+            <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #f5d77f; margin-bottom: 6px;">
+              انتخاب مراجع سابق (پرونده‌دار):
+            </label>
+            <select id="custSelect" class="form-control-modal">
+              <option value="">-- ثبت مراجع جدید (ورود دستی) --</option>
+              {customers.items.map((c) => (
+                <option value={c.id} data-name={c.name} data-phone={c.phone} data-category={c.pricingCategory}>
+                  {c.name} — {c.phone} ({c.pricingCategory === 'female' ? 'بانوان' : 'آقایان'})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #f5d77f; margin-bottom: 6px;">
+              نام و نام خانوادگی مراجع:
+            </label>
+            <input type="text" id="custName" class="form-control-modal" placeholder="نام مراجع..." required />
+          </div>
+
+          <div>
+            <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #f5d77f; margin-bottom: 6px;">
+              شماره تلفن همراه (پیامک تایید):
+            </label>
+            <input type="tel" id="custPhone" dir="ltr" class="form-control-modal" placeholder="۰۹۱۲..." required />
+          </div>
+
+          <div>
+            <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #f5d77f; margin-bottom: 6px;">
+              بخش پذیرش:
+            </label>
+            <select id="custCategory" class="form-control-modal">
+              <option value="female">بانوان</option>
+              <option value="male">آقایان</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Treatment & Laser Service -->
+      <div class="admin-section-block" style="padding: 26px; margin-bottom: 24px;">
+        <h3 class="section-block-title" style="margin-bottom: 18px; display: flex; align-items: center; gap: 10px;">
+          <span>💎</span> ناحیه تحت درمان و پارامترهای لیزر کندلا
+        </h3>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px;">
+          <div>
+            <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #f5d77f; margin-bottom: 6px;">
+              ناحیه / خدمت لیزر:
+            </label>
+            <select id="serviceSelect" class="form-control-modal" required>
+              {services.map((s) => (
+                <option value={s.slug} data-price={s.prices.find(p => p.pricingCategory === 'female')?.amount || 320}>
+                  {s.name} ({s.durationMinutes} دقیقه)
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #f5d77f; margin-bottom: 6px;">
+              شماره جلسه درمانی:
+            </label>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <input type="number" id="sessionNumber" class="form-control-modal" value="1" min="1" max="15" required />
+              <span style="color: #94a3b8; font-size: 0.85rem;">از</span>
+              <input type="number" id="totalSessions" class="form-control-modal" value="8" min="1" max="15" required />
+            </div>
+          </div>
+
+          <div>
+            <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #f5d77f; margin-bottom: 6px;">
+              انرژی شات (J/cm²) و عرض پالس:
+            </label>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+              <input type="number" id="joulesEnergy" step="0.5" class="form-control-modal" value="14.0" title="ژول بر سانتی‌متر مربع" />
+              <input type="number" id="pulseWidth" step="0.5" class="form-control-modal" value="3.0" title="عرض پالس میلی‌ثانیه" />
+            </div>
+          </div>
+
+          <div>
+            <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #f5d77f; margin-bottom: 6px;">
+              تعداد شات دستگاه:
+            </label>
+            <input type="number" id="shotCount" class="form-control-modal" value="520" />
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Financial & POS Payment -->
+      <div class="admin-section-block" style="padding: 26px; margin-bottom: 24px;">
+        <h3 class="section-block-title" style="margin-bottom: 18px; display: flex; align-items: center; gap: 10px;">
+          <span>💳</span> تسویه مالی و دریافت وجه (ثبت خودکار در حسابداری)
+        </h3>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px;">
+          <div>
+            <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #f5d77f; margin-bottom: 6px;">
+              مبلغ دریافتی (هزار تومان):
+            </label>
+            <input type="number" id="paymentAmount" class="form-control-modal" value="1940" required />
+            <span style="font-size: 0.76rem; color: #34d399; margin-top: 4px; display: block;">
+              معادل ۱٬۹۴۰٬۰۰۰ تومان (پکیج فول بادی بانوان)
+            </span>
+          </div>
+
+          <div>
+            <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #f5d77f; margin-bottom: 6px;">
+              روش پرداخت:
+            </label>
+            <select id="paymentMethod" class="form-control-modal">
+              <option value="pos">💳 کارت‌خوان کلینیک (POS)</option>
+              <option value="card_to_card">📱 کارت‌به‌کارت / شبا</option>
+              <option value="cash">💵 پرداخت نقدی</option>
+            </select>
+          </div>
+
+          <div>
+            <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #f5d77f; margin-bottom: 6px;">
+              شماره پیگیری / ارجاع پوز:
+            </label>
+            <input type="text" id="trackingNumber" dir="ltr" class="form-control-modal" placeholder="POS-89312" />
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Next Session Scheduler (Auto) -->
+      <div class="admin-section-block" style="padding: 26px; margin-bottom: 24px; border-color: rgba(56, 189, 248, 0.4); background: rgba(14, 165, 233, 0.04);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <h3 class="section-block-title" style="margin: 0; color: #38bdf8; display: flex; align-items: center; gap: 10px;">
+            <span>🗓️</span> تنظیم هوشمند نوبت جلسه بعدی (Next Session Scheduler)
+          </h3>
+          <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; color: #38bdf8; font-weight: 700;">
+            <input type="checkbox" id="scheduleNextCheckbox" checked style="width: 18px; height: 18px; accent-color: #38bdf8;" />
+            <span>رزرو نوبت جلسه بعدی مراجع</span>
+          </label>
+        </div>
+
+        <div id="nextSessionFields" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px;">
+          <div>
+            <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">
+              فاصله استاندارد چرخه رشد مو:
+            </label>
+            <select id="intervalWeeks" class="form-control-modal">
+              <option value="4">۴ هفته بعد (مناسب صورت و جلسات آغازین)</option>
+              <option value="6" selected>۶ هفته بعد (استاندارد نواحی بدن و کندلا)</option>
+              <option value="8">۸ هفته بعد (جلسات پایانی و شارژ)</option>
+            </select>
+          </div>
+
+          <div>
+            <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">
+              تاریخ پیشنهادی جلسه بعدی:
+            </label>
+            <input type="datetime-local" id="nextSessionDateTime" class="form-control-modal" dir="ltr" />
+          </div>
+
+          <div>
+            <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">
+              یادداشت برای جلسه بعدی:
+            </label>
+            <input type="text" id="nextSessionNote" class="form-control-modal" placeholder="بررسی واکنش پوست در جلسه دوم..." />
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 14px;">
+        <button type="submit" id="submitWalkinBtn" class="btn-3d-accept" style="padding: 16px 36px; font-size: 1.05rem; border-radius: 12px;">
+          ⚡ ثبت قطعی پذیرش، تراکنش مالی و نوبت جلسه بعد
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    const custSelect = document.getElementById('custSelect') as unknown as HTMLSelectElement;
+    const custName = document.getElementById('custName') as HTMLInputElement;
+    const custPhone = document.getElementById('custPhone') as HTMLInputElement;
+    const custCategory = document.getElementById('custCategory') as unknown as HTMLSelectElement;
+    const serviceSelect = document.getElementById('serviceSelect') as unknown as HTMLSelectElement;
+    const paymentAmount = document.getElementById('paymentAmount') as HTMLInputElement;
+    const scheduleNextCheckbox = document.getElementById('scheduleNextCheckbox') as HTMLInputElement;
+    const nextSessionFields = document.getElementById('nextSessionFields');
+    const intervalWeeks = document.getElementById('intervalWeeks') as unknown as HTMLSelectElement;
+    const nextSessionDateTime = document.getElementById('nextSessionDateTime') as HTMLInputElement;
+
+    const form = document.getElementById('walkinForm') as HTMLFormElement;
+    const submitBtn = document.getElementById('submitWalkinBtn') as HTMLButtonElement;
+    const alertBox = document.getElementById('walkinAlert');
+    const alertText = document.getElementById('walkinAlertText');
+    const successBox = document.getElementById('walkinSuccess');
+    const successText = document.getElementById('walkinSuccessText');
+
+    // Auto-calculate next session date (6 weeks from now)
+    function calcNextDate(weeks = 6) {
+      const d = new Date();
+      d.setDate(d.getDate() + weeks * 7);
+      d.setHours(16, 0, 0, 0); // Default to 16:00
+      const iso = d.toISOString().slice(0, 16);
+      if (nextSessionDateTime) nextSessionDateTime.value = iso;
+    }
+    calcNextDate(6);
+
+    intervalWeeks?.addEventListener('change', () => {
+      calcNextDate(Number(intervalWeeks.value));
+    });
+
+    scheduleNextCheckbox?.addEventListener('change', () => {
+      if (nextSessionFields) {
+        nextSessionFields.style.display = scheduleNextCheckbox.checked ? 'grid' : 'none';
+      }
+    });
+
+    custSelect?.addEventListener('change', () => {
+      const opt = custSelect.options[custSelect.selectedIndex];
+      if (opt && opt.value) {
+        custName.value = opt.dataset.name || '';
+        custPhone.value = opt.dataset.phone || '';
+        custCategory.value = opt.dataset.category || 'female';
+      }
+    });
+
+    serviceSelect?.addEventListener('change', () => {
+      const opt = serviceSelect.options[serviceSelect.selectedIndex];
+      if (opt && opt.dataset.price) {
+        paymentAmount.value = opt.dataset.price;
+      }
+    });
+
+    form?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      submitBtn.disabled = true;
+      submitBtn.innerText = '⏳ در حال ثبت در سامانه و صدور فاکتور...';
+      if (alertBox) alertBox.style.display = 'none';
+      if (successBox) successBox.style.display = 'none';
+
+      const payload = {
+        customerId: custSelect.value || undefined,
+        customerName: custName.value.trim(),
+        customerPhone: custPhone.value.trim(),
+        pricingCategory: custCategory.value,
+        serviceId: serviceSelect.value,
+        amount: Number(paymentAmount.value),
+        paymentMethod: (document.getElementById('paymentMethod') as unknown as HTMLSelectElement).value,
+        trackingNumber: (document.getElementById('trackingNumber') as HTMLInputElement).value.trim(),
+        sessionNumber: Number((document.getElementById('sessionNumber') as HTMLInputElement).value),
+        totalSessions: Number((document.getElementById('totalSessions') as HTMLInputElement).value),
+        joulesEnergy: Number((document.getElementById('joulesEnergy') as HTMLInputElement).value),
+        pulseWidthMs: Number((document.getElementById('pulseWidth') as HTMLInputElement).value),
+        shotCount: Number((document.getElementById('shotCount') as HTMLInputElement).value),
+        scheduleNextSession: scheduleNextCheckbox.checked,
+        nextSessionDate: scheduleNextCheckbox.checked ? nextSessionDateTime.value : null,
+      };
+
+      try {
+        const res = await fetch('/api/v1/admin/walkin/book', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        const json = await res.json() as any;
+        if (res.ok && json.data) {
+          submitBtn.innerText = '✓ ثبت نوبت و جلسه آینده انجام شد!';
+          if (successBox && successText) {
+            successText.innerText = `✓ نوبت حضوری با موفقیت ثبت شد. ${json.data.nextBookingId ? 'نوبت جلسه بعد نیز تنظیم گردید.' : ''}`;
+            successBox.style.display = 'block';
+          }
+          setTimeout(() => {
+            window.location.href = '/admin/bookings';
+          }, 1500);
+        } else {
+          if (alertText) alertText.innerText = json.error?.message || 'خطا در ثبت پذیرش حضوری.';
+          if (alertBox) alertBox.style.display = 'flex';
+          submitBtn.disabled = false;
+          submitBtn.innerText = '⚡ ثبت قطعی پذیرش، تراکنش مالی و نوبت جلسه بعد';
+        }
+      } catch {
+        if (alertText) alertText.innerText = 'خطای ارتباط با سرور.';
+        if (alertBox) alertBox.style.display = 'flex';
+        submitBtn.disabled = false;
+        submitBtn.innerText = '⚡ ثبت قطعی پذیرش، تراکنش مالی و نوبت جلسه بعد';
+      }
+    });
+  </script>
+</AdminLayout>

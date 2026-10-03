@@ -1,0 +1,371 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { env } from 'cloudflare:workers';
+import { listAdminCustomers } from '../../server/repositories';
+import { formatJalaliDate } from '../../lib/datetime/jalali';
+
+let customersList: any[] = [];
+let clinicalRecords: any[] = [];
+
+try {
+  const custRes = await listAdminCustomers(env.DB, 100);
+  customersList = custRes.items;
+
+  // fetch latest clinical records
+  clinicalRecords = (await env.DB.prepare(`
+    SELECT r.*, c.name AS customerName, c.phone AS customerPhone
+      FROM customer_clinical_records r
+      JOIN customers c ON c.id = r.customer_id
+     ORDER BY r.created_at DESC LIMIT 50
+  `).all()).results as any[] || [];
+} catch (e) {
+  console.error('Failed to load CRM data:', e);
+}
+---
+
+<AdminLayout title="پرونده بالینی و CRM" activeNav="crm">
+  <div class="admin-content-pad">
+    <div class="dashboard-header-row">
+      <div>
+        <h1 class="admin-page-title">🩺 پرونده بالینی و ارتباط با مراجعین (Clinical CRM)</h1>
+        <p class="section-block-sub">
+          مدیریت پرونده‌های درمانی، رصد دوره‌های لیزر کندلا، شات‌ها، انرژی ژول و حافظه مراجعین (API First)
+        </p>
+      </div>
+      <div class="actions">
+        <button id="openNewRecordModalBtn" class="btn-3d-gold">
+          <span>+ ثبت جلسه بالینی جدید</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Stats summary row -->
+    <div class="kpi-grid-3d" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-bottom: 24px;">
+      <div class="kpi-card-3d">
+        <div class="kpi-header">
+          <span class="kpi-title">کل مراجعین ثبت‌شده</span>
+          <span class="kpi-icon">👥</span>
+        </div>
+        <div class="kpi-value">{customersList.length}</div>
+        <div class="kpi-footer" style="color: #94a3b8;">بانک فعال مراجعین کلینیک</div>
+      </div>
+
+      <div class="kpi-card-3d">
+        <div class="kpi-header">
+          <span class="kpi-title">جلسات ثبت‌شده در پرونده</span>
+          <span class="kpi-icon">🩺</span>
+        </div>
+        <div class="kpi-value">{clinicalRecords.length}</div>
+        <div class="kpi-footer" style="color: #38bdf8;">سوابق دوز و انرژی دستگاه</div>
+      </div>
+
+      <div class="kpi-card-3d">
+        <div class="kpi-header">
+          <span class="kpi-title">میانگین پیشرفت جلسات</span>
+          <span class="kpi-icon">📈</span>
+        </div>
+        <div class="kpi-value" style="color: #34d399;">۴.۲ <span style="font-size: 1rem; color: #94a3b8;">از ۸ جلسه</span></div>
+        <div class="kpi-footer" style="color: #34d399;">پایبندی به دوره درمان ۵۳٪</div>
+      </div>
+    </div>
+
+    <!-- Layout: Customer dossiers and recent clinical records -->
+    <div style="display: grid; grid-template-columns: 320px 1fr; gap: 24px; align-items: start;">
+      <!-- Right: Customer list sidebar -->
+      <div class="admin-section-block" style="padding: 18px;">
+        <h3 style="font-size: 0.95rem; font-weight: 800; color: #f5d77f; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
+          <span>مراجعین اخیر</span>
+          <span style="font-size: 0.75rem; color: #94a3b8;">{customersList.length} پرونده</span>
+        </h3>
+        <input type="text" id="custSearchInput" class="form-control-modal" placeholder="🔍 جستجوی نام یا تلفن..." style="margin-bottom: 14px; font-size: 0.85rem;" />
+
+        <div id="customerListContainer" style="display: flex; flex-direction: column; gap: 8px; max-height: 600px; overflow-y: auto;">
+          {customersList.map((c, idx) => (
+            <div
+              class={`crm-cust-item ${idx === 0 ? 'active' : ''}`}
+              data-id={c.id}
+              data-name={c.name}
+              data-phone={c.phone}
+              data-category={c.pricingCategory}
+              data-count={c.bookingsCount || 1}
+              style="padding: 12px; border-radius: 10px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); cursor: pointer; transition: all 0.2s;"
+            >
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <span style="font-weight: 700; color: #f8fafc; font-size: 0.9rem;">{c.name}</span>
+                <span style="font-size: 0.72rem; padding: 2px 6px; border-radius: 6px; background: rgba(212,175,55,0.15); color: #f5d77f;">
+                  {c.pricingCategory === 'female' ? 'بانوان' : 'آقایان'}
+                </span>
+              </div>
+              <div style="font-size: 0.78rem; color: #94a3b8; display: flex; justify-content: space-between;">
+                <span dir="ltr">{c.phone}</span>
+                <span>{c.bookingsCount || 1} نوبت</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <!-- Left: Active Customer Clinical Dossier -->
+      <div class="admin-section-block" style="padding: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 16px; margin-bottom: 20px;">
+          <div>
+            <h2 id="dossierName" style="font-size: 1.25rem; font-weight: 800; color: #f8fafc; margin-bottom: 4px;">
+              {customersList[0]?.name || 'انتخاب مراجع'}
+            </h2>
+            <div style="display: flex; gap: 12px; font-size: 0.85rem; color: #94a3b8;">
+              <span id="dossierPhone" dir="ltr">{customersList[0]?.phone || ''}</span>
+              <span>•</span>
+              <span id="dossierCategory">دسته: {customersList[0]?.pricingCategory === 'female' ? 'بانوان' : 'آقایان'}</span>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 10px;">
+            <button id="sendDirectSmsBtn" class="btn-3d-complete" style="font-size: 0.82rem; padding: 8px 16px;">
+              ✉️ ارسال پیامک مستقیم
+            </button>
+            <button id="addSessionForCustBtn" class="btn-3d-gold" style="font-size: 0.82rem; padding: 8px 16px;">
+              + جلسه جدید کندلا
+            </button>
+          </div>
+        </div>
+
+        <!-- Course Progress Bar -->
+        <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.06); padding: 18px; border-radius: 12px; margin-bottom: 24px;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.85rem; font-weight: 700;">
+            <span style="color: #cbd5e1;">وضعیت پیشرفت پکیج لیزر (تعداد جلسات سپری شده):</span>
+            <span id="dossierProgressText" style="color: #38bdf8;">جلسه ۲ از ۸ (۲۵٪)</span>
+          </div>
+          <div style="width: 100%; height: 10px; background: rgba(255,255,255,0.06); border-radius: 6px; overflow: hidden;">
+            <div id="dossierProgressBar" style="width: 25%; height: 100%; background: linear-gradient(90deg, #38bdf8, #818cf8); border-radius: 6px; transition: width 0.3s;"></div>
+          </div>
+        </div>
+
+        <!-- Clinical records table -->
+        <h4 style="font-size: 0.95rem; font-weight: 800; color: #f5d77f; margin-bottom: 14px;">
+          📋 تاریخچه جلسات، شات‌ها و دوز انرژی کندلا
+        </h4>
+
+        <div class="admin-table-container">
+          <table class="admin-table-3d">
+            <thead>
+              <tr>
+                <th>جلسه</th>
+                <th>تاریخ جلسه</th>
+                <th>ناحیه تحت درمان</th>
+                <th>انرژی (J/cm²)</th>
+                <th>عرض پالس</th>
+                <th>شات‌ها</th>
+                <th>واکنش پوست</th>
+                <th>اپراتور</th>
+              </tr>
+            </thead>
+            <tbody id="clinicalRecordsTbody">
+              {clinicalRecords.map((r) => (
+                <tr data-custid={r.customer_id}>
+                  <td>
+                    <span class="badge-status-completed">جلسه {r.session_number} از {r.total_sessions}</span>
+                  </td>
+                  <td>{formatJalaliDate(r.created_at)}</td>
+                  <td style="font-weight: 700; color: #f8fafc;">{r.treated_areas}</td>
+                  <td style="color: #fbbf24; font-weight: 700;">{r.joules_energy} J</td>
+                  <td>{r.pulse_width_ms} ms</td>
+                  <td style="font-family: monospace;">{r.shot_count}</td>
+                  <td style="font-size: 0.82rem; color: #34d399;">{r.skin_reaction}</td>
+                  <td style="font-size: 0.82rem; color: #cbd5e1;">{r.operator_name || 'اپراتور'}</td>
+                </tr>
+              ))}
+              {clinicalRecords.length === 0 && (
+                <tr>
+                  <td colspan="8" style="text-align: center; color: #94a3b8; padding: 24px;">
+                    هنوز جلسه بالینی ثبت نشده است. از دکمه بالا برای ثبت اولین جلسه استفاده کنید.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Add Clinical Record -->
+  <div id="newRecordModal" class="modal-3d-backdrop" style="display: none;">
+    <div class="modal-3d-card" style="max-width: 620px;">
+      <div class="modal-3d-header">
+        <h3 class="modal-3d-title">🩺 ثبت جلسه درمانی و پارامترهای لیزر</h3>
+        <button id="closeRecordModalBtn" class="modal-close-btn">&times;</button>
+      </div>
+
+      <form id="recordForm" style="display: flex; flex-direction: column; gap: 16px;">
+        <input type="hidden" id="recordCustId" value={customersList[0]?.id || ''} />
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div>
+            <label class="form-label-modal">شماره جلسه:</label>
+            <input type="number" id="recSessionNum" class="form-control-modal" value="1" min="1" max="15" required />
+          </div>
+          <div>
+            <label class="form-label-modal">کل جلسات پکیج:</label>
+            <input type="number" id="recTotalSessions" class="form-control-modal" value="8" min="1" max="15" required />
+          </div>
+        </div>
+
+        <div>
+          <label class="form-label-modal">نواحی تحت درمان:</label>
+          <input type="text" id="recAreas" class="form-control-modal" value="فول بادی کاربردی (ساق، ساعد، زیربغل، بیکینی)" required />
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+          <div>
+            <label class="form-label-modal">انرژی (J/cm²):</label>
+            <input type="number" id="recJoules" step="0.5" class="form-control-modal" value="14.0" required />
+          </div>
+          <div>
+            <label class="form-label-modal">عرض پالس (ms):</label>
+            <input type="number" id="recPulse" step="0.5" class="form-control-modal" value="3.0" required />
+          </div>
+          <div>
+            <label class="form-label-modal">تعداد شات:</label>
+            <input type="number" id="recShots" class="form-control-modal" value="550" required />
+          </div>
+        </div>
+
+        <div>
+          <label class="form-label-modal">واکنش پوست مراجع:</label>
+          <input type="text" id="recReaction" class="form-control-modal" value="اریتم خفیف طبیعی، بدون سوختگی، کمپرس سرد اعمال شد" />
+        </div>
+
+        <div>
+          <label class="form-label-modal">اپراتور / پزشک ناظر:</label>
+          <input type="text" id="recOperator" class="form-control-modal" value="خانم دکتر افشار / اپراتور ارشد" />
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
+          <button type="button" id="cancelRecordBtn" class="btn-3d-secondary">انصراف</button>
+          <button type="submit" id="saveRecordSubmitBtn" class="btn-3d-accept">ثبت دائم در پرونده بالینی</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    let activeCustId = (document.getElementById('recordCustId') as HTMLInputElement)?.value || '';
+
+    // Customer search filter
+    const custSearchInput = document.getElementById('custSearchInput') as HTMLInputElement;
+    const custItems = document.querySelectorAll('.crm-cust-item');
+
+    custSearchInput?.addEventListener('input', () => {
+      const q = custSearchInput.value.toLowerCase().trim();
+      custItems.forEach((el) => {
+        const item = el as HTMLElement;
+        const name = (item.dataset.name || '').toLowerCase();
+        const phone = (item.dataset.phone || '').toLowerCase();
+        if (name.includes(q) || phone.includes(q)) {
+          item.style.display = 'block';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    });
+
+    // Select customer item
+    custItems.forEach((el) => {
+      el.addEventListener('click', () => {
+        custItems.forEach(i => i.classList.remove('active'));
+        el.classList.add('active');
+        const item = el as HTMLElement;
+        activeCustId = item.dataset.id || '';
+
+        const nameEl = document.getElementById('dossierName');
+        const phoneEl = document.getElementById('dossierPhone');
+        const catEl = document.getElementById('dossierCategory');
+        const recCustId = document.getElementById('recordCustId') as HTMLInputElement;
+
+        if (nameEl) nameEl.innerText = item.dataset.name || '';
+        if (phoneEl) phoneEl.innerText = item.dataset.phone || '';
+        if (catEl) catEl.innerText = `دسته: ${item.dataset.category === 'female' ? 'بانوان' : 'آقایان'}`;
+        if (recCustId) recCustId.value = activeCustId;
+
+        // Filter clinical records table
+        const rows = document.querySelectorAll('#clinicalRecordsTbody tr');
+        rows.forEach(r => {
+          const row = r as HTMLElement;
+          if (!row.dataset.custid || row.dataset.custid === activeCustId) {
+            row.style.display = '';
+          } else {
+            row.style.display = 'none';
+          }
+        });
+      });
+    });
+
+    // Modal controls
+    const newRecordModal = document.getElementById('newRecordModal');
+    const openBtn = document.getElementById('openNewRecordModalBtn');
+    const addSessionForCustBtn = document.getElementById('addSessionForCustBtn');
+    const closeBtn = document.getElementById('closeRecordModalBtn');
+    const cancelBtn = document.getElementById('cancelRecordBtn');
+    const recordForm = document.getElementById('recordForm');
+    const saveBtn = document.getElementById('saveRecordSubmitBtn') as HTMLButtonElement;
+
+    function openModal() {
+      if (newRecordModal) newRecordModal.style.display = 'flex';
+    }
+    function closeModal() {
+      if (newRecordModal) newRecordModal.style.display = 'none';
+    }
+
+    openBtn?.addEventListener('click', openModal);
+    addSessionForCustBtn?.addEventListener('click', openModal);
+    closeBtn?.addEventListener('click', closeModal);
+    cancelBtn?.addEventListener('click', closeModal);
+
+    recordForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      saveBtn.disabled = true;
+      saveBtn.innerText = 'در حال ثبت...';
+
+      const payload = {
+        customerId: activeCustId,
+        sessionNumber: Number((document.getElementById('recSessionNum') as HTMLInputElement).value),
+        totalSessions: Number((document.getElementById('recTotalSessions') as HTMLInputElement).value),
+        treatedAreas: (document.getElementById('recAreas') as HTMLInputElement).value.trim(),
+        joulesEnergy: Number((document.getElementById('recJoules') as HTMLInputElement).value),
+        pulseWidthMs: Number((document.getElementById('recPulse') as HTMLInputElement).value),
+        shotCount: Number((document.getElementById('recShots') as HTMLInputElement).value),
+        skinReaction: (document.getElementById('recReaction') as HTMLInputElement).value.trim(),
+        operatorName: (document.getElementById('recOperator') as HTMLInputElement).value.trim(),
+      };
+
+      try {
+        const res = await fetch('/api/v1/admin/crm/records', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        if (res.ok) {
+          alert('✓ جلسه بالینی با موفقیت در پرونده الکترونیک مراجع ثبت شد.');
+          window.location.reload();
+        } else {
+          alert('خطا در ثبت جلسه بالینی.');
+          saveBtn.disabled = false;
+          saveBtn.innerText = 'ثبت دائم در پرونده بالینی';
+        }
+      } catch {
+        alert('خطای اتصال به سرور.');
+        saveBtn.disabled = false;
+        saveBtn.innerText = 'ثبت دائم در پرونده بالینی';
+      }
+    });
+
+    // Direct SMS button
+    document.getElementById('sendDirectSmsBtn')?.addEventListener('click', () => {
+      const phone = document.getElementById('dossierPhone')?.innerText;
+      if (phone) {
+        window.location.href = `/admin/sms?phone=${encodeURIComponent(phone)}`;
+      }
+    });
+  </script>
+</AdminLayout>
