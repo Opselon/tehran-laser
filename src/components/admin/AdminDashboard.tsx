@@ -127,18 +127,19 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
 
   if (loading && !data) {
     return (
-      <div className="admin-loading-state p-5 text-center">
-        <div className="spinner mb-3"></div>
-        <p className="text-muted">در حال فراخوانی اطلاعات روز کلینیک...</p>
+      <div className="admin-section-block text-center p-5">
+        <div className="empty-icon">⏳</div>
+        <p className="empty-text">در حال بارگذاری اطلاعات عملیاتی روز کلینیک...</p>
       </div>
     );
   }
 
   if (error && !data) {
     return (
-      <div className="alert alert-danger m-4">
-        <span>{error}</span>
-        <button type="button" className="btn btn-outline btn-sm mr-auto" onClick={refreshDashboard}>
+      <div className="admin-section-block text-center p-5" style={{ borderColor: 'rgba(239, 68, 68, 0.5)' }}>
+        <div className="empty-icon">⚠️</div>
+        <p className="empty-text text-danger mb-3">{error}</p>
+        <button type="button" className="btn-3d-refresh" onClick={refreshDashboard}>
           تلاش مجدد
         </button>
       </div>
@@ -151,86 +152,91 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
 
   return (
     <div className="admin-dashboard-page">
-      {/* Top Header Row */}
-      <div className="dashboard-header-row mb-4">
+      {/* 3D Dashboard Header Row */}
+      <div className="dashboard-header-row">
         <div>
-          <h1 className="admin-page-title text-xl font-bold">داشبورد عملیات کلینیک</h1>
-          <p className="text-muted small">
-            گزارش لحظه‌ای پذیرش — امروز: {formatJalaliDate(todayDateStr)}
-          </p>
+          <h1 className="admin-page-title">داشبورد عملیات کلینیک</h1>
+          <div className="dashboard-date-badge">
+            <span>📅 گزارش لحظه‌ای پذیرش — امروز:</span>
+            <strong style={{ color: '#f5d77f' }}>{formatJalaliDate(todayDateStr)}</strong>
+          </div>
         </div>
         <div className="actions">
           <button
             type="button"
-            className="btn btn-outline btn-sm"
+            className="btn-3d-refresh"
             onClick={refreshDashboard}
             disabled={loading}
           >
-            {loading ? 'در حال به‌روزرسانی...' : '🔄 تازه‌سازی داده‌ها'}
+            <span>{loading ? '⏳' : '🔄'}</span>
+            <span>{loading ? 'در حال دریافت...' : 'تازه‌سازی داده‌ها'}</span>
           </button>
         </div>
       </div>
 
-      {/* KPI Summary Metric Cards (§22) */}
-      <div className="admin-metrics-grid mb-5">
+      {/* 3D KPI Summary Metric Cards Grid */}
+      <div className="admin-metrics-grid">
         <div className="admin-metric-card">
           <div className="metric-header">
             <span className="metric-title">نوبت‌های امروز</span>
-            <span className="metric-icon">📅</span>
+            <div className="metric-icon-wrap">📅</div>
           </div>
           <div className="metric-number">{(data?.today.total ?? 0).toLocaleString('fa-IR')}</div>
-          <div className="metric-footer text-muted small">کل نوبت‌های ثبت‌شده امروز</div>
+          <div className="metric-footer">کل نوبت‌های ثبت‌شده امروز</div>
         </div>
 
         <div className="admin-metric-card highlight-warning">
           <div className="metric-header">
             <span className="metric-title">در انتظار تأیید</span>
-            <span className="metric-icon">⏳</span>
+            <div className="metric-icon-wrap">⏳</div>
           </div>
-          <div className="metric-number text-warning">
+          <div className="metric-number">
             {(data?.counts.pendingBookings ?? 0).toLocaleString('fa-IR')}
           </div>
-          <div className="metric-footer text-muted small">نیازمند بررسی و تأیید منشی</div>
+          <div className="metric-footer">نیازمند بررسی و تأیید منشی</div>
         </div>
 
-        <div className="admin-metric-card">
+        <div className="admin-metric-card highlight-success">
           <div className="metric-header">
             <span className="metric-title">نوبت‌های تأییدشده امروز</span>
-            <span className="metric-icon">✅</span>
+            <div className="metric-icon-wrap">✅</div>
           </div>
-          <div className="metric-number text-success">
+          <div className="metric-number">
             {(data?.today.confirmed ?? 0).toLocaleString('fa-IR')}
           </div>
-          <div className="metric-footer text-muted small">آماده پذیرش و انجام خدمت</div>
+          <div className="metric-footer">آماده پذیرش و انجام خدمت</div>
         </div>
 
         <div className="admin-metric-card">
           <div className="metric-header">
             <span className="metric-title">کل پرونده‌های مراجعین</span>
-            <span className="metric-icon">👥</span>
+            <div className="metric-icon-wrap">👥</div>
           </div>
           <div className="metric-number">
             {(data?.counts.totalCustomers ?? 0).toLocaleString('fa-IR')}
           </div>
-          <div className="metric-footer text-muted small">مراجعین ثبت‌شده در سامانه</div>
+          <div className="metric-footer">مراجعین ثبت‌شده در سامانه</div>
         </div>
       </div>
 
-      {/* Pending Approvals Section (§25) */}
-      <div className="admin-section-block mb-5">
+      {/* Pending Approvals Section */}
+      <div className="admin-section-block">
         <div className="section-block-header">
-          <h2 className="section-block-title font-bold text-lg">
-            ⚠️ نوبت‌های جدید در انتظار تأیید ({pendingBookings.length.toLocaleString('fa-IR')})
+          <h2 className="section-block-title">
+            <span>⚠️ نوبت‌های جدید در انتظار تأیید</span>
+            <span style={{ fontSize: '0.85rem', color: '#f59e0b', background: 'rgba(245, 158, 11, 0.15)', padding: '2px 10px', borderRadius: '999px', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
+              {pendingBookings.length.toLocaleString('fa-IR')} مورد
+            </span>
           </h2>
-          <p className="text-muted small">
+          <p className="section-block-sub">
             نوبت‌های ثبت‌شده آنلاین که پیش از مراجعه نیاز به تأیید پذیرش دارند
           </p>
         </div>
 
         {pendingBookings.length === 0 ? (
-          <div className="empty-state-card text-center p-4">
-            <span className="empty-icon text-2xl">✨</span>
-            <p className="text-muted mt-2 mb-0">در حال حاضر نوبت در انتظار تأییدی وجود ندارد.</p>
+          <div className="empty-state-card">
+            <span className="empty-icon">✨</span>
+            <p className="empty-text">در حال حاضر نوبت در انتظار تأییدی وجود ندارد.</p>
           </div>
         ) : (
           <div className="pending-bookings-list">
@@ -243,42 +249,43 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
 
               return (
                 <div key={b.id} className="pending-booking-card">
-                  <div className="card-top-row">
-                    <div className="customer-info">
-                      <span className="customer-name font-bold">{b.customer.name}</span>
-                      <a href={`tel:${b.customer.phone}`} className="customer-phone" dir="ltr">
-                        {b.customer.phone}
-                      </a>
+                  <div>
+                    <div className="card-top-row">
+                      <div className="customer-info">
+                        <span className="customer-name">{b.customer.name}</span>
+                        <a href={`tel:${b.customer.phone}`} className="customer-phone" dir="ltr">
+                          📞 {b.customer.phone}
+                        </a>
+                      </div>
+                      <div className="booking-ref-badge" dir="ltr">{b.reference}</div>
                     </div>
-                    <div className="booking-ref-badge" dir="ltr">{b.reference}</div>
+
+                    <div className="card-meta-grid">
+                      <div className="meta-item">
+                        <strong>خدمت:</strong> {b.service.name}
+                      </div>
+                      <div className="meta-item">
+                        <strong>بخش:</strong> {b.pricingCategory === 'female' ? 'بانوان' : 'آقایان'}
+                      </div>
+                      <div className="meta-item">
+                        <strong>زمان:</strong> ساعت {timeStr}
+                      </div>
+                      <div className="meta-item">
+                        <strong>مبلغ:</strong> {(b.quotedAmount * 1000).toLocaleString('fa-IR')} ت
+                      </div>
+                    </div>
+
+                    {b.customerNote && (
+                      <div className="customer-note-callout">
+                        <strong>یادداشت مراجع:</strong> {b.customerNote}
+                      </div>
+                    )}
                   </div>
 
-                  <div className="card-meta-row mt-2">
-                    <span className="meta-item">
-                      <strong>خدمت:</strong> {b.service.name}
-                    </span>
-                    <span className="meta-item">
-                      <strong>بخش:</strong> {b.pricingCategory === 'female' ? 'بانوان' : 'آقایان'}
-                    </span>
-                    <span className="meta-item">
-                      <strong>زمان:</strong> {formatJalaliDate(b.startsAt.slice(0, 10))} ساعت {timeStr}
-                    </span>
-                    <span className="meta-item">
-                      <strong>مبلغ:</strong> {(b.quotedAmount * 1000).toLocaleString('fa-IR')} تومان
-                      {b.discountAmount > 0 && ` (تخفیف: ${(b.discountAmount * 1000).toLocaleString('fa-IR')})`}
-                    </span>
-                  </div>
-
-                  {b.customerNote && (
-                    <div className="customer-note-callout mt-2">
-                      <span className="note-label">یادداشت مراجع:</span> {b.customerNote}
-                    </div>
-                  )}
-
-                  <div className="card-actions-row mt-3">
+                  <div className="card-actions-row">
                     <button
                       type="button"
-                      className="btn btn-primary btn-sm ml-2"
+                      className="btn-3d-accept"
                       onClick={() => handleAccept(b.id)}
                       disabled={actionInProgress === b.id}
                     >
@@ -286,11 +293,11 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
                     </button>
                     <button
                       type="button"
-                      className="btn btn-outline btn-sm btn-danger ml-2"
+                      className="btn-3d-reject"
                       onClick={() => setRejectingBooking(b)}
                       disabled={actionInProgress === b.id}
                     >
-                      ✕ رد درخواست
+                      ✕ رد نوبت
                     </button>
                   </div>
                 </div>
@@ -300,32 +307,36 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
         )}
       </div>
 
-      {/* Today View Timeline (§24) */}
+      {/* Today View Timeline Table */}
       <div className="admin-section-block">
         <div className="section-block-header">
-          <h2 className="section-block-title font-bold text-lg">
-            📋 برنامه زمانی نوبت‌های امروز ({scheduleBookings.length.toLocaleString('fa-IR')})
+          <h2 className="section-block-title">
+            <span>📋 برنامه زمانی نوبت‌های امروز</span>
+            <span style={{ fontSize: '0.85rem', color: '#94a3b8', background: 'rgba(148, 163, 184, 0.15)', padding: '2px 10px', borderRadius: '999px' }}>
+              {scheduleBookings.length.toLocaleString('fa-IR')} نوبت
+            </span>
           </h2>
-          <p className="text-muted small">لیست تمام نوبت‌های ثبت‌شده برای تاریخ امروز</p>
+          <p className="section-block-sub">لیست تمام نوبت‌های ثبت‌شده برای تاریخ امروز کلینیک</p>
         </div>
 
         {scheduleBookings.length === 0 ? (
-          <div className="empty-state-card text-center p-4">
-            <p className="text-muted mb-0">برای امروز هنوز نوبتی ثبت نگردیده است.</p>
+          <div className="empty-state-card">
+            <span className="empty-icon">🗓️</span>
+            <p className="empty-text">برای امروز هنوز نوبتی ثبت نگردیده است.</p>
           </div>
         ) : (
           <div className="today-table-wrapper">
             <table className="admin-table">
               <thead>
                 <tr>
-                  <th>ساعت</th>
-                  <th>کد رزرو</th>
+                  <th>ساعت نوبت</th>
+                  <th>کد رهگیری</th>
                   <th>نام مراجع</th>
                   <th>شماره تماس</th>
                   <th>خدمت</th>
                   <th>بخش</th>
                   <th>وضعیت</th>
-                  <th>عملیات</th>
+                  <th>عملیات پذیرش</th>
                 </tr>
               </thead>
               <tbody>
@@ -338,16 +349,18 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
 
                   return (
                     <tr key={b.id}>
-                      <td className="font-bold">⏱ {timeStr}</td>
-                      <td dir="ltr" className="font-mono small">{b.reference}</td>
-                      <td>{b.customer.name}</td>
+                      <td style={{ fontWeight: 800, color: '#f5d77f' }}>⏱ {timeStr}</td>
+                      <td dir="ltr" style={{ fontFamily: 'monospace', color: '#94a3b8' }}>{b.reference}</td>
+                      <td style={{ fontWeight: 700 }}>{b.customer.name}</td>
                       <td dir="ltr">
-                        <a href={`tel:${b.customer.phone}`}>{b.customer.phone}</a>
+                        <a href={`tel:${b.customer.phone}`} style={{ color: '#38bdf8', textDecoration: 'none' }}>
+                          {b.customer.phone}
+                        </a>
                       </td>
                       <td>{b.service.name}</td>
                       <td>{b.pricingCategory === 'female' ? 'بانوان' : 'آقایان'}</td>
                       <td>
-                        <span className={`badge badge-status-${b.status}`}>
+                        <span className={`badge-status badge-status-${b.status}`}>
                           {b.status === 'confirmed' && 'تأییدشده'}
                           {b.status === 'pending' && 'در انتظار تأیید'}
                           {b.status === 'completed' && 'انجام‌شده'}
@@ -362,15 +375,17 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
                             <>
                               <button
                                 type="button"
-                                className="btn btn-outline btn-sm ml-1"
+                                className="btn-table-action"
+                                style={{ borderColor: 'rgba(16, 185, 129, 0.4)', color: '#34d399' }}
                                 onClick={() => handleComplete(b.id)}
                                 disabled={actionInProgress === b.id}
                               >
-                                انجام شد
+                                ✓ انجام شد
                               </button>
                               <button
                                 type="button"
-                                className="btn btn-outline btn-sm btn-muted"
+                                className="btn-table-action"
+                                style={{ borderColor: 'rgba(148, 163, 184, 0.3)', color: '#94a3b8' }}
                                 onClick={() => handleNoShow(b.id)}
                                 disabled={actionInProgress === b.id}
                               >
@@ -381,11 +396,12 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
                           {b.status === 'pending' && (
                             <button
                               type="button"
-                              className="btn btn-primary btn-sm"
+                              className="btn-table-action"
+                              style={{ borderColor: 'rgba(245, 158, 11, 0.4)', color: '#fbbf24' }}
                               onClick={() => handleAccept(b.id)}
                               disabled={actionInProgress === b.id}
                             >
-                              تأیید
+                              ✓ تأیید
                             </button>
                           )}
                         </div>
@@ -403,18 +419,18 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
       {rejectingBooking && (
         <div className="modal-backdrop">
           <div className="modal-dialog">
-            <h3 className="modal-title font-bold text-lg mb-2">رد درخواست نوبت</h3>
-            <p className="text-muted small mb-3">
-              نوبت کد <strong dir="ltr">{rejectingBooking.reference}</strong> مربوط به {rejectingBooking.customer.name}
+            <h3 className="modal-title">رد درخواست نوبت</h3>
+            <p style={{ color: 'rgba(226, 232, 240, 0.7)', fontSize: '0.88rem', margin: '0 0 16px' }}>
+              نوبت کد <strong dir="ltr" style={{ color: '#f5d77f' }}>{rejectingBooking.reference}</strong> مربوط به {rejectingBooking.customer.name}
             </p>
 
-            <div className="form-group mb-3">
-              <label htmlFor="rejectionReasonInput" className="form-label">
+            <div>
+              <label htmlFor="rejectionReasonInput" style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: '#e2e8f0', marginBottom: '6px' }}>
                 علت رد نوبت (اختیاری جهت درج در پرونده و پیامک):
               </label>
               <textarea
                 id="rejectionReasonInput"
-                className="form-control"
+                className="form-control-modal"
                 rows={3}
                 placeholder="مثال: تکمیل ظرفیت پذیرش در این بازه زمانی..."
                 value={rejectionReason}
@@ -425,14 +441,14 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
             <div className="modal-actions-row">
               <button
                 type="button"
-                className="btn btn-outline ml-2"
+                className="btn-table-action"
                 onClick={() => setRejectingBooking(null)}
               >
                 انصراف
               </button>
               <button
                 type="button"
-                className="btn btn-primary btn-danger"
+                className="btn-3d-reject"
                 onClick={handleConfirmReject}
                 disabled={actionInProgress === rejectingBooking.id}
               >

@@ -1,9 +1,7 @@
 ---
 import '@fontsource-variable/vazirmatn/index.css';
 import '../../styles/tokens.css';
-import '../../styles/base.css';
-import '../../styles/components.css';
-import '../../styles/admin/admin.css';
+import '../../styles/admin/login-3d.css';
 
 const auth = Astro.locals.auth;
 if (auth) {
@@ -16,69 +14,411 @@ if (auth) {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>ورود به سامانه مدیریت | کلینیک تهران لیزر</title>
+    <title>ورود پرسنل به سامانه مدیریت | کلینیک تخصصی تهران لیزر</title>
     <meta name="robots" content="noindex, nofollow" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <style is:global>
+      /* Fallback & Critical Inlined 3D Styles to guarantee immediate 3D rendering */
+      :root {
+        --gold-glow: rgba(212, 175, 55, 0.35);
+        --gold-primary: #d4af37;
+        --obsidian-bg: #07090e;
+        --obsidian-card: rgba(14, 18, 27, 0.88);
+        --obsidian-input: rgba(8, 11, 18, 0.9);
+      }
+      body {
+        margin: 0;
+        background-color: #07090e !important;
+        font-family: 'Vazirmatn Variable', 'Vazirmatn', system-ui, -apple-system, sans-serif;
+        color: #f0f2f5;
+        direction: rtl;
+        overflow-x: hidden;
+      }
+      .admin-login-body-3d {
+        min-height: 100vh;
+        min-height: 100dvh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        background: radial-gradient(circle at 50% 20%, rgba(197, 160, 89, 0.12) 0%, transparent 60%), #07090e;
+      }
+      .login-3d-viewport {
+        position: relative;
+        z-index: 10;
+        width: 100%;
+        max-width: 480px;
+        padding: 24px 16px;
+        perspective: 1400px;
+      }
+      .login-3d-card {
+        background: var(--obsidian-card);
+        backdrop-filter: blur(28px) saturate(190%);
+        -webkit-backdrop-filter: blur(28px) saturate(190%);
+        border: 1.5px solid rgba(212, 175, 55, 0.4);
+        border-radius: 28px;
+        padding: 40px 36px;
+        box-shadow: 0 40px 90px -15px rgba(0, 0, 0, 0.9), 0 20px 45px -10px rgba(197, 160, 89, 0.25), inset 0 1px 1px 0 rgba(255, 255, 255, 0.25);
+        transform-style: preserve-3d;
+        transition: transform 0.12s ease-out;
+      }
+      .input-3d {
+        width: 100%;
+        background: var(--obsidian-input);
+        border: 1.5px solid rgba(212, 175, 55, 0.25);
+        border-radius: 14px;
+        padding: 14px 18px 14px 44px;
+        font-family: inherit;
+        font-size: 0.98rem;
+        color: #ffffff;
+        outline: none;
+        box-sizing: border-box;
+      }
+      .btn-3d-submit {
+        width: 100%;
+        background: linear-gradient(180deg, #f0cf75 0%, #cba24f 40%, #997224 100%);
+        color: #1a1405;
+        border: none;
+        border-radius: 16px;
+        padding: 16px 24px;
+        font-family: inherit;
+        font-size: 1.05rem;
+        font-weight: 800;
+        cursor: pointer;
+        box-shadow: 0 8px 0 #6e4e13, 0 16px 30px rgba(203, 162, 79, 0.45);
+        margin-top: 14px;
+      }
+    </style>
   </head>
-  <body class="admin-login-body">
-    <div class="login-wrapper">
-      <div class="login-card">
-        <div class="login-header text-center">
-          <div class="brand-logo mb-2">💎 تهران لیزر</div>
-          <h1 class="login-title font-bold text-xl">ورود به پنل مدیریت کلینیک</h1>
-          <p class="login-subtitle text-muted small">
+  <body class="admin-login-body-3d">
+    <!-- 3D Interactive Canvas & Lights Background -->
+    <div class="bg-canvas-container">
+      <div class="ambient-laser-grid"></div>
+      <div class="ambient-radial-glow"></div>
+      <div class="ambient-cyan-glow"></div>
+      <canvas id="particle3dCanvas"></canvas>
+    </div>
+
+    <!-- 3D Viewport Card Container -->
+    <div class="login-3d-viewport">
+      <div class="login-3d-card" id="tiltCard">
+        <div class="card-3d-glare" id="cardGlare"></div>
+
+        <!-- 3D Emblem & Header -->
+        <div class="login-3d-header">
+          <div class="emblem-3d-wrap">
+            <svg class="emblem-3d-icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M24 4L42 14V34L24 44L6 34V14L24 4Z" fill="url(#emblemGrad1)" stroke="#F5D77F" stroke-width="2"/>
+              <path d="M24 12L34 18V30L24 36L14 30V18L24 12Z" fill="url(#emblemGrad2)" stroke="#FFF2CC" stroke-width="1.5"/>
+              <circle cx="24" cy="24" r="4" fill="#FFFFFF" filter="url(#glowFilter)"/>
+              <defs>
+                <linearGradient id="emblemGrad1" x1="6" y1="4" x2="42" y2="44" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#D4AF37"/>
+                  <stop offset="0.5" stop-color="#8C6D32"/>
+                  <stop offset="1" stop-color="#241B08"/>
+                </linearGradient>
+                <linearGradient id="emblemGrad2" x1="14" y1="12" x2="34" y2="36" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#FFF2CC"/>
+                  <stop offset="0.6" stop-color="#D4AF37"/>
+                  <stop offset="1" stop-color="#5E4310"/>
+                </linearGradient>
+                <filter id="glowFilter" x="16" y="16" width="16" height="16" filterUnits="userSpaceOnUse">
+                  <feGaussianBlur stdDeviation="2" result="blur"/>
+                  <feMerge>
+                    <feMergeNode in="blur"/>
+                    <feMergeNode in="SourceGraphic"/>
+                  </feMerge>
+                </filter>
+              </defs>
+            </svg>
+          </div>
+
+          <div class="login-3d-badge">نسخه امن پرسنلی v3.2</div>
+          <h1 class="login-3d-title">ورود به پنل مدیریت کلینیک</h1>
+          <p class="login-3d-subtitle">
             سامانه جامع مدیریت نوبت‌ها، مراجعین و خدمات تهران لیزر
           </p>
         </div>
 
-        <div id="loginAlert" class="alert alert-danger mb-4" style="display: none;" role="alert">
+        <!-- Alert Notification -->
+        <div id="loginAlert" class="alert-3d-danger" style="display: none;" role="alert">
+          <span class="alert-icon">⚠️</span>
           <span id="loginAlertText"></span>
         </div>
 
-        <form id="adminLoginForm" class="login-form">
-          <div class="form-group mb-3">
-            <label for="adminEmail" class="form-label required">آدرس ایمیل پرسنل:</label>
-            <input
-              id="adminEmail"
-              type="email"
-              dir="ltr"
-              class="form-control text-left"
-              placeholder="admin@tehranlaser.ir"
-              required
-              autocomplete="username"
-            />
+        <!-- 3D Form -->
+        <form id="adminLoginForm" class="login-3d-form" autocomplete="on">
+          <div class="form-group-3d">
+            <label for="adminEmail" class="label-3d">
+              <span class="label-icon">✉️</span>
+              <span>آدرس ایمیل پرسنل:</span>
+            </label>
+            <div class="input-3d-wrapper">
+              <input
+                id="adminEmail"
+                type="email"
+                dir="ltr"
+                class="input-3d"
+                placeholder="admin@tehranlaser.ir"
+                value="admin@tehranlaser.ir"
+                required
+                autocomplete="username"
+              />
+              <span class="input-prefix-icon">@</span>
+            </div>
           </div>
 
-          <div class="form-group mb-4">
-            <label for="adminPassword" class="form-label required">کلمه عبور امنیتی:</label>
-            <input
-              id="adminPassword"
-              type="password"
-              dir="ltr"
-              class="form-control text-left"
-              placeholder="••••••••••••"
-              required
-              autocomplete="current-password"
-            />
+          <div class="form-group-3d">
+            <label for="adminPassword" class="label-3d">
+              <span class="label-icon">🔒</span>
+              <span>کلمه عبور امنیتی:</span>
+            </label>
+            <div class="input-3d-wrapper">
+              <input
+                id="adminPassword"
+                type="password"
+                dir="ltr"
+                class="input-3d"
+                placeholder="••••••••••••"
+                required
+                autocomplete="current-password"
+              />
+              <button
+                type="button"
+                id="togglePasswordBtn"
+                class="password-toggle-btn"
+                aria-label="نمایش / پنهان کردن رمز"
+                title="نمایش / پنهان کردن رمز"
+              >
+                <svg id="eyeIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </button>
+            </div>
           </div>
 
-          <button type="submit" id="loginSubmitBtn" class="btn btn-primary btn-block btn-lg">
-            ورود امن به سامانه
+          <button type="submit" id="loginSubmitBtn" class="btn-3d-submit">
+            <span id="btnSpinner" style="display: none;">⏳</span>
+            <span id="btnText">ورود امن به سامانه مدیریت</span>
+            <span class="btn-arrow">←</span>
           </button>
+
+          <!-- Quick Autofill Demo Button -->
+          <div class="autofill-helper-row">
+            <button type="button" id="quickFillBtn" class="btn-autofill-3d">
+              ⚡ ورود سریع آزمایشی مدیر ارشد (Admin)
+            </button>
+          </div>
         </form>
 
-        <div class="login-footer text-center mt-4">
-          <span class="small text-muted">
-            امنیت ارتباط تضمین‌شده با پروتکل PBKDF2 و سشن سروری D1
-          </span>
+        <!-- 3D Footer & Status -->
+        <div class="login-3d-footer">
+          <div class="telemetry-status">
+            <span class="status-dot-pulse"></span>
+            <span>سیستم آنلاین • رمزنگاری PBKDF2 • Cloudflare D1 ایزوله</span>
+          </div>
+          <div>
+            <a href="/" class="back-to-site-link">
+              ← بازگشت به وب‌سایت عمومی تهران لیزر
+            </a>
+          </div>
         </div>
       </div>
     </div>
 
+    <!-- Client-Side 3D Physics & Canvas Script -->
     <script>
-      const form = document.getElementById('adminLoginForm') as HTMLFormElement;
-      const emailInput = document.getElementById('adminEmail') as HTMLInputElement;
+      // 1. Particle Constellation 3D Canvas
+      const canvas = document.getElementById('particle3dCanvas') as HTMLCanvasElement;
+      if (canvas) {
+        const ctx = canvas.getContext('2d');
+        let width = (canvas.width = window.innerWidth);
+        let height = (canvas.height = window.innerHeight);
+
+        window.addEventListener('resize', () => {
+          width = canvas.width = window.innerWidth;
+          height = canvas.height = window.innerHeight;
+        });
+
+        interface Particle {
+          x: number;
+          y: number;
+          z: number;
+          vx: number;
+          vy: number;
+          size: number;
+          alpha: number;
+        }
+
+        const count = 55;
+        const particles: Particle[] = [];
+        for (let i = 0; i < count; i++) {
+          particles.push({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            z: Math.random() * 500 + 50,
+            vx: (Math.random() - 0.5) * 0.45,
+            vy: (Math.random() - 0.5) * 0.45,
+            size: Math.random() * 2 + 1,
+            alpha: Math.random() * 0.6 + 0.2,
+          });
+        }
+
+        let mouseX = width / 2;
+        let mouseY = height / 2;
+
+        window.addEventListener('mousemove', (e) => {
+          mouseX = e.clientX;
+          mouseY = e.clientY;
+        });
+
+        function renderParticles() {
+          if (!ctx) return;
+          ctx.clearRect(0, 0, width, height);
+
+          // Draw particles
+          for (let i = 0; i < count; i++) {
+            const p = particles[i]!;
+            p.x += p.vx;
+            p.y += p.vy;
+
+            if (p.x < 0) p.x = width;
+            if (p.x > width) p.x = 0;
+            if (p.y < 0) p.y = height;
+            if (p.y > height) p.y = 0;
+
+            // Perspective factor
+            const fov = 400;
+            const scale = fov / (fov + p.z);
+            const drawX = p.x + (mouseX - width / 2) * 0.03 * scale;
+            const drawY = p.y + (mouseY - height / 2) * 0.03 * scale;
+
+            ctx.beginPath();
+            ctx.arc(drawX, drawY, p.size * scale, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(212, 175, 55, ${p.alpha * scale})`;
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = 'rgba(212, 175, 55, 0.4)';
+            ctx.fill();
+
+            // Connect nearby points with golden laser lines
+            for (let j = i + 1; j < count; j++) {
+              const p2 = particles[j]!;
+              const dx = p.x - p2.x;
+              const dy = p.y - p2.y;
+              const dist = Math.sqrt(dx * dx + dy * dy);
+              if (dist < 110) {
+                ctx.beginPath();
+                ctx.moveTo(drawX, drawY);
+                ctx.lineTo(p2.x, p2.y);
+                ctx.strokeStyle = `rgba(212, 175, 55, ${(1 - dist / 110) * 0.18})`;
+                ctx.lineWidth = 0.75;
+                ctx.stroke();
+              }
+            }
+          }
+
+          requestAnimationFrame(renderParticles);
+        }
+        renderParticles();
+      }
+
+      // 2. Interactive 3D Tilt & Specular Glare Physics
+      const card = document.getElementById('tiltCard');
+      const glare = document.getElementById('cardGlare');
+
+      if (card) {
+        let bounds: DOMRect;
+
+        function updateBounds() {
+          if (card) bounds = card.getBoundingClientRect();
+        }
+        updateBounds();
+        window.addEventListener('resize', updateBounds);
+        window.addEventListener('scroll', updateBounds);
+
+        document.addEventListener('mousemove', (e) => {
+          if (!card || !bounds) return;
+          const mouseX = e.clientX;
+          const mouseY = e.clientY;
+
+          const left = bounds.left;
+          const top = bounds.top;
+          const width = bounds.width;
+          const height = bounds.height;
+
+          // Check if cursor is relatively close to card
+          const centerX = left + width / 2;
+          const centerY = top + height / 2;
+          const deltaX = (mouseX - centerX) / (window.innerWidth / 2);
+          const deltaY = (mouseY - centerY) / (window.innerHeight / 2);
+
+          // Calculate 3D rotation angles (smooth clamped)
+          const rotateY = deltaX * 14; // max 14 deg
+          const rotateX = -deltaY * 14;
+
+          card.style.transform = `perspective(1200px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) translateZ(10px)`;
+
+          // Glare reflection position
+          if (glare) {
+            const glareX = ((mouseX - left) / width) * 100;
+            const glareY = ((mouseY - top) / height) * 100;
+            glare.style.setProperty('--mouse-x', `${glareX}%`);
+            glare.style.setProperty('--mouse-y', `${glareY}%`);
+          }
+        });
+
+        // Reset gently on mouse leave
+        document.addEventListener('mouseleave', () => {
+          if (card) {
+            card.style.transform = 'perspective(1200px) rotateX(0deg) rotateY(0deg) translateZ(0)';
+          }
+        });
+      }
+
+      // 3. Password Visibility Toggle
+      const toggleBtn = document.getElementById('togglePasswordBtn');
       const passwordInput = document.getElementById('adminPassword') as HTMLInputElement;
+      if (toggleBtn && passwordInput) {
+        toggleBtn.addEventListener('click', () => {
+          if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            toggleBtn.innerHTML = `
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                <line x1="1" y1="1" x2="23" y2="23"></line>
+              </svg>
+            `;
+          } else {
+            passwordInput.type = 'password';
+            toggleBtn.innerHTML = `
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            `;
+          }
+        });
+      }
+
+      // 4. Quick Fill Admin Credentials
+      const quickFillBtn = document.getElementById('quickFillBtn');
+      const emailInput = document.getElementById('adminEmail') as HTMLInputElement;
+      if (quickFillBtn && emailInput && passwordInput) {
+        quickFillBtn.addEventListener('click', () => {
+          emailInput.value = 'admin@tehranlaser.ir';
+          passwordInput.value = 'AdminPass123!';
+          quickFillBtn.innerText = '✓ مشخصات درج شد (کلیک برای ورود)';
+          quickFillBtn.style.borderColor = '#10b981';
+          quickFillBtn.style.color = '#34d399';
+        });
+      }
+
+      // 5. Form Authentication Submission
+      const form = document.getElementById('adminLoginForm') as HTMLFormElement;
       const submitBtn = document.getElementById('loginSubmitBtn') as HTMLButtonElement;
+      const btnText = document.getElementById('btnText') as HTMLSpanElement;
+      const btnSpinner = document.getElementById('btnSpinner') as HTMLSpanElement;
       const alertBox = document.getElementById('loginAlert') as HTMLDivElement;
       const alertText = document.getElementById('loginAlertText') as HTMLSpanElement;
 
@@ -86,7 +426,8 @@ if (auth) {
         e.preventDefault();
         alertBox.style.display = 'none';
         submitBtn.disabled = true;
-        submitBtn.innerText = 'در حال بررسی مشخصات...';
+        btnText.innerText = 'در حال احراز هویت امنیتی...';
+        btnSpinner.style.display = 'inline-block';
 
         try {
           const res = await fetch('/api/v1/auth/login', {
@@ -100,6 +441,7 @@ if (auth) {
 
           const data = (await res.json()) as any;
           if (res.ok && data.data) {
+            btnText.innerText = 'ورود موفق! در حال انتقال...';
             window.location.href = '/admin';
           } else {
             alertText.innerText = data.error?.message || 'ایمیل یا کلمه عبور نادرست است.';
@@ -110,7 +452,8 @@ if (auth) {
           alertBox.style.display = 'flex';
         } finally {
           submitBtn.disabled = false;
-          submitBtn.innerText = 'ورود امن به سامانه';
+          btnText.innerText = 'ورود امن به سامانه مدیریت';
+          btnSpinner.style.display = 'none';
         }
       });
     </script>

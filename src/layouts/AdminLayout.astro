@@ -1,8 +1,6 @@
 ---
 import '@fontsource-variable/vazirmatn/index.css';
 import '../styles/tokens.css';
-import '../styles/base.css';
-import '../styles/components.css';
 import '../styles/admin/admin.css';
 
 interface Props {
@@ -42,32 +40,48 @@ const navItems = [
   </head>
   <body class="admin-body">
     <div class="admin-shell">
-      <!-- Topbar -->
+      <!-- 3D High-Tech Topbar -->
       <header class="admin-topbar">
         <div class="admin-topbar__brand">
           <a href="/admin" class="brand-link">
-            <strong>تهران لیزر</strong>
-            <span>سامانه فرماندهی عملیات</span>
+            <div class="brand-emblem-mini">💎</div>
+            <div class="brand-text-col">
+              <strong class="brand-name">تهران لیزر</strong>
+              <span class="brand-sub">سامانه فرماندهی عملیات</span>
+            </div>
           </a>
         </div>
 
-        <div class="admin-topbar__search-trigger mr-4">
-          <span class="search-hint">جستجوی سریع مراجع / نوبت (Ctrl + K)</span>
-        </div>
-
-        <div class="admin-topbar__actions ml-auto">
-          <div class="user-profile-badge">
-            <span class="user-name">{auth.displayName || auth.email}</span>
-            <span class="badge badge-primary">{auth.roles.join(', ')}</span>
+        <div class="admin-topbar__center">
+          <div class="hud-telemetry-badge">
+            <span class="hud-pulse-dot"></span>
+            <span>سرور لایو • اتصال D1 پایدار</span>
           </div>
 
-          <button type="button" class="btn btn-outline btn-sm logout-btn" id="adminLogoutBtn">
-            خروج از سامانه
+          <div class="hud-clock-widget" id="liveClockWidget">
+            <span id="liveClockTime">⏱ --:--:--</span>
+          </div>
+        </div>
+
+        <div class="admin-topbar__actions">
+          <div class="user-profile-badge">
+            <div class="user-avatar-circle">
+              {(auth.displayName || 'ادمین').slice(0, 1)}
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+              <span class="user-name">{auth.displayName || auth.email}</span>
+              <span class="badge-role-gold">SUPER ADMIN</span>
+            </div>
+          </div>
+
+          <button type="button" class="btn-3d-logout" id="adminLogoutBtn" title="خروج از سامانه">
+            <span>خروج</span>
+            <span>⎋</span>
           </button>
         </div>
       </header>
 
-      <!-- Sidebar -->
+      <!-- 3D Obsidian Sidebar -->
       <aside class="admin-sidebar">
         <nav class="admin-sidebar__nav">
           <ul class="admin-nav-list">
@@ -87,9 +101,9 @@ const navItems = [
 
         <div class="admin-sidebar__footer">
           <a href="/" target="_blank" class="view-website-link">
-            🌐 مشاهده وب‌سایت اصلی ↗
+            <span>🌐 مشاهده وب‌سایت اصلی ↗</span>
           </a>
-          <div class="version-tag">نسخه ۱.۰.۰ — Cloudflare Native</div>
+          <div class="version-tag">نسخه ۳.۲.۰ — Cloudflare Edge Native</div>
         </div>
       </aside>
 
@@ -99,8 +113,29 @@ const navItems = [
       </main>
     </div>
 
-    <!-- Script for logout action -->
+    <!-- Script for Clock & Logout -->
     <script>
+      // Live Tehran Time Clock
+      function updateLiveClock() {
+        const clockEl = document.getElementById('liveClockTime');
+        if (!clockEl) return;
+        try {
+          const now = new Date();
+          const timeStr = now.toLocaleTimeString('fa-IR', {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            timeZone: 'Asia/Tehran',
+          });
+          clockEl.innerText = `⏱ ${timeStr}`;
+        } catch {
+          // fallback
+        }
+      }
+      setInterval(updateLiveClock, 1000);
+      updateLiveClock();
+
+      // Logout handler
       const logoutBtn = document.getElementById('adminLogoutBtn');
       if (logoutBtn) {
         logoutBtn.addEventListener('click', async () => {
