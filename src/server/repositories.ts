@@ -16,6 +16,7 @@ import type {
   PublicBlogPostDto,
   PublicBlogPostSummaryDto,
   AdminBookingRowDto,
+  AdminBookingDto,
   AdminCustomerRowDto,
   AdminServiceDto,
   AdminStaffDto,
@@ -26,7 +27,7 @@ import type {
   FaqItemDto,
   PublicSettingsDto,
 } from '../domain/api/dto.types';
-import type { PricingCategory } from '../domain/booking/booking.types';
+import type { PricingCategory, BookingStatus } from '../domain/booking/booking.types';
 import type { PriceRow } from '../domain/pricing/pricing';
 import type { HoursRow, ScheduleExceptionKind } from '../domain/schedule/availability';
 
@@ -606,6 +607,65 @@ export interface BookingFilterOptions {
   cursor?: string | undefined;
 }
 
+interface RawAdminBookingDbRow {
+  id: string;
+  reference: string;
+  customerId: string;
+  customerName: string;
+  customerPhone: string;
+  serviceId: string;
+  serviceName: string;
+  serviceSlug?: string;
+  serviceDurationMinutes?: number;
+  staffId: string | null;
+  staffName: string | null;
+  pricingCategory: PricingCategory;
+  startsAt: string;
+  endsAt: string;
+  status: BookingStatus;
+  quotedAmount: number;
+  discountAmount: number;
+  currency: string;
+  customerNote: string | null;
+  adminNote: string | null;
+  rejectionReason: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+function mapRawToAdminBookingDto(row: RawAdminBookingDbRow): AdminBookingDto {
+  return {
+    id: row.id,
+    reference: row.reference,
+    status: row.status,
+    startsAt: row.startsAt,
+    endsAt: row.endsAt,
+    pricingCategory: row.pricingCategory,
+    quotedAmount: row.quotedAmount,
+    discountAmount: row.discountAmount,
+    currency: row.currency,
+    customer: {
+      id: row.customerId,
+      name: row.customerName,
+      phone: row.customerPhone,
+      email: null,
+      pricingCategory: row.pricingCategory,
+    },
+    service: {
+      id: row.serviceId,
+      slug: row.serviceSlug || '',
+      name: row.serviceName,
+      durationMinutes: row.serviceDurationMinutes || 30,
+    },
+    staff: row.staffId ? { id: row.staffId, name: row.staffName || '' } : null,
+    customerNote: row.customerNote,
+    adminNote: row.adminNote,
+    rejectionReason: row.rejectionReason,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  };
+}
+
 export async function listAdminBookings(
   db: Queryable,
   options: BookingFilterOptions = {},
@@ -650,6 +710,7 @@ export async function listAdminBookings(
   let sql = `SELECT b.id, b.reference, b.customer_id AS customerId,
                     c.name AS customerName, c.phone AS customerPhone,
                     b.service_id AS serviceId, s.name AS serviceName,
+                    s.slug AS serviceSlug, s.duration_minutes AS serviceDurationMinutes,
                     b.staff_id AS staffId, st.name AS staffName,
                     b.pricing_category AS pricingCategory,
                     b.starts_at AS startsAt, b.ends_at AS endsAt,
@@ -667,7 +728,8 @@ export async function listAdminBookings(
   sql += ` ORDER BY b.starts_at DESC, b.id DESC LIMIT ?`;
   binds.push(safeLimit + 1);
 
-  const rows = await all<AdminBookingRowDto>(db, sql, ...binds);
+  const rawRows = await all<RawAdminBookingDbRow>(db, sql, ...binds);
+  const rows = rawRows.map(mapRawToAdminBookingDto);
   const hasMore = rows.length > safeLimit;
   const items = hasMore ? rows.slice(0, safeLimit) : rows;
   const last = items[items.length - 1];
@@ -683,7 +745,7 @@ export async function getAdminDashboard(
   todayStartIso: string,
   todayEndIso: string,
 ): Promise<AdminDashboardDto> {
-  const [counts, todayBookings] = await Promise.all([
+  const [counts, rawTodayBookings] = await Promise.all([
     one<{
       pending: number;
       confirmed: number;
@@ -702,11 +764,12 @@ export async function getAdminDashboard(
       todayStartIso,
       todayEndIso,
     ),
-    all<AdminBookingRowDto>(
+    all<RawAdminBookingDbRow>(
       db,
       `SELECT b.id, b.reference, b.customer_id AS customerId,
               c.name AS customerName, c.phone AS customerPhone,
               b.service_id AS serviceId, s.name AS serviceName,
+              s.slug AS serviceSlug, s.duration_minutes AS serviceDurationMinutes,
               b.staff_id AS staffId, st.name AS staffName,
               b.pricing_category AS pricingCategory,
               b.starts_at AS startsAt, b.ends_at AS endsAt,
@@ -726,6 +789,8 @@ export async function getAdminDashboard(
       todayEndIso,
     ),
   ]);
+
+  const todayBookings = rawTodayBookings.map(mapRawToAdminBookingDto);
 
   return {
     date: todayStartIso.slice(0, 10),

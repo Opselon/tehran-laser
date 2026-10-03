@@ -23,19 +23,23 @@ try {
 
 <AdminLayout title="تقویم روزانه کلینیک" activeNav="calendar">
   <div class="admin-content-pad">
-    <div class="page-title-row mb-4">
+    <!-- 3D Header Row -->
+    <div class="dashboard-header-row">
       <div>
-        <h1 class="text-xl font-bold">تقویم زمان‌بندی کلینیک</h1>
-        <p class="text-muted small">نمایش نوبت‌ها به تفکیک روز انتخابی — {formatJalaliDate(targetDate)}</p>
+        <h1 class="admin-page-title">تقویم زمان‌بندی روزانه کلینیک</h1>
+        <p class="section-block-sub">
+          نمایش نوبت‌ها به تفکیک روز انتخابی — <strong style="color: #f5d77f;">{formatJalaliDate(targetDate)}</strong>
+        </p>
       </div>
 
       <div class="date-selector-form">
-        <form method="GET" class="d-flex align-items-center gap-2">
-          <label class="small text-muted">انتخاب تاریخ:</label>
+        <form method="GET" style="display: flex; align-items: center; gap: 10px;">
+          <label style="font-size: 0.85rem; font-weight: 700; color: #cbd5e1;">انتخاب تاریخ:</label>
           <input
             type="date"
             name="date"
-            class="form-control form-control-sm"
+            class="form-control-modal"
+            style="margin-top: 0; padding: 8px 14px;"
             value={targetDate}
             onchange="this.form.submit()"
           />
@@ -44,15 +48,23 @@ try {
     </div>
 
     <!-- Day Schedule Visual Timeline -->
-    <div class="card p-4">
-      <h3 class="font-bold text-lg mb-3">برنامه زمانی نوبت‌های {formatJalaliDate(targetDate)}</h3>
+    <div class="admin-section-block">
+      <div class="section-block-header">
+        <h2 class="section-block-title">
+          <span>📅 جدول زمان‌بندی نوبت‌های {formatJalaliDate(targetDate)}</span>
+          <span style="font-size: 0.85rem; color: #f5d77f; background: rgba(212, 175, 55, 0.15); border: 1px solid rgba(212, 175, 55, 0.35); padding: 2px 10px; border-radius: 999px;">
+            {bookings.items.length.toLocaleString('fa-IR')} نوبت ثبت‌شده
+          </span>
+        </h2>
+      </div>
 
       {bookings.items.length === 0 ? (
-        <div class="empty-state-card text-center p-5 text-muted">
-          <p class="mb-0">هیچ نوبتی برای این روز ثبت نشده است.</p>
+        <div class="empty-state-card">
+          <span class="empty-icon">🗓️</span>
+          <p class="empty-text">هیچ نوبتی برای این روز ثبت نشده است.</p>
         </div>
       ) : (
-        <div class="timeline-slots-grid">
+        <div class="pending-bookings-list">
           {bookings.items.map((b) => {
             const timeStr = new Date(b.startsAt).toLocaleTimeString('fa-IR', {
               hour: '2-digit',
@@ -61,17 +73,36 @@ try {
             });
 
             return (
-              <div class={`timeline-slot-card status-${b.status}`}>
-                <div class="slot-time-badge font-bold">⏱ {timeStr}</div>
-                <div class="slot-body">
-                  <div class="slot-title font-semibold">{b.customer.name}</div>
-                  <div class="slot-subtitle small text-muted">
-                    {b.service.name} ({b.pricingCategory === 'female' ? 'بانوان' : 'آقایان'})
+              <div class="pending-booking-card" style="border-color: rgba(212, 175, 55, 0.35);">
+                <div>
+                  <div class="card-top-row">
+                    <div class="customer-info">
+                      <span class="customer-name">{b.customer.name}</span>
+                      <a href={`tel:${b.customer.phone}`} class="customer-phone" dir="ltr">
+                        📞 {b.customer.phone}
+                      </a>
+                    </div>
+                    <div class="booking-ref-badge" dir="ltr">{b.reference}</div>
                   </div>
-                  <div class="slot-phone small" dir="ltr">{b.customer.phone}</div>
+
+                  <div class="card-meta-grid">
+                    <div class="meta-item">
+                      <strong>زمان:</strong> ساعت {timeStr}
+                    </div>
+                    <div class="meta-item">
+                      <strong>خدمت:</strong> {b.service.name}
+                    </div>
+                    <div class="meta-item">
+                      <strong>بخش:</strong> {b.pricingCategory === 'female' ? 'بانوان' : 'آقایان'}
+                    </div>
+                    <div class="meta-item">
+                      <strong>مبلغ:</strong> {(b.quotedAmount * 1000).toLocaleString('fa-IR')} ت
+                    </div>
+                  </div>
                 </div>
-                <div class="slot-status">
-                  <span class={`badge badge-status-${b.status}`}>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255, 255, 255, 0.08);">
+                  <span class={`badge-status badge-status-${b.status}`}>
                     {b.status === 'confirmed' && 'تأییدشده'}
                     {b.status === 'pending' && 'در انتظار'}
                     {b.status === 'completed' && 'انجام‌شده'}
@@ -79,6 +110,7 @@ try {
                     {b.status === 'rejected' && 'ردشده'}
                     {b.status === 'no_show' && 'عدم حضور'}
                   </span>
+                  <span style="font-size: 0.8rem; color: #94a3b8;">کد: {b.id.slice(0, 10)}</span>
                 </div>
               </div>
             );

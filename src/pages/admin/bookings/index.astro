@@ -28,19 +28,29 @@ try {
 
 <AdminLayout title="مدیریت نوبت‌ها" activeNav="bookings">
   <div class="admin-content-pad">
-    <div class="page-title-row mb-4">
+    <!-- 3D Page Title Row -->
+    <div class="dashboard-header-row">
       <div>
-        <h1 class="text-xl font-bold">دفتر نوبت‌ها و رزروها</h1>
-        <p class="text-muted small">مشاهده، فیلتر و جستجوی جامع تمامی رزروهای آنلاین و حضوری</p>
+        <h1 class="admin-page-title">دفتر مدیریت نوبت‌ها و رزروها</h1>
+        <p class="section-block-sub">
+          مشاهده، فیلتر و جستجوی جامع تمامی رزروهای آنلاین و حضوری مراجعین کلینیک تهران لیزر
+        </p>
+      </div>
+      <div class="actions">
+        <span style="font-size: 0.88rem; color: #f5d77f; background: rgba(212, 175, 55, 0.15); border: 1px solid rgba(212, 175, 55, 0.35); padding: 8px 16px; border-radius: 12px;">
+          مجموع نتایج: {bookings.items.length.toLocaleString('fa-IR')} رزرو
+        </span>
       </div>
     </div>
 
-    <!-- Filters Strip (§146) -->
-    <div class="card p-3 mb-4">
-      <form method="GET" class="filter-form-grid">
-        <div class="form-group">
-          <label class="form-label small">وضعیت نوبت:</label>
-          <select name="status" class="form-control form-control-sm">
+    <!-- 3D Filters Block -->
+    <div class="admin-section-block" style="padding: 24px; margin-bottom: 28px;">
+      <form method="GET" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) auto; gap: 16px; align-items: flex-end;">
+        <div>
+          <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">
+            وضعیت نوبت:
+          </label>
+          <select name="status" class="form-control-modal" style="margin-top: 0; padding: 10px 14px;">
             <option value="">همه وضعیت‌ها</option>
             <option value="pending" selected={statusFilter === 'pending'}>در انتظار تأیید</option>
             <option value="confirmed" selected={statusFilter === 'confirmed'}>تأییدشده</option>
@@ -51,9 +61,11 @@ try {
           </select>
         </div>
 
-        <div class="form-group">
-          <label class="form-label small">فیلتر بر اساس خدمت:</label>
-          <select name="service" class="form-control form-control-sm">
+        <div>
+          <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">
+            فیلتر بر اساس خدمت:
+          </label>
+          <select name="service" class="form-control-modal" style="margin-top: 0; padding: 10px 14px;">
             <option value="">همه خدمات</option>
             {services.map((s) => (
               <option value={s.slug} selected={serviceFilter === s.slug}>{s.name}</option>
@@ -61,36 +73,44 @@ try {
           </select>
         </div>
 
-        <div class="form-group">
-          <label class="form-label small">جستجوی مراجع / کد رهگیری / تلفن:</label>
+        <div>
+          <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">
+            جستجوی مراجع / کد رهگیری / تلفن:
+          </label>
           <input
             type="text"
             name="q"
-            class="form-control form-control-sm"
+            class="form-control-modal"
+            style="margin-top: 0; padding: 10px 14px;"
             placeholder="نام، ۰۹۱۲ یا کد رهگیری..."
             value={searchFilter || ''}
           />
         </div>
 
-        <div class="form-group actions-col">
-          <button type="submit" class="btn btn-primary btn-sm">اعمال فیلتر</button>
-          <a href="/admin/bookings" class="btn btn-outline btn-sm mr-2">پاک کردن</a>
+        <div style="display: flex; gap: 8px;">
+          <button type="submit" class="btn-3d-refresh" style="padding: 10px 18px;">
+            🔍 اعمال فیلتر
+          </button>
+          <a href="/admin/bookings" class="btn-table-action" style="display: inline-flex; align-items: center; padding: 10px 14px;">
+            ✕ پاک کردن
+          </a>
         </div>
       </form>
     </div>
 
-    <!-- Bookings Table (§145) -->
-    <div class="card p-0">
+    <!-- 3D Bookings Table -->
+    <div class="admin-section-block" style="padding: 0; overflow: hidden;">
       {bookings.items.length === 0 ? (
-        <div class="p-5 text-center text-muted">
-          <p class="mb-0">نوبتی با مشخصات واردشده یافت نشد.</p>
+        <div class="empty-state-card" style="border: none; margin: 20px;">
+          <span class="empty-icon">🔍</span>
+          <p class="empty-text">نوبتی با مشخصات واردشده یافت نشد.</p>
         </div>
       ) : (
-        <div class="table-responsive">
+        <div class="today-table-wrapper" style="border: none; border-radius: 0;">
           <table class="admin-table">
             <thead>
               <tr>
-                <th>کد نوبت</th>
+                <th>کد رزرو</th>
                 <th>نام مراجع</th>
                 <th>شماره همراه</th>
                 <th>خدمت</th>
@@ -111,25 +131,31 @@ try {
 
                 return (
                   <tr>
-                    <td dir="ltr" class="font-mono font-bold text-primary">{b.reference}</td>
-                    <td class="font-semibold">{b.customer.name}</td>
+                    <td dir="ltr" style={{ fontFamily: 'monospace', fontWeight: 800, color: '#f5d77f' }}>
+                      {b.reference}
+                    </td>
+                    <td style={{ fontWeight: 700 }}>{b.customer.name}</td>
                     <td dir="ltr">
-                      <a href={`tel:${b.customer.phone}`} class="phone-link">{b.customer.phone}</a>
+                      <a href={`tel:${b.customer.phone}`} style={{ color: '#38bdf8', textDecoration: 'none' }}>
+                        {b.customer.phone}
+                      </a>
                     </td>
                     <td>{b.service.name}</td>
                     <td>{b.pricingCategory === 'female' ? 'بانوان' : 'آقایان'}</td>
                     <td>
-                      <div>{formatJalaliDate(dateStr)}</div>
-                      <span class="text-muted small">⏱ ساعت {timeStr}</span>
+                      <div style={{ fontWeight: 600 }}>{formatJalaliDate(dateStr)}</div>
+                      <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>⏱ ساعت {timeStr}</span>
                     </td>
                     <td>
-                      <div>{(b.quotedAmount * 1000).toLocaleString('fa-IR')} تومان</div>
+                      <div style={{ fontWeight: 700 }}>{(b.quotedAmount * 1000).toLocaleString('fa-IR')} تومان</div>
                       {b.discountAmount > 0 && (
-                        <span class="text-success small">تخفیف: {(b.discountAmount * 1000).toLocaleString('fa-IR')}</span>
+                        <span style={{ fontSize: '0.75rem', color: '#34d399' }}>
+                          (تخفیف: {(b.discountAmount * 1000).toLocaleString('fa-IR')})
+                        </span>
                       )}
                     </td>
                     <td>
-                      <span class={`badge badge-status-${b.status}`}>
+                      <span class={`badge-status badge-status-${b.status}`}>
                         {b.status === 'confirmed' && 'تأییدشده'}
                         {b.status === 'pending' && 'در انتظار تأیید'}
                         {b.status === 'completed' && 'انجام‌شده'}
