@@ -55,31 +55,40 @@ const articleJsonLd = {
   <section class="section">
     <div class="container container-sm">
       <article class="article-container">
+        {post.coverImage && (
+          <div class="article-cover-wrapper mb-4" style="border-radius: 16px; overflow: hidden; max-height: 420px; box-shadow: 0 10px 30px rgba(0,0,0,0.15);">
+            <img src={post.coverImage} alt={post.title} style="width: 100%; height: 100%; object-fit: cover;" />
+          </div>
+        )}
+
         <div class="article-excerpt-callout">
           <p>{post.excerpt}</p>
         </div>
 
-        <div class="article-content-body mt-4">
-          <!-- Render article paragraphs safely (§88) -->
-          {post.content.split('\n\n').map((paragraph) => {
-            if (paragraph.startsWith('## ')) {
-              return <h2 class="article-h2">{paragraph.replace('## ', '')}</h2>;
-            }
-            if (paragraph.startsWith('### ')) {
-              return <h3 class="article-h3">{paragraph.replace('### ', '')}</h3>;
-            }
-            if (paragraph.startsWith('- ')) {
-              return (
-                <ul class="article-list">
-                  {paragraph.split('\n').map((item) => (
-                    <li>{item.replace(/^- /, '')}</li>
-                  ))}
-                </ul>
-              );
-            }
-            return <p class="article-p">{paragraph}</p>;
-          })}
-        </div>
+        {/<[a-z][\s\S]*>/i.test(post.content) ? (
+          <div class="article-content-body mt-4" set:html={post.content} />
+        ) : (
+          <div class="article-content-body mt-4">
+            {post.content.split('\n\n').map((paragraph) => {
+              if (paragraph.startsWith('## ')) {
+                return <h2 class="article-h2">{paragraph.replace('## ', '')}</h2>;
+              }
+              if (paragraph.startsWith('### ')) {
+                return <h3 class="article-h3">{paragraph.replace('### ', '')}</h3>;
+              }
+              if (paragraph.startsWith('- ')) {
+                return (
+                  <ul class="article-list">
+                    {paragraph.split('\n').map((item) => (
+                      <li>{item.replace(/^- /, '')}</li>
+                    ))}
+                  </ul>
+                );
+              }
+              return <p class="article-p">{paragraph}</p>;
+            })}
+          </div>
+        )}
 
         <hr class="summary-divider my-5" />
 

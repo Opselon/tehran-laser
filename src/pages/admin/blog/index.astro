@@ -10,45 +10,131 @@ try {
 } catch (e) {
   console.error('Failed to load admin blog posts:', e);
 }
+
+const publishedCount = posts.items.filter((p) => p.status === 'published').length;
+const draftCount = posts.items.filter((p) => p.status === 'draft').length;
 ---
 
-<AdminLayout title="مدیریت مقالات" activeNav="blog">
+<AdminLayout title="مدیریت مقالات و محتوا" activeNav="blog">
   <div class="admin-content-pad">
-    <div class="page-title-row mb-4">
+    <!-- 3D Header Row -->
+    <div class="dashboard-header-row">
       <div>
-        <h1 class="text-xl font-bold">مدیریت مقالات و محتوا (Blog CMS)</h1>
-        <p class="text-muted small">تولید محتوای سئو، آموزش‌های مراقبت پوستی و راهنماهای مراجعین</p>
+        <h1 class="admin-page-title">✍️ سامانه مدیریت و نگارش مقالات کلینیک (Blog CMS)</h1>
+        <p class="section-block-sub">
+          تولید مقالات تخصصی، آموزش‌های مراقبت از پوست و تنظیمات سئو با ویرایشگر فوق‌حرفه‌ای HTML (API First)
+        </p>
+      </div>
+      <div class="actions" style="display: flex; gap: 12px; align-items: center;">
+        <span style="font-size: 0.85rem; color: #f5d77f; background: rgba(212, 175, 55, 0.15); border: 1px solid rgba(212, 175, 55, 0.35); padding: 8px 16px; border-radius: 12px;">
+          منتشرشده: {publishedCount.toLocaleString('fa-IR')} | پیش‌نویس: {draftCount.toLocaleString('fa-IR')}
+        </span>
+        <button type="button" id="newArticleBtn" class="btn-3d-refresh" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 22px;">
+          <span>+</span> نگارش مقاله جدید
+        </button>
       </div>
     </div>
 
-    <div class="card p-0">
+    <!-- Alert Box -->
+    <div id="blogAlert" class="alert-3d-danger" style="display: none; margin-bottom: 20px;">
+      <span id="blogAlertText"></span>
+    </div>
+
+    <!-- Articles Table -->
+    <div class="admin-section-block" style="padding: 0; overflow: hidden; margin-bottom: 30px;">
       {posts.items.length === 0 ? (
-        <div class="p-5 text-center text-muted">
-          <p class="mb-0">هنوز مقاله‌ای در سامانه ثبت نشده است.</p>
+        <div class="empty-state-card" style="border: none; margin: 20px;">
+          <span class="empty-icon">✍️</span>
+          <p class="empty-text">هنوز مقاله‌ای در سامانه ثبت نشده است. روی دکمه «نگارش مقاله جدید» کلیک کنید.</p>
         </div>
       ) : (
-        <div class="table-responsive">
+        <div class="today-table-wrapper" style="border: none; border-radius: 0;">
           <table class="admin-table">
             <thead>
               <tr>
+                <th style="width: 70px;">تصویر</th>
                 <th>عنوان مقاله</th>
                 <th>پیوند یکتا (Slug)</th>
                 <th>نویسنده</th>
                 <th>تاریخ انتشار</th>
                 <th>وضعیت</th>
+                <th>عملیات</th>
               </tr>
             </thead>
             <tbody>
               {posts.items.map((p) => (
                 <tr>
-                  <td class="font-bold">{p.title}</td>
-                  <td dir="ltr" class="font-mono text-muted small">{p.slug}</td>
-                  <td>{p.author || 'تهران لیزر'}</td>
-                  <td>{p.publishedAt ? formatJalaliDate(p.publishedAt.slice(0, 10)) : '—'}</td>
                   <td>
-                    <span class={`badge ${p.status === 'published' ? 'badge-success' : 'badge-warning'}`}>
+                    {p.coverImage ? (
+                      <div style="width: 52px; height: 38px; border-radius: 8px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1);">
+                        <img src={p.coverImage} alt={p.title} style="width: 100%; height: 100%; object-fit: cover;" />
+                      </div>
+                    ) : (
+                      <div style="width: 52px; height: 38px; border-radius: 8px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
+                        📄
+                      </div>
+                    )}
+                  </td>
+                  <td style={{ fontWeight: 800, color: '#ffffff', maxWidth: '280px' }}>
+                    <div>{p.title}</div>
+                    <div style={{ fontSize: '0.78rem', color: '#94a3b8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {p.excerpt}
+                    </div>
+                  </td>
+                  <td dir="ltr" style={{ fontFamily: 'monospace', color: '#f5d77f', fontSize: '0.82rem' }}>
+                    {p.slug}
+                  </td>
+                  <td style={{ color: '#cbd5e1' }}>{p.author || 'تهران لیزر'}</td>
+                  <td>
+                    {p.publishedAt ? (
+                      <span style={{ color: '#f5d77f' }}>{formatJalaliDate(p.publishedAt.slice(0, 10))}</span>
+                    ) : (
+                      <span style={{ color: '#64748b' }}>—</span>
+                    )}
+                  </td>
+                  <td>
+                    <span class={`badge-status ${p.status === 'published' ? 'badge-status-completed' : 'badge-status-pending'}`}>
                       {p.status === 'published' ? 'منتشرشده' : 'پیش‌نویس'}
                     </span>
+                  </td>
+                  <td>
+                    <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                      {p.status === 'published' && (
+                        <a
+                          href={`/blog/${p.slug}`}
+                          target="_blank"
+                          class="btn-table-action"
+                          style="border-color: rgba(56, 189, 248, 0.4); color: #38bdf8; text-decoration: none; padding: 6px 10px; font-size: 0.78rem;"
+                        >
+                          👁️ نمایش
+                        </a>
+                      )}
+                      <button
+                        type="button"
+                        class="btn-table-action edit-post-btn"
+                        style="border-color: rgba(212, 175, 55, 0.45); color: #f5d77f; padding: 6px 10px; font-size: 0.78rem;"
+                        data-id={p.id}
+                        data-title={p.title}
+                        data-slug={p.slug}
+                        data-excerpt={p.excerpt}
+                        data-cover={p.coverImage || ''}
+                        data-author={p.author || ''}
+                        data-status={p.status}
+                        data-seotitle={p.seoTitle || ''}
+                        data-seodesc={p.seoDescription || ''}
+                        data-content={encodeURIComponent(p.content || '')}
+                      >
+                        ✏️ ویرایش
+                      </button>
+                      <button
+                        type="button"
+                        class="btn-3d-reject delete-post-btn"
+                        style="padding: 6px 10px; font-size: 0.78rem;"
+                        data-id={p.id}
+                      >
+                        ✕
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -57,5 +143,611 @@ try {
         </div>
       )}
     </div>
+
+    <!-- 3D Professional Article Studio / Editor Modal -->
+    <div id="articleModal" class="modal-backdrop" style="display: none; align-items: flex-start; padding: 30px 15px; overflow-y: auto;">
+      <div class="modal-dialog" style="max-width: 1040px; width: 100%; margin: auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid rgba(212,175,55,0.25); padding-bottom: 14px;">
+          <div>
+            <h3 class="modal-title" id="articleModalTitle" style="margin: 0;">✍️ نگارش مقاله و آموزش تخصصی</h3>
+            <span style="font-size: 0.82rem; color: #94a3b8;">ویرایشگر پیشرفته HTML با پشتیبانی از کادرهای کلینیکال و سئو</span>
+          </div>
+          <button type="button" id="closeArticleModalBtn" style="background: none; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer;">
+            ✕
+          </button>
+        </div>
+
+        <form id="articleForm">
+          <input type="hidden" id="articleId" />
+
+          <!-- Row 1: Title & Slug -->
+          <div style="display: grid; grid-template-columns: 2fr 1.2fr; gap: 16px; margin-bottom: 16px;">
+            <div>
+              <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #f5d77f; margin-bottom: 6px;">
+                عنوان رسمی مقاله:
+              </label>
+              <input
+                type="text"
+                id="articleTitle"
+                class="form-control-modal"
+                placeholder="مثال: راهنمای جامع مراقبت‌های پوستی قبل و بعد از لیزر الکساندرایت"
+                required
+              />
+            </div>
+
+            <div>
+              <label style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 700; color: #f5d77f; margin-bottom: 6px;">
+                <span>پیوند یکتا (Slug انگلیسی):</span>
+                <button type="button" id="autoSlugBtn" style="background: none; border: none; color: #38bdf8; font-size: 0.75rem; cursor: pointer; text-decoration: underline;">
+                  ⚡ اسلاگ هوشمند
+                </button>
+              </label>
+              <input
+                type="text"
+                id="articleSlug"
+                dir="ltr"
+                class="form-control-modal"
+                placeholder="laser-skin-care-guide"
+                required
+              />
+            </div>
+          </div>
+
+          <!-- Row 2: Excerpt & Cover Image -->
+          <div style="display: grid; grid-template-columns: 2fr 1.2fr; gap: 16px; margin-bottom: 16px;">
+            <div>
+              <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #f5d77f; margin-bottom: 6px;">
+                چکیده و معرفی کوتاه (جهت نمایش در کارت مقاله):
+              </label>
+              <textarea
+                id="articleExcerpt"
+                class="form-control-modal"
+                rows={2}
+                placeholder="خلاصه ۲ خطی جذاب از محتوای مقاله برای کاربران..."
+                required
+              ></textarea>
+            </div>
+
+            <div>
+              <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #f5d77f; margin-bottom: 6px;">
+                آدرس تصویر شاخص (URL):
+              </label>
+              <input
+                type="url"
+                id="articleCover"
+                dir="ltr"
+                class="form-control-modal"
+                placeholder="https://images.unsplash.com/..."
+              />
+              <span style="font-size: 0.75rem; color: #94a3b8; display: block; margin-top: 4px;">
+                می‌توانید تصویر دلخواه از آنسپلش یا هاست تصویر وارد کنید.
+              </span>
+            </div>
+          </div>
+
+          <!-- Row 3: Author & Status -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+            <div>
+              <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #f5d77f; margin-bottom: 6px;">
+                نام نویسنده / تیم تولید محتوا:
+              </label>
+              <input
+                type="text"
+                id="articleAuthor"
+                class="form-control-modal"
+                value="دکتر تیم پزشکی تهران لیزر"
+              />
+            </div>
+
+            <div>
+              <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #f5d77f; margin-bottom: 6px;">
+                وضعیت انتشار در وب‌سایت:
+              </label>
+              <select id="articleStatus" class="form-control-modal">
+                <option value="published">🚀 انتشار عمومی در سایت</option>
+                <option value="draft">📝 ذخیره به صورت پیش‌نویس محرمانه</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Professional HTML Editor Suite -->
+          <div style="margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <label style="font-size: 0.92rem; font-weight: 800; color: #f5d77f;">
+                محتوای کامل مقاله (Professional HTML Studio):
+              </label>
+
+              <!-- Editor Mode Tabs -->
+              <div style="display: flex; gap: 6px; background: rgba(0,0,0,0.4); padding: 4px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                <button type="button" id="tabVisualBtn" class="editor-tab-btn active">
+                  👁️ بصری (WYSIWYG)
+                </button>
+                <button type="button" id="tabSourceBtn" class="editor-tab-btn">
+                  💻 کدهای HTML
+                </button>
+                <button type="button" id="tabPreviewBtn" class="editor-tab-btn">
+                  📱 پیش‌نمایش سایت
+                </button>
+              </div>
+            </div>
+
+            <!-- Toolbar (for Visual Mode) -->
+            <div id="editorToolbar" class="html-toolbar">
+              <select id="formatBlockSelect" class="tb-select" title="سطح سرتیتر">
+                <option value="p">پاراگراف عادی</option>
+                <option value="h2">تیتر ۲ (بخش اصلی)</option>
+                <option value="h3">تیتر ۳ (زیربخش)</option>
+                <option value="h4">تیتر ۴</option>
+              </select>
+
+              <div class="tb-divider"></div>
+
+              <button type="button" class="tb-btn" data-cmd="bold" title="درشت (Bold)"><b>B</b></button>
+              <button type="button" class="tb-btn" data-cmd="italic" title="کج (Italic)"><i>I</i></button>
+              <button type="button" class="tb-btn" data-cmd="underline" title="خط زیر (Underline)"><u>U</u></button>
+              <button type="button" class="tb-btn" data-cmd="strikeThrough" title="خط‌خورده"><s>S</s></button>
+
+              <div class="tb-divider"></div>
+
+              <button type="button" class="tb-btn" data-cmd="justifyRight" title="راست‌چین">≡→</button>
+              <button type="button" class="tb-btn" data-cmd="justifyCenter" title="وسط‌چین">≡</button>
+              <button type="button" class="tb-btn" data-cmd="justifyLeft" title="چپ‌چین">←≡</button>
+
+              <div class="tb-divider"></div>
+
+              <button type="button" class="tb-btn" data-cmd="insertUnorderedList" title="لیست بالت‌دار">• لیست</button>
+              <button type="button" class="tb-btn" data-cmd="insertOrderedList" title="لیست شماره‌دار">1. لیست</button>
+
+              <div class="tb-divider"></div>
+
+              <button type="button" class="tb-btn" id="insertLinkBtn" title="درج پیوند اینترنتی">🔗 لینک</button>
+              <button type="button" class="tb-btn" id="insertImgBtn" title="درج تصویر">🖼️ عکس</button>
+              <button type="button" class="tb-btn" id="insertHrBtn" title="خط جداکننده">― خط</button>
+
+              <div class="tb-divider"></div>
+
+              <!-- Special Clinic Callouts -->
+              <button type="button" class="tb-btn callout-tb-btn" id="insertTipBtn" title="درج باکس نکته طلایی">
+                💡 نکته طلایی
+              </button>
+              <button type="button" class="tb-btn callout-tb-btn" id="insertWarnBtn" title="درج باکس هشدار پوست">
+                ⚠️ هشدار
+              </button>
+              <button type="button" class="tb-btn callout-tb-btn" id="insertDocBtn" title="درج توصیه پزشک">
+                🩺 توصیه پزشک
+              </button>
+            </div>
+
+            <!-- 1. Visual WYSIWYG Container -->
+            <div
+              id="visualEditor"
+              contenteditable="true"
+              class="visual-editor-surface"
+              dir="rtl"
+            ></div>
+
+            <!-- 2. Source Code HTML Textarea -->
+            <textarea
+              id="sourceEditor"
+              class="source-editor-surface"
+              dir="ltr"
+              style="display: none;"
+              placeholder="<!-- کدهای استاندارد HTML مقاله -->"
+            ></textarea>
+
+            <!-- 3. Public Site Real Live Preview -->
+            <div id="livePreviewContainer" class="live-preview-surface" style="display: none;">
+              <div id="livePreviewContent" class="article-content-body"></div>
+            </div>
+          </div>
+
+          <!-- SEO Drawer / Collapsible -->
+          <details style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 14px 18px; margin-bottom: 22px;">
+            <summary style="font-size: 0.88rem; font-weight: 700; color: #cbd5e1; cursor: pointer;">
+              🔍 تنظیمات متاتگ‌ها و بهینه‌سازی سئو (Google SEO Meta Tags)
+            </summary>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px;">
+              <div>
+                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #94a3b8; margin-bottom: 6px;">
+                  عنوان صفحه در نتایج گوگل (SEO Title):
+                </label>
+                <input type="text" id="seoTitle" class="form-control-modal" placeholder="حداکثر ۶۰ کاراکتر..." />
+              </div>
+              <div>
+                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #94a3b8; margin-bottom: 6px;">
+                  توضیحات متا در گوگل (Meta Description):
+                </label>
+                <input type="text" id="seoDescription" class="form-control-modal" placeholder="حداکثر ۱۶۰ کاراکتر جذاب..." />
+              </div>
+            </div>
+          </details>
+
+          <!-- Form Actions -->
+          <div class="modal-actions-row">
+            <button type="button" id="cancelArticleBtn" class="btn-table-action">
+              انصراف
+            </button>
+            <button type="submit" id="saveArticleBtn" class="btn-3d-accept" style="flex: none; padding: 12px 30px;">
+              🚀 ثبت و ذخیره مقاله در دیتابیس D1
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
+
+  <style>
+    .editor-tab-btn {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      font-size: 0.82rem;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .editor-tab-btn.active {
+      background: rgba(212, 175, 55, 0.2);
+      color: #f5d77f;
+      border: 1px solid rgba(212, 175, 55, 0.35);
+    }
+    .html-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(212, 175, 55, 0.25);
+      border-bottom: none;
+      border-radius: 12px 12px 0 0;
+      padding: 10px 14px;
+    }
+    .tb-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #e2e8f0;
+      font-size: 0.85rem;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 32px;
+      transition: all 0.15s;
+    }
+    .tb-btn:hover {
+      background: rgba(212, 175, 55, 0.2);
+      color: #f5d77f;
+      border-color: rgba(212, 175, 55, 0.4);
+    }
+    .callout-tb-btn {
+      font-size: 0.78rem;
+      background: rgba(212, 175, 55, 0.1);
+      border-color: rgba(212, 175, 55, 0.3);
+      color: #f5d77f;
+    }
+    .tb-select {
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #e2e8f0;
+      font-size: 0.82rem;
+      padding: 6px 10px;
+      border-radius: 6px;
+      outline: none;
+    }
+    .tb-divider {
+      width: 1px;
+      height: 20px;
+      background: rgba(255, 255, 255, 0.15);
+      margin: 0 4px;
+    }
+    .visual-editor-surface {
+      min-height: 380px;
+      max-height: 600px;
+      overflow-y: auto;
+      background: rgba(10, 15, 30, 0.85);
+      border: 1px solid rgba(212, 175, 55, 0.25);
+      border-radius: 0 0 12px 12px;
+      padding: 22px 26px;
+      color: #f1f5f9;
+      font-size: 1rem;
+      line-height: 1.85;
+      outline: none;
+    }
+    .visual-editor-surface:focus {
+      border-color: rgba(212, 175, 55, 0.6);
+      box-shadow: 0 0 20px rgba(212, 175, 55, 0.15);
+    }
+    .source-editor-surface {
+      width: 100%;
+      min-height: 380px;
+      max-height: 600px;
+      background: #090d16;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 0 0 12px 12px;
+      padding: 18px;
+      color: #38bdf8;
+      font-family: monospace;
+      font-size: 0.92rem;
+      line-height: 1.6;
+      outline: none;
+      resize: vertical;
+    }
+    .live-preview-surface {
+      min-height: 380px;
+      max-height: 600px;
+      overflow-y: auto;
+      background: #ffffff;
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      border-radius: 0 0 12px 12px;
+      padding: 30px;
+      color: #0f172a;
+    }
+  </style>
+
+  <script>
+    const modal = document.getElementById('articleModal');
+    const modalTitle = document.getElementById('articleModalTitle');
+    const newBtn = document.getElementById('newArticleBtn');
+    const closeBtn = document.getElementById('closeArticleModalBtn');
+    const cancelBtn = document.getElementById('cancelArticleBtn');
+    const saveBtn = document.getElementById('saveArticleBtn') as HTMLButtonElement;
+    const form = document.getElementById('articleForm') as HTMLFormElement;
+
+    // Inputs
+    const idInput = document.getElementById('articleId') as HTMLInputElement;
+    const titleInput = document.getElementById('articleTitle') as HTMLInputElement;
+    const slugInput = document.getElementById('articleSlug') as HTMLInputElement;
+    const excerptInput = document.getElementById('articleExcerpt') as HTMLTextAreaElement;
+    const coverInput = document.getElementById('articleCover') as HTMLInputElement;
+    const authorInput = document.getElementById('articleAuthor') as HTMLInputElement;
+    const statusSelect = document.getElementById('articleStatus') as unknown as HTMLSelectElement;
+    const seoTitleInput = document.getElementById('seoTitle') as HTMLInputElement;
+    const seoDescInput = document.getElementById('seoDescription') as HTMLInputElement;
+
+    // Editor surfaces
+    const visualEditor = document.getElementById('visualEditor') as HTMLDivElement;
+    const sourceEditor = document.getElementById('sourceEditor') as HTMLTextAreaElement;
+    const previewContainer = document.getElementById('livePreviewContainer') as HTMLDivElement;
+    const previewContent = document.getElementById('livePreviewContent') as HTMLDivElement;
+    const toolbar = document.getElementById('editorToolbar') as HTMLDivElement;
+
+    // Tabs
+    const tabVisual = document.getElementById('tabVisualBtn');
+    const tabSource = document.getElementById('tabSourceBtn');
+    const tabPreview = document.getElementById('tabPreviewBtn');
+
+    let currentMode: 'visual' | 'source' | 'preview' = 'visual';
+
+    function switchMode(mode: 'visual' | 'source' | 'preview') {
+      if (mode === currentMode) return;
+
+      if (currentMode === 'visual') {
+        sourceEditor.value = visualEditor.innerHTML;
+      } else if (currentMode === 'source') {
+        visualEditor.innerHTML = sourceEditor.value;
+      }
+
+      currentMode = mode;
+
+      [tabVisual, tabSource, tabPreview].forEach((b) => b?.classList.remove('active'));
+
+      if (mode === 'visual') {
+        tabVisual?.classList.add('active');
+        visualEditor.style.display = 'block';
+        sourceEditor.style.display = 'none';
+        previewContainer.style.display = 'none';
+        toolbar.style.display = 'flex';
+      } else if (mode === 'source') {
+        tabSource?.classList.add('active');
+        visualEditor.style.display = 'none';
+        sourceEditor.style.display = 'block';
+        previewContainer.style.display = 'none';
+        toolbar.style.display = 'none';
+      } else if (mode === 'preview') {
+        tabPreview?.classList.add('active');
+        visualEditor.style.display = 'none';
+        sourceEditor.style.display = 'none';
+        previewContainer.style.display = 'block';
+        toolbar.style.display = 'none';
+        previewContent.innerHTML = visualEditor.innerHTML;
+      }
+    }
+
+    tabVisual?.addEventListener('click', () => switchMode('visual'));
+    tabSource?.addEventListener('click', () => switchMode('source'));
+    tabPreview?.addEventListener('click', () => switchMode('preview'));
+
+    // Command buttons
+    document.querySelectorAll('.tb-btn[data-cmd]').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        const cmd = (e.currentTarget as HTMLElement).dataset.cmd;
+        if (!cmd) return;
+        document.execCommand(cmd, false);
+        visualEditor.focus();
+      });
+    });
+
+    const formatSelect = document.getElementById('formatBlockSelect') as unknown as HTMLSelectElement;
+    formatSelect?.addEventListener('change', () => {
+      const val = formatSelect.value;
+      document.execCommand('formatBlock', false, `<${val}>`);
+      visualEditor.focus();
+    });
+
+    // Special clinical callouts
+    document.getElementById('insertTipBtn')?.addEventListener('click', () => {
+      const html = `<div style="background: rgba(212, 175, 55, 0.12); border-right: 4px solid #f5d77f; padding: 16px 20px; border-radius: 8px; margin: 18px 0; color: #f5d77f;"><strong>💡 نکته طلایی کلینیک:</strong> متن نکته کاربردی و ضروری را اینجا بنویسید...</div><p><br></p>`;
+      document.execCommand('insertHTML', false, html);
+    });
+
+    document.getElementById('insertWarnBtn')?.addEventListener('click', () => {
+      const html = `<div style="background: rgba(239, 68, 68, 0.12); border-right: 4px solid #ef4444; padding: 16px 20px; border-radius: 8px; margin: 18px 0; color: #fca5a5;"><strong>⚠️ هشدار پزشکی:</strong> حداقل ۲ هفته قبل از لیزر از برنزه کردن و سولاریوم خودداری نمایید.</div><p><br></p>`;
+      document.execCommand('insertHTML', false, html);
+    });
+
+    document.getElementById('insertDocBtn')?.addEventListener('click', () => {
+      const html = `<div style="background: rgba(56, 189, 248, 0.12); border-right: 4px solid #38bdf8; padding: 16px 20px; border-radius: 8px; margin: 18px 0; color: #bae6fd;"><strong>🩺 توصیه پزشک کلینیک:</strong> پس از اتمام جلسه، استفاده از ژل خنک‌کننده زینک و آلوئه‌ورا الزامی است.</div><p><br></p>`;
+      document.execCommand('insertHTML', false, html);
+    });
+
+    document.getElementById('insertLinkBtn')?.addEventListener('click', () => {
+      const url = prompt('آدرس اینترنتی پیوند را وارد نمایید (https://...):');
+      if (url) document.execCommand('createLink', false, url);
+    });
+
+    document.getElementById('insertImgBtn')?.addEventListener('click', () => {
+      const url = prompt('آدرس مستقیم تصویر (Image URL) را وارد نمایید:');
+      if (url) {
+        const html = `<div style="text-align: center; margin: 20px 0;"><img src="${url}" alt="تصویر کلینیک" style="max-width: 100%; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.2);" /></div><p><br></p>`;
+        document.execCommand('insertHTML', false, html);
+      }
+    });
+
+    document.getElementById('insertHrBtn')?.addEventListener('click', () => {
+      document.execCommand('insertHorizontalRule', false);
+    });
+
+    // Auto slug generator
+    document.getElementById('autoSlugBtn')?.addEventListener('click', () => {
+      const t = titleInput.value.trim();
+      if (!t) return;
+      // Convert Persian / English title to slug
+      const slug = t
+        .toLowerCase()
+        .replace(/[^a-z0-9؀-ۿ]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+      slugInput.value = slug || 'article-' + Date.now().toString(36);
+    });
+
+    // Open Modal for New Article
+    newBtn?.addEventListener('click', () => {
+      idInput.value = '';
+      titleInput.value = '';
+      slugInput.value = '';
+      excerptInput.value = '';
+      coverInput.value = 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=1200&q=80';
+      authorInput.value = 'تیم علمی کلینیک تهران لیزر';
+      statusSelect.value = 'published';
+      seoTitleInput.value = '';
+      seoDescInput.value = '';
+      visualEditor.innerHTML = `<h2>مقدمه و راهنمای درمانی</h2><p>توضیحات و مقدمه مقاله را در این بخش شروع کنید...</p><h3>اهمیت آمادگی قبل از جلسه</h3><p>پوست باید کاملاً تمیز و شیو شده باشد.</p>`;
+      sourceEditor.value = visualEditor.innerHTML;
+      if (modalTitle) modalTitle.innerText = '✍️ نگارش مقاله جدید';
+      switchMode('visual');
+      if (modal) modal.style.display = 'flex';
+    });
+
+    // Open Modal for Editing Existing Post
+    document.querySelectorAll('.edit-post-btn').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        const target = e.currentTarget as HTMLElement;
+        if (!target) return;
+
+        idInput.value = target.dataset.id || '';
+        titleInput.value = target.dataset.title || '';
+        slugInput.value = target.dataset.slug || '';
+        excerptInput.value = target.dataset.excerpt || '';
+        coverInput.value = target.dataset.cover || '';
+        authorInput.value = target.dataset.author || '';
+        statusSelect.value = target.dataset.status || 'published';
+        seoTitleInput.value = target.dataset.seotitle || '';
+        seoDescInput.value = target.dataset.seodesc || '';
+
+        const rawContent = decodeURIComponent(target.dataset.content || '');
+        visualEditor.innerHTML = rawContent;
+        sourceEditor.value = rawContent;
+
+        if (modalTitle) modalTitle.innerText = '✏️ ویرایش مقاله: ' + target.dataset.title;
+        switchMode('visual');
+        if (modal) modal.style.display = 'flex';
+      });
+    });
+
+    closeBtn?.addEventListener('click', () => {
+      if (modal) modal.style.display = 'none';
+    });
+    cancelBtn?.addEventListener('click', () => {
+      if (modal) modal.style.display = 'none';
+    });
+
+    // Save Article Handler
+    form?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      saveBtn.disabled = true;
+      saveBtn.innerText = '⏳ در حال ذخیره در دیتابیس D1...';
+
+      // Ensure content is synced
+      if (currentMode === 'source') {
+        visualEditor.innerHTML = sourceEditor.value;
+      }
+      const finalContent = visualEditor.innerHTML.trim();
+      const pId = idInput.value;
+
+      const payload = {
+        title: titleInput.value.trim(),
+        slug: slugInput.value.trim(),
+        excerpt: excerptInput.value.trim(),
+        content: finalContent,
+        coverImage: coverInput.value.trim() || null,
+        author: authorInput.value.trim() || 'تهران لیزر',
+        status: statusSelect.value,
+        seoTitle: seoTitleInput.value.trim() || null,
+        seoDescription: seoDescInput.value.trim() || null,
+      };
+
+      try {
+        const url = pId ? `/api/v1/admin/blog/${pId}` : '/api/v1/admin/blog';
+        const method = pId ? 'PUT' : 'POST';
+
+        const res = await fetch(url, {
+          method,
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        const json = await res.json() as any;
+        if (res.ok && json.data) {
+          saveBtn.innerText = '✓ با موفقیت ذخیره شد!';
+          setTimeout(() => window.location.reload(), 400);
+        } else {
+          alert(json.error?.message || 'خطا در ثبت مقاله.');
+          saveBtn.disabled = false;
+          saveBtn.innerText = '🚀 ثبت و ذخیره مقاله در دیتابیس D1';
+        }
+      } catch {
+        alert('خطای ارتباط با سرور.');
+        saveBtn.disabled = false;
+        saveBtn.innerText = '🚀 ثبت و ذخیره مقاله در دیتابیس D1';
+      }
+    });
+
+    // Delete Post Handler
+    document.querySelectorAll('.delete-post-btn').forEach((btn) => {
+      btn.addEventListener('click', async (e) => {
+        const target = e.currentTarget as HTMLElement;
+        const id = target.dataset.id;
+        if (!id) return;
+
+        if (!confirm('آیا از حذف قطعی این مقاله اطمینان دارید؟')) return;
+
+        try {
+          const res = await fetch(`/api/v1/admin/blog/${id}`, {
+            method: 'DELETE',
+          });
+
+          if (res.ok) {
+            window.location.reload();
+          } else {
+            alert('خطا در حذف مقاله.');
+          }
+        } catch {
+          alert('خطای ارتباط با سرور.');
+        }
+      });
+    });
+  </script>
 </AdminLayout>

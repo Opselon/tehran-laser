@@ -35,7 +35,12 @@ try {
       ) : (
         <div class="blog-posts-grid">
           {postsPage.items.map((post) => (
-            <article class="blog-card">
+            <article class="blog-card" style="overflow: hidden; border-radius: 16px;">
+              {post.coverImage && (
+                <div style="height: 200px; width: 100%; overflow: hidden; background: #0f172a;">
+                  <img src={post.coverImage} alt={post.title} style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s;" />
+                </div>
+              )}
               <div class="blog-card-body">
                 <span class="blog-card-date">
                   {post.publishedAt ? formatJalaliDate(post.publishedAt.slice(0, 10)) : ''}

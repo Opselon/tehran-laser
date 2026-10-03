@@ -780,6 +780,15 @@ export async function handleApiRequest(
       return ok({ id, updated: true });
     }
 
+    if (pathname.startsWith('/api/v1/admin/blog/') && method === 'DELETE') {
+      const auth = requirePermission(locals, 'blog.write');
+      const id = pathname.slice('/api/v1/admin/blog/'.length);
+
+      await run(env.DB, `DELETE FROM blog_posts WHERE id = ?`, id);
+      await writeAuditLog(env.DB, auth.id, 'blog.deleted', 'blog_post', id);
+      return ok({ id, deleted: true });
+    }
+
     /* ── Admin: FAQ (§256) ────────────────────────────────────── */
     if (pathname === '/api/v1/admin/faq' && method === 'GET') {
       requirePermission(locals, 'settings.read');
