@@ -36,6 +36,7 @@ import {
   updateSettingsSchema,
   rescheduleBookingSchema,
   rejectBookingSchema,
+  updateBookingSchema,
   updateCustomerSchema,
 } from '../../domain/validation/schemas';
 import {
@@ -428,6 +429,31 @@ export async function handleApiRequest(
       return ok(result);
     }
 
+    if (pathname.match(/^\/api\/v1\/admin\/bookings\/[^/]+$/) && method === 'PUT') {
+      const auth = requirePermission(locals, 'booking.accept');
+      const id = pathname.split('/')[5]!;
+      const body = await parseBody(request, updateBookingSchema);
+      const nowIso = new Date().toISOString();
+
+      await run(
+        env.DB,
+        `UPDATE bookings
+            SET admin_note = COALESCE(?, admin_note),
+                customer_note = COALESCE(?, customer_note),
+                quoted_amount = COALESCE(?, quoted_amount),
+                updated_at = ?
+          WHERE id = ?`,
+        body.adminNote ?? null,
+        body.customerNote ?? null,
+        body.quotedAmount ?? null,
+        nowIso,
+        id,
+      );
+
+      await writeAuditLog(env.DB, auth.id, 'booking.updated', 'booking', id);
+      return ok({ id, updated: true });
+    }
+
     /* ── Admin: Services & Pricing (§123, §124) ───────────────── */
     if (pathname === '/api/v1/admin/services' && method === 'GET') {
       requirePermission(locals, 'service.read');
@@ -638,11 +664,15 @@ export async function handleApiRequest(
         env.DB,
         `UPDATE customers
             SET name = COALESCE(?, name),
+                phone = COALESCE(?, phone),
+                pricing_category = COALESCE(?, pricing_category),
                 email = COALESCE(?, email),
                 note = COALESCE(?, note),
                 updated_at = ?
           WHERE id = ?`,
         body.name ?? null,
+        body.phone ?? null,
+        body.pricingCategory ?? null,
         body.email ?? null,
         body.note ?? null,
         nowIso,
@@ -821,10 +851,12 @@ export async function handleApiRequest(
         if (value !== undefined) {
           await run(
             env.DB,
-            `UPDATE settings SET value = ?, updated_at = ? WHERE key = ?`,
+            `INSERT INTO settings (key, value, scope, updated_at)
+             VALUES (?, ?, 'public', ?)
+             ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at`,
+            key,
             String(value),
             nowIso,
-            key,
           );
         }
       }

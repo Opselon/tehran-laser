@@ -3,11 +3,12 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
 import { env } from 'cloudflare:workers';
 import { listAdminBookings, listPublicServices } from '../../../server/repositories';
 import { formatJalaliDate } from '../../../lib/datetime/jalali';
+import type { BookingStatus } from '../../../domain/booking/booking.types';
 
 const url = Astro.url;
-const statusFilter = url.searchParams.get('status') || undefined;
-const searchFilter = url.searchParams.get('q') || undefined;
+const statusFilter = (url.searchParams.get('status') as BookingStatus) || undefined;
 const serviceFilter = url.searchParams.get('service') || undefined;
+const searchFilter = url.searchParams.get('q') || undefined;
 
 let bookings: Awaited<ReturnType<typeof listAdminBookings>> = { items: [], nextCursor: null };
 let services: Awaited<ReturnType<typeof listPublicServices>> = [];
@@ -16,7 +17,8 @@ try {
   [bookings, services] = await Promise.all([
     listAdminBookings(env.DB, {
       status: statusFilter,
-      search: searchFilter,
+      serviceSlug: serviceFilter,
+      q: searchFilter,
       limit: 50,
     }),
     listPublicServices(env.DB),
@@ -28,27 +30,27 @@ try {
 
 <AdminLayout title="مدیریت نوبت‌ها" activeNav="bookings">
   <div class="admin-content-pad">
-    <!-- 3D Page Title Row -->
+    <!-- 3D Header Row -->
     <div class="dashboard-header-row">
       <div>
-        <h1 class="admin-page-title">دفتر مدیریت نوبت‌ها و رزروها</h1>
+        <h1 class="admin-page-title">کنسول مدیریت و ویرایش نوبت‌های کلینیک</h1>
         <p class="section-block-sub">
-          مشاهده، فیلتر و جستجوی جامع تمامی رزروهای آنلاین و حضوری مراجعین کلینیک تهران لیزر
+          تأیید فوری نوبت‌ها، لغو، تغییر وضعیت، ویرایش مشخصات مراجعین و مبالغ مصوب (API First)
         </p>
       </div>
       <div class="actions">
         <span style="font-size: 0.88rem; color: #f5d77f; background: rgba(212, 175, 55, 0.15); border: 1px solid rgba(212, 175, 55, 0.35); padding: 8px 16px; border-radius: 12px;">
-          مجموع نتایج: {bookings.items.length.toLocaleString('fa-IR')} رزرو
+          تعداد کل نوبت‌ها: {bookings.items.length.toLocaleString('fa-IR')} مورد
         </span>
       </div>
     </div>
 
-    <!-- 3D Filters Block -->
-    <div class="admin-section-block" style="padding: 24px; margin-bottom: 28px;">
-      <form method="GET" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) auto; gap: 16px; align-items: flex-end;">
-        <div>
+    <!-- 3D Filter Bar -->
+    <div class="admin-section-block" style="padding: 22px; margin-bottom: 26px;">
+      <form method="GET" style="display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 170px;">
           <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">
-            وضعیت نوبت:
+            فیلتر وضعیت نوبت:
           </label>
           <select name="status" class="form-control-modal" style="margin-top: 0; padding: 10px 14px;">
             <option value="">همه وضعیت‌ها</option>
@@ -56,24 +58,26 @@ try {
             <option value="confirmed" selected={statusFilter === 'confirmed'}>تأییدشده</option>
             <option value="completed" selected={statusFilter === 'completed'}>انجام‌شده</option>
             <option value="cancelled" selected={statusFilter === 'cancelled'}>لغوشده</option>
-            <option value="rejected" selected={statusFilter === 'rejected'}>ردشده</option>
             <option value="no_show" selected={statusFilter === 'no_show'}>عدم حضور</option>
+            <option value="rejected" selected={statusFilter === 'rejected'}>ردشده</option>
           </select>
         </div>
 
-        <div>
+        <div style="flex: 1; min-width: 170px;">
           <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">
-            فیلتر بر اساس خدمت:
+            فیلتر خدمت / ناحیه:
           </label>
           <select name="service" class="form-control-modal" style="margin-top: 0; padding: 10px 14px;">
             <option value="">همه خدمات</option>
             {services.map((s) => (
-              <option value={s.slug} selected={serviceFilter === s.slug}>{s.name}</option>
+              <option value={s.slug} selected={serviceFilter === s.slug}>
+                {s.name}
+              </option>
             ))}
           </select>
         </div>
 
-        <div>
+        <div style="flex: 1.5; min-width: 220px;">
           <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">
             جستجوی مراجع / کد رهگیری / تلفن:
           </label>
@@ -118,6 +122,7 @@ try {
                 <th>تاریخ و ساعت نوبت</th>
                 <th>مبلغ مصوب</th>
                 <th>وضعیت</th>
+                <th>مدیریت و ویرایش</th>
               </tr>
             </thead>
             <tbody>
@@ -137,11 +142,15 @@ try {
                     <td style={{ fontWeight: 700 }}>{b.customer.name}</td>
                     <td dir="ltr">
                       <a href={`tel:${b.customer.phone}`} style={{ color: '#38bdf8', textDecoration: 'none' }}>
-                        {b.customer.phone}
+                        📞 {b.customer.phone}
                       </a>
                     </td>
                     <td>{b.service.name}</td>
-                    <td>{b.pricingCategory === 'female' ? 'بانوان' : 'آقایان'}</td>
+                    <td>
+                      <span class={`badge-status ${b.pricingCategory === 'female' ? 'badge-status-completed' : 'badge-status-pending'}`}>
+                        {b.pricingCategory === 'female' ? 'بانوان' : 'آقایان'}
+                      </span>
+                    </td>
                     <td>
                       <div style={{ fontWeight: 600 }}>{formatJalaliDate(dateStr)}</div>
                       <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>⏱ ساعت {timeStr}</span>
@@ -164,6 +173,57 @@ try {
                         {b.status === 'rejected' && 'ردشده'}
                       </span>
                     </td>
+                    <td>
+                      <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                        {b.status === 'pending' && (
+                          <button
+                            type="button"
+                            class="btn-3d-accept accept-booking-btn"
+                            style="padding: 6px 12px; font-size: 0.78rem;"
+                            data-id={b.id}
+                          >
+                            ✓ تأیید
+                          </button>
+                        )}
+
+                        {b.status === 'pending' && (
+                          <button
+                            type="button"
+                            class="btn-3d-reject reject-booking-btn"
+                            style="padding: 6px 10px; font-size: 0.78rem;"
+                            data-id={b.id}
+                          >
+                            ✕ رد
+                          </button>
+                        )}
+
+                        {b.status === 'confirmed' && (
+                          <button
+                            type="button"
+                            class="btn-table-action complete-booking-btn"
+                            style="padding: 6px 10px; font-size: 0.78rem; border-color: rgba(56, 189, 248, 0.4); color: #38bdf8;"
+                            data-id={b.id}
+                          >
+                            ✓ انجام شد
+                          </button>
+                        )}
+
+                        <button
+                          type="button"
+                          class="btn-table-action edit-booking-btn"
+                          style="padding: 6px 10px; font-size: 0.78rem; border-color: rgba(212, 175, 55, 0.45); color: #f5d77f;"
+                          data-id={b.id}
+                          data-customer-id={b.customer.id}
+                          data-customer-name={b.customer.name}
+                          data-customer-phone={b.customer.phone}
+                          data-customer-note={b.customerNote || ''}
+                          data-admin-note={b.adminNote || ''}
+                          data-amount={b.quotedAmount}
+                        >
+                          ✏️ ویرایش
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 );
               })}
@@ -172,5 +232,357 @@ try {
         </div>
       )}
     </div>
+
+    <!-- 3D Edit Booking & Customer Modal -->
+    <div id="bookingEditModal" class="modal-backdrop" style="display: none;">
+      <div class="modal-dialog">
+        <h3 class="modal-title">✏️ ویرایش مشخصات نوبت و مراجع</h3>
+        <p style="color: rgba(226, 232, 240, 0.7); font-size: 0.86rem; margin: 0 0 18px;">
+          ویرایش نام، شماره تلفن، یادداشت‌های پرونده و مبلغ مصوب (API First)
+        </p>
+
+        <div id="bookingEditAlert" class="alert-3d-danger" style="display: none; margin-bottom: 16px;">
+          <span id="bookingEditAlertText"></span>
+        </div>
+
+        <form id="editBookingForm">
+          <input type="hidden" id="editBookingId" />
+          <input type="hidden" id="editBookingCustomerId" />
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+            <div>
+              <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #e2e8f0; margin-bottom: 6px;">
+                نام و نام خانوادگی مراجع:
+              </label>
+              <input
+                type="text"
+                id="editBookingCustName"
+                class="form-control-modal"
+                required
+              />
+            </div>
+
+            <div>
+              <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #e2e8f0; margin-bottom: 6px;">
+                شماره همراه:
+              </label>
+              <input
+                type="tel"
+                id="editBookingCustPhone"
+                dir="ltr"
+                class="form-control-modal"
+                required
+              />
+            </div>
+          </div>
+
+          <div style="margin-bottom: 14px;">
+            <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #e2e8f0; margin-bottom: 6px;">
+              مبلغ مصوب فاکتور (هزار تومان):
+            </label>
+            <input
+              type="number"
+              id="editBookingAmount"
+              class="form-control-modal"
+              required
+            />
+          </div>
+
+          <div style="margin-bottom: 14px;">
+            <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #e2e8f0; margin-bottom: 6px;">
+              یادداشت مراجع (توضیحات رزرو):
+            </label>
+            <input
+              type="text"
+              id="editBookingCustomerNote"
+              class="form-control-modal"
+              placeholder="توضیحات وارد شده توسط مراجع..."
+            />
+          </div>
+
+          <div style="margin-bottom: 18px;">
+            <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #e2e8f0; margin-bottom: 6px;">
+              یادداشت محرمانه داخلی اپراتور / کلینیک:
+            </label>
+            <textarea
+              id="editBookingAdminNote"
+              class="form-control-modal"
+              rows={2}
+              placeholder="توضیحات داخلی کلینیک..."
+            ></textarea>
+          </div>
+
+          <div class="modal-actions-row">
+            <button type="button" id="cancelBookingEditBtn" class="btn-table-action">
+              انصراف
+            </button>
+            <button type="submit" id="saveBookingBtn" class="btn-3d-accept" style="flex: none; padding: 12px 24px;">
+              ✓ ذخیره تغییرات نوبت
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- 3D Rejection Modal -->
+    <div id="bookingRejectModal" class="modal-backdrop" style="display: none;">
+      <div class="modal-dialog">
+        <h3 class="modal-title" style="color: #f87171;">✕ ثبت دلیل رد نوبت</h3>
+        <p style="color: rgba(226, 232, 240, 0.7); font-size: 0.86rem; margin: 0 0 16px;">
+          دلیل عدم امکان پذیرش جهت اطلاع مراجع و آزادسازی فوری اسلات در سامانه:
+        </p>
+
+        <form id="rejectBookingForm">
+          <input type="hidden" id="rejectBookingId" />
+
+          <div style="margin-bottom: 18px;">
+            <select id="rejectReasonPreset" class="form-control-modal" style="margin-bottom: 10px;">
+              <option value="عدم امکان ارائه خدمت در ساعت درخواستی به دلیل تکمیل ظرفیت">عدم امکان ارائه خدمت در ساعت درخواستی</option>
+              <option value="ضرورت تغییر زمان با هماهنگی تلفنی با مراجع">ضرورت تغییر زمان با هماهنگی تلفنی</option>
+              <option value="محدودیت‌های پزشکی و دارویی مراجع">محدودیت‌های پزشکی و دارویی مراجع</option>
+              <option value="سایر دلایل">سایر دلایل...</option>
+            </select>
+            <textarea
+              id="rejectReasonText"
+              class="form-control-modal"
+              rows={2}
+              placeholder="توضیحات تکمیلی یا پیام ارسالی به مراجع..."
+            ></textarea>
+          </div>
+
+          <div class="modal-actions-row">
+            <button type="button" id="cancelRejectBtn" class="btn-table-action">
+              انصراف
+            </button>
+            <button type="submit" id="confirmRejectBtn" class="btn-3d-reject" style="flex: none; padding: 12px 24px;">
+              ثبت قطعی رد نوبت
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
+
+  <script>
+    // Edit Modal Elements
+    const editModal = document.getElementById('bookingEditModal');
+    const editForm = document.getElementById('editBookingForm') as HTMLFormElement;
+    const cancelEditBtn = document.getElementById('cancelBookingEditBtn');
+    const saveBookingBtn = document.getElementById('saveBookingBtn') as HTMLButtonElement;
+    const editAlertBox = document.getElementById('bookingEditAlert');
+    const editAlertText = document.getElementById('bookingEditAlertText');
+
+    const editBookingId = document.getElementById('editBookingId') as HTMLInputElement;
+    const editBookingCustomerId = document.getElementById('editBookingCustomerId') as HTMLInputElement;
+    const editCustName = document.getElementById('editBookingCustName') as HTMLInputElement;
+    const editCustPhone = document.getElementById('editBookingCustPhone') as HTMLInputElement;
+    const editAmount = document.getElementById('editBookingAmount') as HTMLInputElement;
+    const editCustNote = document.getElementById('editBookingCustomerNote') as HTMLInputElement;
+    const editAdminNote = document.getElementById('editBookingAdminNote') as HTMLTextAreaElement;
+
+    // Reject Modal Elements
+    const rejectModal = document.getElementById('bookingRejectModal');
+    const rejectForm = document.getElementById('rejectBookingForm') as HTMLFormElement;
+    const cancelRejectBtn = document.getElementById('cancelRejectBtn');
+    const rejectBookingId = document.getElementById('rejectBookingId') as HTMLInputElement;
+    const rejectReasonPreset = document.getElementById('rejectReasonPreset') as unknown as HTMLSelectElement;
+    const rejectReasonText = document.getElementById('rejectReasonText') as HTMLTextAreaElement;
+
+    // Hook Accept Buttons
+    document.querySelectorAll('.accept-booking-btn').forEach((btn) => {
+      btn.addEventListener('click', async (e) => {
+        const target = e.currentTarget as HTMLButtonElement;
+        const id = target.dataset.id;
+        if (!id) return;
+
+        target.disabled = true;
+        target.innerText = '...';
+
+        try {
+          const res = await fetch(`/api/v1/admin/bookings/${id}/accept`, {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+          });
+          if (res.ok) {
+            target.innerText = '✓ تأیید شد';
+            setTimeout(() => window.location.reload(), 400);
+          } else {
+            alert('خطا در تأیید نوبت.');
+            target.disabled = false;
+            target.innerText = '✓ تأیید';
+          }
+        } catch {
+          alert('خطای ارتباط با سرور.');
+          target.disabled = false;
+          target.innerText = '✓ تأیید';
+        }
+      });
+    });
+
+    // Hook Complete Buttons
+    document.querySelectorAll('.complete-booking-btn').forEach((btn) => {
+      btn.addEventListener('click', async (e) => {
+        const target = e.currentTarget as HTMLButtonElement;
+        const id = target.dataset.id;
+        if (!id) return;
+
+        if (!confirm('آیا این نوبت با موفقیت به پایان رسید؟')) return;
+
+        target.disabled = true;
+        target.innerText = '...';
+
+        try {
+          const res = await fetch(`/api/v1/admin/bookings/${id}/complete`, {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+          });
+          if (res.ok) {
+            target.innerText = '✓ ثبت شد';
+            setTimeout(() => window.location.reload(), 400);
+          } else {
+            alert('خطا در تغییر وضعیت نوبت.');
+            target.disabled = false;
+            target.innerText = '✓ انجام شد';
+          }
+        } catch {
+          alert('خطای ارتباط با سرور.');
+          target.disabled = false;
+          target.innerText = '✓ انجام شد';
+        }
+      });
+    });
+
+    // Hook Reject Buttons
+    document.querySelectorAll('.reject-booking-btn').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        const target = e.currentTarget as HTMLElement;
+        const id = target.dataset.id;
+        if (!id || !rejectModal) return;
+
+        rejectBookingId.value = id;
+        rejectReasonText.value = rejectReasonPreset.value;
+        rejectModal.style.display = 'flex';
+      });
+    });
+
+    if (rejectReasonPreset) {
+      rejectReasonPreset.addEventListener('change', () => {
+        rejectReasonText.value = rejectReasonPreset.value;
+      });
+    }
+
+    if (cancelRejectBtn && rejectModal) {
+      cancelRejectBtn.addEventListener('click', () => {
+        rejectModal.style.display = 'none';
+      });
+    }
+
+    if (rejectForm && rejectModal) {
+      rejectForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = rejectBookingId.value;
+        const reason = rejectReasonText.value.trim();
+
+        try {
+          const res = await fetch(`/api/v1/admin/bookings/${id}/reject`, {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ reason }),
+          });
+
+          if (res.ok) {
+            rejectModal.style.display = 'none';
+            window.location.reload();
+          } else {
+            alert('خطا در ثبت رد نوبت.');
+          }
+        } catch {
+          alert('خطای ارتباط با سرور.');
+        }
+      });
+    }
+
+    // Hook Edit Booking Buttons
+    document.querySelectorAll('.edit-booking-btn').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        const target = e.currentTarget as HTMLElement;
+        if (!target || !editModal) return;
+
+        editBookingId.value = target.dataset.id || '';
+        editBookingCustomerId.value = target.dataset.customerId || '';
+        editCustName.value = target.dataset.customerName || '';
+        editCustPhone.value = target.dataset.customerPhone || '';
+        editAmount.value = target.dataset.amount || '0';
+        editCustNote.value = target.dataset.customerNote || '';
+        editAdminNote.value = target.dataset.adminNote || '';
+
+        if (editAlertBox) editAlertBox.style.display = 'none';
+        editModal.style.display = 'flex';
+      });
+    });
+
+    if (cancelEditBtn && editModal) {
+      cancelEditBtn.addEventListener('click', () => {
+        editModal.style.display = 'none';
+      });
+    }
+
+    if (editForm && editModal) {
+      editForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const bId = editBookingId.value;
+        const cId = editBookingCustomerId.value;
+        if (!bId) return;
+
+        saveBookingBtn.disabled = true;
+        saveBookingBtn.innerText = '⏳ در حال ذخیره...';
+
+        try {
+          // Parallel API calls: Update Customer and Update Booking
+          const promises = [
+            fetch(`/api/v1/admin/bookings/${bId}`, {
+              method: 'PUT',
+              headers: { 'content-type': 'application/json' },
+              body: JSON.stringify({
+                quotedAmount: Number(editAmount.value),
+                customerNote: editCustNote.value.trim() || null,
+                adminNote: editAdminNote.value.trim() || null,
+              }),
+            }),
+          ];
+
+          if (cId) {
+            promises.push(
+              fetch(`/api/v1/admin/customers/${cId}`, {
+                method: 'PUT',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({
+                  name: editCustName.value.trim(),
+                  phone: editCustPhone.value.trim(),
+                }),
+              })
+            );
+          }
+
+          const results = await Promise.all(promises);
+          const allOk = results.every((r) => r.ok);
+
+          if (allOk) {
+            saveBookingBtn.innerText = '✓ ذخیره شد!';
+            setTimeout(() => window.location.reload(), 400);
+          } else {
+            if (editAlertText) editAlertText.innerText = 'خطا در ثبت برخی از تغییرات.';
+            if (editAlertBox) editAlertBox.style.display = 'flex';
+            saveBookingBtn.disabled = false;
+            saveBookingBtn.innerText = '✓ ذخیره تغییرات نوبت';
+          }
+        } catch {
+          if (editAlertText) editAlertText.innerText = 'خطای ارتباط با سرور.';
+          if (editAlertBox) editAlertBox.style.display = 'flex';
+          saveBookingBtn.disabled = false;
+          saveBookingBtn.innerText = '✓ ذخیره تغییرات نوبت';
+        }
+      });
+    }
+  </script>
 </AdminLayout>

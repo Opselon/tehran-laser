@@ -578,11 +578,13 @@ export async function listAdminCustomers(
     }
   }
 
-  let sql = `SELECT id, name, phone, email, pricing_category AS pricingCategory,
-                    note, created_at AS createdAt, updated_at AS updatedAt
-               FROM customers`;
+  let sql = `SELECT c.id, c.name, c.phone, c.email, c.pricing_category AS pricingCategory,
+                    c.note, c.created_at AS createdAt, c.updated_at AS updatedAt,
+                    COALESCE((SELECT COUNT(*) FROM bookings b WHERE b.customer_id = c.id), 0) AS bookingsCount,
+                    (SELECT MAX(b.starts_at) FROM bookings b WHERE b.customer_id = c.id) AS lastBookingAt
+               FROM customers c`;
   if (conditions.length > 0) sql += ` WHERE ` + conditions.join(' AND ');
-  sql += ` ORDER BY created_at DESC, id DESC LIMIT ?`;
+  sql += ` ORDER BY c.created_at DESC, c.id DESC LIMIT ?`;
   binds.push(safeLimit + 1);
 
   const rows = await all<AdminCustomerRowDto>(db, sql, ...binds);
@@ -600,9 +602,11 @@ export interface BookingFilterOptions {
   status?: string | undefined;
   staffId?: string | undefined;
   serviceId?: string | undefined;
+  serviceSlug?: string | undefined;
   fromStartsAt?: string | undefined;
   toStartsAt?: string | undefined;
   search?: string | undefined;
+  q?: string | undefined;
   limit?: number | undefined;
   cursor?: string | undefined;
 }
@@ -694,10 +698,14 @@ export async function listAdminBookings(
     conditions.push(`b.starts_at < ?`);
     binds.push(options.toStartsAt);
   }
-  if (options.search && options.search.trim()) {
-    const q = options.search.trim();
+  if (options.serviceSlug) {
+    conditions.push(`s.slug = ?`);
+    binds.push(options.serviceSlug);
+  }
+  const queryStr = (options.q || options.search || '').trim();
+  if (queryStr) {
     conditions.push(`(b.reference LIKE ? OR c.phone LIKE ? OR c.name LIKE ?)`);
-    binds.push(`${q}%`, `${q}%`, `${q}%`);
+    binds.push(`%${queryStr}%`, `%${queryStr}%`, `%${queryStr}%`);
   }
   if (options.cursor) {
     const decoded = decodeCursor(options.cursor);

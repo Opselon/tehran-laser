@@ -13,45 +13,247 @@ try {
 
 <AdminLayout title="تنظیمات کلینیک" activeNav="settings">
   <div class="admin-content-pad">
-    <div class="page-title-row mb-4">
+    <!-- 3D Header Row -->
+    <div class="dashboard-header-row">
       <div>
-        <h1 class="text-xl font-bold">تنظیمات سیستم و پیکربندی کلینیک</h1>
-        <p class="text-muted small">مشاهده متغیرهای عملیاتی کلینیک تهران لیزر در دیتابیس D1</p>
+        <h1 class="admin-page-title">⚙️ تنظیمات و پیکربندی مرکزی کلینیک</h1>
+        <p class="section-block-sub">
+          ویرایش زنده مشخصات، نشانی، شماره تماس، زمان‌بندی و قواعد قیمت‌گذاری (کاملاً API First)
+        </p>
+      </div>
+      <div class="actions">
+        <span style="font-size: 0.88rem; color: #10b981; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.35); padding: 8px 16px; border-radius: 12px; display: inline-flex; align-items: center; gap: 8px;">
+          <span class="live-dot"></span>
+          پایگاه داده Cloudflare D1 فعال
+        </span>
       </div>
     </div>
 
-    <div class="card p-4">
-      <h3 class="font-bold text-lg mb-3">مشخصات عمومی کلینیک</h3>
-      <div class="settings-grid">
-        <div class="setting-item">
-          <span class="setting-key font-semibold">نام برند کلینیک:</span>
-          <span class="setting-value">{settings.business_name || 'تهران لیزر'}</span>
-        </div>
-        <div class="setting-item">
-          <span class="setting-key font-semibold">نشانی کلینیک:</span>
-          <span class="setting-value">{settings.address || 'پاسداران، خیابان پایدارفرد، نبش بوستان هفتم'}</span>
-        </div>
-        <div class="setting-item">
-          <span class="setting-key font-semibold">شماره تماس پشتیبانی:</span>
-          <span class="setting-value" dir="ltr">{settings.phone || '+98 903 555 5090'}</span>
-        </div>
-        <div class="setting-item">
-          <span class="setting-key font-semibold">منطقه زمانی سیستم:</span>
-          <span class="setting-value" dir="ltr">{settings.timezone || 'Asia/Tehran'}</span>
-        </div>
-        <div class="setting-item">
-          <span class="setting-key font-semibold">فاصله گام‌های نوبت‌دهی (Granularity):</span>
-          <span class="setting-value">{settings.slot_granularity_minutes || '30'} دقیقه</span>
-        </div>
-        <div class="setting-item">
-          <span class="setting-key font-semibold">فاصله بافر بین نوبت‌ها (Buffer):</span>
-          <span class="setting-value">{settings.booking_buffer_minutes || '0'} دقیقه</span>
-        </div>
-        <div class="setting-item">
-          <span class="setting-key font-semibold">درصد تخفیف سایت پکیج کل بدن:</span>
-          <span class="setting-value">{settings.site_discount_percent || '15'}٪</span>
+    <div id="settingsAlert" class="alert-3d-danger" style="display: none; margin-bottom: 20px;">
+      <span id="settingsAlertText"></span>
+    </div>
+
+    <div id="settingsSuccess" style="display: none; margin-bottom: 20px; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); color: #34d399; padding: 16px 20px; border-radius: 14px; font-weight: 700; align-items: center; gap: 10px;">
+      <span>✓ تنظیمات با موفقیت در پایگاه داده کلینیک به‌روزرسانی شد.</span>
+    </div>
+
+    <!-- 3D Settings Form -->
+    <form id="settingsForm">
+      <div class="admin-section-block" style="padding: 28px; margin-bottom: 24px;">
+        <h3 class="section-block-title" style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+          <span>🏥</span> اطلاعات هویتی و ارتباطی کلینیک
+        </h3>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px;">
+          <div>
+            <label style="display: block; font-size: 0.88rem; font-weight: 700; color: #f5d77f; margin-bottom: 8px;">
+              نام تجاری کلینیک:
+            </label>
+            <input
+              type="text"
+              name="business_name"
+              class="form-control-modal"
+              value={settings.business_name || 'تهران لیزر'}
+              required
+            />
+            <span style="display: block; font-size: 0.78rem; color: #94a3b8; margin-top: 4px;">
+              عنوان رسمی کلینیک که در سربرگ، پیامک‌ها و فاکتورها نمایش داده می‌شود.
+            </span>
+          </div>
+
+          <div>
+            <label style="display: block; font-size: 0.88rem; font-weight: 700; color: #f5d77f; margin-bottom: 8px;">
+              شماره تلفن تماس و نوبت‌دهی:
+            </label>
+            <input
+              type="text"
+              name="phone"
+              dir="ltr"
+              class="form-control-modal"
+              value={settings.phone || '+98 903 555 5090'}
+              required
+            />
+            <span style="display: block; font-size: 0.78rem; color: #94a3b8; margin-top: 4px;">
+              شماره مستقیم نوبت‌دهی و پشتیبانی کلینیک.
+            </span>
+          </div>
+
+          <div style="grid-column: 1 / -1;">
+            <label style="display: block; font-size: 0.88rem; font-weight: 700; color: #f5d77f; margin-bottom: 8px;">
+              نشانی دقیق کلینیک:
+            </label>
+            <input
+              type="text"
+              name="address"
+              class="form-control-modal"
+              value={settings.address || 'تهران، پاسداران، خیابان پایدارفرد، نبش بوستان هفتم'}
+              required
+            />
+            <span style="display: block; font-size: 0.78rem; color: #94a3b8; margin-top: 4px;">
+              آدرس ارسالی به مراجعین در پیامک تایید نوبت و فوتر وب‌سایت.
+            </span>
+          </div>
         </div>
       </div>
-    </div>
+
+      <div class="admin-section-block" style="padding: 28px; margin-bottom: 24px;">
+        <h3 class="section-block-title" style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+          <span>⏱️</span> زمان‌بندی هوشمند و موتور رزرواسیون
+        </h3>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+          <div>
+            <label style="display: block; font-size: 0.88rem; font-weight: 700; color: #f5d77f; margin-bottom: 8px;">
+              گام اسلات‌های نوبت‌دهی (دقیقه):
+            </label>
+            <input
+              type="number"
+              name="slot_granularity_minutes"
+              class="form-control-modal"
+              value={settings.slot_granularity_minutes || '30'}
+              min="10"
+              max="120"
+              required
+            />
+            <span style="display: block; font-size: 0.78rem; color: #94a3b8; margin-top: 4px;">
+              فاصله‌ی زمانی بین شروع هر نوبت در تقویم رزرو (پیش‌فرض: ۳۰ دقیقه).
+            </span>
+          </div>
+
+          <div>
+            <label style="display: block; font-size: 0.88rem; font-weight: 700; color: #f5d77f; margin-bottom: 8px;">
+              زمان بافر ضدعفونی دستگاه (دقیقه):
+            </label>
+            <input
+              type="number"
+              name="booking_buffer_minutes"
+              class="form-control-modal"
+              value={settings.booking_buffer_minutes || '0'}
+              min="0"
+              max="60"
+              required
+            />
+            <span style="display: block; font-size: 0.78rem; color: #94a3b8; margin-top: 4px;">
+              زمان استراحت و ضدعفونی اتاق لیزر پس از اتمام هر نوبت.
+            </span>
+          </div>
+
+          <div>
+            <label style="display: block; font-size: 0.88rem; font-weight: 700; color: #f5d77f; margin-bottom: 8px;">
+              منطقه زمانی سرور نوبت‌دهی:
+            </label>
+            <input
+              type="text"
+              name="timezone"
+              dir="ltr"
+              class="form-control-modal"
+              value={settings.timezone || 'Asia/Tehran'}
+              required
+            />
+            <span style="display: block; font-size: 0.78rem; color: #94a3b8; margin-top: 4px;">
+              مبنای محاسبه اوقات اداری و محاسبات تقویم شمسی.
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-section-block" style="padding: 28px; margin-bottom: 24px;">
+        <h3 class="section-block-title" style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+          <span>💎</span> سیاست‌های تخفیف و مالی
+        </h3>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+          <div>
+            <label style="display: block; font-size: 0.88rem; font-weight: 700; color: #f5d77f; margin-bottom: 8px;">
+              درصد تخفیف پکیج فول‌بادی (کل بدن):
+            </label>
+            <div style="position: relative;">
+              <input
+                type="number"
+                name="site_discount_percent"
+                class="form-control-modal"
+                value={settings.site_discount_percent || '15'}
+                min="0"
+                max="100"
+                required
+              />
+              <span style="position: absolute; left: 16px; top: 12px; color: #94a3b8; font-weight: 700;">٪</span>
+            </div>
+            <span style="display: block; font-size: 0.78rem; color: #94a3b8; margin-top: 4px;">
+              میزان کسر تخفیف هوشمند برای رزرو پکیج کامل بانوان.
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 14px; margin-top: 20px;">
+        <button
+          type="submit"
+          id="saveSettingsBtn"
+          class="btn-3d-accept"
+          style="padding: 14px 32px; font-size: 1rem; border-radius: 12px;"
+        >
+          💾 ذخیره تنظیمات در دیتابیس D1 (API Call)
+        </button>
+      </div>
+    </form>
   </div>
+
+  <script>
+    const form = document.getElementById('settingsForm') as HTMLFormElement;
+    const saveBtn = document.getElementById('saveSettingsBtn') as HTMLButtonElement;
+    const alertBox = document.getElementById('settingsAlert');
+    const alertText = document.getElementById('settingsAlertText');
+    const successBox = document.getElementById('settingsSuccess');
+
+    if (form) {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        saveBtn.disabled = true;
+        saveBtn.innerText = '⏳ در حال به‌روزرسانی تنظیمات...';
+        if (alertBox) alertBox.style.display = 'none';
+        if (successBox) successBox.style.display = 'none';
+
+        const formData = new FormData(form);
+        const payload: Record<string, any> = {};
+
+        formData.forEach((val, key) => {
+          const str = String(val).trim();
+          if (key === 'slot_granularity_minutes' || key === 'booking_buffer_minutes' || key === 'site_discount_percent') {
+            payload[key] = Number(str);
+          } else {
+            payload[key] = str;
+          }
+        });
+
+        try {
+          const res = await fetch('/api/v1/admin/settings', {
+            method: 'PUT',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+
+          const json = await res.json() as any;
+          if (res.ok && json.data) {
+            saveBtn.innerText = '✓ ذخیره شد!';
+            if (successBox) successBox.style.display = 'flex';
+            setTimeout(() => {
+              saveBtn.disabled = false;
+              saveBtn.innerText = '💾 ذخیره تنظیمات در دیتابیس D1 (API Call)';
+            }, 2500);
+          } else {
+            if (alertText) alertText.innerText = json.error?.message || 'خطا در ذخیره تنظیمات.';
+            if (alertBox) alertBox.style.display = 'flex';
+            saveBtn.disabled = false;
+            saveBtn.innerText = '💾 ذخیره تنظیمات در دیتابیس D1 (API Call)';
+          }
+        } catch {
+          if (alertText) alertText.innerText = 'خطای ارتباط با سرور.';
+          if (alertBox) alertBox.style.display = 'flex';
+          saveBtn.disabled = false;
+          saveBtn.innerText = '💾 ذخیره تنظیمات در دیتابیس D1 (API Call)';
+        }
+      });
+    }
+  </script>
 </AdminLayout>

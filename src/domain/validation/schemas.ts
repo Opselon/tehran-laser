@@ -110,6 +110,12 @@ export const cancelBookingSchema = z.object({
   reason: z.string().trim().max(300).optional(),
 });
 
+export const updateBookingSchema = z.object({
+  adminNote: z.string().max(500).nullable().optional(),
+  customerNote: z.string().max(500).nullable().optional(),
+  quotedAmount: z.number().int().nonnegative().optional(),
+});
+
 export const rescheduleBookingSchema = z.object({
   startsAt: isoInstantSchema,
   staffId: z.string().trim().min(1).max(64).nullable().optional(),
@@ -261,6 +267,8 @@ export const updateSettingsSchema = z.record(z.string(), z.union([z.string(), z.
 
 export const updateCustomerSchema = z.object({
   name: nameSchema.optional(),
+  phone: phoneSchema.optional(),
+  pricingCategory: z.enum(['female', 'male']).optional(),
   email: emailSchema.nullable().optional(),
   note: noteSchema.nullable().optional(),
 });

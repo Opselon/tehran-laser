@@ -17,62 +17,108 @@ try {
 
 <AdminLayout title="بانک مراجعین" activeNav="customers">
   <div class="admin-content-pad">
-    <div class="page-title-row mb-4">
+    <!-- 3D Header Row -->
+    <div class="dashboard-header-row">
       <div>
-        <h1 class="text-xl font-bold">بانک اطلاعات مراجعین کلینیک</h1>
-        <p class="text-muted small">لیست مراجعین ثبت‌شده و سوابق پرونده‌ها</p>
+        <h1 class="admin-page-title">بانک جامع اطلاعات مراجعین کلینیک</h1>
+        <p class="section-block-sub">
+          مشاهده، مدیریت، جستجو و ویرایش مستقیم مشخصات مراجعین (API First)
+        </p>
+      </div>
+      <div class="actions">
+        <span style="font-size: 0.88rem; color: #f5d77f; background: rgba(212, 175, 55, 0.15); border: 1px solid rgba(212, 175, 55, 0.35); padding: 8px 16px; border-radius: 12px;">
+          تعداد کل مراجعین: {customers.items.length.toLocaleString('fa-IR')} پرونده
+        </span>
       </div>
     </div>
 
-    <!-- Search Form (§28) -->
-    <div class="card p-3 mb-4">
-      <form method="GET" class="filter-form-grid">
-        <div class="form-group flex-grow-1">
+    <!-- 3D Search & Filter -->
+    <div class="admin-section-block" style="padding: 22px; margin-bottom: 26px;">
+      <form method="GET" style="display: flex; gap: 14px; align-items: center; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 260px;">
           <input
             type="text"
             name="q"
-            class="form-control form-control-sm"
-            placeholder="جستجو با نام مراجع یا شماره تلفن (مثال: ۰۹۱۲)..."
+            class="form-control-modal"
+            style="margin-top: 0; padding: 12px 18px;"
+            placeholder="جستجوی سریع با نام مراجع یا شماره تلفن (مثال: ۰۹۰۳)..."
             value={search || ''}
           />
         </div>
-        <div class="form-group">
-          <button type="submit" class="btn btn-primary btn-sm">جستجو</button>
-          <a href="/admin/customers" class="btn btn-outline btn-sm mr-2">پاک کردن</a>
+        <div style="display: flex; gap: 8px;">
+          <button type="submit" class="btn-3d-refresh" style="padding: 10px 22px;">
+            🔍 جستجوی مراجع
+          </button>
+          <a href="/admin/customers" class="btn-table-action" style="display: inline-flex; align-items: center; padding: 10px 16px;">
+            ✕ پاک کردن
+          </a>
         </div>
       </form>
     </div>
 
-    <!-- Customers Table -->
-    <div class="card p-0">
+    <!-- 3D Customers Table -->
+    <div class="admin-section-block" style="padding: 0; overflow: hidden;">
       {customers.items.length === 0 ? (
-        <div class="p-5 text-center text-muted">
-          <p class="mb-0">مراجع مطابق با جستجوی شما یافت نشد.</p>
+        <div class="empty-state-card" style="border: none; margin: 20px;">
+          <span class="empty-icon">👥</span>
+          <p class="empty-text">مراجع مطابق با جستجوی شما یافت نشد.</p>
         </div>
       ) : (
-        <div class="table-responsive">
+        <div class="today-table-wrapper" style="border: none; border-radius: 0;">
           <table class="admin-table">
             <thead>
               <tr>
                 <th>نام و نام خانوادگی</th>
                 <th>شماره همراه</th>
-                <th>بخش</th>
+                <th>بخش پذیرش</th>
                 <th>تعداد نوبت‌ها</th>
-                <th>آخرین مراجعه</th>
-                <th>تاریخ عضویت</th>
+                <th>آخرین نوبت</th>
+                <th>تاریخ ثبت پرونده</th>
+                <th>عملیات ویرایش</th>
               </tr>
             </thead>
             <tbody>
               {customers.items.map((c) => (
                 <tr>
-                  <td class="font-bold">{c.name}</td>
+                  <td style={{ fontWeight: 800, color: '#ffffff' }}>{c.name}</td>
                   <td dir="ltr">
-                    <a href={`tel:${c.phone}`} class="phone-link">{c.phone}</a>
+                    <a href={`tel:${c.phone}`} style={{ color: '#38bdf8', textDecoration: 'none', fontWeight: 700 }}>
+                      📞 {c.phone}
+                    </a>
                   </td>
-                  <td>{c.pricingCategory === 'female' ? 'بانوان' : 'آقایان'}</td>
-                  <td>{c.bookingsCount.toLocaleString('fa-IR')} نوبت</td>
-                  <td>{c.lastBookingAt ? formatJalaliDate(c.lastBookingAt.slice(0, 10)) : '—'}</td>
-                  <td>{formatJalaliDate(c.createdAt.slice(0, 10))}</td>
+                  <td>
+                    <span class={`badge-status ${c.pricingCategory === 'female' ? 'badge-status-completed' : 'badge-status-pending'}`}>
+                      {c.pricingCategory === 'female' ? 'بانوان' : 'آقایان'}
+                    </span>
+                  </td>
+                  <td style={{ fontWeight: 700 }}>
+                    {(c.bookingsCount ?? 0).toLocaleString('fa-IR')} نوبت
+                  </td>
+                  <td>
+                    {c.lastBookingAt ? (
+                      <span style={{ color: '#f5d77f' }}>{formatJalaliDate(c.lastBookingAt.slice(0, 10))}</span>
+                    ) : (
+                      <span style={{ color: '#64748b' }}>—</span>
+                    )}
+                  </td>
+                  <td style={{ color: '#cbd5e1', fontSize: '0.85rem' }}>
+                    {formatJalaliDate(c.createdAt.slice(0, 10))}
+                  </td>
+                  <td>
+                    <button
+                      type="button"
+                      class="btn-table-action edit-customer-btn"
+                      style="border-color: rgba(212, 175, 55, 0.45); color: #f5d77f;"
+                      data-id={c.id}
+                      data-name={c.name}
+                      data-phone={c.phone}
+                      data-category={c.pricingCategory}
+                      data-email={c.email || ''}
+                      data-note={c.note || ''}
+                    >
+                      ✏️ ویرایش مشخصات
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -80,5 +126,179 @@ try {
         </div>
       )}
     </div>
+
+    <!-- 3D Edit Customer Modal -->
+    <div id="customerEditModal" class="modal-backdrop" style="display: none;">
+      <div class="modal-dialog">
+        <h3 class="modal-title">✏️ ویرایش پرونده مراجع</h3>
+        <p style="color: rgba(226, 232, 240, 0.7); font-size: 0.86rem; margin: 0 0 18px;">
+          تغییرات مستقیماً در دیتابیس D1 ذخیره و در تمامی بخش‌های پذیرش اعمال خواهد شد.
+        </p>
+
+        <div id="editAlert" class="alert-3d-danger" style="display: none; margin-bottom: 16px;">
+          <span id="editAlertText"></span>
+        </div>
+
+        <form id="editCustomerForm">
+          <input type="hidden" id="editCustomerId" />
+
+          <div style="margin-bottom: 14px;">
+            <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #e2e8f0; margin-bottom: 6px;">
+              نام و نام خانوادگی مراجع:
+            </label>
+            <input
+              type="text"
+              id="editCustomerName"
+              class="form-control-modal"
+              required
+            />
+          </div>
+
+          <div style="margin-bottom: 14px;">
+            <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #e2e8f0; margin-bottom: 6px;">
+              شماره تلفن همراه (جهت پیامک و تماس):
+            </label>
+            <input
+              type="tel"
+              id="editCustomerPhone"
+              dir="ltr"
+              class="form-control-modal"
+              required
+            />
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+            <div>
+              <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #e2e8f0; margin-bottom: 6px;">
+                بخش پذیرش:
+              </label>
+              <select id="editCustomerCategory" class="form-control-modal">
+                <option value="female">بانوان</option>
+                <option value="male">آقایان</option>
+              </select>
+            </div>
+
+            <div>
+              <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #e2e8f0; margin-bottom: 6px;">
+                آدرس ایمیل (اختیاری):
+              </label>
+              <input
+                type="email"
+                id="editCustomerEmail"
+                dir="ltr"
+                class="form-control-modal"
+                placeholder="example@mail.com"
+              />
+            </div>
+          </div>
+
+          <div style="margin-bottom: 18px;">
+            <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #e2e8f0; margin-bottom: 6px;">
+              یادداشت و پرونده بالینی (پوست، حساسیت، توضیحات):
+            </label>
+            <textarea
+              id="editCustomerNote"
+              class="form-control-modal"
+              rows={3}
+              placeholder="توضیحات نوع پوست، آلرژی یا یادداشت اپراتور..."
+            ></textarea>
+          </div>
+
+          <div class="modal-actions-row">
+            <button type="button" id="cancelEditBtn" class="btn-table-action">
+              انصراف
+            </button>
+            <button type="submit" id="saveCustomerBtn" class="btn-3d-accept" style="flex: none; padding: 12px 24px;">
+              ✓ ذخیره تغییرات مراجع
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
+
+  <!-- Client-side script for editing -->
+  <script>
+    const modal = document.getElementById('customerEditModal');
+    const form = document.getElementById('editCustomerForm') as HTMLFormElement;
+    const cancelBtn = document.getElementById('cancelEditBtn');
+    const saveBtn = document.getElementById('saveCustomerBtn') as HTMLButtonElement;
+    const alertBox = document.getElementById('editAlert');
+    const alertText = document.getElementById('editAlertText');
+
+    const idInput = document.getElementById('editCustomerId') as HTMLInputElement;
+    const nameInput = document.getElementById('editCustomerName') as HTMLInputElement;
+    const phoneInput = document.getElementById('editCustomerPhone') as HTMLInputElement;
+    const categorySelect = document.getElementById('editCustomerCategory') as unknown as HTMLSelectElement;
+    const emailInput = document.getElementById('editCustomerEmail') as HTMLInputElement;
+    const noteInput = document.getElementById('editCustomerNote') as HTMLTextAreaElement;
+
+    // Attach click listeners to edit buttons
+    document.querySelectorAll('.edit-customer-btn').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        const target = e.currentTarget as HTMLElement;
+        if (!target) return;
+
+        idInput.value = target.dataset.id || '';
+        nameInput.value = target.dataset.name || '';
+        phoneInput.value = target.dataset.phone || '';
+        categorySelect.value = target.dataset.category || 'female';
+        emailInput.value = target.dataset.email || '';
+        noteInput.value = target.dataset.note || '';
+
+        if (alertBox) alertBox.style.display = 'none';
+        if (modal) modal.style.display = 'flex';
+      });
+    });
+
+    if (cancelBtn && modal) {
+      cancelBtn.addEventListener('click', () => {
+        modal.style.display = 'none';
+      });
+    }
+
+    if (form && modal) {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const customerId = idInput.value;
+        if (!customerId) return;
+
+        saveBtn.disabled = true;
+        saveBtn.innerText = 'در حال ذخیره در دیتابیس...';
+        if (alertBox) alertBox.style.display = 'none';
+
+        try {
+          const res = await fetch(`/api/v1/admin/customers/${customerId}`, {
+            method: 'PUT',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({
+              name: nameInput.value.trim(),
+              phone: phoneInput.value.trim(),
+              pricingCategory: categorySelect.value,
+              email: emailInput.value.trim() || null,
+              note: noteInput.value.trim() || null,
+            }),
+          });
+
+          const json = await res.json() as any;
+          if (res.ok && json.data) {
+            saveBtn.innerText = '✓ ذخیره شد!';
+            setTimeout(() => {
+              window.location.reload();
+            }, 500);
+          } else {
+            if (alertText) alertText.innerText = json.error?.message || 'خطا در ثبت تغییرات.';
+            if (alertBox) alertBox.style.display = 'flex';
+            saveBtn.disabled = false;
+            saveBtn.innerText = '✓ ذخیره تغییرات مراجع';
+          }
+        } catch {
+          if (alertText) alertText.innerText = 'خطای ارتباط با سرور.';
+          if (alertBox) alertBox.style.display = 'flex';
+          saveBtn.disabled = false;
+          saveBtn.innerText = '✓ ذخیره تغییرات مراجع';
+        }
+      });
+    }
+  </script>
 </AdminLayout>

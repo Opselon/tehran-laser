@@ -13,57 +13,91 @@ try {
 
 <AdminLayout title="خدمات و تعرفه‌ها" activeNav="services">
   <div class="admin-content-pad">
-    <div class="page-title-row mb-4">
+    <!-- 3D Header Row -->
+    <div class="dashboard-header-row">
       <div>
-        <h1 class="text-xl font-bold">کاتالوگ خدمات و تعرفه‌ها</h1>
-        <p class="text-muted small">مدیریت نواحی تحت پوشش لیزر، مدت زمان جلسات و تعرفه‌های مصوب</p>
+        <h1 class="admin-page-title">کاتالوگ خدمات و تعرفه‌های مصوب کلینیک</h1>
+        <p class="section-block-sub">
+          مدیریت نواحی تحت پوشش لیزر، ویرایش زمان جلسات و به‌روزرسانی قیمت‌ها (کاملاً API First)
+        </p>
+      </div>
+      <div class="actions">
+        <span style="font-size: 0.88rem; color: #f5d77f; background: rgba(212, 175, 55, 0.15); border: 1px solid rgba(212, 175, 55, 0.35); padding: 8px 16px; border-radius: 12px;">
+          تعداد خدمات فعال: {services.filter(s => s.active).length.toLocaleString('fa-IR')} از {services.length.toLocaleString('fa-IR')}
+        </span>
       </div>
     </div>
 
-    <div class="card p-0">
-      <div class="table-responsive">
+    <!-- 3D Services Table -->
+    <div class="admin-section-block" style="padding: 0; overflow: hidden;">
+      <div class="today-table-wrapper" style="border: none; border-radius: 0;">
         <table class="admin-table">
           <thead>
             <tr>
-              <th>ترتیب</th>
-              <th>نام خدمت</th>
+              <th style="width: 60px;">ترتیب</th>
+              <th>نام خدمت / ناحیه</th>
               <th>شناسه یکتا (Slug)</th>
               <th>مدت زمان</th>
-              <th>تعرفه بانوان (تومان)</th>
-              <th>وضعیت نمایش</th>
+              <th>تعرفه مصوب بانوان</th>
+              <th>وضعیت در وب‌سایت</th>
+              <th>عملیات ویرایش</th>
             </tr>
           </thead>
           <tbody>
             {services.map((s) => {
               const femalePrice = s.prices.find((p) => p.pricingCategory === 'female');
+              const priceAmount = femalePrice ? femalePrice.amount : 0;
               const isPromo = s.slug === 'full-body';
 
               return (
                 <tr>
-                  <td>{s.displayOrder}</td>
-                  <td class="font-bold">{s.name}</td>
-                  <td dir="ltr" class="font-mono text-muted small">{s.slug}</td>
-                  <td>⏱ {s.durationMinutes} دقیقه</td>
+                  <td style={{ textAlign: 'center', color: '#94a3b8' }}>{s.displayOrder}</td>
+                  <td style={{ fontWeight: 800, color: '#ffffff' }}>{s.name}</td>
+                  <td dir="ltr" style={{ fontFamily: 'monospace', color: '#f5d77f', fontSize: '0.85rem' }}>
+                    {s.slug}
+                  </td>
+                  <td>
+                    <span style={{ color: '#38bdf8', fontWeight: 600 }}>⏱ {s.durationMinutes} دقیقه</span>
+                  </td>
                   <td>
                     {femalePrice ? (
                       isPromo ? (
                         <div>
-                          <span class="strikethrough text-muted small ml-1">۲/۲۹۰/۰۰۰</span>
-                          <span class="font-bold text-success">۱/۹۴۰/۰۰۰</span>
+                          <span style={{ textDecoration: 'line-through', color: '#94a3b8', fontSize: '0.8rem', marginLeft: '6px' }}>
+                            ۲٬۲۹۰٬۰۰۰
+                          </span>
+                          <span style={{ color: '#34d399', fontWeight: 800 }}>
+                            ۱٬۹۴۰٬۰۰۰ تومان
+                          </span>
                         </div>
                       ) : (
-                        <span class="font-semibold">
-                          {(femalePrice.amount * 1000).toLocaleString('fa-IR')}
+                        <span style={{ fontWeight: 800, color: '#f5d77f' }}>
+                          {(femalePrice.amount * 1000).toLocaleString('fa-IR')} تومان
                         </span>
                       )
                     ) : (
-                      'استعلام تلفنی'
+                      <span style={{ color: '#94a3b8' }}>استعلام تلفنی</span>
                     )}
                   </td>
                   <td>
-                    <span class={`badge ${s.active ? 'badge-success' : 'badge-danger'}`}>
-                      {s.active ? 'فعال در سامانه' : 'غیرفعال'}
+                    <span class={`badge-status ${s.active ? 'badge-status-confirmed' : 'badge-status-rejected'}`}>
+                      {s.active ? 'فعال' : 'غیرفعال'}
                     </span>
+                  </td>
+                  <td>
+                    <button
+                      type="button"
+                      class="btn-table-action edit-service-btn"
+                      style="border-color: rgba(212, 175, 55, 0.45); color: #f5d77f;"
+                      data-id={s.id}
+                      data-name={s.name}
+                      data-slug={s.slug}
+                      data-duration={s.durationMinutes}
+                      data-active={s.active ? 'true' : 'false'}
+                      data-price={priceAmount}
+                    >
+                      ✏️ ویرایش خدمت و قیمت
+                    </button>
                   </td>
                 </tr>
               );
@@ -72,5 +106,182 @@ try {
         </table>
       </div>
     </div>
+
+    <!-- 3D Edit Service Modal -->
+    <div id="serviceEditModal" class="modal-backdrop" style="display: none;">
+      <div class="modal-dialog">
+        <h3 class="modal-title">✏️ ویرایش خدمت و تعرفه مصوب</h3>
+        <p style="color: rgba(226, 232, 240, 0.7); font-size: 0.86rem; margin: 0 0 18px;">
+          تغییر نام، زمان تخصیصی جلسه و قیمت خدمت مستقیماً در دیتابیس D1 ذخیره می‌شود.
+        </p>
+
+        <div id="serviceAlert" class="alert-3d-danger" style="display: none; margin-bottom: 16px;">
+          <span id="serviceAlertText"></span>
+        </div>
+
+        <form id="editServiceForm">
+          <input type="hidden" id="editServiceId" />
+
+          <div style="margin-bottom: 14px;">
+            <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #e2e8f0; margin-bottom: 6px;">
+              نام ناحیه / خدمت:
+            </label>
+            <input
+              type="text"
+              id="editServiceName"
+              class="form-control-modal"
+              required
+            />
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+            <div>
+              <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #e2e8f0; margin-bottom: 6px;">
+                مدت زمان جلسه (دقیقه):
+              </label>
+              <input
+                type="number"
+                id="editServiceDuration"
+                class="form-control-modal"
+                min="5"
+                max="180"
+                required
+              />
+            </div>
+
+            <div>
+              <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #e2e8f0; margin-bottom: 6px;">
+                وضعیت انتشار:
+              </label>
+              <select id="editServiceActive" class="form-control-modal">
+                <option value="true">فعال (قابل رزرو)</option>
+                <option value="false">غیرفعال (مخفی)</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="margin-bottom: 18px;">
+            <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #e2e8f0; margin-bottom: 6px;">
+              تعرفه مصوب بانوان (هزار تومان - ضرب در ۱۰۰۰):
+            </label>
+            <input
+              type="number"
+              id="editServicePrice"
+              class="form-control-modal"
+              placeholder="مثال: ۳۲۰ برای ۳۲۰٬۰۰۰ تومان"
+              min="0"
+            />
+            <span style="display: block; font-size: 0.78rem; color: #94a3b8; margin-top: 4px;">
+              توجه: عدد بر حسب هزار تومان است (مثال: عدد ۲۵۰ معادل ۲۵۰٬۰۰۰ تومان محاسبه می‌شود).
+            </span>
+          </div>
+
+          <div class="modal-actions-row">
+            <button type="button" id="cancelServiceBtn" class="btn-table-action">
+              انصراف
+            </button>
+            <button type="submit" id="saveServiceBtn" class="btn-3d-accept" style="flex: none; padding: 12px 24px;">
+              ✓ ذخیره تغییرات خدمت
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
+
+  <script>
+    const modal = document.getElementById('serviceEditModal');
+    const form = document.getElementById('editServiceForm') as HTMLFormElement;
+    const cancelBtn = document.getElementById('cancelServiceBtn');
+    const saveBtn = document.getElementById('saveServiceBtn') as HTMLButtonElement;
+    const alertBox = document.getElementById('serviceAlert');
+    const alertText = document.getElementById('serviceAlertText');
+
+    const idInput = document.getElementById('editServiceId') as HTMLInputElement;
+    const nameInput = document.getElementById('editServiceName') as HTMLInputElement;
+    const durationInput = document.getElementById('editServiceDuration') as HTMLInputElement;
+    const activeSelect = document.getElementById('editServiceActive') as unknown as HTMLSelectElement;
+    const priceInput = document.getElementById('editServicePrice') as HTMLInputElement;
+
+    document.querySelectorAll('.edit-service-btn').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        const target = e.currentTarget as HTMLElement;
+        if (!target) return;
+
+        idInput.value = target.dataset.id || '';
+        nameInput.value = target.dataset.name || '';
+        durationInput.value = target.dataset.duration || '15';
+        activeSelect.value = target.dataset.active || 'true';
+        priceInput.value = target.dataset.price || '0';
+
+        if (alertBox) alertBox.style.display = 'none';
+        if (modal) modal.style.display = 'flex';
+      });
+    });
+
+    if (cancelBtn && modal) {
+      cancelBtn.addEventListener('click', () => {
+        modal.style.display = 'none';
+      });
+    }
+
+    if (form && modal) {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const serviceId = idInput.value;
+        if (!serviceId) return;
+
+        saveBtn.disabled = true;
+        saveBtn.innerText = 'در حال ذخیره...';
+        if (alertBox) alertBox.style.display = 'none';
+
+        try {
+          const promises = [
+            fetch(`/api/v1/admin/services/${serviceId}`, {
+              method: 'PUT',
+              headers: { 'content-type': 'application/json' },
+              body: JSON.stringify({
+                name: nameInput.value.trim(),
+                durationMinutes: Number(durationInput.value),
+                active: activeSelect.value === 'true',
+              }),
+            }),
+          ];
+
+          const priceVal = Number(priceInput.value);
+          if (priceVal > 0) {
+            promises.push(
+              fetch(`/api/v1/admin/pricing/${serviceId}`, {
+                method: 'PUT',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({
+                  pricingCategory: 'female',
+                  amount: priceVal,
+                  currency: 'IRR_TOMAN',
+                }),
+              })
+            );
+          }
+
+          const results = await Promise.all(promises);
+          const allOk = results.every((r) => r.ok);
+
+          if (allOk) {
+            saveBtn.innerText = '✓ ذخیره شد!';
+            setTimeout(() => window.location.reload(), 400);
+          } else {
+            if (alertText) alertText.innerText = 'خطا در ثبت تغییرات خدمت یا تعرفه.';
+            if (alertBox) alertBox.style.display = 'flex';
+            saveBtn.disabled = false;
+            saveBtn.innerText = '✓ ذخیره تغییرات خدمت';
+          }
+        } catch {
+          if (alertText) alertText.innerText = 'خطای ارتباط با سرور.';
+          if (alertBox) alertBox.style.display = 'flex';
+          saveBtn.disabled = false;
+          saveBtn.innerText = '✓ ذخیره تغییرات خدمت';
+        }
+      });
+    }
+  </script>
 </AdminLayout>

@@ -134,6 +134,8 @@ export interface CustomerListItemDto {
   pricingCategory: PricingCategory;
   bookingsCount: number;
   lastBookingAt: string | null;
+  email?: string | null;
+  note?: string | null;
   createdAt: string;
 }
 
