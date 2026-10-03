@@ -14,7 +14,7 @@
     {
       "binding": "DB",
       "database_name": "tehran-laser-db",
-      "database_id": "REPLACE_AFTER_WRANGLER_D1_CREATE"
+      "database_id": "6ded6ab1-c8db-4071-aee9-bb74a7d61455"
     }
   ],
   "vars": {
