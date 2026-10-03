@@ -326,16 +326,26 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
                       key={s.slug}
                       className={`service-select-card ${isSelected ? 'selected' : ''}`}
                       onClick={() => setSelectedServiceSlug(s.slug)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          setSelectedServiceSlug(s.slug);
+                        }
+                      }}
                       role="button"
                       tabIndex={0}
+                      aria-pressed={isSelected}
                     >
                       <div className="card-radio">
-                        <span className={`radio-indicator ${isSelected ? 'checked' : ''}`}></span>
+                        <span className={`radio-indicator ${isSelected ? 'checked' : ''}`}>
+                          {isSelected ? '✓' : ''}
+                        </span>
                       </div>
                       <div className="card-details">
                         <div className="card-title-row">
                           <span className="service-name">{s.name}</span>
                           {isPromo && <span className="badge badge-promo">تخفیف ویژه ۱۵٪</span>}
+                          {isSelected && <span className="badge badge-selected">انتخاب شده ✓</span>}
                         </div>
                         <p className="service-short-desc">{s.shortDescription || s.description}</p>
                         <div className="card-price-row">
@@ -348,6 +358,20 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
                     </div>
                   );
                 })}
+              </div>
+            )}
+
+            {selectedService && (
+              <div className="selection-confirmation-banner animate-fade-in mt-4">
+                <div className="banner-text">
+                  <span className="banner-icon">✓</span>
+                  <span>
+                    خدمت انتخابی: <strong>{selectedService.name}</strong>
+                  </span>
+                </div>
+                <button type="button" className="btn btn-primary btn-sm" onClick={handleNext}>
+                  تأیید و انتخاب بخش (بانوان / آقایان) ←
+                </button>
               </div>
             )}
           </div>
@@ -363,11 +387,20 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
               <div
                 className={`gender-card ${pricingCategory === 'female' ? 'selected' : ''}`}
                 onClick={() => setPricingCategory('female')}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setPricingCategory('female');
+                  }
+                }}
                 role="button"
                 tabIndex={0}
+                aria-pressed={pricingCategory === 'female'}
               >
                 <div className="gender-icon">👩</div>
-                <div className="gender-title">بخش بانوان</div>
+                <div className="gender-title">
+                  بخش بانوان {pricingCategory === 'female' && <span className="badge badge-selected">✓</span>}
+                </div>
                 <p className="gender-desc">دستگاه اختصاصی، اپراتور مجرب خانم، تعرفه مصوب</p>
                 <div className="gender-price-preview">
                   {currentPrice ? (
@@ -388,11 +421,20 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
               <div
                 className={`gender-card ${pricingCategory === 'male' ? 'selected' : ''}`}
                 onClick={() => setPricingCategory('male')}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setPricingCategory('male');
+                  }
+                }}
                 role="button"
                 tabIndex={0}
+                aria-pressed={pricingCategory === 'male'}
               >
                 <div className="gender-icon">👨</div>
-                <div className="gender-title">بخش آقایان</div>
+                <div className="gender-title">
+                  بخش آقایان {pricingCategory === 'male' && <span className="badge badge-selected">✓</span>}
+                </div>
                 <p className="gender-desc">اپراتور آقا، متناسب با تراکم و ضخامت موهای آقایان</p>
                 <div className="gender-price-preview">
                   <span className="text-muted">استعلام تلفنی تعرفه</span>
@@ -407,6 +449,18 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
                 </span>
               </div>
             )}
+
+            <div className="selection-confirmation-banner animate-fade-in mt-4">
+              <div className="banner-text">
+                <span className="banner-icon">✓</span>
+                <span>
+                  بخش انتخابی: <strong>{pricingCategory === 'female' ? 'بانوان' : 'آقایان'}</strong>
+                </span>
+              </div>
+              <button type="button" className="btn btn-primary btn-sm" onClick={handleNext}>
+                تأیید و انتخاب تاریخ مراجعه ←
+              </button>
+            </div>
           </div>
         )}
 
@@ -424,15 +478,37 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
                     key={d.isoDate}
                     className={`date-slot-card ${isSelected ? 'selected' : ''}`}
                     onClick={() => setSelectedDate(d.isoDate)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setSelectedDate(d.isoDate);
+                      }
+                    }}
                     role="button"
                     tabIndex={0}
+                    aria-pressed={isSelected}
                   >
                     <span className="date-weekday">{d.weekdayName}</span>
                     <span className="date-jalali">{d.jalaliLabel}</span>
+                    {isSelected && <span className="date-selected-check">✓</span>}
                   </div>
                 );
               })}
             </div>
+
+            {selectedDate && (
+              <div className="selection-confirmation-banner animate-fade-in mt-4">
+                <div className="banner-text">
+                  <span className="banner-icon">✓</span>
+                  <span>
+                    روز انتخابی: <strong>{formatJalaliDate(selectedDate)}</strong>
+                  </span>
+                </div>
+                <button type="button" className="btn btn-primary btn-sm" onClick={handleNext}>
+                  تأیید و مشاهده ساعت‌های آزاد ←
+                </button>
+              </div>
+            )}
           </div>
         )}
 
@@ -475,11 +551,26 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
                         type="button"
                         className={`time-pill ${isSelected ? 'selected' : ''}`}
                         onClick={() => setSelectedSlot(slot.startsAt)}
+                        aria-pressed={isSelected}
                       >
-                        ⏱ ساعت {timeStr}
+                        ⏱ ساعت {timeStr} {isSelected ? '✓' : ''}
                       </button>
                     );
                   })}
+              </div>
+            )}
+
+            {selectedSlot && (
+              <div className="selection-confirmation-banner animate-fade-in mt-4">
+                <div className="banner-text">
+                  <span className="banner-icon">✓</span>
+                  <span>
+                    ساعت انتخابی: <strong>{new Date(selectedSlot).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Tehran' })}</strong>
+                  </span>
+                </div>
+                <button type="button" className="btn btn-primary btn-sm" onClick={handleNext}>
+                  تأیید و تکمیل مشخصات مراجع ←
+                </button>
               </div>
             )}
           </div>
@@ -633,7 +724,11 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
 
         {step < 6 ? (
           <button type="button" className="btn btn-primary mr-auto" onClick={handleNext}>
-            مرحله بعد →
+            {step === 1 && 'مرحله بعد (تعیین بخش بانوان / آقایان) →'}
+            {step === 2 && 'مرحله بعد (انتخاب تاریخ) →'}
+            {step === 3 && 'مرحله بعد (انتخاب ساعت) →'}
+            {step === 4 && 'مرحله بعد (اطلاعات مراجع) →'}
+            {step === 5 && 'مرحله بعد (پیش‌فاکتور و تأیید) →'}
           </button>
         ) : (
           <button
