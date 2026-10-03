@@ -1,0 +1,104 @@
+/* ─────────────────────────────────────────────────────────────
+   Tehran Laser — design tokens
+   Luxury beauty × modern clinical × editorial spacing.
+   Every color/space/radius/motion value in the app comes from here.
+   ───────────────────────────────────────────────────────────── */
+
+:root {
+  color-scheme: light;
+
+  /* Surfaces & ink (warm neutral family) */
+  --color-bg: #faf8f5;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f2eee8;
+  --color-surface-sunken: #ebe5dc;
+  --color-ink: #16130f;
+  --color-ink-soft: #3d372f;
+  --color-text-secondary: #6b6459;
+  --color-border: #e5ded3;
+  --color-border-strong: #d3c9ba;
+
+  /* Brand — champagne bronze on ivory */
+  --color-primary: #a98a54;
+  --color-primary-strong: #876c3c;
+  --color-primary-soft: #f3ece0;
+  --color-on-primary: #ffffff;
+
+  /* Dark editorial sections */
+  --color-ink-bg: #16130f;
+  --color-ink-bg-soft: #211d18;
+  --color-on-ink: #f7f3ec;
+  --color-on-ink-muted: #b3aa9c;
+
+  /* Status */
+  --color-success: #2f6b4f;
+  --color-success-soft: #e6f1eb;
+  --color-warning: #9a6b12;
+  --color-warning-soft: #faf1de;
+  --color-danger: #a8322b;
+  --color-danger-soft: #fbeae8;
+  --color-info: #35566e;
+  --color-info-soft: #e9f0f5;
+
+  /* Radii */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+  --radius-xl: 32px;
+  --radius-full: 999px;
+
+  /* Elevation — warm, restrained */
+  --shadow-sm: 0 1px 2px rgb(22 19 15 / 0.05), 0 1px 1px rgb(22 19 15 / 0.04);
+  --shadow-md: 0 6px 18px -8px rgb(22 19 15 / 0.16), 0 2px 6px -2px rgb(22 19 15 / 0.08);
+  --shadow-lg: 0 24px 48px -24px rgb(22 19 15 / 0.28), 0 8px 20px -12px rgb(22 19 15 / 0.12);
+
+  /* Spacing scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  --space-9: 96px;
+  --space-10: 128px;
+
+  /* Typography */
+  --font-sans: 'Vazirmatn Variable', Vazirmatn, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --text-display: clamp(2.4rem, 5.5vw, 4.25rem);
+  --text-h-xl: clamp(2rem, 4vw, 3rem);
+  --text-h-lg: clamp(1.6rem, 3vw, 2.25rem);
+  --text-h-md: clamp(1.3rem, 2vw, 1.5rem);
+  --text-body-lg: 1.125rem;
+  --text-body: 1rem;
+  --text-body-sm: 0.9375rem;
+  --text-caption: 0.8125rem;
+  --leading-tight: 1.2;
+  --leading-snug: 1.45;
+  --leading-body: 1.85;
+
+  /* Layout */
+  --container-max: 1200px;
+  --container-narrow: 760px;
+  --header-height: 72px;
+  --sticky-cta-height: 68px;
+
+  /* Motion */
+  --motion-instant: 120ms;
+  --motion-fast: 180ms;
+  --motion-normal: 280ms;
+  --motion-slow: 520ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-instant: 1ms;
+    --motion-fast: 1ms;
+    --motion-normal: 1ms;
+    --motion-slow: 1ms;
+  }
+}
