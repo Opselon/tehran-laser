@@ -1,0 +1,61 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { env } from 'cloudflare:workers';
+import { listBusinessHours } from '../../../server/repositories';
+
+let hours: Awaited<ReturnType<typeof listBusinessHours>> = [];
+try {
+  hours = await listBusinessHours(env.DB);
+} catch (e) {
+  console.error('Failed to load business hours:', e);
+}
+
+const weekdayNames = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'];
+---
+
+<AdminLayout title="ساعات کاری و تعطیلات" activeNav="schedule">
+  <div class="admin-content-pad">
+    <div class="page-title-row mb-4">
+      <div>
+        <h1 class="text-xl font-bold">ساعات کاری و زمان‌بندی کلینیک</h1>
+        <p class="text-muted small">تنظیم بازه‌های مجاز نوبت‌دهی هفتگی و روزهای تعطیل رسمی</p>
+      </div>
+    </div>
+
+    <!-- Business Hours Card (§19) -->
+    <div class="card p-4 mb-4">
+      <h3 class="font-bold text-lg mb-3">ساعات کاری هفتگی کلینیک</h3>
+      <div class="table-responsive">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>روز هفته</th>
+              <th>ساعت شروع</th>
+              <th>ساعت پایان</th>
+              <th>وضعیت پذیرش</th>
+            </tr>
+          </thead>
+          <tbody>
+            {weekdayNames.map((name, index) => {
+              const day = hours.find((h) => h.weekday === index);
+              const isOpen = day && day.segments.length > 0;
+
+              return (
+                <tr>
+                  <td class="font-bold">{name}</td>
+                  <td>{isOpen ? day.segments[0]?.opensAt : '—'}</td>
+                  <td>{isOpen ? day.segments[day.segments.length - 1]?.closesAt : '—'}</td>
+                  <td>
+                    <span class={`badge ${isOpen ? 'badge-success' : 'badge-danger'}`}>
+                      {isOpen ? 'فعال و باز' : 'تعطیل هفتگی'}
+                    </span>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</AdminLayout>

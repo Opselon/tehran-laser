@@ -1,0 +1,23 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { AdminDashboard } from '../../components/admin/AdminDashboard';
+import { env } from 'cloudflare:workers';
+import { getAdminDashboard } from '../../server/repositories';
+
+const todayStr = new Date().toISOString().slice(0, 10);
+const todayStartIso = `${todayStr}T00:00:00.000Z`;
+const todayEndIso = `${todayStr}T23:59:59.999Z`;
+
+let initialDashboard: Awaited<ReturnType<typeof getAdminDashboard>> | undefined = undefined;
+try {
+  initialDashboard = await getAdminDashboard(env.DB, todayStartIso, todayEndIso);
+} catch (e) {
+  console.error('Failed to load initial admin dashboard data:', e);
+}
+---
+
+<AdminLayout title="داشبورد و وضعیت امروز" activeNav="dashboard">
+  <div class="admin-content-pad">
+    <AdminDashboard client:load initialData={initialDashboard} />
+  </div>
+</AdminLayout>

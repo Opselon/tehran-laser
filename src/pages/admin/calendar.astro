@@ -1,0 +1,90 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { env } from 'cloudflare:workers';
+import { listAdminBookings } from '../../server/repositories';
+import { formatJalaliDate } from '../../lib/datetime/jalali';
+
+const url = Astro.url;
+const targetDate = url.searchParams.get('date') || new Date().toISOString().slice(0, 10);
+const fromIso = `${targetDate}T00:00:00.000Z`;
+const toIso = `${targetDate}T23:59:59.999Z`;
+
+let bookings: Awaited<ReturnType<typeof listAdminBookings>> = { items: [], nextCursor: null };
+try {
+  bookings = await listAdminBookings(env.DB, {
+    fromStartsAt: fromIso,
+    toStartsAt: toIso,
+    limit: 100,
+  });
+} catch (e) {
+  console.error('Failed to load calendar bookings:', e);
+}
+---
+
+<AdminLayout title="تقویم روزانه کلینیک" activeNav="calendar">
+  <div class="admin-content-pad">
+    <div class="page-title-row mb-4">
+      <div>
+        <h1 class="text-xl font-bold">تقویم زمان‌بندی کلینیک</h1>
+        <p class="text-muted small">نمایش نوبت‌ها به تفکیک روز انتخابی — {formatJalaliDate(targetDate)}</p>
+      </div>
+
+      <div class="date-selector-form">
+        <form method="GET" class="d-flex align-items-center gap-2">
+          <label class="small text-muted">انتخاب تاریخ:</label>
+          <input
+            type="date"
+            name="date"
+            class="form-control form-control-sm"
+            value={targetDate}
+            onchange="this.form.submit()"
+          />
+        </form>
+      </div>
+    </div>
+
+    <!-- Day Schedule Visual Timeline -->
+    <div class="card p-4">
+      <h3 class="font-bold text-lg mb-3">برنامه زمانی نوبت‌های {formatJalaliDate(targetDate)}</h3>
+
+      {bookings.items.length === 0 ? (
+        <div class="empty-state-card text-center p-5 text-muted">
+          <p class="mb-0">هیچ نوبتی برای این روز ثبت نشده است.</p>
+        </div>
+      ) : (
+        <div class="timeline-slots-grid">
+          {bookings.items.map((b) => {
+            const timeStr = new Date(b.startsAt).toLocaleTimeString('fa-IR', {
+              hour: '2-digit',
+              minute: '2-digit',
+              timeZone: 'Asia/Tehran',
+            });
+
+            return (
+              <div class={`timeline-slot-card status-${b.status}`}>
+                <div class="slot-time-badge font-bold">⏱ {timeStr}</div>
+                <div class="slot-body">
+                  <div class="slot-title font-semibold">{b.customer.name}</div>
+                  <div class="slot-subtitle small text-muted">
+                    {b.service.name} ({b.pricingCategory === 'female' ? 'بانوان' : 'آقایان'})
+                  </div>
+                  <div class="slot-phone small" dir="ltr">{b.customer.phone}</div>
+                </div>
+                <div class="slot-status">
+                  <span class={`badge badge-status-${b.status}`}>
+                    {b.status === 'confirmed' && 'تأییدشده'}
+                    {b.status === 'pending' && 'در انتظار'}
+                    {b.status === 'completed' && 'انجام‌شده'}
+                    {b.status === 'cancelled' && 'لغوشده'}
+                    {b.status === 'rejected' && 'ردشده'}
+                    {b.status === 'no_show' && 'عدم حضور'}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  </div>
+</AdminLayout>

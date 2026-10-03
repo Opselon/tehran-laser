@@ -112,11 +112,17 @@ export interface TodayItemDto {
 
 export interface AdminDashboardDto {
   date: string; // clinic-local today
-  counts: Record<BookingStatus, number>;
-  pending: AdminBookingDto[];
-  today: AdminBookingDto[];
-  nextArrival: AdminBookingDto | null;
-  totals: { customers: number; activeServices: number };
+  today: {
+    total: number;
+    pending: number;
+    confirmed: number;
+  };
+  counts: {
+    pendingBookings: number;
+    totalCustomers: number;
+    activeServices: number;
+  };
+  todayBookings: AdminBookingDto[];
 }
 
 /** ── Customers ──────────────────────────────────────────────── */
@@ -144,7 +150,10 @@ export interface StaffDto {
   id: string;
   name: string;
   active: boolean;
-  serviceSlugs: string[];
+  serviceIds: string[];
+  serviceSlugs?: string[];
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface BusinessSegmentDto {
@@ -179,6 +188,16 @@ export interface BlogSeoDto {
   canonicalUrl: string | null;
   ogTitle: string | null;
   ogDescription: string | null;
+}
+
+export interface PublicBlogPostSummaryDto {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  coverImage: string | null;
+  author: string | null;
+  publishedAt: string | null;
 }
 
 export interface PublicBlogPostDto {
@@ -290,6 +309,13 @@ export interface AuditLogDto {
   entityId: string | null;
   createdAt: string;
 }
+
+/** Convenience aliases for repository row contracts. */
+export type AdminBookingRowDto = AdminBookingDto;
+export type AdminCustomerRowDto = CustomerListItemDto;
+export type AdminStaffDto = StaffDto;
+export type AuditLogRowDto = AuditLogDto;
+export type NotificationEventRowDto = NotificationEventDto;
 
 /** ── Health ─────────────────────────────────────────────────── */
 

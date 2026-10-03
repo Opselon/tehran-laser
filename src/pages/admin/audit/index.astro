@@ -1,0 +1,71 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { env } from 'cloudflare:workers';
+import { listAuditLogs } from '../../../server/repositories';
+import { formatJalaliDate } from '../../../lib/datetime/jalali';
+
+let auditLogs: Awaited<ReturnType<typeof listAuditLogs>> = { items: [], nextCursor: null };
+try {
+  auditLogs = await listAuditLogs(env.DB, 50);
+} catch (e) {
+  console.error('Failed to load audit logs:', e);
+}
+---
+
+<AdminLayout title="گزارش وقایع و لاگ" activeNav="audit">
+  <div class="admin-content-pad">
+    <div class="page-title-row mb-4">
+      <div>
+        <h1 class="text-xl font-bold">دفتر ثبت رویدادها و لاگ‌های امنیتی (Audit Log)</h1>
+        <p class="text-muted small">ردیابی تمامی عملیات‌های حساس پذیرش، تأییدها و تغییرات سامانه</p>
+      </div>
+    </div>
+
+    <div class="card p-0">
+      {auditLogs.items.length === 0 ? (
+        <div class="p-5 text-center text-muted">
+          <p class="mb-0">رویدادی ثبت نگردیده است.</p>
+        </div>
+      ) : (
+        <div class="table-responsive">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>زمان وقوع</th>
+                <th>کاربر / عامل</th>
+                <th>عملیات انجام‌شده</th>
+                <th>نوع موجودیت</th>
+                <th>شناسه موجودیت</th>
+              </tr>
+            </thead>
+            <tbody>
+              {auditLogs.items.map((log) => {
+                const timeStr = new Date(log.createdAt).toLocaleTimeString('fa-IR', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  second: '2-digit',
+                  timeZone: 'Asia/Tehran',
+                });
+
+                return (
+                  <tr>
+                    <td>
+                      <div>{formatJalaliDate(log.createdAt.slice(0, 10))}</div>
+                      <span class="text-muted small">ساعت {timeStr}</span>
+                    </td>
+                    <td class="font-semibold">{log.actor || 'سیستم'}</td>
+                    <td>
+                      <span class="badge badge-outline">{log.action}</span>
+                    </td>
+                    <td>{log.entityType}</td>
+                    <td dir="ltr" class="font-mono text-muted small">{log.entityId || '—'}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  </div>
+</AdminLayout>

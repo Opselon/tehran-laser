@@ -1,0 +1,61 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { env } from 'cloudflare:workers';
+import { listAdminBlogPosts } from '../../../server/repositories';
+import { formatJalaliDate } from '../../../lib/datetime/jalali';
+
+let posts: Awaited<ReturnType<typeof listAdminBlogPosts>> = { items: [], nextCursor: null };
+try {
+  posts = await listAdminBlogPosts(env.DB, 50);
+} catch (e) {
+  console.error('Failed to load admin blog posts:', e);
+}
+---
+
+<AdminLayout title="مدیریت مقالات" activeNav="blog">
+  <div class="admin-content-pad">
+    <div class="page-title-row mb-4">
+      <div>
+        <h1 class="text-xl font-bold">مدیریت مقالات و محتوا (Blog CMS)</h1>
+        <p class="text-muted small">تولید محتوای سئو، آموزش‌های مراقبت پوستی و راهنماهای مراجعین</p>
+      </div>
+    </div>
+
+    <div class="card p-0">
+      {posts.items.length === 0 ? (
+        <div class="p-5 text-center text-muted">
+          <p class="mb-0">هنوز مقاله‌ای در سامانه ثبت نشده است.</p>
+        </div>
+      ) : (
+        <div class="table-responsive">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>عنوان مقاله</th>
+                <th>پیوند یکتا (Slug)</th>
+                <th>نویسنده</th>
+                <th>تاریخ انتشار</th>
+                <th>وضعیت</th>
+              </tr>
+            </thead>
+            <tbody>
+              {posts.items.map((p) => (
+                <tr>
+                  <td class="font-bold">{p.title}</td>
+                  <td dir="ltr" class="font-mono text-muted small">{p.slug}</td>
+                  <td>{p.author || 'تهران لیزر'}</td>
+                  <td>{p.publishedAt ? formatJalaliDate(p.publishedAt.slice(0, 10)) : '—'}</td>
+                  <td>
+                    <span class={`badge ${p.status === 'published' ? 'badge-success' : 'badge-warning'}`}>
+                      {p.status === 'published' ? 'منتشرشده' : 'پیش‌نویس'}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  </div>
+</AdminLayout>

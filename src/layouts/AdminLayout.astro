@@ -1,0 +1,116 @@
+---
+import '../styles/tokens.css';
+import '../styles/base.css';
+import '../styles/components.css';
+import '../styles/admin/admin.css';
+
+interface Props {
+  title?: string;
+  activeNav?: string;
+}
+
+const { title = 'سامانه مدیریت تهران لیزر', activeNav = 'dashboard' } = Astro.props;
+const auth = Astro.locals.auth;
+
+// Contract §326: unauthenticated requests must be redirected immediately
+if (!auth) {
+  return Astro.redirect('/admin/login');
+}
+
+const navItems = [
+  { id: 'dashboard', label: 'داشبورد و امروز', href: '/admin', icon: '📊' },
+  { id: 'bookings', label: 'مدیریت نوبت‌ها', href: '/admin/bookings', icon: '📋' },
+  { id: 'calendar', label: 'تقویم نوبت‌ها', href: '/admin/calendar', icon: '📅' },
+  { id: 'customers', label: 'بانک مراجعین', href: '/admin/customers', icon: '👥' },
+  { id: 'services', label: 'خدمات و تعرفه‌ها', href: '/admin/services', icon: '💎' },
+  { id: 'schedule', label: 'ساعات کاری و تعطیلات', href: '/admin/schedule', icon: '⏱' },
+  { id: 'blog', label: 'مقالات و محتوا', href: '/admin/blog', icon: '✍️' },
+  { id: 'settings', label: 'تنظیمات کلینیک', href: '/admin/settings', icon: '⚙️' },
+  { id: 'audit', label: 'گزارش وقایع و لاگ', href: '/admin/audit', icon: '📜' },
+];
+---
+
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title} | پنل مدیریت تهران لیزر</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+  <body class="admin-body">
+    <div class="admin-shell">
+      <!-- Topbar -->
+      <header class="admin-topbar">
+        <div class="admin-topbar__brand">
+          <a href="/admin" class="brand-link">
+            <strong>تهران لیزر</strong>
+            <span>سامانه فرماندهی عملیات</span>
+          </a>
+        </div>
+
+        <div class="admin-topbar__search-trigger mr-4">
+          <span class="search-hint">جستجوی سریع مراجع / نوبت (Ctrl + K)</span>
+        </div>
+
+        <div class="admin-topbar__actions ml-auto">
+          <div class="user-profile-badge">
+            <span class="user-name">{auth.displayName || auth.email}</span>
+            <span class="badge badge-primary">{auth.roles.join(', ')}</span>
+          </div>
+
+          <button type="button" class="btn btn-outline btn-sm logout-btn" id="adminLogoutBtn">
+            خروج از سامانه
+          </button>
+        </div>
+      </header>
+
+      <!-- Sidebar -->
+      <aside class="admin-sidebar">
+        <nav class="admin-sidebar__nav">
+          <ul class="admin-nav-list">
+            {navItems.map((item) => (
+              <li class="admin-nav-item">
+                <a
+                  href={item.href}
+                  class={`admin-nav-link ${activeNav === item.id ? 'active' : ''}`}
+                >
+                  <span class="nav-icon">{item.icon}</span>
+                  <span class="nav-label">{item.label}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
+        <div class="admin-sidebar__footer">
+          <a href="/" target="_blank" class="view-website-link">
+            🌐 مشاهده وب‌سایت اصلی ↗
+          </a>
+          <div class="version-tag">نسخه ۱.۰.۰ — Cloudflare Native</div>
+        </div>
+      </aside>
+
+      <!-- Main Content Area -->
+      <main class="admin-main">
+        <slot />
+      </main>
+    </div>
+
+    <!-- Script for logout action -->
+    <script>
+      const logoutBtn = document.getElementById('adminLogoutBtn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', async () => {
+          try {
+            await fetch('/api/v1/auth/logout', { method: 'POST' });
+            window.location.href = '/admin/login';
+          } catch {
+            window.location.href = '/admin/login';
+          }
+        });
+      }
+    </script>
+  </body>
+</html>

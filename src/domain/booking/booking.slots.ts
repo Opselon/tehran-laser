@@ -15,6 +15,25 @@ export function staffSlotKey(staffId: string | null): string {
   return staffId ? `staff:${staffId}` : CLINIC_SLOT_OWNER;
 }
 
+/** Alias for staffSlotKey. */
+export const slotStaffKey = staffSlotKey;
+
+/** Generates canonical grid slot instants for a booking duration. */
+export function buildSlotInstants(
+  startsAt: string,
+  durationMinutes: number,
+  granularityMinutes: number,
+  timezone = 'Asia/Tehran',
+): string[] {
+  return occupiedSlotStarts({
+    startsAt,
+    durationMinutes,
+    bufferMinutes: 0,
+    timezone,
+    granularityMinutes,
+  });
+}
+
 function quantise(localMinutes: number, granularityMinutes: number): number {
   return Math.floor(localMinutes / granularityMinutes) * granularityMinutes;
 }

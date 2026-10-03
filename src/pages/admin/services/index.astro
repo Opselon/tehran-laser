@@ -1,0 +1,76 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { env } from 'cloudflare:workers';
+import { listAdminServices } from '../../../server/repositories';
+
+let services: Awaited<ReturnType<typeof listAdminServices>> = [];
+try {
+  services = await listAdminServices(env.DB);
+} catch (e) {
+  console.error('Failed to load admin services:', e);
+}
+---
+
+<AdminLayout title="خدمات و تعرفه‌ها" activeNav="services">
+  <div class="admin-content-pad">
+    <div class="page-title-row mb-4">
+      <div>
+        <h1 class="text-xl font-bold">کاتالوگ خدمات و تعرفه‌ها</h1>
+        <p class="text-muted small">مدیریت نواحی تحت پوشش لیزر، مدت زمان جلسات و تعرفه‌های مصوب</p>
+      </div>
+    </div>
+
+    <div class="card p-0">
+      <div class="table-responsive">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>ترتیب</th>
+              <th>نام خدمت</th>
+              <th>شناسه یکتا (Slug)</th>
+              <th>مدت زمان</th>
+              <th>تعرفه بانوان (تومان)</th>
+              <th>وضعیت نمایش</th>
+            </tr>
+          </thead>
+          <tbody>
+            {services.map((s) => {
+              const femalePrice = s.prices.find((p) => p.pricingCategory === 'female');
+              const isPromo = s.slug === 'full-body';
+
+              return (
+                <tr>
+                  <td>{s.displayOrder}</td>
+                  <td class="font-bold">{s.name}</td>
+                  <td dir="ltr" class="font-mono text-muted small">{s.slug}</td>
+                  <td>⏱ {s.durationMinutes} دقیقه</td>
+                  <td>
+                    {femalePrice ? (
+                      isPromo ? (
+                        <div>
+                          <span class="strikethrough text-muted small ml-1">۲/۲۹۰/۰۰۰</span>
+                          <span class="font-bold text-success">۱/۹۴۰/۰۰۰</span>
+                        </div>
+                      ) : (
+                        <span class="font-semibold">
+                          {(femalePrice.amount * 1000).toLocaleString('fa-IR')}
+                        </span>
+                      )
+                    ) : (
+                      'استعلام تلفنی'
+                    )}
+                  </td>
+                  <td>
+                    <span class={`badge ${s.active ? 'badge-success' : 'badge-danger'}`}>
+                      {s.active ? 'فعال در سامانه' : 'غیرفعال'}
+                    </span>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</AdminLayout>

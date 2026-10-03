@@ -1,0 +1,125 @@
+---
+import PublicLayout from '../../layouts/PublicLayout.astro';
+import { env } from 'cloudflare:workers';
+import { listPublicServices } from '../../server/repositories';
+
+let services: Awaited<ReturnType<typeof listPublicServices>> = [];
+try {
+  services = await listPublicServices(env.DB);
+} catch (e) {
+  console.error('Failed to load services:', e);
+}
+---
+
+<PublicLayout
+  title="لیست خدمات و تعرفه‌های مصوب — کلینیک تهران لیزر"
+  description="مشاهده لیست کامل تعرفه‌ها و قیمت لیزر موهای زائد بانوان در کلینیک تهران لیزر پاسداران. بیش از ۲۰ ناحیه تخصصی با تعرفه مصوب و ۱۵٪ تخفیف ویژه رزرو سایت برای کل بدن."
+>
+  <div class="page-header-strip">
+    <div class="container text-center">
+      <span class="section-subtitle">شفافیت کامل در هزینه‌ها</span>
+      <h1 class="page-title">تعرفه‌های مصوب خدمات لیزر تهران لیزر</h1>
+      <p class="page-subtitle">
+        تمامی قیمت‌ها به صورت شفاف، قطعی و بر اساس تعرفه مصوب کلینیک تهران لیزر ارائه گردیده است.
+      </p>
+    </div>
+  </div>
+
+  <section class="section">
+    <div class="container">
+      <!-- Special Offer Banner -->
+      <div class="featured-promo-card mb-5">
+        <div class="promo-badge-ribbon">تخفیف ویژه ۱۵٪</div>
+        <div class="promo-content">
+          <div class="promo-info">
+            <h3 class="promo-title">پکیج طلایی کل بدن بانوان (Full Body)</h3>
+            <p class="promo-desc">
+              شامل دست کامل، پا کامل، زیر بغل، بیکینی، خط باسن، خط ناف و شکم با شات نامحدود و سیستم خنک‌کننده پیشرفته
+            </p>
+          </div>
+          <div class="promo-pricing-box">
+            <div class="old-price">
+              <span class="strikethrough">۲/۲۹۰/۰۰۰</span>
+              <span class="price-unit">تومان</span>
+            </div>
+            <div class="new-price">
+              <span class="final-amount">۱/۹۴۰/۰۰۰</span>
+              <span class="price-unit">تومان</span>
+            </div>
+            <a href="/booking?service=full-body" class="btn btn-primary btn-block mt-3">
+              رزرو نوبت کل بدن با تخفیف سایت
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Services Catalog Table / Grid -->
+      <div class="pricing-table-container">
+        <table class="table-pricing">
+          <thead>
+            <tr>
+              <th scope="col">ردیف</th>
+              <th scope="col">ناحیه خدمت</th>
+              <th scope="col">مدت زمان تقریبی</th>
+              <th scope="col">تعرفه بانوان (تومان)</th>
+              <th scope="col">بخش آقایان</th>
+              <th scope="col">عملیات</th>
+            </tr>
+          </thead>
+          <tbody>
+            {services.map((service, index) => {
+              const femalePrice = service.prices.find((p) => p.pricingCategory === 'female');
+              const isPromo = service.slug === 'full-body';
+
+              return (
+                <tr class={isPromo ? 'highlight-promo-row' : ''}>
+                  <td class="row-num">{(index + 1).toLocaleString('fa-IR')}</td>
+                  <td class="service-cell">
+                    <a href={`/services/${service.slug}`} class="service-link font-semibold">
+                      {service.name}
+                    </a>
+                    {isPromo && <span class="badge badge-promo mr-2">۱۵٪ تخفیف سایت</span>}
+                    <div class="text-muted small">{service.shortDescription}</div>
+                  </td>
+                  <td class="duration-cell">⏱ {service.durationMinutes} دقیقه</td>
+                  <td class="price-cell">
+                    {femalePrice ? (
+                      isPromo ? (
+                        <div>
+                          <span class="strikethrough text-muted small ml-1">۲/۲۹۰/۰۰۰</span>
+                          <span class="font-bold text-success">۱/۹۴۰/۰۰۰</span>
+                        </div>
+                      ) : (
+                        <span class="font-bold">
+                          {(femalePrice.amount * 1000).toLocaleString('fa-IR')} تومان
+                        </span>
+                      )
+                    ) : (
+                      'استعلام تلفنی'
+                    )}
+                  </td>
+                  <td class="male-cell">
+                    <span class="text-muted small">استعلام قیمت / تماس</span>
+                  </td>
+                  <td class="action-cell">
+                    <a href={`/booking?service=${service.slug}`} class="btn btn-primary btn-sm">
+                      رزرو نوبت
+                    </a>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Men's Services Explanatory Card (§11) -->
+      <div class="alert alert-info mt-5 p-4">
+        <h4 class="font-bold mb-2">📌 توضیحات در خصوص تعرفه خدمات آقایان:</h4>
+        <p class="mb-0">
+          با توجه به تفاوت در الگوی رشد، تراکم و ضخامت موهای آقایان و نیاز به تنظیمات اختصاصی دستگاه، تعرفه بخش آقایان متناسب با ناحیه و وسعت مورد نظر پس از بررسی در کلینیک یا از طریق تماس تلفنی با شماره <a href="tel:+989035555090" class="bold" dir="ltr">+98 903 555 5090</a> اعلام می‌گردد. لاین آقایان دارای اپراتور مجرب آقا و فضایی کاملاً مجزا می‌باشد.
+        </p>
+      </div>
+    </div>
+  </section>
+</PublicLayout>

@@ -1,0 +1,99 @@
+---
+import PublicLayout from '../../layouts/PublicLayout.astro';
+import { env } from 'cloudflare:workers';
+import { findPublicBlogPostBySlug } from '../../server/repositories';
+import { formatJalaliDate } from '../../lib/datetime/jalali';
+
+const { slug } = Astro.params;
+if (!slug) return Astro.redirect('/blog');
+
+const post = await findPublicBlogPostBySlug(env.DB, slug);
+if (!post) return Astro.redirect('/404');
+
+// Schema.org Article JSON-LD (§31, §135)
+const articleJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: post.title,
+  description: post.excerpt,
+  author: {
+    '@type': 'Person',
+    name: post.author || 'کلینیک تهران لیزر',
+  },
+  publisher: {
+    '@type': 'Organization',
+    name: 'کلینیک تهران لیزر',
+    url: 'https://tehranlaser.ir',
+  },
+  datePublished: post.publishedAt,
+};
+---
+
+<PublicLayout
+  title={`${post.seo.seoTitle || post.title} — تهران لیزر`}
+  description={post.seo.seoDescription || post.excerpt}
+  jsonLd={articleJsonLd}
+>
+  <div class="page-header-strip">
+    <div class="container container-sm text-center">
+      <nav class="breadcrumbs mb-3">
+        <a href="/">صفحه اصلی</a>
+        <span class="bc-sep">/</span>
+        <a href="/blog">مجله تخصصی</a>
+        <span class="bc-sep">/</span>
+        <span class="bc-current">{post.title}</span>
+      </nav>
+      <h1 class="article-main-title">{post.title}</h1>
+      <div class="article-meta-row mt-2">
+        <span>✍️ نویسنده: {post.author || 'تیم علمی تهران لیزر'}</span>
+        <span class="meta-dot">•</span>
+        <span>📅 تاریخ انتشار: {formatJalaliDate(post.publishedAt.slice(0, 10))}</span>
+      </div>
+    </div>
+  </div>
+
+  <section class="section">
+    <div class="container container-sm">
+      <article class="article-container">
+        <div class="article-excerpt-callout">
+          <p>{post.excerpt}</p>
+        </div>
+
+        <div class="article-content-body mt-4">
+          <!-- Render article paragraphs safely (§88) -->
+          {post.content.split('\n\n').map((paragraph) => {
+            if (paragraph.startsWith('## ')) {
+              return <h2 class="article-h2">{paragraph.replace('## ', '')}</h2>;
+            }
+            if (paragraph.startsWith('### ')) {
+              return <h3 class="article-h3">{paragraph.replace('### ', '')}</h3>;
+            }
+            if (paragraph.startsWith('- ')) {
+              return (
+                <ul class="article-list">
+                  {paragraph.split('\n').map((item) => (
+                    <li>{item.replace(/^- /, '')}</li>
+                  ))}
+                </ul>
+              );
+            }
+            return <p class="article-p">{paragraph}</p>;
+          })}
+        </div>
+
+        <hr class="summary-divider my-5" />
+
+        <!-- Article Footer CTA -->
+        <div class="article-bottom-cta card text-center p-4">
+          <h3 class="font-bold mb-2">مشاوره تخصصی و رزرو نوبت در تهران لیزر</h3>
+          <p class="text-muted small mb-3">
+            برای تجربه درمانی استاندارد و ایمن با اپراتورهای حرفه‌ای کلینیک پاسداران، نوبت خود را آنلاین ثبت نمایید.
+          </p>
+          <a href="/booking" class="btn btn-primary btn-lg">
+            ورود به سامانه رزرو آنلاین نوبت
+          </a>
+        </div>
+      </article>
+    </div>
+  </section>
+</PublicLayout>

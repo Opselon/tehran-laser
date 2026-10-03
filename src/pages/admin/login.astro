@@ -1,0 +1,117 @@
+---
+import '../../styles/tokens.css';
+import '../../styles/base.css';
+import '../../styles/components.css';
+import '../../styles/admin/admin.css';
+
+const auth = Astro.locals.auth;
+if (auth) {
+  return Astro.redirect('/admin');
+}
+---
+
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ورود به سامانه مدیریت | کلینیک تهران لیزر</title>
+    <meta name="robots" content="noindex, nofollow" />
+  </head>
+  <body class="admin-login-body">
+    <div class="login-wrapper">
+      <div class="login-card">
+        <div class="login-header text-center">
+          <div class="brand-logo mb-2">💎 تهران لیزر</div>
+          <h1 class="login-title font-bold text-xl">ورود به پنل مدیریت کلینیک</h1>
+          <p class="login-subtitle text-muted small">
+            سامانه جامع مدیریت نوبت‌ها، مراجعین و خدمات تهران لیزر
+          </p>
+        </div>
+
+        <div id="loginAlert" class="alert alert-danger mb-4" style="display: none;" role="alert">
+          <span id="loginAlertText"></span>
+        </div>
+
+        <form id="adminLoginForm" class="login-form">
+          <div class="form-group mb-3">
+            <label for="adminEmail" class="form-label required">آدرس ایمیل پرسنل:</label>
+            <input
+              id="adminEmail"
+              type="email"
+              dir="ltr"
+              class="form-control text-left"
+              placeholder="admin@tehranlaser.ir"
+              required
+              autocomplete="username"
+            />
+          </div>
+
+          <div class="form-group mb-4">
+            <label for="adminPassword" class="form-label required">کلمه عبور امنیتی:</label>
+            <input
+              id="adminPassword"
+              type="password"
+              dir="ltr"
+              class="form-control text-left"
+              placeholder="••••••••••••"
+              required
+              autocomplete="current-password"
+            />
+          </div>
+
+          <button type="submit" id="loginSubmitBtn" class="btn btn-primary btn-block btn-lg">
+            ورود امن به سامانه
+          </button>
+        </form>
+
+        <div class="login-footer text-center mt-4">
+          <span class="small text-muted">
+            امنیت ارتباط تضمین‌شده با پروتکل PBKDF2 و سشن سروری D1
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const form = document.getElementById('adminLoginForm') as HTMLFormElement;
+      const emailInput = document.getElementById('adminEmail') as HTMLInputElement;
+      const passwordInput = document.getElementById('adminPassword') as HTMLInputElement;
+      const submitBtn = document.getElementById('loginSubmitBtn') as HTMLButtonElement;
+      const alertBox = document.getElementById('loginAlert') as HTMLDivElement;
+      const alertText = document.getElementById('loginAlertText') as HTMLSpanElement;
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        alertBox.style.display = 'none';
+        submitBtn.disabled = true;
+        submitBtn.innerText = 'در حال بررسی مشخصات...';
+
+        try {
+          const res = await fetch('/api/v1/auth/login', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({
+              email: emailInput.value.trim(),
+              password: passwordInput.value,
+            }),
+          });
+
+          const data = (await res.json()) as any;
+          if (res.ok && data.data) {
+            window.location.href = '/admin';
+          } else {
+            alertText.innerText = data.error?.message || 'ایمیل یا کلمه عبور نادرست است.';
+            alertBox.style.display = 'flex';
+          }
+        } catch {
+          alertText.innerText = 'خطای ارتباط با سرور. لطفاً اتصال اینترنت را بررسی فرمایید.';
+          alertBox.style.display = 'flex';
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.innerText = 'ورود امن به سامانه';
+        }
+      });
+    </script>
+  </body>
+</html>

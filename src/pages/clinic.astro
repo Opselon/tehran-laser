@@ -1,0 +1,109 @@
+---
+import PublicLayout from '../layouts/PublicLayout.astro';
+
+const clinicJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'MedicalClinic',
+  name: 'کلینیک تهران لیزر',
+  image: 'https://tehranlaser.ir/og-image.jpg',
+  telephone: '+989035555090',
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: 'پاسداران، خیابان پایدارفرد، نبش بوستان هفتم',
+    addressLocality: 'تهران',
+    addressRegion: 'تهران',
+    addressCountry: 'IR',
+  },
+  geo: {
+    '@type': 'GeoCoordinates',
+    latitude: 35.7645,
+    longitude: 51.4628,
+  },
+  openingHoursSpecification: [
+    {
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday'],
+      opens: '09:00',
+      closes: '20:00',
+    },
+    {
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: 'Thursday',
+      opens: '09:00',
+      closes: '18:00',
+    },
+  ],
+};
+---
+
+<PublicLayout
+  title="درباره کلینیک تهران لیزر — پاسداران، خیابان پایدارفرد"
+  description="معرفی مرکز تخصصی زیبایی و لیزر تهران لیزر در منطقه پاسداران نبش بوستان هفتم. تجهیزات مدرن خنک‌کننده، کادر مجرب، محیط استریل و دسترسی آسان."
+  jsonLd={clinicJsonLd}
+>
+  <div class="page-header-strip">
+    <div class="container text-center">
+      <span class="section-subtitle">درباره مرکز ما</span>
+      <h1 class="page-title">کلینیک تخصصی تهران لیزر در پاسداران</h1>
+      <p class="page-subtitle">
+        تلفیق دانش پزشکی، مدرن‌ترین تکنولوژی خنک‌کننده و محیطی لوکس و آرام برای تجربه درمانی متمایز
+      </p>
+    </div>
+  </div>
+
+  <section class="section">
+    <div class="container container-sm">
+      <div class="clinic-info-card">
+        <h3 class="font-bold text-xl mb-3">درباره کلینیک تهران لیزر</h3>
+        <p class="text-body leading-relaxed mb-4">
+          کلینیک تهران لیزر با هدف ارائه خدمات تخصصی لیزر موهای زائد و زیبایی با بالاترین استانداردهای بهداشتی در شمال شرق تهران و منطقه اصیل پاسداران تأسیس گردیده است. ما باور داریم که تجربه یک جلسه لیزر، فراتر از تابش نور دستگاه است؛ حفظ آرامش مراجعه‌کننده، رعایت شأن مراجعین محترم، استریلیزاسیون دقیق تجهیزات و رعایت زمان‌بندی بدون اتلاف وقت، اصول تغییرناپذیر مجموعه ما هستند.
+        </p>
+
+        <div class="clinic-highlights-grid my-4">
+          <div class="highlight-item">
+            <span class="highlight-icon">📍</span>
+            <div>
+              <h4 class="font-semibold">لوکیشن و دسترسی آسان</h4>
+              <p class="small text-muted mb-0">واقع در پاسداران، خیابان پایدارفرد با دسترسی مناسب به بزرگراه‌های صیاد شیرازی و همت و دسترسی سریع به پارکینگ.</p>
+            </div>
+          </div>
+
+          <div class="highlight-item">
+            <span class="highlight-icon">❄️</span>
+            <div>
+              <h4 class="font-semibold">تکنولوژی بدون درد</h4>
+              <p class="small text-muted mb-0">سیستم سرمایش تماسی قدرتمند دمای پوست را در تمام طول تابش شات در سطح ایمن و خنک نگه می‌دارد.</p>
+            </div>
+          </div>
+
+          <div class="highlight-item">
+            <span class="highlight-icon">👩‍⚕️</span>
+            <div>
+              <h4 class="font-semibold">اپراتورهای ارشد خانم و آقا</h4>
+              <p class="small text-muted mb-0">لاین‌های درمانی کاملاً تفکیک‌شده برای بانوان و آقایان با حضور پرسنل مجرب و متعهد.</p>
+            </div>
+          </div>
+        </div>
+
+        <hr class="summary-divider my-4" />
+
+        <h4 class="font-bold mb-3">مشخصات و ساعات کاری کلینیک:</h4>
+        <ul class="clinic-meta-list">
+          <li><strong>آدرس:</strong> تهران، پاسداران، خیابان پایدارفرد، نبش بوستان هفتم</li>
+          <li><strong>شماره تماس پذیرش:</strong> <a href="tel:+989035555090" dir="ltr">+98 903 555 5090</a></li>
+          <li><strong>شنبه الی چهارشنبه:</strong> ۹:۰۰ صبح الی ۲۰:۰۰ شب</li>
+          <li><strong>پنجشنبه‌ها:</strong> ۹:۰۰ صبح الی ۱۸:۰۰ عصر</li>
+          <li><strong>جمعه‌ها و تعطیلات رسمی:</strong> تعطیل</li>
+        </ul>
+
+        <div class="clinic-cta-box mt-5 text-center">
+          <h4 class="font-bold mb-2">آماده تجربه یک جلسه حرفه‌ای هستید؟</h4>
+          <p class="small text-muted mb-3">نوبت خود را در کمتر از ۱ دقیقه به صورت آنلاین و با تخفیف سایت رزرو فرمایید.</p>
+          <a href="/booking" class="btn btn-primary btn-lg">
+            ورود به سامانه رزرو آنلاین نوبت
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+</PublicLayout>

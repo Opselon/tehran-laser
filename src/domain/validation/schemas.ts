@@ -219,3 +219,33 @@ export const seoWriteSchema = z.object({
   ogImage: z.string().trim().max(500).nullable().optional(),
   noindex: z.boolean(),
 });
+
+/** ── Admin schema aliases / helpers ────────────────────────── */
+
+export const createServiceSchema = serviceWriteSchema;
+export const updateServiceSchema = serviceWriteSchema.partial();
+
+export const updatePricingSchema = pricingWriteSchema.extend({
+  currency: z.string().trim().max(10).optional(),
+});
+
+export const createStaffSchema = z.object({
+  name: nameSchema,
+  active: z.boolean().default(true),
+  serviceIds: z.array(z.string().trim()).max(100).optional(),
+});
+export const updateStaffSchema = createStaffSchema.partial();
+
+export const createBlogPostSchema = blogWriteSchema;
+export const updateBlogPostSchema = blogWriteSchema.partial();
+
+export const createFaqSchema = faqWriteSchema;
+export const updateFaqSchema = faqWriteSchema.partial();
+
+export const updateSettingsSchema = z.record(z.string(), z.union([z.string(), z.number(), z.boolean()]));
+
+export const updateCustomerSchema = z.object({
+  name: nameSchema.optional(),
+  email: emailSchema.nullable().optional(),
+  note: noteSchema.nullable().optional(),
+});

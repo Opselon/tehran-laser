@@ -1,0 +1,25 @@
+---
+import PublicLayout from '../layouts/PublicLayout.astro';
+---
+
+<PublicLayout
+  title="صفحه پیدا نشد — کلینیک تهران لیزر"
+  description="متأسفانه صفحه مورد نظر شما در سایت کلینیک تهران لیزر یافت نشد."
+>
+  <section class="section py-5 text-center">
+    <div class="container container-sm">
+      <div class="error-page-card py-5">
+        <div class="error-badge mb-3">خطای ۴۰۴</div>
+        <h1 class="error-title text-2xl font-bold mb-3">صفحه مورد نظر پیدا نشد</h1>
+        <p class="error-desc text-muted mb-4">
+          آدرسی که وارد نموده‌اید تغییر یافته یا موقتاً در دسترس نیست. می‌توانید از بخش‌های زیر استفاده فرمایید:
+        </p>
+        <div class="error-actions-group">
+          <a href="/" class="btn btn-primary ml-2">بازگشت به صفحه اصلی</a>
+          <a href="/services" class="btn btn-outline ml-2">مشاهده تعرفه خدمات</a>
+          <a href="/booking" class="btn btn-outline">رزرو آنلاین نوبت</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</PublicLayout>

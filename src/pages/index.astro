@@ -1,21 +1,296 @@
 ---
-/**
- * Placeholder home page — replaced by the public-site lane.
- * Exists so the Astro/Cloudflare build pipeline can be verified before lanes land.
- */
+import PublicLayout from '../layouts/PublicLayout.astro';
+import { env } from 'cloudflare:workers';
+import { listPublicServices, listFaqItems } from '../server/repositories';
+
+// Fetch public services and FAQs server-side for instant SEO & zero JS dependence (§3, §31, §191)
+let services: Awaited<ReturnType<typeof listPublicServices>> = [];
+let faqs: Awaited<ReturnType<typeof listFaqItems>> = [];
+
+try {
+  [services, faqs] = await Promise.all([
+    listPublicServices(env.DB),
+    listFaqItems(env.DB),
+  ]);
+} catch (e) {
+  console.error('SSR homepage data fetch failure:', e);
+}
+
+// Generate FAQPage JSON-LD for rich snippets (§31, §135)
+const faqJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqs.slice(0, 6).map((f) => ({
+    '@type': 'Question',
+    name: f.question,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: f.answer,
+    },
+  })),
+};
 ---
 
-<html lang="fa" dir="rtl">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>تهران لیزر</title>
-    <meta name="description" content="تهران لیزر" />
-  </head>
-  <body>
-    <main class="container section">
-      <h1>تهران لیزر</h1>
-      <p class="lede">در حال ساخت…</p>
-    </main>
-  </body>
-</html>
+<PublicLayout
+  title="تهران لیزر — مرکز تخصصی لیزر موهای زائد در پاسداران"
+  description="کلینیک تخصصی تهران لیزر در خیابان پایدارفرد پاسداران. ارائه خدمات لیزر موهای زائد بانوان و آقایان، محیط لوکس و بهداشتی، تعرفه شفاف و ۱۵٪ تخفیف ویژه رزرو آنلاین."
+  jsonLd={faqJsonLd}
+>
+  <!-- Hero Section (§38) -->
+  <section class="hero-section">
+    <div class="container hero-container">
+      <div class="hero-content">
+        <div class="hero-badge animate-fade-in">
+          <span class="badge-dot"></span>
+          <span>کلینیک تخصصی زیبایی و لیزر پاسداران</span>
+        </div>
+        <h1 class="hero-title animate-fade-up">
+          تجربه‌ای لوکس و مؤثر از <span class="gold-gradient-text">لیزر موهای زائد</span> در تهران
+        </h1>
+        <p class="hero-subtitle animate-fade-up delay-1">
+          در کلینیک تهران لیزر، بالاترین استانداردهای بهداشتی و جدیدترین تکنولوژی روز دنیا را با همراهی اپراتورهای حرفه‌ای و مجرب گرد هم آورده‌ایم تا آسودگی و رضایت کامل شما را تضمین نماییم.
+        </p>
+        <div class="hero-cta-group animate-fade-up delay-2">
+          <a href="/booking" class="btn btn-primary btn-lg">
+            <span>رزرو آنلاین نوبت</span>
+            <span class="btn-arrow">←</span>
+          </a>
+          <a href="/services" class="btn btn-outline btn-lg">
+            <span>مشاهده خدمات و تعرفه‌ها</span>
+          </a>
+        </div>
+        <div class="hero-trust-metrics animate-fade-up delay-3">
+          <div class="metric-item">
+            <span class="metric-val">۱۰۰٪</span>
+            <span class="metric-label">رعایت اصول بهداشتی و پک استریل</span>
+          </div>
+          <div class="metric-divider"></div>
+          <div class="metric-item">
+            <span class="metric-val">۱۵٪</span>
+            <span class="metric-label">تخفیف ویژه رزرو اینترنتی پکیج کل بدن</span>
+          </div>
+          <div class="metric-divider"></div>
+          <div class="metric-item">
+            <span class="metric-val">پاسداران</span>
+            <span class="metric-label">دسترسی آسان با پارکینگ اختصاصی</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Trust Strip (§37) -->
+  <section class="trust-strip">
+    <div class="container trust-grid">
+      <div class="trust-card">
+        <div class="trust-icon">🛡️</div>
+        <h3 class="trust-title">اپراتورهای دوره‌دیده و مجرب</h3>
+        <p class="trust-desc">ارائه خدمات توسط اپراتورهای خانم و آقا با بالاترین دقت و استانداردهای درمانی</p>
+      </div>
+      <div class="trust-card">
+        <div class="trust-icon">✨</div>
+        <h3 class="trust-title">تکنولوژی پیشرفته خنک‌کننده</h3>
+        <p class="trust-desc">سیستم کولینگ هوشمند و قدرتمند جهت تجربه لیزر کاملاً بدون درد و سوزش</p>
+      </div>
+      <div class="trust-card">
+        <div class="trust-icon">🧼</div>
+        <h3 class="trust-title">بهداشت و سری‌های یکبار مصرف</h3>
+        <p class="trust-desc">استفاده از سلفون، ملحفه و سری مجزا برای هر مراجعه‌کننده با تضمین سلامت کامل</p>
+      </div>
+      <div class="trust-card">
+        <div class="trust-icon">💎</div>
+        <h3 class="trust-title">تعرفه‌های شفاف و مصوب</h3>
+        <p class="trust-desc">هزینه‌های مشخص بدون هیچ‌گونه هزینه پنهان یا تغییر قیمت در محل کلینیک</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Services & Pricing Section (§10, §11, §253, §254) -->
+  <section id="services" class="section services-section">
+    <div class="container">
+      <div class="section-header text-center">
+        <span class="section-subtitle">تعرفه‌های مصوب و شفاف</span>
+        <h2 class="section-title">خدمات تخصصی لیزر موهای زائد بانوان</h2>
+        <p class="section-desc">
+          تعرفه‌های رسمی کلینیک تهران لیزر برای بخش بانوان. رزرو پکیج کل بدن از طریق وب‌سایت مشمول ۱۵٪ تخفیف ویژه می‌باشد.
+        </p>
+      </div>
+
+      <!-- Featured Promo Banner -->
+      <div class="featured-promo-card">
+        <div class="promo-badge-ribbon">پیشنهاد ویژه سایت</div>
+        <div class="promo-content">
+          <div class="promo-info">
+            <h3 class="promo-title">پکیج طلایی کل بدن (Full Body)</h3>
+            <p class="promo-desc">شامل دست کامل، پا کامل، زیر بغل، بیکینی، خط باسن، خط ناف و شکم</p>
+            <ul class="promo-features">
+              <li>✓ انجام توسط اپراتور ارشد با شات نامحدود</li>
+              <li>✓ سیستم خنک‌کننده هوشمند بدون درد</li>
+              <li>✓ پک بهداشتی یکبار مصرف اختصاصی</li>
+            </ul>
+          </div>
+          <div class="promo-pricing-box">
+            <div class="old-price">
+              <span class="strikethrough">۲/۲۹۰/۰۰۰</span>
+              <span class="price-unit">تومان</span>
+            </div>
+            <div class="new-price">
+              <span class="final-amount">۱/۹۴۰/۰۰۰</span>
+              <span class="price-unit">تومان</span>
+            </div>
+            <span class="discount-tag">۱۵٪ تخفیف اختصاصی رزرو سایت</span>
+            <a href="/booking?service=full-body" class="btn btn-primary btn-block mt-3">
+              رزرو نوبت پکیج کل بدن
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Services Grid (SSR rendered) -->
+      <div class="services-grid mt-5">
+        {services.slice(0, 12).map((service) => {
+          const femalePrice = service.prices.find((p) => p.pricingCategory === 'female');
+          const isFullBody = service.slug === 'full-body';
+
+          return (
+            <div class="service-card">
+              <div class="service-card-header">
+                <h4 class="service-name">{service.name}</h4>
+                <span class="duration-badge">⏱ {service.durationMinutes} دقیقه</span>
+              </div>
+              <p class="service-desc">{service.shortDescription || service.description}</p>
+              <div class="service-pricing-row">
+                <div class="price-details">
+                  <span class="price-label">تعرفه بانوان:</span>
+                  <span class="price-amount">
+                    {femalePrice ? `${femalePrice.amount.toLocaleString('fa-IR')} هزار تومان` : 'استعلام تلفنی'}
+                  </span>
+                </div>
+                {isFullBody && <span class="badge badge-success">۱۵٪ تخفیف سایت</span>}
+              </div>
+              <div class="service-card-actions">
+                <a href={`/booking?service=${service.slug}`} class="btn btn-outline btn-sm btn-block">
+                  رزرو این خدمت
+                </a>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div class="text-center mt-5">
+        <a href="/services" class="btn btn-outline btn-lg">
+          مشاهده تمام ۲۰ ناحیه و لیست کامل قیمت‌ها ←
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Male Services Section Info (§11) -->
+  <section class="section male-services-strip">
+    <div class="container male-strip-inner">
+      <div class="male-text">
+        <span class="badge badge-outline">بخش مجزا</span>
+        <h3 class="male-title">خدمات اختصاصی لیزر آقایان</h3>
+        <p class="male-desc">
+          کلینیک تهران لیزر مجهز به لاین اختصاصی آقایان با اپراتورهای مجرب آقا و پروتکل‌های ویژه موهای ضخیم می‌باشد. نواحی آنکارد ریش، خط گردن، پشت، سینه و پکیج کامل با تعیین وقت قبلی ارائه می‌گردد.
+        </p>
+      </div>
+      <div class="male-cta">
+        <a href="tel:+989035555090" class="btn btn-outline btn-lg">
+          مشاوره تلفنی و استعلام تعرفه آقایان
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Why Tehran Laser Section -->
+  <section class="section why-us-section">
+    <div class="container">
+      <div class="section-header text-center">
+        <span class="section-subtitle">استانداردهای تهران لیزر</span>
+        <h2 class="section-title">چرا مراجعین پاسداران تهران لیزر را انتخاب می‌کنند؟</h2>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-item">
+          <div class="feature-number">۰۱</div>
+          <h4 class="feature-title">محیط لوکس، آرام و بدون معطلی</h4>
+          <p class="feature-desc">
+            سیستم زمان‌بندی دقیق و رزرو هوشمند باعث شده تا بدون اتلاف وقت و با احترام به زمان مراجعین، خدمات در کمال آرامش ارائه شود.
+          </p>
+        </div>
+        <div class="feature-item">
+          <div class="feature-number">۰۲</div>
+          <h4 class="feature-title">پروتکل‌های بهداشتی درجه یک</h4>
+          <p class="feature-desc">
+            تمامی فضاها پس از هر جلسه کاملاً ضدعفونی شده و ملحفه‌ها و سری دستگاه به شکل کاملاً استریل و یکبار مصرف تعویض می‌گردند.
+          </p>
+        </div>
+        <div class="feature-item">
+          <div class="feature-number">۰۳</div>
+          <h4 class="feature-title">مشاوره و پشتیبانی پس از درمان</h4>
+          <p class="feature-desc">
+            تیم پشتیبانی و اپراتورهای کلینیک مراقبت‌های قبل و بعد از لیزر را به طور کامل در اختیار شما قرار داده و وضعیت درمان شما را پیگیری می‌کنند.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section (§31, §256) -->
+  <section id="faq" class="section faq-section">
+    <div class="container">
+      <div class="section-header text-center">
+        <span class="section-subtitle">پاسخ به ابهامات شما</span>
+        <h2 class="section-title">سوالات متداول مراجعین</h2>
+      </div>
+
+      <div class="faq-accordion">
+        {faqs.map((faq) => (
+          <details class="faq-card">
+            <summary class="faq-question">
+              <span>{faq.question}</span>
+              <span class="faq-toggle-icon">+</span>
+            </summary>
+            <div class="faq-answer">
+              <p>{faq.answer}</p>
+            </div>
+          </details>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Clinic Location & Direct CTA (§34, §35, §36) -->
+  <section class="section clinic-location-section">
+    <div class="container location-container">
+      <div class="location-card">
+        <span class="section-subtitle">موقعیت و دسترسی</span>
+        <h2 class="location-heading">کلینیک تهران لیزر در منطقه پاسداران</h2>
+        <p class="location-address">
+          <strong>نشانی دقیق:</strong> تهران، پاسداران، خیابان پایدارفرد، نبش بوستان هفتم
+        </p>
+        <p class="location-phone">
+          <strong>تلفن نوبت‌دهی و پشتیبانی:</strong> <a href="tel:+989035555090" dir="ltr">+98 903 555 5090</a>
+        </p>
+        <p class="location-hours">
+          <strong>ساعات فعالیت:</strong> شنبه تا چهارشنبه ۹ الی ۲۰ | پنجشنبه ۹ الی ۱۸
+        </p>
+        <div class="location-actions mt-4">
+          <a
+            href="https://maps.google.com/?q=Pasdaran+Paydarfard+Tehran"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn btn-outline"
+          >
+            📍 مسیریابی روی نقشه
+          </a>
+          <a href="/booking" class="btn btn-primary">
+            رزرو آنلاین نوبت
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+</PublicLayout>

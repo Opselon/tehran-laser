@@ -56,12 +56,18 @@ export async function parseBody<T>(request: Request, schema: ZodType<T>): Promis
   return result.data;
 }
 
-/** Parse URL query params with a schema (same error contract as parseBody). */
-export function parseQuery<T>(url: URL, schema: ZodType<T>): T {
+export function getSearchParams(source: Request | URL): Record<string, string> {
+  const url = source instanceof URL ? source : new URL(source.url);
   const record: Record<string, string> = {};
   url.searchParams.forEach((value, key) => {
     record[key] = value;
   });
+  return record;
+}
+
+/** Parse URL query params with a schema (same error contract as parseBody). */
+export function parseQuery<T>(source: Request | URL, schema: ZodType<T>): T {
+  const record = getSearchParams(source);
   const result = schema.safeParse(record);
   if (!result.success) {
     throw new ApiError('VALIDATION_ERROR', 'پارامترهای درخواست معتبر نیست.', {

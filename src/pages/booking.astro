@@ -1,0 +1,40 @@
+---
+import PublicLayout from '../layouts/PublicLayout.astro';
+import { BookingWizard } from '../components/booking/BookingWizard';
+import { env } from 'cloudflare:workers';
+import { listPublicServices } from '../server/repositories';
+
+let services: Awaited<ReturnType<typeof listPublicServices>> = [];
+try {
+  services = await listPublicServices(env.DB);
+} catch (e) {
+  console.error('Failed to load services for booking page:', e);
+}
+
+const serviceParam = Astro.url.searchParams.get('service') ?? undefined;
+---
+
+<PublicLayout
+  title="رزرو آنلاین نوبت — کلینیک تخصصی تهران لیزر"
+  description="سامانه هوشمند و شبانه‌روزی رزرو آنلاین نوبت کلینیک تهران لیزر پاسداران. انتخاب خدمت، ساعت و تاریخ بدون معطلی با ۱۵٪ تخفیف ویژه سایت."
+>
+  <div class="booking-page-header">
+    <div class="container text-center">
+      <span class="section-subtitle">پذیرش هوشمند و بدون معطلی</span>
+      <h1 class="page-title">رزرو آنلاین نوبت کلینیک تهران لیزر</h1>
+      <p class="page-subtitle">
+        مراحل زیر را جهت ثبت نوبت خود تکمیل نمایید. تأییدیه و جزئیات نوبت بلافاصله ثبت خواهد شد.
+      </p>
+    </div>
+  </div>
+
+  <section class="section booking-page-section">
+    <div class="container container-sm">
+      <BookingWizard
+        client:load
+        initialServices={services}
+        preselectedSlug={serviceParam}
+      />
+    </div>
+  </section>
+</PublicLayout>

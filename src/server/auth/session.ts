@@ -26,7 +26,7 @@ export const DEFAULT_SESSION_TTL_HOURS = 168; // 7 days
 export async function createSession(
   db: D1Database,
   userId: string,
-  ttlHours: number,
+  ttlHours: number = DEFAULT_SESSION_TTL_HOURS,
   now: Date = new Date(),
 ): Promise<CreatedSession> {
   const token = randomToken(32);

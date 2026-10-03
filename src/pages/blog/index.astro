@@ -1,0 +1,59 @@
+---
+import PublicLayout from '../../layouts/PublicLayout.astro';
+import { env } from 'cloudflare:workers';
+import { listPublicBlogPosts } from '../../server/repositories';
+import { formatJalaliDate } from '../../lib/datetime/jalali';
+
+let postsPage: Awaited<ReturnType<typeof listPublicBlogPosts>> = { items: [], nextCursor: null };
+try {
+  postsPage = await listPublicBlogPosts(env.DB, 12);
+} catch (e) {
+  console.error('Failed to load blog posts:', e);
+}
+---
+
+<PublicLayout
+  title="مجله تخصصی زیبایی و لیزر — کلینیک تهران لیزر"
+  description="مقالات علمی و کاربردی پیرامون مراقبت‌های پوستی، آمادگی قبل از لیزر، مراقبت‌های پس از درمان، انواع پوست و استانداردهای کلینیکال."
+>
+  <div class="page-header-strip">
+    <div class="container text-center">
+      <span class="section-subtitle">آموزش و آگاهی</span>
+      <h1 class="page-title">مجله تخصصی تهران لیزر</h1>
+      <p class="page-subtitle">
+        راهنماهای علمی و کاربردی برای ارتقای سلامت پوست و دستیابی به بهترین نتیجه از جلسات لیزر
+      </p>
+    </div>
+  </div>
+
+  <section class="section">
+    <div class="container">
+      {postsPage.items.length === 0 ? (
+        <div class="empty-state text-center py-5">
+          <p class="text-muted">هنوز مقاله‌ای منتشر نشده است. به زودی مقالات جدید اضافه خواهند شد.</p>
+        </div>
+      ) : (
+        <div class="blog-posts-grid">
+          {postsPage.items.map((post) => (
+            <article class="blog-card">
+              <div class="blog-card-body">
+                <span class="blog-card-date">
+                  {post.publishedAt ? formatJalaliDate(post.publishedAt.slice(0, 10)) : ''}
+                </span>
+                <h3 class="blog-card-title">
+                  <a href={`/blog/${post.slug}`}>{post.title}</a>
+                </h3>
+                <p class="blog-card-excerpt">{post.excerpt}</p>
+                <div class="blog-card-footer mt-4">
+                  <a href={`/blog/${post.slug}`} class="read-more-link">
+                    مطالعه کامل مقاله ←
+                  </a>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
+    </div>
+  </section>
+</PublicLayout>

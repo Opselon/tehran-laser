@@ -1,0 +1,132 @@
+---
+import PublicLayout from '../../layouts/PublicLayout.astro';
+import { env } from 'cloudflare:workers';
+import { findPublicServiceBySlug } from '../../server/repositories';
+
+const { slug } = Astro.params;
+if (!slug) return Astro.redirect('/services');
+
+const service = await findPublicServiceBySlug(env.DB, slug);
+if (!service) return Astro.redirect('/404');
+
+const femalePrice = service.prices.find((p) => p.pricingCategory === 'female');
+const isPromo = service.slug === 'full-body';
+const basePrice = femalePrice?.amount ?? 0;
+
+// Schema.org Service JSON-LD (§31, §135)
+const serviceJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  name: `لیزر ${service.name}`,
+  description: service.description,
+  provider: {
+    '@type': 'MedicalClinic',
+    name: 'کلینیک تهران لیزر',
+    telephone: '+989035555090',
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: 'پاسداران، خیابان پایدارفرد، نبش بوستان هفتم',
+      addressLocality: 'تهران',
+      addressCountry: 'IR',
+    },
+  },
+  offers: femalePrice
+    ? {
+        '@type': 'Offer',
+        price: isPromo ? 1940000 : basePrice * 1000,
+        priceCurrency: 'IRR',
+        availability: 'https://schema.org/InStock',
+      }
+    : undefined,
+};
+---
+
+<PublicLayout
+  title={`لیزر ${service.name} در پاسداران — تعرفه و رزرو | کلینیک تهران لیزر`}
+  description={`خدمات تخصصی لیزر ${service.name} در کلینیک تهران لیزر پاسداران. مدت زمان ${service.durationMinutes} دقیقه، اپراتور مجرب، دستگاه خنک‌کننده بدون درد و تعرفه مصوب.`}
+  jsonLd={serviceJsonLd}
+>
+  <div class="page-header-strip">
+    <div class="container text-center">
+      <nav class="breadcrumbs mb-3">
+        <a href="/">صفحه اصلی</a>
+        <span class="bc-sep">/</span>
+        <a href="/services">خدمات و تعرفه‌ها</a>
+        <span class="bc-sep">/</span>
+        <span class="bc-current">{service.name}</span>
+      </nav>
+      <h1 class="page-title">لیزر تخصصی {service.name}</h1>
+      <p class="page-subtitle">
+        ارائه خدمات با مدرن‌ترین تجهیزات خنک‌کننده و بالاترین استاندارد بهداشتی در منطقه پاسداران
+      </p>
+    </div>
+  </div>
+
+  <section class="section">
+    <div class="container container-sm">
+      <div class="service-detail-card">
+        <div class="detail-header-row">
+          <div>
+            <span class="badge badge-primary mb-2">خدمات پوست و لیزر</span>
+            <h2 class="service-full-name">{service.name}</h2>
+          </div>
+          <div class="duration-pill">
+            <span>⏱ مدت جلسه:</span>
+            <strong>{service.durationMinutes} دقیقه</strong>
+          </div>
+        </div>
+
+        <p class="service-long-description">
+          {service.description}
+        </p>
+
+        <!-- Pricing Highlight Box -->
+        <div class="pricing-highlight-box my-4">
+          <div class="pricing-tier-row">
+            <span class="tier-label">تعرفه مصوب بخش بانوان:</span>
+            {femalePrice ? (
+              isPromo ? (
+                <div class="text-left" dir="ltr">
+                  <span class="strikethrough text-muted mr-2">۲,۲۹۰,۰۰۰ تومان</span>
+                  <span class="promo-final-price font-bold text-success">۱,۹۴۰,۰۰۰ تومان</span>
+                  <span class="badge badge-promo ml-2">۱۵٪ تخفیف سایت</span>
+                </div>
+              ) : (
+                <span class="tier-val font-bold">
+                  {(basePrice * 1000).toLocaleString('fa-IR')} تومان
+                </span>
+              )
+            ) : (
+              <span class="text-muted">استعلام تلفنی</span>
+            )}
+          </div>
+          <div class="pricing-tier-row mt-2">
+            <span class="tier-label">تعرفه بخش آقایان:</span>
+            <span class="text-muted small">استعلام قیمت بر اساس تراکم و وسعت در کلینیک یا تماس تلفنی</span>
+          </div>
+        </div>
+
+        <!-- Preparation & Care Guide -->
+        <div class="service-care-guide">
+          <h4 class="font-bold mb-3">مراقبت‌های ضروری پیش از جلسه لیزر {service.name}:</h4>
+          <ul class="care-list">
+            <li>✓ ناحیه مورد نظر را ۲۴ ساعت قبل از مراجعه صرفاً با ژیلت شیو فرمایید.</li>
+            <li>✓ از حداقل ۲ الی ۴ هفته پیش از جلسه از وکس، اپیلاسیون یا بندانداختن خودداری فرمایید.</li>
+            <li>✓ پوست ناحیه لیزر باید عاری از هرگونه کرم، لوسیون، مام یا ضدآفتاب باشد.</li>
+            <li>✓ در صورت مصرف داروهای خاص (مانند راکوتان)، لطفاً به اپراتور کلینیک اطلاع دهید.</li>
+          </ul>
+        </div>
+
+        <!-- Actions -->
+        <div class="service-detail-actions mt-5">
+          <a href={`/booking?service=${service.slug}`} class="btn btn-primary btn-lg btn-block">
+            رزرو آنلاین نوبت برای {service.name}
+          </a>
+          <a href="/services" class="btn btn-outline btn-block mt-2">
+            بازگشت به لیست همه خدمات
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+</PublicLayout>

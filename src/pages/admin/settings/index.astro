@@ -1,0 +1,57 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { env } from 'cloudflare:workers';
+import { getPublicSettings } from '../../../server/repositories';
+
+let settings: Record<string, string> = {};
+try {
+  settings = await getPublicSettings(env.DB);
+} catch (e) {
+  console.error('Failed to load settings:', e);
+}
+---
+
+<AdminLayout title="تنظیمات کلینیک" activeNav="settings">
+  <div class="admin-content-pad">
+    <div class="page-title-row mb-4">
+      <div>
+        <h1 class="text-xl font-bold">تنظیمات سیستم و پیکربندی کلینیک</h1>
+        <p class="text-muted small">مشاهده متغیرهای عملیاتی کلینیک تهران لیزر در دیتابیس D1</p>
+      </div>
+    </div>
+
+    <div class="card p-4">
+      <h3 class="font-bold text-lg mb-3">مشخصات عمومی کلینیک</h3>
+      <div class="settings-grid">
+        <div class="setting-item">
+          <span class="setting-key font-semibold">نام برند کلینیک:</span>
+          <span class="setting-value">{settings.business_name || 'تهران لیزر'}</span>
+        </div>
+        <div class="setting-item">
+          <span class="setting-key font-semibold">نشانی کلینیک:</span>
+          <span class="setting-value">{settings.address || 'پاسداران، خیابان پایدارفرد، نبش بوستان هفتم'}</span>
+        </div>
+        <div class="setting-item">
+          <span class="setting-key font-semibold">شماره تماس پشتیبانی:</span>
+          <span class="setting-value" dir="ltr">{settings.phone || '+98 903 555 5090'}</span>
+        </div>
+        <div class="setting-item">
+          <span class="setting-key font-semibold">منطقه زمانی سیستم:</span>
+          <span class="setting-value" dir="ltr">{settings.timezone || 'Asia/Tehran'}</span>
+        </div>
+        <div class="setting-item">
+          <span class="setting-key font-semibold">فاصله گام‌های نوبت‌دهی (Granularity):</span>
+          <span class="setting-value">{settings.slot_granularity_minutes || '30'} دقیقه</span>
+        </div>
+        <div class="setting-item">
+          <span class="setting-key font-semibold">فاصله بافر بین نوبت‌ها (Buffer):</span>
+          <span class="setting-value">{settings.booking_buffer_minutes || '0'} دقیقه</span>
+        </div>
+        <div class="setting-item">
+          <span class="setting-key font-semibold">درصد تخفیف سایت پکیج کل بدن:</span>
+          <span class="setting-value">{settings.site_discount_percent || '15'}٪</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</AdminLayout>

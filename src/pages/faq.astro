@@ -1,0 +1,66 @@
+---
+import PublicLayout from '../layouts/PublicLayout.astro';
+import { env } from 'cloudflare:workers';
+import { listFaqItems } from '../server/repositories';
+
+let faqs: Awaited<ReturnType<typeof listFaqItems>> = [];
+try {
+  faqs = await listFaqItems(env.DB);
+} catch (e) {
+  console.error('Failed to load FAQs:', e);
+}
+
+const faqJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqs.map((f) => ({
+    '@type': 'Question',
+    name: f.question,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: f.answer,
+    },
+  })),
+};
+---
+
+<PublicLayout
+  title="سوالات متداول مراجعین لیزر — کلینیک تهران لیزر"
+  description="پاسخ به پرتکرارترین پرسش‌ها پیرامون مراقبت‌های قبل و بعد لیزر، تعداد جلسات، سیستم خنک‌کننده، درد و تعرفه‌های کلینیک تهران لیزر در پاسداران."
+  jsonLd={faqJsonLd}
+>
+  <div class="page-header-strip">
+    <div class="container text-center">
+      <span class="section-subtitle">پاسخ به سوالات شما</span>
+      <h1 class="page-title">سوالات متداول مراجعین تهران لیزر</h1>
+      <p class="page-subtitle">
+        پاسخ‌های شفاف و علمی به ابهامات متداول مراجعین درباره جلسات لیزر، مراقبت‌ها و شرایط کلینیک
+      </p>
+    </div>
+  </div>
+
+  <section class="section">
+    <div class="container container-sm">
+      <div class="faq-accordion-list">
+        {faqs.map((faq) => (
+          <details class="faq-card mb-3" open>
+            <summary class="faq-question">
+              <span class="font-semibold">{faq.question}</span>
+              <span class="faq-toggle-icon">+</span>
+            </summary>
+            <div class="faq-answer">
+              <p class="text-body mb-0 leading-relaxed">{faq.answer}</p>
+            </div>
+          </details>
+        ))}
+      </div>
+
+      <div class="faq-bottom-cta text-center mt-5 p-4 card">
+        <h4 class="font-bold mb-2">پاسخ سوال خود را نیافتید؟</h4>
+        <p class="small text-muted mb-3">مشاورین پذیرش ما در تمام ساعات کاری پاسخگوی شما هستند.</p>
+        <a href="tel:+989035555090" class="btn btn-outline ml-2" dir="ltr">+98 903 555 5090</a>
+        <a href="/booking" class="btn btn-primary">رزرو آنلاین نوبت</a>
+      </div>
+    </div>
+  </section>
+</PublicLayout>

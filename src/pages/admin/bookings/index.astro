@@ -1,0 +1,150 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { env } from 'cloudflare:workers';
+import { listAdminBookings, listPublicServices } from '../../../server/repositories';
+import { formatJalaliDate } from '../../../lib/datetime/jalali';
+
+const url = Astro.url;
+const statusFilter = url.searchParams.get('status') || undefined;
+const searchFilter = url.searchParams.get('q') || undefined;
+const serviceFilter = url.searchParams.get('service') || undefined;
+
+let bookings: Awaited<ReturnType<typeof listAdminBookings>> = { items: [], nextCursor: null };
+let services: Awaited<ReturnType<typeof listPublicServices>> = [];
+
+try {
+  [bookings, services] = await Promise.all([
+    listAdminBookings(env.DB, {
+      status: statusFilter,
+      search: searchFilter,
+      limit: 50,
+    }),
+    listPublicServices(env.DB),
+  ]);
+} catch (e) {
+  console.error('Failed to load admin bookings:', e);
+}
+---
+
+<AdminLayout title="مدیریت نوبت‌ها" activeNav="bookings">
+  <div class="admin-content-pad">
+    <div class="page-title-row mb-4">
+      <div>
+        <h1 class="text-xl font-bold">دفتر نوبت‌ها و رزروها</h1>
+        <p class="text-muted small">مشاهده، فیلتر و جستجوی جامع تمامی رزروهای آنلاین و حضوری</p>
+      </div>
+    </div>
+
+    <!-- Filters Strip (§146) -->
+    <div class="card p-3 mb-4">
+      <form method="GET" class="filter-form-grid">
+        <div class="form-group">
+          <label class="form-label small">وضعیت نوبت:</label>
+          <select name="status" class="form-control form-control-sm">
+            <option value="">همه وضعیت‌ها</option>
+            <option value="pending" selected={statusFilter === 'pending'}>در انتظار تأیید</option>
+            <option value="confirmed" selected={statusFilter === 'confirmed'}>تأییدشده</option>
+            <option value="completed" selected={statusFilter === 'completed'}>انجام‌شده</option>
+            <option value="cancelled" selected={statusFilter === 'cancelled'}>لغوشده</option>
+            <option value="rejected" selected={statusFilter === 'rejected'}>ردشده</option>
+            <option value="no_show" selected={statusFilter === 'no_show'}>عدم حضور</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label small">فیلتر بر اساس خدمت:</label>
+          <select name="service" class="form-control form-control-sm">
+            <option value="">همه خدمات</option>
+            {services.map((s) => (
+              <option value={s.slug} selected={serviceFilter === s.slug}>{s.name}</option>
+            ))}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label small">جستجوی مراجع / کد رهگیری / تلفن:</label>
+          <input
+            type="text"
+            name="q"
+            class="form-control form-control-sm"
+            placeholder="نام، ۰۹۱۲ یا کد رهگیری..."
+            value={searchFilter || ''}
+          />
+        </div>
+
+        <div class="form-group actions-col">
+          <button type="submit" class="btn btn-primary btn-sm">اعمال فیلتر</button>
+          <a href="/admin/bookings" class="btn btn-outline btn-sm mr-2">پاک کردن</a>
+        </div>
+      </form>
+    </div>
+
+    <!-- Bookings Table (§145) -->
+    <div class="card p-0">
+      {bookings.items.length === 0 ? (
+        <div class="p-5 text-center text-muted">
+          <p class="mb-0">نوبتی با مشخصات واردشده یافت نشد.</p>
+        </div>
+      ) : (
+        <div class="table-responsive">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>کد نوبت</th>
+                <th>نام مراجع</th>
+                <th>شماره همراه</th>
+                <th>خدمت</th>
+                <th>بخش</th>
+                <th>تاریخ و ساعت نوبت</th>
+                <th>مبلغ مصوب</th>
+                <th>وضعیت</th>
+              </tr>
+            </thead>
+            <tbody>
+              {bookings.items.map((b) => {
+                const dateStr = b.startsAt.slice(0, 10);
+                const timeStr = new Date(b.startsAt).toLocaleTimeString('fa-IR', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  timeZone: 'Asia/Tehran',
+                });
+
+                return (
+                  <tr>
+                    <td dir="ltr" class="font-mono font-bold text-primary">{b.reference}</td>
+                    <td class="font-semibold">{b.customer.name}</td>
+                    <td dir="ltr">
+                      <a href={`tel:${b.customer.phone}`} class="phone-link">{b.customer.phone}</a>
+                    </td>
+                    <td>{b.service.name}</td>
+                    <td>{b.pricingCategory === 'female' ? 'بانوان' : 'آقایان'}</td>
+                    <td>
+                      <div>{formatJalaliDate(dateStr)}</div>
+                      <span class="text-muted small">⏱ ساعت {timeStr}</span>
+                    </td>
+                    <td>
+                      <div>{(b.quotedAmount * 1000).toLocaleString('fa-IR')} تومان</div>
+                      {b.discountAmount > 0 && (
+                        <span class="text-success small">تخفیف: {(b.discountAmount * 1000).toLocaleString('fa-IR')}</span>
+                      )}
+                    </td>
+                    <td>
+                      <span class={`badge badge-status-${b.status}`}>
+                        {b.status === 'confirmed' && 'تأییدشده'}
+                        {b.status === 'pending' && 'در انتظار تأیید'}
+                        {b.status === 'completed' && 'انجام‌شده'}
+                        {b.status === 'cancelled' && 'لغوشده'}
+                        {b.status === 'no_show' && 'عدم حضور'}
+                        {b.status === 'rejected' && 'ردشده'}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  </div>
+</AdminLayout>
