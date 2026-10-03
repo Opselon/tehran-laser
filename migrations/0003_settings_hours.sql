@@ -11,7 +11,10 @@ INSERT INTO settings (key, value, scope, updated_at) VALUES
   ('address',                  'تهران، پاسداران، خیابان پایدارفرد، نبش بوستان هفتم',      'public', strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
   ('timezone',                 'Asia/Tehran',                                           'public', strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
   ('currency',                 'IRT',                                                   'public', strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
-  ('currency_label',           'تومان',                                                  'public', strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+  -- Prices are stored exactly as supplied by the clinic's price list (which quotes
+  -- plain numbers: صورت ۳۲۰, کل بدن ۲/۲۹۰); the list is in thousands of toman.
+  -- Confirm with the clinic if needed — this label is admin-editable.
+  ('currency_label',           'هزار تومان',                                             'public', strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
   -- 15% site discount as stated in the clinic's own price message; set to 0 to disable.
   ('discount_percent',         '15',                                                    'public', strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
   ('booking_enabled',          'true',                                                  'public', strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),

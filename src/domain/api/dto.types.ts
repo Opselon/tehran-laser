@@ -28,6 +28,12 @@ export interface AdminServiceDto extends PublicServiceDto {
   updatedAt: string;
 }
 
+/** Pricing rows with their row ids — admin pricing reads/writes these (never the public shape). */
+export interface AdminPriceDto extends ServicePriceDto {
+  id: string;
+  serviceId: string;
+}
+
 /** ── Availability ───────────────────────────────────────────── */
 
 export interface AvailabilitySlotDto {
@@ -225,6 +231,12 @@ export interface PublicSettingsDto {
 export interface ClinicInfoDto {
   settings: PublicSettingsDto;
   hours: BusinessHoursDto[];
+}
+
+/** Cursor-paginated list envelope. `nextCursor` is an opaque `created_at|id` string. */
+export interface PageDto<T> {
+  items: T[];
+  nextCursor: string | null;
 }
 
 export interface AdminSettingsDto {

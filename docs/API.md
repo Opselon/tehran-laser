@@ -34,7 +34,7 @@ buttons is never authorization.
 | GET | `/api/v1/services/:slug` | – | `PublicServiceDto` | `404 NOT_FOUND` if missing/inactive |
 | GET | `/api/v1/availability` | `service, date, category, staffId?` | `AvailabilityResponseDto` | `date` = `YYYY-MM-DD` clinic-local |
 | POST | `/api/v1/bookings` | `CreateBookingInput` | `PublicBookingSummaryDto` | `201`; rate limited; idempotent via `idempotencyKey` |
-| GET | `/api/v1/blog` | `cursor?, limit?` | `Paginated<PublicBlogPostDto>` | published only |
+| GET | `/api/v1/blog` | `cursor?, limit?` | `PageDto<PublicBlogPostDto>` | published only |
 | GET | `/api/v1/blog/:slug` | – | `PublicBlogPostDto` | `404` for non-published |
 | GET | `/api/v1/clinic` | – | `ClinicInfoDto` | `{ settings: PublicSettingsDto, hours: BusinessHoursDto[] }` |
 | GET | `/api/v1/settings/public` | – | `PublicSettingsDto` | public scope only — never private keys |
@@ -63,22 +63,24 @@ buttons is never authorization.
 | --- | --- | --- |
 | dashboard | `GET /admin/dashboard` | `booking.read` |
 | bookings | `GET /admin/bookings`, `GET /admin/bookings/:id` | `booking.read` |
+| booking timeline | `GET /admin/bookings/:id/timeline` | `booking.read` |
 | booking actions | `POST /admin/bookings/:id/{accept,reject,cancel,reschedule,complete,no-show}` | `booking.accept` / `booking.reject` / `booking.cancel` / `booking.reschedule` / `booking.complete` |
 | services | `GET /admin/services` (`service.read`), `POST`, `PUT /:id`, `DELETE /:id` (`service.write`) | |
-| pricing | `GET /admin/pricing` (`pricing.read`), `PUT /admin/pricing/:id` (`pricing.write`) | |
-| staff | `GET /admin/staff` (`staff.read`), `POST`, `PUT /:id` (`staff.write`) | |
-| schedule | `GET /admin/schedule` (`schedule.read`), `PUT /admin/schedule` (`schedule.write`) | |
+| pricing | `GET /admin/pricing` → `AdminPriceDto[]` (`pricing.read`), `POST /admin/pricing` (upsert, `pricing.write`), `PUT /admin/pricing/:id` (`pricing.write`) | |
+| staff | `GET /admin/staff` (`staff.read`), `POST`, `PUT /:id` (`staff.write`) — body `{ name, active, serviceSlugs: string[] }` | |
+| schedule | `GET /admin/schedule` → `ScheduleDto`, `PUT /admin/schedule` body `ScheduleDto` (full replace, validated) (`schedule.*`) | |
 | customers | `GET /admin/customers` (`customer.read`), `GET /:id`, `PUT /:id` (`customer.update`) | |
 | blog | `GET /admin/blog` (`blog.read`), `POST`, `PUT /:id`, `DELETE /:id` (`blog.write`) | |
-| seo | `GET /admin/seo` (`seo.read`), `PUT /admin/seo` (`seo.write`) | |
-| faq | `GET /admin/faq` (`settings.read`), `POST`, `PUT /:id`, `DELETE /:id` (`settings.write`) | |
+| seo | `GET /admin/seo?entityType&entityId` → `SeoMetadataDto[]` (`seo.read`), `PUT /admin/seo` upsert body `{ entityType, entityId, title, description, canonicalUrl, ogImage, noindex }` (`seo.write`) | |
+| faq | `GET /admin/faq` → `FaqItemDto[]` (unpaginated, bounded) (`settings.read`), `POST`, `PUT /:id`, `DELETE /:id` (`settings.write`) | |
 | settings | `GET /admin/settings` (`settings.read`), `PUT /admin/settings` (`settings.write`) | |
 | notifications | `GET /admin/notifications` (`settings.read`) | |
 | audit | `GET /admin/audit` (`audit.read`) | |
 
 Rules:
 
-- Lists are **paginated** (`?limit=&cursor=`, cursor = opaque `created_at|id`), `limit` ≤ 100.
+- Lists are **paginated** (`?limit=&cursor=`, cursor = opaque `created_at|id`), `limit` ≤ 100,
+  response `data` is `PageDto<T>` = `{ items, nextCursor }`.
 - Search (`q`) is exact/prefix on indexed columns (`customers.phone`, `customers.name`,
   `bookings.reference`) — never unbounded `LIKE '%…%'` scans.
 - Every admin mutation writes an `audit_logs` row (actor, action, entity).
