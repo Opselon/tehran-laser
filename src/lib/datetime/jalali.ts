@@ -47,9 +47,14 @@ export interface JalaliDate {
   jd: number;
 }
 
-/** Gregorian 'YYYY-MM-DD' → Jalali parts. */
+/** Gregorian 'YYYY-MM-DD' (or ISO string) → Jalali parts. */
 export function toJalali(localDate: string): JalaliDate {
-  const [y, m, d] = localDate.split('-').map(Number) as [number, number, number];
+  if (!localDate) return { jy: 1405, jm: 1, jd: 1 };
+  const clean = localDate.includes('T') ? localDate.slice(0, 10) : localDate.slice(0, 10);
+  const parts = clean.split('-');
+  const y = Number(parts[0]) || 2026;
+  const m = Number(parts[1]) || 1;
+  const d = Number(parts[2]) || 1;
   return toJalaali(y, m, d);
 }
 
@@ -58,8 +63,9 @@ export function jalaliOfInstant(instantIso: string, timeZone: string): JalaliDat
   return toJalali(localDateOf(instantIso, timeZone));
 }
 
-/** 'YYYY-MM-DD' → '۱۴۰۵/۰۷/۱۲' */
+/** 'YYYY-MM-DD' or ISO instant → '۱۴۰۵/۰۷/۱۲' */
 export function formatJalaliDate(localDate: string): string {
+  if (!localDate) return '-';
   const { jy, jm, jd } = toJalali(localDate);
   return toPersianDigits(`${jy}/${String(jm).padStart(2, '0')}/${String(jd).padStart(2, '0')}`);
 }
