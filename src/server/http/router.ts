@@ -16,7 +16,7 @@ import {
 } from '../../lib/security/session-cookie';
 import { consumeRateLimit, parseRateLimitPolicy } from '../../lib/security/rate-limit';
 import { verifyPassword } from '../../lib/security/password';
-import { getSearchParams, handleRoute, ok, okWithStatus, parseBody } from '../../lib/api/respond';
+import { getSearchParams, handleRoute, ok, okWithStatus, parseBody, parseValue } from '../../lib/api/respond';
 import { ApiError } from '../../lib/api/errors';
 import {
   createBookingSchema,
@@ -40,6 +40,14 @@ import {
   updateCustomerSchema,
   updateWeekdayHoursSchema,
   createExceptionSchema,
+  walkinBookSchema,
+  clinicalRecordSchema,
+  accountingTransactionSchema,
+  sendSmsSchema,
+  lotteryCampaignSchema,
+  lotteryDrawSchema,
+  discountFestivalSchema,
+  instagramSettingsSchema,
 } from '../../domain/validation/schemas';
 import {
   findPublicBlogPostBySlug,
@@ -189,9 +197,9 @@ export async function handleApiRequest(
     /* ── Public: Availability (§16, §17) ─────────────────────── */
     if (pathname === '/api/v1/availability' && method === 'GET') {
       const q = getSearchParams(request);
-      const category = pricingCategorySchema.parse(q.category);
-      const localDate = localDateSchema.parse(q.date);
-      const staffId = typeof q.staffId === 'string' && q.staffId ? q.staffId : null;
+      const category = parseValue(pricingCategorySchema, q.category, 'دسته قیمتی انتخاب‌شده معتبر نیست.');
+      const localDate = parseValue(localDateSchema, q.date, 'تاریخ انتخاب‌شده معتبر نیست.');
+      const staffId = typeof q.staffId === 'string' && q.staffId ? q.staffId.slice(0, 64) : null;
 
       const servicesParam =
         typeof q.services === 'string' && q.services
@@ -203,7 +211,14 @@ export async function handleApiRequest(
       if (rawSlugs.length === 0) {
         throw new ApiError('VALIDATION_ERROR', 'حداقل یک خدمت برای استعلام الزامی است.');
       }
-      const slugs = rawSlugs.map((s) => slugSchema.parse(s));
+      if (rawSlugs.length > 20) {
+        throw new ApiError('VALIDATION_ERROR', 'حداکثر ۲۰ خدمت در هر درخواست ظرفیت مجاز است.');
+      }
+      /* De-duplicate: a repeated slug would otherwise be summed twice into
+         durationMinutes and produce slots of the wrong length. */
+      const slugs = [
+        ...new Set(rawSlugs.map((s) => parseValue(slugSchema, s, 'نام خدمت انتخاب‌شده معتبر نیست.'))),
+      ];
 
       const placeholders = slugs.map(() => '?').join(',');
       const services = await all<{
@@ -959,7 +974,7 @@ export async function handleApiRequest(
     /* ── Admin: Walk-in & Next Session Scheduler ──────────────── */
     if (pathname === '/api/v1/admin/walkin/book' && method === 'POST') {
       const auth = requirePermission(locals, 'booking.accept');
-      const body = (await request.json()) as any;
+      const body = await parseBody(request, walkinBookSchema);
       const nowIso = new Date().toISOString();
 
       let customerId = body.customerId;
@@ -1159,7 +1174,7 @@ export async function handleApiRequest(
 
     if (pathname === '/api/v1/admin/crm/records' && method === 'POST') {
       const auth = requirePermission(locals, 'customer.update');
-      const body = (await request.json()) as any;
+      const body = await parseBody(request, clinicalRecordSchema);
       const id = crypto.randomUUID();
       const nowIso = new Date().toISOString();
 
@@ -1237,7 +1252,7 @@ export async function handleApiRequest(
 
     if (pathname === '/api/v1/admin/accounting/transactions' && method === 'POST') {
       requirePermission(locals, 'settings.write');
-      const body = (await request.json()) as any;
+      const body = await parseBody(request, accountingTransactionSchema);
       const id = crypto.randomUUID();
       const ref = 'TX-' + Math.random().toString(36).substring(2, 7).toUpperCase();
       const nowIso = new Date().toISOString();
@@ -1277,7 +1292,7 @@ export async function handleApiRequest(
 
     if (pathname === '/api/v1/admin/sms/send' && method === 'POST') {
       requirePermission(locals, 'settings.write');
-      const body = (await request.json()) as any;
+      const body = await parseBody(request, sendSmsSchema);
       const id = crypto.randomUUID();
       const nowIso = new Date().toISOString();
 
@@ -1305,7 +1320,7 @@ export async function handleApiRequest(
 
     if (pathname === '/api/v1/admin/lottery/draw' && method === 'POST') {
       requirePermission(locals, 'settings.write');
-      const body = (await request.json()) as any;
+      const body = await parseBody(request, lotteryDrawSchema);
       const campaignId = body.campaignId;
 
       const candidate = await one<{ id: string; name: string; phone: string }>(
@@ -1353,7 +1368,7 @@ export async function handleApiRequest(
 
     if (pathname === '/api/v1/admin/lottery' && method === 'POST') {
       requirePermission(locals, 'settings.write');
-      const body = (await request.json()) as any;
+      const body = await parseBody(request, lotteryCampaignSchema);
       const id = crypto.randomUUID();
       const nowIso = new Date().toISOString();
 
@@ -1374,13 +1389,14 @@ export async function handleApiRequest(
 
     /* ── Admin: Discount Festivals ────────────────────────────── */
     if (pathname === '/api/v1/admin/festivals' && method === 'GET') {
+      requirePermission(locals, 'settings.read');
       const rows = await all(env.DB, `SELECT * FROM discount_festivals ORDER BY created_at DESC`);
       return ok(rows);
     }
 
     if (pathname === '/api/v1/admin/festivals' && method === 'POST') {
-      requirePermission(locals, 'settings.write');
-      const body = (await request.json()) as any;
+      const auth = requirePermission(locals, 'settings.write');
+      const body = await parseBody(request, discountFestivalSchema);
       const id = crypto.randomUUID();
       const nowIso = new Date().toISOString();
 
@@ -1390,16 +1406,17 @@ export async function handleApiRequest(
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         id,
         body.title,
-        body.slug || 'fest-' + Math.random().toString(36).substring(2, 7),
-        Number(body.discountPercent) || 15,
+        body.slug || 'fest-' + crypto.randomUUID().slice(0, 8),
+        body.discountPercent ?? 15,
         body.description ?? null,
         body.bannerImage ?? null,
-        body.startsAt,
-        body.endsAt,
+        body.startsAt ?? null,
+        body.endsAt ?? null,
         body.active ? 1 : 0,
         nowIso,
       );
 
+      await writeAuditLog(env.DB, auth.id, 'festival.created', 'discount_festival', id);
       return okWithStatus({ id, success: true }, 201);
     }
 
@@ -1419,15 +1436,21 @@ export async function handleApiRequest(
 
     if (pathname === '/api/v1/admin/instagram' && method === 'PUT') {
       const auth = requirePermission(locals, 'settings.write');
-      const body = (await request.json()) as any;
+      const body = await parseBody(request, instagramSettingsSchema);
       const nowIso = new Date().toISOString();
 
-      const pairs = [
+      /* Only the keys actually present in the payload are written. (Previously
+         `String(body.discountPercent || 10)` always produced a string, so a
+         partial update silently reset the follower discount to 10%.) */
+      const pairs: [string, string | undefined][] = [
         ['instagram_username', body.username],
         ['instagram_bio_link', body.bioLink],
         ['instagram_promo_code', body.promoCode],
         ['instagram_latest_reel_url', body.latestReel],
-        ['instagram_follower_discount_percent', String(body.discountPercent || 10)],
+        [
+          'instagram_follower_discount_percent',
+          body.discountPercent !== undefined ? String(body.discountPercent) : undefined,
+        ],
       ];
 
       for (const [k, v] of pairs) {

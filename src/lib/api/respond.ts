@@ -65,6 +65,23 @@ export function getSearchParams(source: Request | URL): Record<string, string> {
   return record;
 }
 
+/** Parse an already-extracted value with a schema.
+ *  Identical error contract to parseBody/parseQuery: VALIDATION_ERROR + per-field messages.
+ *  Use instead of `schema.parse(...)` — a raw ZodError surfaces as INTERNAL_ERROR (500). */
+export function parseValue<T>(
+  schema: ZodType<T>,
+  value: unknown,
+  message = 'پارامترهای درخواست معتبر نیست.',
+): T {
+  const result = schema.safeParse(value);
+  if (!result.success) {
+    throw new ApiError('VALIDATION_ERROR', message, {
+      fields: zodFieldErrors(result.error.issues),
+    });
+  }
+  return result.data;
+}
+
 /** Parse URL query params with a schema (same error contract as parseBody). */
 export function parseQuery<T>(source: Request | URL, schema: ZodType<T>): T {
   const record = getSearchParams(source);

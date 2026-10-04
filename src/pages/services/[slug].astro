@@ -248,6 +248,19 @@ const afterCareSteps = [
             </div>
           </div>
 
+          {femalePrice && (
+            <div class="session-cost-note">
+              <Icon name="info" size={13} />
+              <span>
+                هزینه تقریبی دوره کامل (۶ تا ۸ جلسه):{' '}
+                <strong>
+                  {formatToman((isPromo ? promoFinalPrice : basePrice) * 6)} تا{' '}
+                  {formatToman((isPromo ? promoFinalPrice : basePrice) * 8)} تومان
+                </strong>
+              </span>
+            </div>
+          )}
+
           <!-- Men's tier -->
           <div class="tier-row">
             <div class="tier-row-head">
@@ -823,14 +836,16 @@ const afterCareSteps = [
   }
 
   .strikethrough-price {
-    font-size: 0.85rem;
-    color: #78716c;
+    font-size: 0.88rem;
+    color: #a39a8e;
     text-decoration: line-through;
+    text-decoration-color: rgba(163, 154, 142, 0.9);
   }
 
   .price-currency {
-    font-size: 0.75rem;
-    color: #9ca3af;
+    font-size: 0.82rem;
+    color: #b5ada0;
+    font-weight: 600;
   }
 
   .tier-note {
@@ -848,6 +863,31 @@ const afterCareSteps = [
     font-size: 0.775rem;
     color: #8c857b;
     line-height: 1.6;
+  }
+
+  .session-cost-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+    background: rgba(74, 222, 128, 0.06);
+    border: 1px dashed rgba(74, 222, 128, 0.3);
+    border-radius: 11px;
+    padding: 9px 12px;
+    margin: -3px 0 10px;
+    font-size: 0.79rem;
+    color: #a9b3a5;
+    line-height: 1.65;
+  }
+
+  .session-cost-note :global(svg) {
+    color: #4ade80;
+    flex-shrink: 0;
+    margin-top: 3px;
+  }
+
+  .session-cost-note strong {
+    color: #4ade80;
+    font-weight: 800;
   }
 
   .tier-foot-note :global(svg) {
@@ -1145,7 +1185,7 @@ const afterCareSteps = [
     align-items: center;
     justify-content: space-between;
     gap: 10px;
-    padding: 9px 0;
+    padding: 10px 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.04);
     font-size: 0.825rem;
   }

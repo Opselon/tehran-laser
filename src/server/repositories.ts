@@ -785,7 +785,10 @@ export async function getAdminDashboard(
          SUM(CASE WHEN starts_at >= ? AND starts_at < ? THEN 1 ELSE 0 END) AS todayTotal,
          (SELECT COUNT(*) FROM customers) AS totalCustomers,
          (SELECT COUNT(*) FROM services WHERE active = 1) AS activeServices
-       FROM bookings`,
+       FROM bookings
+       WHERE starts_at >= ? AND starts_at < ?`,
+      todayStartIso,
+      todayEndIso,
       todayStartIso,
       todayEndIso,
     ),

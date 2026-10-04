@@ -6,13 +6,20 @@ import { PRICING_CATEGORIES } from '../booking/booking.types';
 
 export const pricingCategorySchema = z.enum(PRICING_CATEGORIES);
 
-/** Accepts 09121234567, +989121234567, 00989121234567, 9121234567 → canonical +989121234567. */
+/** Accepts 09121234567, +989****4567, 00989121234567, 9121234567 → canonical +989****4567.
+ *  Persian/Arabic-Indic digits (۰-۹, ٠-٩) are normalised first — admins type them
+ *  from the on-screen keypad and would otherwise be rejected as invalid input. */
 export const phoneSchema = z
   .string()
   .trim()
   .min(4)
   .max(24)
-  .transform((value) => value.replace(/[\s\-().]/g, ''))
+  .transform((value) =>
+    value
+      .replace(/[\s\-().]/g, '')
+      .replace(/[۰-۹]/g, (d) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)))
+      .replace(/[٠-٩]/g, (d) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d))),
+  )
   .refine((value) => /^\+?\d{10,15}$/.test(value), { message: 'شماره تماس معتبر نیست.' })
   .transform((value) => {
     if (value.startsWith('0098')) return `+98${value.slice(4)}`;
@@ -286,3 +293,112 @@ export const updateCustomerSchema = z.object({
   email: emailSchema.nullable().optional(),
   note: noteSchema.nullable().optional(),
 });
+
+/** ── Admin "operations console" endpoints (walk-in, CRM, accounting, SMS,
+ *  lottery, festivals). These previously called request.json() unsafely; the
+ *  schemas below match the payloads the admin pages actually submit, so no
+ *  bad input can reach a D1 INSERT. ────────────────────────────────────── */
+
+/* Must stay a subset of the D1 CHECK constraint:
+   method IN ('pos', 'card_to_card', 'cash', 'online'), type IN ('income', 'expense', 'refund'). */
+export const paymentMethodSchema = z.enum(['pos', 'cash', 'card_to_card', 'online']);
+export const transactionTypeSchema = z.enum(['income', 'expense', 'refund']);
+export const transactionCategorySchema = z.string().trim().min(1).max(60);
+
+export const walkinBookSchema = z.object({
+  customerId: z.string().trim().min(1).max(64).optional(),
+  customerName: nameSchema.optional(),
+  customerPhone: phoneSchema.optional(),
+  pricingCategory: pricingCategorySchema.optional(),
+  serviceId: z.string().trim().max(64).optional(),
+  startsAt: isoInstantSchema.optional(),
+  amount: z.number().int().min(0).max(1_000_000_000).optional(),
+  paymentMethod: paymentMethodSchema.optional(),
+  trackingNumber: z.string().trim().max(80).optional(),
+  adminNote: z.string().trim().max(500).optional(),
+  note: z.string().trim().max(500).optional(),
+  sessionNumber: z.number().int().min(1).max(200).optional(),
+  totalSessions: z.number().int().min(1).max(200).optional(),
+  deviceModel: z.string().trim().max(120).optional(),
+  joulesEnergy: z.number().finite().min(0).max(200).optional(),
+  pulseWidthMs: z.number().finite().min(0).max(1000).optional(),
+  shotCount: z.number().int().min(0).max(100_000).optional(),
+  skinReaction: z.string().trim().max(200).optional(),
+  operatorName: z.string().trim().max(80).optional(),
+  doctorNotes: z.string().trim().max(2000).optional(),
+  scheduleNextSession: z.boolean().optional(),
+  nextSessionDate: z.string().trim().max(40).nullable().optional(),
+});
+export type WalkinBookInput = z.infer<typeof walkinBookSchema>;
+
+export const clinicalRecordSchema = z.object({
+  customerId: z.string().trim().min(1).max(64),
+  bookingId: z.string().trim().min(1).max(64).nullable().optional(),
+  sessionNumber: z.number().int().min(1).max(200).optional(),
+  totalSessions: z.number().int().min(1).max(200).optional(),
+  treatedAreas: z.string().trim().max(500).optional(),
+  deviceModel: z.string().trim().max(120).optional(),
+  joulesEnergy: z.number().finite().min(0).max(200).optional(),
+  pulseWidthMs: z.number().finite().min(0).max(1000).optional(),
+  shotCount: z.number().int().min(0).max(100_000).optional(),
+  skinReaction: z.string().trim().max(200).optional(),
+  operatorName: z.string().trim().max(80).optional(),
+  doctorNotes: z.string().trim().max(2000).nullable().optional(),
+  nextSessionRecommendedAt: z.string().trim().max(40).nullable().optional(),
+});
+export type ClinicalRecordInput = z.infer<typeof clinicalRecordSchema>;
+
+export const accountingTransactionSchema = z.object({
+  customerId: z.string().trim().min(1).max(64).nullable().optional(),
+  bookingId: z.string().trim().min(1).max(64).nullable().optional(),
+  amount: z.number().int().min(0).max(1_000_000_000, 'مبلغ سند نامعتبر است.'),
+  type: transactionTypeSchema.optional(),
+  method: paymentMethodSchema.optional(),
+  category: transactionCategorySchema.optional(),
+  description: z.string().trim().max(500).nullable().optional(),
+  trackingNumber: z.string().trim().max(80).nullable().optional(),
+});
+export type AccountingTransactionInput = z.infer<typeof accountingTransactionSchema>;
+
+export const sendSmsSchema = z.object({
+  phone: phoneSchema,
+  message: z.string().trim().min(1).max(1200, 'متن پیامک طولانی است.'),
+  customerId: z.string().trim().min(1).max(64).nullable().optional(),
+  templateName: z.string().trim().min(1).max(60).optional(),
+});
+export type SendSmsInput = z.infer<typeof sendSmsSchema>;
+
+export const lotteryCampaignSchema = z.object({
+  title: z.string().trim().min(2, 'عنوان دوره الزامی است.').max(120),
+  prize: z.string().trim().min(1, 'جایزه الزامی است.').max(200),
+  minSpending: z.number().finite().min(0).max(1_000_000_000).optional(),
+  drawDate: z.string().trim().max(40).nullable().optional(),
+});
+export type LotteryCampaignInput = z.infer<typeof lotteryCampaignSchema>;
+
+export const lotteryDrawSchema = z.object({
+  campaignId: z.string().trim().min(1).max(64),
+});
+export type LotteryDrawInput = z.infer<typeof lotteryDrawSchema>;
+
+export const discountFestivalSchema = z.object({
+  title: z.string().trim().min(2, 'عنوان جشنواره الزامی است.').max(120),
+  slug: slugSchema.optional(),
+  /** D1 CHECK: discount_percent BETWEEN 1 AND 100, starts_at/ends_at NOT NULL. */
+  discountPercent: z.number().int().min(1).max(100).optional(),
+  description: z.string().trim().max(2000).nullable().optional(),
+  bannerImage: z.string().trim().max(500).nullable().optional(),
+  startsAt: z.string().trim().min(1).max(40),
+  endsAt: z.string().trim().min(1).max(40),
+  active: z.boolean().optional(),
+});
+export type DiscountFestivalInput = z.infer<typeof discountFestivalSchema>;
+
+export const instagramSettingsSchema = z.object({
+  username: z.string().trim().max(60).optional(),
+  bioLink: z.string().trim().max(300).optional(),
+  promoCode: z.string().trim().max(40).optional(),
+  latestReel: z.string().trim().max(300).optional(),
+  discountPercent: z.number().finite().min(0).max(100).optional(),
+});
+export type InstagramSettingsInput = z.infer<typeof instagramSettingsSchema>;
