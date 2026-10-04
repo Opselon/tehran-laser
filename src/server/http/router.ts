@@ -75,7 +75,11 @@ import {
 } from '../repositories';
 import { createBooking, rescheduleBooking, transitionBooking } from '../booking';
 import { calculateAvailability } from '../../domain/schedule/availability';
-import { parseOperationalSettings } from '../../domain/settings/settings.types';
+import {
+  isPrivateSettingKey,
+  isSettingKey,
+  parseOperationalSettings,
+} from '../../domain/settings/settings.types';
 import { slotStaffKey } from '../../domain/booking/booking.slots';
 import { dispatchNotification } from '../notifications';
 import { all, one, run } from '../../db/query';
@@ -930,18 +934,30 @@ export async function handleApiRequest(
       const body = await parseBody(request, updateSettingsSchema);
       const nowIso = new Date().toISOString();
 
+      /* Only registered keys may be written, and the scope is taken from the
+         registry — never from the payload. Previously every key was upserted with
+         scope='public', so saving the settings form for the first time published
+         `sms_api_key` through the unauthenticated GET /api/v1/settings/public. */
+      const unknown = Object.keys(body).filter((key) => !isSettingKey(key));
+      if (unknown.length > 0) {
+        throw new ApiError('VALIDATION_ERROR', 'کلید تنظیمات ناشناخته است.', {
+          fields: Object.fromEntries(unknown.map((key) => [key, ['این کلید تنظیمات شناخته‌شده نیست.']])),
+        });
+      }
+
       for (const [key, value] of Object.entries(body)) {
-        if (value !== undefined) {
-          await run(
-            env.DB,
-            `INSERT INTO settings (key, value, scope, updated_at)
-             VALUES (?, ?, 'public', ?)
-             ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at`,
-            key,
-            String(value),
-            nowIso,
-          );
-        }
+        if (value === undefined || !isSettingKey(key)) continue;
+        const scope = isPrivateSettingKey(key) ? 'private' : 'public';
+        await run(
+          env.DB,
+          `INSERT INTO settings (key, value, scope, updated_at)
+           VALUES (?, ?, ?, ?)
+           ON CONFLICT(key) DO UPDATE SET value = excluded.value, scope = excluded.scope, updated_at = excluded.updated_at`,
+          key,
+          String(value),
+          scope,
+          nowIso,
+        );
       }
 
       await writeAuditLog(env.DB, auth.id, 'settings.updated', 'settings', null);

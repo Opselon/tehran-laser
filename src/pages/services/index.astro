@@ -912,6 +912,10 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
             </tbody>
           </table>
         </div>
+        <p class="table-swipe-hint">
+          <Icon name="arrowLeft" size={14} />
+          <span>برای مشاهده همه ستون‌ها، جدول را افقی بکشید</span>
+        </p>
 
         <!-- Clinical Session Recommendations Accordion & Guidance -->
         <div class="clinical-guidance-card mt-5">
@@ -2009,6 +2013,24 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  }
+
+  /* Swipe affordance: the table is 760px wide inside a ~300px mobile viewport,
+     so tell the user it scrolls — only while the table view is actually open. */
+  .table-swipe-hint {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 10px 0 0;
+    font-size: 0.78rem;
+    color: #a99f8f;
+  }
+
+  @media (max-width: 900px) {
+    #servicesTableView:not(.hidden) + .table-swipe-hint {
+      display: flex;
+    }
   }
 
   .table-obsidian-pricing {

@@ -284,7 +284,10 @@ export const updateBlogPostSchema = blogWriteSchema.partial();
 export const createFaqSchema = faqWriteSchema;
 export const updateFaqSchema = faqWriteSchema.partial();
 
-export const updateSettingsSchema = z.record(z.string(), z.union([z.string(), z.number(), z.boolean()]));
+export const updateSettingsSchema = z.record(
+  z.string(),
+  z.union([z.string(), z.number(), z.boolean()]),
+);
 
 export const updateCustomerSchema = z.object({
   name: nameSchema.optional(),
