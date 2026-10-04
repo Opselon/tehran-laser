@@ -1,22 +1,25 @@
 ---
 import PublicLayout from '../layouts/PublicLayout.astro';
 import Icon from '../components/ui/Icon.astro';
-import { createBreadcrumbSchema } from '../lib/seo';
+import { createBreadcrumbSchema, resolveCanonicalOrigin } from '../lib/seo';
 
 // The layout already emits the canonical MedicalClinic entity (with geo, hours,
 // offer catalog). The /clinic page adds an AboutPage entity + breadcrumbs so
 // Google sees one consistent clinic node, not two conflicting ones.
+// Origin comes from the runtime SITE_URL var — tehranlaser.ir is a parked
+// domain and must never appear in emitted structured data.
+const origin = resolveCanonicalOrigin();
 const aboutJsonLd = {
   '@context': 'https://schema.org',
   '@type': ['AboutPage', 'MedicalWebPage'],
-  '@id': 'https://tehranlaser.ir/clinic#about',
-  url: 'https://tehranlaser.ir/clinic',
+  '@id': `${origin}/clinic#about`,
+  url: `${origin}/clinic`,
   name: 'درباره کلینیک تخصصی تهران لیزر پاسداران',
   description:
     'مرکز تخصصی لیزر و زیبایی تهران لیزر در پاسداران با تجهیزات اورجینال کندلا جنتل مکس پرو ۲۰۲۶، سیستم سرمایش DCD و کادر مجرب پزشکی.',
   inLanguage: 'fa-IR',
-  mainEntity: { '@id': 'https://tehranlaser.ir/#clinic' },
-  isPartOf: { '@id': 'https://tehranlaser.ir/#website' },
+  mainEntity: { '@id': `${origin}/#clinic` },
+  isPartOf: { '@id': `${origin}/#website` },
 };
 
 const breadcrumbJsonLd = createBreadcrumbSchema([

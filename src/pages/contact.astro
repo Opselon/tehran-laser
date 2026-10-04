@@ -1,21 +1,24 @@
 ---
 import PublicLayout from '../layouts/PublicLayout.astro';
 import Icon from '../components/ui/Icon.astro';
-import { createBreadcrumbSchema } from '../lib/seo';
+import { createBreadcrumbSchema, resolveCanonicalOrigin } from '../lib/seo';
 
 // ContactPage entity + breadcrumbs. The clinic node itself is emitted once by
-// the layout (canonical @id https://tehranlaser.ir/#clinic), so we only link to it.
+// the layout (canonical @id <origin>/#clinic), so we only link to it.
+// Origin is resolved at runtime from SITE_URL — tehranlaser.ir is a parked
+// domain and must never be emitted as an @id/url.
+const origin = resolveCanonicalOrigin();
 const contactJsonLd = {
   '@context': 'https://schema.org',
   '@type': ['ContactPage', 'MedicalWebPage'],
-  '@id': 'https://tehranlaser.ir/contact#contact',
-  url: 'https://tehranlaser.ir/contact',
+  '@id': `${origin}/contact#contact`,
+  url: `${origin}/contact`,
   name: 'تماس و آدرس کلینیک تهران لیزر پاسداران',
   description:
     'راه‌های ارتباطی، آدرس دقیق در پاسداران خیابان پایدارفرد، شماره تماس مستقیم پذیرش، مشاوره فوری در واتساپ و لوکیشن مسیریابی.',
   inLanguage: 'fa-IR',
-  mainEntity: { '@id': 'https://tehranlaser.ir/#clinic' },
-  isPartOf: { '@id': 'https://tehranlaser.ir/#website' },
+  mainEntity: { '@id': `${origin}/#clinic` },
+  isPartOf: { '@id': `${origin}/#website` },
 };
 
 const breadcrumbJsonLd = createBreadcrumbSchema([

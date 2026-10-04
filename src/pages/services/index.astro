@@ -2,7 +2,7 @@
 import PublicLayout from '../../layouts/PublicLayout.astro';
 import { env } from 'cloudflare:workers';
 import { listPublicServices } from '../../server/repositories';
-import { createBreadcrumbSchema } from '../../lib/seo';
+import { createBreadcrumbSchema, resolveCanonicalOrigin } from '../../lib/seo';
 import Icon from '../../components/ui/Icon.astro';
 
 // Clinical services catalogue definition with fallback and rich metadata
@@ -428,15 +428,18 @@ function formatToman(amountInThousands: number): string {
 // Structured Data: CollectionPage + OfferCatalog price list (§31, §135)
 // Linked to the canonical clinic node (@id /#clinic) emitted by the layout,
 // so there is exactly one MedicalClinic entity site-wide.
+// Origin resolved at runtime from SITE_URL — tehranlaser.ir is parked and
+// must never be emitted in structured data.
+const origin = resolveCanonicalOrigin();
 const priceListJsonLd = {
   '@context': 'https://schema.org',
   '@type': ['CollectionPage', 'MedicalWebPage'],
-  '@id': 'https://tehranlaser.ir/services#prices',
-  url: 'https://tehranlaser.ir/services',
+  '@id': `${origin}/services#prices`,
+  url: `${origin}/services`,
   name: 'تعرفه‌های مصوب لیزر موهای زائد کندلا جنتل مکس پرو',
   inLanguage: 'fa-IR',
-  mainEntity: { '@id': 'https://tehranlaser.ir/#clinic' },
-  isPartOf: { '@id': 'https://tehranlaser.ir/#website' },
+  mainEntity: { '@id': `${origin}/#clinic` },
+  isPartOf: { '@id': `${origin}/#website` },
   about: {
     '@type': 'OfferCatalog',
     name: 'تعرفه‌های مصوب لیزر کندلا جنتل‌مکس پرو',
