@@ -2,6 +2,7 @@
 import AdminLayout from '../../layouts/AdminLayout.astro';
 import { env } from 'cloudflare:workers';
 import { formatJalaliDate } from '../../lib/datetime/jalali';
+import Icon from '../../components/ui/Icon.astro';
 
 let smsLogs: any[] = [];
 let totalSent = 0;
@@ -28,7 +29,10 @@ try {
   <div class="admin-content-pad">
     <div class="dashboard-header-row">
       <div>
-        <h1 class="admin-page-title">✉️ پنل هوشمند پیامک و اطلاع‌رسانی خودکار</h1>
+        <h1 class="admin-page-title" style="display: flex; align-items: center; gap: 10px;">
+          <Icon name="sms" size={26} class="title-icon" />
+          <span>پنل هوشمند پیامک و اطلاع‌رسانی خودکار</span>
+        </h1>
         <p class="section-block-sub">
           ارسال خودکار پیامک‌های تایید نوبت، یادآوری جلسات، تبریک تولد و کمپین‌های جشنواره مراجعین (API First)
         </p>
@@ -46,7 +50,7 @@ try {
       <div class="kpi-card-3d">
         <div class="kpi-header">
           <span class="kpi-title">موجودی شارژ پیامک</span>
-          <span class="kpi-icon">🔋</span>
+          <span class="kpi-icon" style="color: #34d399;"><Icon name="battery" size={20} /></span>
         </div>
         <div class="kpi-value" style="color: #34d399;">۱۴,۲۵۰ <span style="font-size: 0.9rem; color: #94a3b8;">پیامک</span></div>
         <div class="kpi-footer" style="color: #34d399;">اعتبار تا پایان سال جاری</div>
@@ -55,7 +59,7 @@ try {
       <div class="kpi-card-3d">
         <div class="kpi-header">
           <span class="kpi-title">کل پیامک‌های ارسالی</span>
-          <span class="kpi-icon">📤</span>
+          <span class="kpi-icon" style="color: #38bdf8;"><Icon name="send" size={20} /></span>
         </div>
         <div class="kpi-value">{totalSent}</div>
         <div class="kpi-footer" style="color: #38bdf8;">نوبت‌ها و اطلاع‌رسانی‌ها</div>
@@ -64,7 +68,7 @@ try {
       <div class="kpi-card-3d">
         <div class="kpi-header">
           <span class="kpi-title">نرخ تحویل موفق به گوشی</span>
-          <span class="kpi-icon">📶</span>
+          <span class="kpi-icon" style="color: #f5d77f;"><Icon name="signal" size={20} /></span>
         </div>
         <div class="kpi-value" style="color: #f5d77f;">۹۹.۲٪</div>
         <div class="kpi-footer" style="color: #34d399;">ارسال از خط خدماتی بدون بلک‌لیست</div>
@@ -75,8 +79,9 @@ try {
     <div class="g-side-r" style="gap: 24px; align-items: start; margin-bottom: 24px;">
       <!-- Quick SMS Sender Form -->
       <div class="admin-section-block" style="padding: 24px;">
-        <h3 class="section-block-title" style="margin-bottom: 16px;">
-          ⚡ ارسال پیامک سریع به مراجع
+        <h3 class="section-block-title" style="margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+          <Icon name="lightning" size={18} />
+          <span>ارسال پیامک سریع به مراجع</span>
         </h3>
 
         <form id="smsForm" style="display: flex; flex-direction: column; gap: 14px;">
@@ -106,8 +111,9 @@ try {
             </div>
           </div>
 
-          <button type="submit" id="sendSmsSubmitBtn" class="btn-3d-gold" style="width: 100%; margin-top: 6px;">
-            ✉️ ارسال فوری پیامک
+          <button type="submit" id="sendSmsSubmitBtn" class="btn-3d-gold" style="width: 100%; margin-top: 6px; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
+            <Icon name="send" size={16} />
+            <span>ارسال فوری پیامک</span>
           </button>
         </form>
       </div>
@@ -115,7 +121,10 @@ try {
       <!-- SMS Logs Table -->
       <div class="admin-section-block" style="padding: 24px;">
         <h3 class="section-block-title" style="margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
-          <span>📋 گزارش تحویل پیامک‌های ارسالی</span>
+          <span style="display: flex; align-items: center; gap: 8px;">
+            <Icon name="document" size={18} />
+            <span>گزارش تحویل پیامک‌های ارسالی</span>
+          </span>
           <span style="font-size: 0.8rem; color: #94a3b8;">۵۰ لاگ اخیر سامانه</span>
         </h3>
 

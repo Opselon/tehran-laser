@@ -3,6 +3,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 import { env } from 'cloudflare:workers';
 import { listAdminCustomers } from '../../server/repositories';
 import { formatJalaliDate } from '../../lib/datetime/jalali';
+import Icon from '../../components/ui/Icon.astro';
 
 let customersList: any[] = [];
 let clinicalRecords: any[] = [];
@@ -27,7 +28,10 @@ try {
   <div class="admin-content-pad">
     <div class="dashboard-header-row">
       <div>
-        <h1 class="admin-page-title">🩺 پرونده بالینی و ارتباط با مراجعین (Clinical CRM)</h1>
+        <h1 class="admin-page-title" style="display: flex; align-items: center; gap: 10px;">
+          <Icon name="stethoscope" size={26} class="title-icon" />
+          <span>پرونده بالینی و ارتباط با مراجعین (Clinical CRM)</span>
+        </h1>
         <p class="section-block-sub">
           مدیریت پرونده‌های درمانی، رصد دوره‌های لیزر کندلا، شات‌ها، انرژی ژول و حافظه مراجعین (API First)
         </p>
@@ -44,7 +48,7 @@ try {
       <div class="kpi-card-3d">
         <div class="kpi-header">
           <span class="kpi-title">کل مراجعین ثبت‌شده</span>
-          <span class="kpi-icon">👥</span>
+          <span class="kpi-icon" style="color: #94a3b8;"><Icon name="users" size={20} /></span>
         </div>
         <div class="kpi-value">{customersList.length}</div>
         <div class="kpi-footer" style="color: #94a3b8;">بانک فعال مراجعین کلینیک</div>
@@ -53,7 +57,7 @@ try {
       <div class="kpi-card-3d">
         <div class="kpi-header">
           <span class="kpi-title">جلسات ثبت‌شده در پرونده</span>
-          <span class="kpi-icon">🩺</span>
+          <span class="kpi-icon" style="color: #38bdf8;"><Icon name="stethoscope" size={20} /></span>
         </div>
         <div class="kpi-value">{clinicalRecords.length}</div>
         <div class="kpi-footer" style="color: #38bdf8;">سوابق دوز و انرژی دستگاه</div>
@@ -62,7 +66,7 @@ try {
       <div class="kpi-card-3d">
         <div class="kpi-header">
           <span class="kpi-title">میانگین پیشرفت جلسات</span>
-          <span class="kpi-icon">📈</span>
+          <span class="kpi-icon" style="color: #34d399;"><Icon name="chart" size={20} /></span>
         </div>
         <div class="kpi-value" style="color: #34d399;">۴.۲ <span style="font-size: 1rem; color: #94a3b8;">از ۸ جلسه</span></div>
         <div class="kpi-footer" style="color: #34d399;">پایبندی به دوره درمان ۵۳٪</div>
@@ -120,8 +124,9 @@ try {
           </div>
 
           <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-            <button id="sendDirectSmsBtn" class="btn-3d-complete" style="font-size: 0.82rem; padding: 8px 16px;">
-              ✉️ ارسال پیامک مستقیم
+            <button id="sendDirectSmsBtn" class="btn-3d-complete" style="font-size: 0.82rem; padding: 8px 16px; display: inline-flex; align-items: center; gap: 6px;">
+              <Icon name="sms" size={15} />
+              <span>ارسال پیامک مستقیم</span>
             </button>
             <button id="addSessionForCustBtn" class="btn-3d-gold" style="font-size: 0.82rem; padding: 8px 16px;">
               + جلسه جدید کندلا
@@ -141,8 +146,9 @@ try {
         </div>
 
         <!-- Clinical records table -->
-        <h4 style="font-size: 0.95rem; font-weight: 800; color: #f5d77f; margin-bottom: 14px;">
-          📋 تاریخچه جلسات، شات‌ها و دوز انرژی کندلا
+        <h4 style="font-size: 0.95rem; font-weight: 800; color: #f5d77f; margin-bottom: 14px; display: flex; align-items: center; gap: 8px;">
+          <Icon name="document" size={16} />
+          <span>تاریخچه جلسات، شات‌ها و دوز انرژی کندلا</span>
         </h4>
 
         <div class="admin-table-container">
@@ -192,7 +198,10 @@ try {
   <div id="newRecordModal" class="modal-3d-backdrop" style="display: none;">
     <div class="modal-3d-card" style="max-width: 620px;">
       <div class="modal-3d-header">
-        <h3 class="modal-3d-title">🩺 ثبت جلسه درمانی و پارامترهای لیزر</h3>
+        <h3 class="modal-3d-title" style="display: flex; align-items: center; gap: 8px;">
+          <Icon name="stethoscope" size={20} />
+          <span>ثبت جلسه درمانی و پارامترهای لیزر</span>
+        </h3>
         <button id="closeRecordModalBtn" class="modal-close-btn">&times;</button>
       </div>
 

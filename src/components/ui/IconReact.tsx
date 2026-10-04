@@ -109,6 +109,11 @@ const paths: Record<string, string> = {
     'M4 6.5c0-1.66 3.58-3 8-3s8 1.34 8 3-3.58 3-8 3-8-1.34-8-3Zm0 0v11c0 1.66 3.58 3 8 3s8-1.34 8-3v-11M4 12c0 1.66 3.58 3 8 3s8-1.34 8-3',
   lightning: 'M13.5 2.5 5 14h6l-1 7.5L19.5 10h-6l1-7.5Z',
   percent: 'M19 5.5 5 18.5M8 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm12 12a2 2 0 1 1-4 0 2 2 0 0 1 4 0Z',
+  wallet:
+    'M3 7h18v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Zm0-2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2H3V5Zm13 8h2v2h-2v-2Z',
+  battery:
+    'M4 7h13a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2Zm17 4v2',
+  signal: 'M4 19h.01M8 15v4M12 11v8M16 7v12M20 3v16',
 };
 
 export const IconReact: React.FC<IconReactProps> = ({

@@ -2,6 +2,7 @@
 import AdminLayout from '../../layouts/AdminLayout.astro';
 import { env } from 'cloudflare:workers';
 import { formatJalaliDate } from '../../lib/datetime/jalali';
+import Icon from '../../components/ui/Icon.astro';
 
 let campaigns: any[] = [];
 let activeCampaign: any = null;
@@ -19,7 +20,10 @@ try {
   <div class="admin-content-pad">
     <div class="dashboard-header-row">
       <div>
-        <h1 class="admin-page-title">🎰 قرعه‌کشی هوشمند و گردونه شانس مراجعین</h1>
+        <h1 class="admin-page-title" style="display: flex; align-items: center; gap: 10px;">
+          <Icon name="lottery" size={26} class="title-icon" />
+          <span>قرعه‌کشی هوشمند و گردونه شانس مراجعین</span>
+        </h1>
         <p class="section-block-sub">
           سیستم باشگاه وفاداری، قرعه‌کشی‌های ماهانه بین مراجعین، اهدای جوایز جلسات رایگان و اطلاع‌رسانی پیامکی (API First)
         </p>
@@ -141,7 +145,10 @@ try {
   <div id="newLotteryModal" class="modal-3d-backdrop" style="display: none;">
     <div class="modal-3d-card" style="max-width: 500px;">
       <div class="modal-3d-header">
-        <h3 class="modal-3d-title">🎰 تعریف دوره قرعه‌کشی جدید</h3>
+        <h3 class="modal-3d-title" style="display: flex; align-items: center; gap: 8px;">
+          <Icon name="lottery" size={20} />
+          <span>تعریف دوره قرعه‌کشی جدید</span>
+        </h3>
         <button id="closeLotteryModalBtn" class="modal-close-btn">&times;</button>
       </div>
 
