@@ -16,6 +16,7 @@ import {
 } from '../../lib/security/session-cookie';
 import { consumeRateLimit, parseRateLimitPolicy } from '../../lib/security/rate-limit';
 import { verifyPassword } from '../../lib/security/password';
+import { resolveCanonicalOrigin } from '../../lib/seo/canonical';
 import { getSearchParams, handleRoute, ok, okWithStatus, parseBody, parseValue } from '../../lib/api/respond';
 import { ApiError } from '../../lib/api/errors';
 import {
@@ -1443,7 +1444,7 @@ export async function handleApiRequest(
       const pub = allSettings.public;
       return ok({
         username: pub.instagram_username || 'tehranlaser_clinic',
-        bioLink: pub.instagram_bio_link || 'https://tehranlaser.ir',
+        bioLink: pub.instagram_bio_link || resolveCanonicalOrigin(),
         promoCode: pub.instagram_promo_code || 'INSTA20',
         latestReel: pub.instagram_latest_reel_url || 'https://instagram.com/reel/...',
         discountPercent: Number(pub.instagram_follower_discount_percent || 10),
