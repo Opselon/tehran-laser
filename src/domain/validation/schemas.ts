@@ -329,7 +329,28 @@ export const walkinBookSchema = z
   doctorNotes: z.string().trim().max(2000).optional(),
   scheduleNextSession: z.boolean().optional(),
   nextSessionDate: z.string().trim().max(40).nullable().optional(),
-});
+  })
+  /* An empty body must never create a walk-in booking: the handler falls back to
+     "first customer in the table" and a default service when nothing is supplied,
+     so at least an identity (customerId / customerName / customerPhone) is required. */
+  .refine(
+    (value) => Boolean(value.customerId || value.customerName || value.customerPhone),
+    { message: 'شناسه، نام یا شماره تماس مراجع الزامی است.', path: ['customerPhone'] },
+  )
+  /* The admin walk-in form always submits both, and the next-session scheduler is
+     meaningless without them. */
+  .refine(
+    (value) => value.amount !== undefined && value.paymentMethod !== undefined,
+    { message: 'مبلغ و روش پرداخت الزامی است.', path: ['amount'] },
+  )
+  .refine(
+    (value) => value.sessionNumber !== undefined && value.totalSessions !== undefined,
+    { message: 'شماره و تعداد کل جلسات الزامی است.', path: ['sessionNumber'] },
+  )
+  .refine(
+    (value) => !(value.scheduleNextSession && !value.nextSessionDate),
+    { message: 'تاریخ جلسه بعدی برای زمان‌بندی انتخاب نشده است.', path: ['nextSessionDate'] },
+  );
 export type WalkinBookInput = z.infer<typeof walkinBookSchema>;
 
 export const clinicalRecordSchema = z.object({
