@@ -18,6 +18,10 @@
     }
   ],
   "vars": {
-    "BUSINESS_TIMEZONE": "Asia/Tehran"
+    "BUSINESS_TIMEZONE": "Asia/Tehran",
+    // Public origin used for canonical/OG/sitemap URLs. Must be the LIVE origin.
+    // Do NOT set this to https://tehranlaser.ir until that domain actually serves
+    // this app — it currently answers with a domain-parking page.
+    "SITE_URL": "https://tehran-laser.samerkhaldounmarefi.workers.dev"
   }
 }

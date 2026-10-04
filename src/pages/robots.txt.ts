@@ -1,10 +1,13 @@
 import type { APIRoute } from 'astro';
+import { resolveCanonicalOrigin } from '../lib/seo/canonical';
 
-const ORIGIN = 'https://tehranlaser.ir';
+// Canonical origin for the Sitemap: directive. Resolved from the SITE_URL var
+// (live workers origin), never the parked tehranlaser.ir vanity domain.
+const ORIGIN = resolveCanonicalOrigin();
 
 export const GET: APIRoute = () => {
   const content = `# Robots.txt — Tehran Laser Clinic (§133)
-# Official canonical domain: https://tehranlaser.ir
+# Canonical origin is provided at runtime via the SITE_URL var (see wrangler.jsonc).
 
 User-agent: *
 Allow: /

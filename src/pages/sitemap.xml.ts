@@ -1,8 +1,14 @@
 import type { APIRoute } from 'astro';
 import { env } from 'cloudflare:workers';
+import { resolveCanonicalOrigin } from '../lib/seo/canonical';
 import { all } from '../db/query';
 
-const ORIGIN = 'https://tehranlaser.ir';
+/**
+ * Canonical origin emitted in every <loc>. `SITE_URL` var wins, so the sitemap
+ * always points at the live origin (see resolveCanonicalOrigin). Do not
+ * hardcode the tehranlaser.ir vanity domain here — it is not live yet.
+ */
+const ORIGIN = resolveCanonicalOrigin();
 
 /** Escape XML special characters so DB-sourced slugs/titles can't break the sitemap. */
 function xmlEscape(value: string): string {

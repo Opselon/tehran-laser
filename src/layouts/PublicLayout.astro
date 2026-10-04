@@ -7,6 +7,7 @@ import '../styles/components.css';
 import '../styles/public.css';
 import {
   buildCanonicalUrl,
+  resolveCanonicalOrigin,
   createMedicalClinicSchema,
   DEFAULT_SEO_TITLE,
   DEFAULT_SEO_DESCRIPTION,
@@ -42,7 +43,9 @@ const {
   bodyClass = '',
 } = Astro.props;
 
-const siteOrigin = 'https://tehranlaser.ir';
+// Live origin for canonical/OG/JSON-LD URLs (SITE_URL env var → live fallback).
+// Never hardcoded to the parked tehranlaser.ir vanity domain.
+const siteOrigin = resolveCanonicalOrigin();
 const currentPath = Astro.url.pathname;
 
 // Dynamic canonical URL: protocol/domain normalization + marketing-param stripping (§133)
