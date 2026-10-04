@@ -47,7 +47,7 @@
 }
 
 .booking-wizard-container .stepper-fill {
-  background: linear-gradient(90deg, #a8842a, #f5d77f);
+  background: linear-gradient(90deg, #047857, #6ee7b7);
   box-shadow: 0 0 10px rgba(245, 215, 127, 0.65);
 }
 
@@ -59,8 +59,8 @@
 }
 
 .booking-wizard-container .step-item.active .step-circle {
-  background: linear-gradient(150deg, #f5d77f, #d4af37 55%, #a8842a);
-  border-color: #f5d77f;
+  background: linear-gradient(150deg, #6ee7b7, #10b981 55%, #047857);
+  border-color: #6ee7b7;
   color: #14161a;
   transform: translateY(-4px);
   box-shadow:
@@ -71,12 +71,12 @@
 .booking-wizard-container .step-item.completed .step-circle {
   background: linear-gradient(150deg, #2b2f38, #1a1d23);
   border-color: rgba(212, 175, 55, 0.65);
-  color: #f5d77f;
+  color: #6ee7b7;
 }
 
 .booking-wizard-container .step-item.active .step-title,
 .booking-wizard-container .step-item.completed .step-title {
-  color: #f5d77f;
+  color: #6ee7b7;
   font-weight: 700;
 }
 
@@ -98,7 +98,7 @@
 .booking-wizard-container .duration-info-notice {
   background: rgba(245, 215, 127, 0.07);
   border: 1px solid rgba(212, 175, 55, 0.3);
-  border-right: 3px solid #d4af37;
+  border-right: 3px solid #10b981;
   border-radius: 10px;
   color: #c9cdd6;
   padding: 10px 14px;
@@ -106,7 +106,7 @@
 }
 
 .booking-wizard-container .duration-info-notice strong {
-  color: #f5d77f;
+  color: #6ee7b7;
 }
 
 .booking-wizard-container .selection-confirmation-banner {
@@ -114,18 +114,18 @@
   border: 1px solid rgba(245, 215, 127, 0.55);
   border-radius: 12px;
   padding: 12px 16px;
-  color: #f5d77f;
+  color: #6ee7b7;
 }
 
 .booking-wizard-container .selection-confirmation-banner .banner-icon {
-  background: #d4af37;
+  background: #10b981;
   color: #14161a;
 }
 
 /* ── Step 1: services ────────────────────────────────────────── */
 
 .booking-wizard-container .step-heading {
-  color: #f5d77f;
+  color: #6ee7b7;
 }
 
 .booking-wizard-container .step-desc {
@@ -149,7 +149,7 @@
 .booking-wizard-container .pill-quick-btn:hover {
   background: rgba(245, 215, 127, 0.12);
   border-color: rgba(212, 175, 55, 0.6);
-  color: #f5d77f;
+  color: #6ee7b7;
 }
 
 .booking-wizard-container .services-selection-grid {
@@ -172,14 +172,14 @@
 
 .booking-wizard-container .service-select-card.selected {
   background: linear-gradient(150deg, rgba(245, 215, 127, 0.14), rgba(212, 175, 55, 0.05));
-  border: 2px solid #d4af37;
+  border: 2px solid #10b981;
   box-shadow:
     0 14px 30px rgba(0, 0, 0, 0.5),
     0 0 0 1px rgba(245, 215, 127, 0.35) inset;
 }
 
 .booking-wizard-container .service-select-card:focus-visible {
-  outline: 2px solid #f5d77f;
+  outline: 2px solid #6ee7b7;
   outline-offset: 2px;
 }
 
@@ -189,8 +189,8 @@
 }
 
 .booking-wizard-container .checkbox-indicator.checked {
-  background: linear-gradient(150deg, #f5d77f, #d4af37);
-  border-color: #f5d77f;
+  background: linear-gradient(150deg, #6ee7b7, #10b981);
+  border-color: #6ee7b7;
   color: #14161a;
 }
 
@@ -204,7 +204,7 @@
 }
 
 .booking-wizard-container .price-val {
-  color: #f5d77f;
+  color: #6ee7b7;
 }
 
 .booking-wizard-container .duration-tag {
@@ -217,7 +217,7 @@
 .booking-wizard-container .badge-selected {
   background: rgba(245, 215, 127, 0.16);
   border: 1px solid rgba(245, 215, 127, 0.55);
-  color: #f5d77f;
+  color: #6ee7b7;
 }
 
 /* skeletons */
@@ -276,19 +276,19 @@
 
 .booking-wizard-container .gender-card.selected {
   background: linear-gradient(150deg, rgba(245, 215, 127, 0.14), rgba(212, 175, 55, 0.05));
-  border: 2px solid #d4af37;
+  border: 2px solid #10b981;
   box-shadow: 0 14px 30px rgba(0, 0, 0, 0.5);
 }
 
 .booking-wizard-container .gender-card:focus-visible {
-  outline: 2px solid #f5d77f;
+  outline: 2px solid #6ee7b7;
   outline-offset: 2px;
 }
 
 .booking-wizard-container .gender-icon {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid #2a2e36;
-  color: #f5d77f;
+  color: #6ee7b7;
 }
 
 .booking-wizard-container .gender-title {
@@ -304,13 +304,13 @@
 }
 
 .booking-wizard-container .price-highlight {
-  color: #f5d77f;
+  color: #6ee7b7;
 }
 
 .booking-wizard-container .discount-badge {
   background: rgba(245, 215, 127, 0.14);
   border: 1px solid rgba(245, 215, 127, 0.5);
-  color: #f5d77f;
+  color: #6ee7b7;
 }
 
 /* ── Selection summary bar ───────────────────────────────────── */
@@ -327,19 +327,19 @@
 }
 
 .booking-wizard-container .badge-count {
-  background: linear-gradient(150deg, #f5d77f, #d4af37);
+  background: linear-gradient(150deg, #6ee7b7, #10b981);
   color: #14161a;
 }
 
 .booking-wizard-container .service-chip {
   background: rgba(245, 215, 127, 0.12);
   border: 1px solid rgba(245, 215, 127, 0.4);
-  color: #f5d77f;
+  color: #6ee7b7;
 }
 
 .booking-wizard-container .chip-remove-btn {
   background: rgba(0, 0, 0, 0.35);
-  color: #f5d77f;
+  color: #6ee7b7;
 }
 
 .booking-wizard-container .stat-pill {
@@ -351,7 +351,7 @@
 }
 
 .booking-wizard-container .highlight-gold {
-  color: #f5d77f;
+  color: #6ee7b7;
 }
 
 /* ── Step 2: calendar + slots ────────────────────────────────── */
@@ -372,7 +372,7 @@
 }
 
 .booking-wizard-container .slots-title {
-  color: #f5d77f;
+  color: #6ee7b7;
   font-size: 15px;
   display: flex;
   align-items: center;
@@ -402,13 +402,13 @@
 .booking-wizard-container .time-pill:hover {
   border-color: rgba(245, 215, 127, 0.65);
   background: linear-gradient(150deg, #1d2027, #14161a);
-  color: #f5d77f;
+  color: #6ee7b7;
   transform: translateY(-1px);
 }
 
 .booking-wizard-container .time-pill.selected {
-  background: linear-gradient(150deg, #f5d77f, #d4af37) !important;
-  border-color: #f5d77f !important;
+  background: linear-gradient(150deg, #6ee7b7, #10b981) !important;
+  border-color: #6ee7b7 !important;
   color: #14161a !important;
   transform: translateY(-2px);
   box-shadow: 0 10px 22px rgba(212, 175, 55, 0.32);
@@ -425,7 +425,7 @@
 
 .booking-wizard-container .spinner {
   border-color: rgba(245, 215, 127, 0.22);
-  border-top-color: #f5d77f;
+  border-top-color: #6ee7b7;
 }
 
 /* ── Step 3: form ────────────────────────────────────────────── */
@@ -448,7 +448,7 @@
 
 .booking-wizard-container .form-control:focus {
   background: #0d0f13;
-  border-color: #d4af37;
+  border-color: #10b981;
   box-shadow:
     inset 0 2px 6px rgba(0, 0, 0, 0.55),
     0 0 0 3px rgba(245, 215, 127, 0.22);
@@ -476,8 +476,8 @@
 }
 
 .booking-wizard-container .input-with-icon:focus-within {
-  border-color: #d4af37;
-  color: #f5d77f;
+  border-color: #10b981;
+  color: #6ee7b7;
   box-shadow:
     inset 0 2px 6px rgba(0, 0, 0, 0.55),
     0 0 0 3px rgba(245, 215, 127, 0.22);
@@ -543,7 +543,7 @@
 
 .booking-wizard-container .summary-row.total-amount-row .label,
 .booking-wizard-container .summary-row.total-amount-row .value {
-  color: #f5d77f;
+  color: #6ee7b7;
   font-weight: 800;
 }
 
@@ -560,14 +560,14 @@
 }
 
 .booking-wizard-container .itemized-row .item-price {
-  color: #f5d77f;
+  color: #6ee7b7;
 }
 
 .booking-wizard-container .payment-notice {
   background: rgba(245, 215, 127, 0.08);
   border: 1px dashed rgba(245, 215, 127, 0.45);
   border-radius: 10px;
-  color: #f5d77f;
+  color: #6ee7b7;
   margin-top: 16px;
 }
 
@@ -581,7 +581,7 @@
   border-radius: 14px;
   padding: 14px 16px;
   margin-top: 16px;
-  color: #f5d77f;
+  color: #6ee7b7;
 }
 
 .booking-wizard-container .sms-notice p,
@@ -613,7 +613,7 @@
 
 .booking-wizard-container .btn:focus-visible,
 .booking-wizard-container .btn-outline:focus-visible {
-  outline: 2px solid #f5d77f;
+  outline: 2px solid #6ee7b7;
   outline-offset: 2px;
 }
 
@@ -629,14 +629,14 @@
 }
 
 .booking-success-card .success-icon-wrap {
-  background: linear-gradient(150deg, #f5d77f, #d4af37);
-  border: 1px solid #f5d77f;
+  background: linear-gradient(150deg, #6ee7b7, #10b981);
+  border: 1px solid #6ee7b7;
   color: #14161a;
   box-shadow: 0 16px 34px rgba(212, 175, 55, 0.4);
 }
 
 .booking-success-card .success-title {
-  color: #f5d77f;
+  color: #6ee7b7;
 }
 
 .booking-success-card .success-subtitle {
@@ -676,12 +676,12 @@
 }
 
 .booking-success-card .text-gold {
-  color: #f5d77f;
+  color: #6ee7b7;
   font-weight: 800;
 }
 
 .booking-success-card .guidelines-title {
-  color: #f5d77f;
+  color: #6ee7b7;
 }
 
 .booking-success-card .success-guidelines {
