@@ -205,10 +205,12 @@ body {
 }
 
 .badge-promo {
+  /* Solid opaque fill + light text. The translucent gradient over a dark body
+     read as ~1:1, and #115e59 text on it was illegible. */
   background-color: #04211d;
-  background-image: linear-gradient(135deg, rgba(45, 212, 191, 0.28) 0%, rgba(110, 231, 183, 0.24) 100%);
-  color: #115e59;
-  border: 1px solid rgba(45, 212, 191, 0.4);
+  background-image: linear-gradient(135deg, rgba(110, 231, 183, 0.28) 0%, rgba(52, 211, 153, 0.2) 100%);
+  color: #6ee7b7;
+  border: 1px solid rgba(110, 231, 183, 0.45);
 }
 
 /* ── Cards & Alerts ── */
