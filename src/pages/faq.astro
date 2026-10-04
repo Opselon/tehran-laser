@@ -716,15 +716,12 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
   @media (max-width: 640px) {
     .category-pills-bar {
       gap: 8px;
-      justify-content: flex-start;
-      overflow-x: auto;
-      padding-bottom: 8px;
-      flex-wrap: nowrap;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
-    }
-    .category-pills-bar::-webkit-scrollbar {
-      display: none;
+      justify-content: center;
+      /* Let pills WRAP to multiple rows instead of a horizontal scroll carousel.
+         A carousel hid 5 of 6 category filters off-screen (bar scrollWidth 1008
+         vs viewport 366) so mobile users could never reach them. */
+      flex-wrap: wrap;
+      padding-bottom: 4px;
     }
   }
 
