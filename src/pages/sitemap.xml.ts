@@ -40,6 +40,14 @@ const staticUrls: StaticUrl[] = [
   { loc: '/terms', changefreq: 'yearly', priority: '0.3' },
 ];
 
+/**
+ * Static pages whose content tracks the catalog (services/blog). They inherit
+ * the newest DB content timestamp as <lastmod> so crawlers re-fetch on change.
+ * Legal pages (/privacy, /terms, /booking) are excluded — they change rarely,
+ * and a stale-inaccurate lastmod gets the whole element ignored by Google.
+ */
+const CONTENT_BACKED_LOCS = new Set(['/', '/services', '/blog', '/faq', '/clinic', '/contact']);
+
 function buildUrlEntry(url: StaticUrl): string {
   const lastmod = url.lastmod ? `\n    <lastmod>${xmlEscape(url.lastmod)}</lastmod>` : '';
   return `  <url>
@@ -80,7 +88,19 @@ export const GET: APIRoute = async () => {
     lastmod: (b.updatedAt || b.publishedAt || '').slice(0, 10) || undefined,
   }));
 
-  const items = [...staticUrls, ...serviceUrls, ...blogUrls].map((url) =>
+  // Newest catalog timestamp drives <lastmod> for the content-backed static pages.
+  const newestContent = [...serviceRows.map((s) => s.updatedAt), ...blogRows.map((b) => b.updatedAt || b.publishedAt)]
+    .filter((d): d is string => Boolean(d))
+    .sort()
+    .pop();
+
+  const mergedStatic: StaticUrl[] = staticUrls.map((u) =>
+    CONTENT_BACKED_LOCS.has(u.loc) && newestContent && !u.lastmod
+      ? { ...u, lastmod: newestContent.slice(0, 10) }
+      : u,
+  );
+
+  const items = [...mergedStatic, ...serviceUrls, ...blogUrls].map((url) =>
     buildUrlEntry(url as StaticUrl),
   );
 
