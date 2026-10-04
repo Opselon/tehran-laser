@@ -273,6 +273,27 @@
   --font-vazir: var(--font-sans);
 }
 
+/* ── DARK OBSIDIAN THEME TOKEN OVERRIDE ──────────────────────────────────────
+   The base `:root` tokens above are designed for the LIGHT ivory surfaces:
+   --color-ink is near-black (#16130f). The public site body carries
+   `theme-dark-obsidian` with a near-black background (#0a0b0d), so every
+   element bound to var(--color-ink) — body text, .logo-title, .section-title,
+   .bottom-nav-label — rendered black-on-black and was invisible.
+   Repoint the ink/surface tokens to light values on dark surfaces.
+   ──────────────────────────────────────────────────────────────────────────── */
+body.theme-dark-obsidian,
+body.theme-dark-obsidian .site-main {
+  --color-ink: #f1f5f9;
+  --color-ink-soft: #cbd5e1;
+  --color-text-secondary: #94a3b8;
+  --color-bg: #0a0b0d;
+  --color-surface: #121417;
+  --color-surface-muted: #1a1d22;
+  --color-surface-sunken: #0d0f12;
+  --color-border: rgba(148, 163, 184, 0.22);
+  --color-border-strong: rgba(148, 163, 184, 0.4);
+}
+
 @media (prefers-reduced-motion: reduce) {
   :root {
     --motion-instant: 1ms;
