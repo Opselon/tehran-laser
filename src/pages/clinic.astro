@@ -1358,6 +1358,11 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
     transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
 
+  .btn-3d-gold :global(svg),
+  .btn-obsidian-outline :global(svg) {
+    flex-shrink: 0;
+  }
+
   .btn-3d-gold:hover {
     transform: translateY(-2px);
     box-shadow: 0 10px 28px rgba(212, 175, 55, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.5);
