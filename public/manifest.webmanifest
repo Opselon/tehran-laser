@@ -1,25 +1,55 @@
 {
+  "id": "/",
   "name": "کلینیک تهران لیزر",
   "short_name": "تهران لیزر",
   "description": "پلتفرم تخصصی لیزر موهای زائد و زیبایی تهران لیزر",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#0d0f12",
-  "theme_color": "#d4af37",
+  "theme_color": "#0f766e",
   "dir": "rtl",
   "lang": "fa-IR",
+  "categories": ["health", "medical", "beauty"],
   "icons": [
     {
       "src": "/icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/apple-touch-icon-180.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "رزرو آنلاین نوبت",
+      "short_name": "رزرو",
+      "url": "/booking",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "خدمات و تعرفه‌ها",
+      "short_name": "خدمات",
+      "url": "/services",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
     }
   ]
 }

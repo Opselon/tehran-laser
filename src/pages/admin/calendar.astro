@@ -3,6 +3,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 import { env } from 'cloudflare:workers';
 import { listAdminBookings } from '../../server/repositories';
 import { formatJalaliDate } from '../../lib/datetime/jalali';
+import JalaliPicker from '../../components/admin/JalaliPicker.astro';
 import Icon from '../../components/ui/Icon.astro';
 
 const url = Astro.url;
@@ -53,7 +54,7 @@ try {
           <a
             href={`/admin/calendar?date=${prevDateStr}`}
             class="btn-cal-step"
-            title={`روز قبل (${prevDateStr})`}
+            title={`روز قبل (${formatJalaliDate(prevDateStr)})`}
             aria-label="روز قبل"
           >
             <Icon name="chevronRight" size={18} />
@@ -72,7 +73,7 @@ try {
           <a
             href={`/admin/calendar?date=${nextDateStr}`}
             class="btn-cal-step"
-            title={`روز بعد (${nextDateStr})`}
+            title={`روز بعد (${formatJalaliDate(nextDateStr)})`}
             aria-label="روز بعد"
           >
             <span>روز بعد</span>
@@ -80,20 +81,19 @@ try {
           </a>
         </div>
 
-        <form method="GET" class="cal-date-picker-form">
-          <label class="cal-date-label" for="calDateInput">
+        <div class="cal-date-picker-form">
+          <span class="cal-date-label">
             <Icon name="calendar" size={16} />
             <span>انتخاب تاریخ:</span>
-          </label>
-          <input
+          </span>
+          <JalaliPicker
             id="calDateInput"
-            type="date"
             name="date"
-            class="cal-date-input"
             value={targetDate}
-            onchange="this.form.submit()"
+            label="انتخاب تاریخ نوبت‌ها (شمسی)"
+            submitOnChange
           />
-        </form>
+        </div>
       </div>
     </div>
 

@@ -2,6 +2,7 @@
 import AdminLayout from '../../layouts/AdminLayout.astro';
 import { env } from 'cloudflare:workers';
 import { formatJalaliDate } from '../../lib/datetime/jalali';
+import JalaliPicker from '../../components/admin/JalaliPicker.astro';
 import Icon from '../../components/ui/Icon.astro';
 
 interface Festival {
@@ -395,12 +396,12 @@ const seasonalTimeline = [
 
         <div class="g-2" style="display: grid; gap: 14px;">
           <div>
-            <label for="festStarts" class="form-label-modal">تاریخ شروع:</label>
-            <input type="date" id="festStarts" class="form-control-modal" required />
+            <label for="festStarts" class="form-label-modal">تاریخ شروع (شمسی):</label>
+            <JalaliPicker id="festStarts" defaultOffsetDays={0} label="تاریخ شروع جشنواره (شمسی)" />
           </div>
           <div>
-            <label for="festEnds" class="form-label-modal">تاریخ پایان:</label>
-            <input type="date" id="festEnds" class="form-control-modal" required />
+            <label for="festEnds" class="form-label-modal">تاریخ پایان (شمسی):</label>
+            <JalaliPicker id="festEnds" defaultOffsetDays={14} label="تاریخ پایان جشنواره (شمسی)" />
           </div>
         </div>
 
@@ -746,14 +747,21 @@ const seasonalTimeline = [
     const toast = document.getElementById('festFeedbackToast');
     const toastText = document.getElementById('festToastText');
 
-    // Default dates (today and +14 days)
+    // Default dates — clinic-local today and +14 days (UTC arithmetic would land
+    // on the previous day for the first 3.5 hours of an Iran day).
     const startInput = document.getElementById('festStarts') as HTMLInputElement | null;
     const endInput = document.getElementById('festEnds') as HTMLInputElement | null;
-    if (startInput) startInput.value = new Date().toISOString().slice(0, 10);
-    if (endInput) {
-      const d = new Date();
-      d.setDate(d.getDate() + 14);
-      endInput.value = d.toISOString().slice(0, 10);
+    const picker = window.TLJalaliPicker;
+    if (picker) {
+      picker.set('festStarts', picker.isoOffset(0));
+      picker.set('festEnds', picker.isoOffset(14));
+    } else {
+      if (startInput) startInput.value = new Date().toISOString().slice(0, 10);
+      if (endInput) {
+        const d = new Date();
+        d.setDate(d.getDate() + 14);
+        endInput.value = d.toISOString().slice(0, 10);
+      }
     }
 
     function openModal() {

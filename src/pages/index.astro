@@ -5,6 +5,7 @@ import CandelaShowcase from '../components/public/CandelaShowcase.astro';
 import ProtocolSection from '../components/public/ProtocolSection.astro';
 import TestimonialsSection from '../components/public/TestimonialsSection.astro';
 import { defaultFaqs } from '../data/faqs';
+import { MENS_ONLY_SLUG_SET } from '../data/male-pricing';
 import { env } from 'cloudflare:workers';
 import { listPublicServices, listFaqItems } from '../server/repositories';
 import { createFAQPageSchema, createBreadcrumbSchema } from '../lib/seo';
@@ -33,6 +34,38 @@ const faqJsonLd = createFAQPageSchema(
 const breadcrumbJsonLd = createBreadcrumbSchema([
   { name: 'صفحه اصلی', url: '/' },
 ]);
+
+// ── Unified gender price table (Lane B) ──────────────────────────────────────
+// One row per zone with BOTH tariffs, so women's and men's prices read side by
+// side. Amounts are stored in thousands of IRT (330 → ۳۳۰٬۰۰۰ تومان).
+interface PriceRowView {
+  name: string;
+  slug: string;
+  durationMinutes: number;
+  femaleAmount: number | null;
+  maleAmount: number | null;
+  mensOnly: boolean;
+}
+
+function toman(amountInThousands: number): string {
+  return (amountInThousands * 1000).toLocaleString('fa-IR');
+}
+
+// DB is authoritative and already ordered by display_order (nulls sort last),
+// then name — so men's-only zones land after the 20 shared zones with no
+// client-side sorting.
+const priceRows: PriceRowView[] = services.map((s) => {
+  const female = s.prices.find((p) => p.pricingCategory === 'female');
+  const male = s.prices.find((p) => p.pricingCategory === 'male');
+  return {
+    name: s.name,
+    slug: s.slug,
+    durationMinutes: s.durationMinutes,
+    femaleAmount: female ? female.amount : null,
+    maleAmount: male ? male.amount : null,
+    mensOnly: MENS_ONLY_SLUG_SET.has(s.slug),
+  };
+});
 ---
 
 <PublicLayout
@@ -164,9 +197,9 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
     <div class="container">
       <div class="section-header text-center">
         <span class="section-subtitle">تعرفه‌های مصوب و شفاف کلینیک</span>
-        <h2 class="section-title">خدمات تخصصی لیزر موهای زائد بانوان</h2>
+        <h2 class="section-title">تعرفه لیزر بانوان و آقایان — کنار هم</h2>
         <p class="section-desc">
-          تعرفه‌های رسمی کلینیک تهران لیزر برای بخش بانوان با دستگاه الکساندرایت کندلا ۲۰۲۶. رزرو آنلاین پکیج کل بدن مشمول ۱۵٪ تخفیف ویژه می‌باشد.
+          تعرفه‌های رسمی کلینیک تهران لیزر با دستگاه الکساندرایت کندلا ۲۰۲۶ برای هر دو لاین بانوان و آقایان. رزرو آنلاین پکیج کل بدن مشمول ۱۵٪ تخفیف ویژه می‌باشد.
         </p>
       </div>
 
@@ -213,45 +246,59 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
         </div>
       </div>
 
-      <!-- Services Grid (SSR rendered) -->
-      <div class="services-grid mt-5">
-        {services.slice(0, 12).map((service) => {
-          const femalePrice = service.prices.find((p) => p.pricingCategory === 'female');
-          const isFullBody = service.slug === 'full-body';
-
-          return (
-            <div class="service-card">
-              <div class="service-card-header">
-                <h4 class="service-name">{service.name}</h4>
-                <span class="duration-badge">
-                  <Icon name="clock" size={13} />
-                  <span>{service.durationMinutes} دقیقه</span>
-                </span>
-              </div>
-              <p class="service-desc">{service.shortDescription || service.description}</p>
-              <div class="service-pricing-row">
-                <div class="price-details">
-                  <span class="price-label">تعرفه بانوان:</span>
-                  <span class="price-amount">
-                    {femalePrice ? `${femalePrice.amount.toLocaleString('fa-IR')} هزار تومان` : 'استعلام تلفنی'}
-                  </span>
-                </div>
-                {isFullBody && <span class="badge badge-success">۱۵٪ تخفیف سایت</span>}
-              </div>
-              <div class="service-card-actions">
-                <a href={`/booking?service=${service.slug}`} class="btn btn-outline btn-sm btn-block">
-                  <Icon name="calendar" size={15} />
-                  <span>رزرو این خدمت</span>
-                </a>
-              </div>
-            </div>
-          );
-        })}
+      <!-- Unified gender price table — تعرفه بانوان و آقایان کنار هم (Lane B) -->
+      <div class="gender-price-table-wrap mt-5">
+        <table class="gender-price-table">
+          <thead>
+            <tr>
+              <th scope="col" class="gpt-th-zone">ناحیه خدمت</th>
+              <th scope="col" class="gpt-th-female">تعرفه بانوان</th>
+              <th scope="col" class="gpt-th-male">تعرفه آقایان</th>
+              <th scope="col" class="gpt-th-action">رزرو</th>
+            </tr>
+          </thead>
+          <tbody>
+            {priceRows.map((row) => (
+              <tr class={row.mensOnly ? 'gpt-row gpt-row-mens' : 'gpt-row'}>
+                <td class="gpt-cell-zone">
+                  <span class="gpt-zone-name">{row.name}</span>
+                  {row.mensOnly && <span class="gpt-mens-tag">مخصوص آقایان</span>}
+                </td>
+                <td class="gpt-cell-female">
+                  {row.femaleAmount !== null ? (
+                    <span class="gpt-price">
+                      <span class="gpt-amount">{toman(row.femaleAmount)}</span>
+                      <span class="gpt-unit">تومان</span>
+                    </span>
+                  ) : (
+                    <span class="gpt-na">—</span>
+                  )}
+                </td>
+                <td class="gpt-cell-male">
+                  {row.maleAmount !== null ? (
+                    <span class="gpt-price">
+                      <span class="gpt-amount">{toman(row.maleAmount)}</span>
+                      <span class="gpt-unit">تومان</span>
+                    </span>
+                  ) : (
+                    <span class="gpt-na">استعلام تلفنی</span>
+                  )}
+                </td>
+                <td class="gpt-cell-action">
+                  <a href={`/booking?service=${row.slug}`} class="gpt-book-btn" aria-label={`رزرو ${row.name}`}>
+                    <Icon name="calendar" size={14} />
+                    <span>رزرو</span>
+                  </a>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
 
       <div class="text-center mt-5">
         <a href="/services" class="btn btn-outline btn-lg">
-          <span>مشاهده تمام ۲۰ ناحیه و لیست کامل قیمت‌ها</span>
+          <span>مشاهده جزئیات کامل هر ناحیه و راهنمای مراقبت</span>
           <Icon name="arrowLeft" size={18} />
         </a>
       </div>
@@ -272,9 +319,9 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
         </p>
       </div>
       <div class="male-cta">
-        <a href="tel:+989035555090" class="btn btn-outline btn-lg">
-          <Icon name="phone" size={18} />
-          <span>مشاوره تلفنی و استعلام تعرفه آقایان</span>
+        <a href="/booking" class="btn btn-outline btn-lg">
+          <Icon name="calendar" size={18} />
+          <span>رزرو نوبت لاین اختصاصی آقایان</span>
         </a>
       </div>
     </div>
@@ -362,3 +409,361 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
     </div>
   </section>
 </PublicLayout>
+
+<style>
+  /* ─────────────────────────────────────────────────────────────
+     Unified gender price table (Lane B) — self-contained.
+     Colour contract: light text on obsidian only. Explicit rgba
+     backgrounds use DARK rgb channels (never gold/white) so the
+     contrast audit never blends them to gold or white.
+     ───────────────────────────────────────────────────────────── */
+  .gender-price-table-wrap {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    background: rgba(14, 18, 26, 0.6);
+    border: 1px solid rgba(212, 175, 55, 0.22);
+    border-radius: 18px;
+    padding: 4px 10px 10px;
+    box-shadow: 0 12px 32px -12px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  }
+
+  .gender-price-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.9rem;
+  }
+
+  .gender-price-table thead th {
+    position: sticky;
+    top: var(--tl-header-offset, 0px);
+    z-index: 2;
+    background: #0e121a;
+    color: #f5d77f;
+    font-weight: 800;
+    font-size: 0.82rem;
+    text-align: center;
+    padding: 13px 10px;
+    white-space: nowrap;
+    border-bottom: 2px solid rgba(212, 175, 55, 0.4);
+  }
+
+  .gpt-th-zone {
+    text-align: right !important;
+  }
+
+  .gpt-row {
+    transition: background 0.15s ease;
+  }
+
+  .gpt-row:hover {
+    background: rgba(30, 36, 48, 0.55);
+  }
+
+  /* Men's-only zones get a neutral (non-gold) tint so the audit never reads
+     the tint as a gold fill behind gold text. */
+  .gpt-row-mens {
+    background: rgba(30, 36, 48, 0.55);
+  }
+
+  .gpt-cell-zone,
+  .gpt-cell-female,
+  .gpt-cell-male,
+  .gpt-cell-action {
+    padding: 12px 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    vertical-align: middle;
+  }
+
+  .gpt-zone-name {
+    color: #f7f3ec;
+    font-weight: 700;
+  }
+
+  .gpt-mens-tag {
+    display: inline-block;
+    margin-inline-start: 8px;
+    color: #f5d77f;
+    font-size: 0.66rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border: 1px solid rgba(212, 175, 55, 0.5);
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+
+  .gpt-cell-female,
+  .gpt-cell-male {
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .gpt-price {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 4px;
+    font-weight: 800;
+  }
+
+  .gpt-cell-female .gpt-amount {
+    color: #f5d77f;
+  }
+
+  .gpt-cell-male .gpt-amount {
+    color: #8ab4ff;
+  }
+
+  .gpt-unit {
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: #b3aa9c;
+  }
+
+  .gpt-na {
+    color: #b3aa9c;
+    font-size: 0.82rem;
+  }
+
+  .gpt-cell-action {
+    text-align: center;
+  }
+
+  .gpt-book-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: #f5d77f;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-decoration: none;
+    padding: 6px 12px;
+    border: 1px solid rgba(212, 175, 55, 0.5);
+    border-radius: 10px;
+    transition: background 0.2s ease, border-color 0.2s ease;
+    white-space: nowrap;
+  }
+
+  .gpt-book-btn:hover {
+    background: rgba(30, 36, 48, 0.7);
+    border-color: rgba(212, 175, 55, 0.85);
+  }
+
+  /* ── ≤768px: compact one-card-per-zone layout + prose collapse ──
+     The homepage must fall under 9,000px at 390px (contract B4), so long
+     prose is collapsed and secondary cards are trimmed to the strongest
+     examples. Everything removed here is still present on /services,
+     /clinic and ≥769px. */
+  @media (max-width: 768px) {
+    /* Section rhythm: two values instead of per-section 60/80 pairs. */
+    :global(.section) {
+      padding-top: 36px;
+      padding-bottom: 44px;
+    }
+
+    /* Hero: drop the paragraph, keep the headline + CTAs. */
+    :global(.hero-section) {
+      padding-top: 44px;
+      padding-bottom: 34px;
+    }
+    :global(.hero-section .hero-subtitle),
+    :global(.hero-badge) {
+      display: none;
+    }
+
+    /* Eyebrow subtitles repeat the section titles; fold them on mobile. */
+    :global(.section-subtitle) {
+      display: none;
+    }
+
+    /* Pricing explainer paragraph: the table is self-describing. */
+    :global(.services-section .section-desc) {
+      display: none;
+    }
+
+    /* Candela showcase: keep the two strongest features, drop the prose. */
+    :global(.candela-lead),
+    :global(.candela-feat-desc) {
+      display: none;
+    }
+    :global(.candela-feature-card:nth-child(n + 3)) {
+      display: none;
+    }
+
+    /* Trust strip: descriptions fold away; keep two marquee cards. */
+    :global(.trust-strip) {
+      padding-top: 28px;
+      padding-bottom: 34px;
+    }
+    :global(.trust-desc) {
+      display: none;
+    }
+    :global(.trust-card:nth-child(n + 3)) {
+      display: none;
+    }
+
+    /* Protocol: step descriptions fold away; keep two steps. */
+    :global(.step-desc) {
+      display: none;
+    }
+    :global(.protocol-step:nth-child(n + 3)) {
+      display: none;
+    }
+
+    /* Testimonials: one card on mobile. */
+    :global(.testimonial-card:nth-child(n + 2)) {
+      display: none;
+    }
+    :global(.testi-quote) {
+      -webkit-line-clamp: 3;
+      line-clamp: 3;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    /* Featured promo: keeps only the price box on mobile. The prose, the
+       feature list and the ribbon caption all live on /services. */
+    :global(.promo-desc),
+    :global(.promo-features) {
+      display: none;
+    }
+    :global(.featured-promo-card) {
+      padding-top: 12px;
+    }
+    :global(.promo-badge-ribbon) {
+      display: none;
+    }
+    :global(.promo-info) {
+      margin-bottom: 0;
+    }
+
+    /* Men's strip: the two-line sales pitch folds; the badge, headline and
+       booking CTA stay. */
+    :global(.male-desc) {
+      display: none;
+    }
+
+    /* FAQ: three questions on mobile. */
+    :global(.faq-card:nth-child(n + 4)) {
+      display: none;
+    }
+
+    /* Compact price cards: zone + book on line 1, both tariffs on line 2. */
+    .gender-price-table-wrap {
+      padding: 10px;
+    }
+
+    .gender-price-table thead {
+      display: none;
+    }
+
+    .gender-price-table,
+    .gender-price-table tbody,
+    .gender-price-table tr,
+    .gender-price-table td {
+      display: block;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .gender-price-table tr {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      align-items: center;
+      column-gap: 8px;
+      border: 1px solid rgba(212, 175, 55, 0.2);
+      border-radius: 12px;
+      padding: 9px 12px;
+      margin-bottom: 8px;
+      background: rgba(20, 24, 32, 0.55);
+    }
+
+    .gender-price-table td {
+      border: none;
+      padding: 2px 0;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      text-align: right;
+    }
+
+    .gpt-cell-zone {
+      grid-column: 1 / 3;
+      grid-row: 1;
+      flex-wrap: wrap;
+    }
+
+    .gpt-cell-action {
+      grid-column: 3;
+      grid-row: 1;
+      justify-self: end;
+    }
+
+    .gpt-cell-female {
+      grid-column: 1;
+      grid-row: 2;
+    }
+
+    .gpt-cell-male {
+      grid-column: 2;
+      grid-row: 2;
+    }
+
+    .gpt-cell-female::before {
+      content: 'بانوان';
+      color: #b3aa9c;
+      font-size: 0.72rem;
+      font-weight: 600;
+    }
+
+    .gpt-cell-male::before {
+      content: 'آقایان';
+      color: #b3aa9c;
+      font-size: 0.72rem;
+      font-weight: 600;
+    }
+
+    .gpt-amount {
+      font-size: 0.9rem;
+    }
+
+    .gpt-unit {
+      font-size: 0.64rem;
+    }
+
+    .gpt-mens-tag {
+      font-size: 0.6rem;
+      padding: 1px 6px;
+    }
+
+    .gpt-book-btn {
+      padding: 6px 9px;
+    }
+
+    /* Icon-only book control keeps the row to two lines. */
+    .gpt-book-btn span:not(.gpt-unit) {
+      display: none;
+    }
+  }
+
+</style>
+
+<script is:inline>
+  // Keep the sticky table header clear of the (also sticky) site header by
+  // publishing the header's real height as a CSS custom property.
+  (function () {
+    function syncHeaderOffset() {
+      var header = document.querySelector('.site-header');
+      if (!header) return;
+      var h = Math.round(header.getBoundingClientRect().height);
+      if (h > 0) {
+        document.documentElement.style.setProperty('--tl-header-offset', h + 'px');
+      }
+    }
+    syncHeaderOffset();
+    window.addEventListener('resize', syncHeaderOffset);
+    window.addEventListener('orientationchange', syncHeaderOffset);
+  })();
+</script>
+

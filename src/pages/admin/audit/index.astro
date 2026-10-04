@@ -3,7 +3,7 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
 import Icon from '../../../components/ui/Icon.astro';
 import { env } from 'cloudflare:workers';
 import { listAuditLogs } from '../../../server/repositories';
-import { formatJalaliOfInstant } from '../../../lib/datetime/jalali';
+import { formatJalaliOfInstant, formatJalaliDate } from '../../../lib/datetime/jalali';
 
 const TZ = 'Asia/Tehran';
 
@@ -355,7 +355,7 @@ const sensitiveCount = rows.filter((r) => r.sev !== 'info').length;
                       <span class="dot-sep">•</span>
                       <span>{r.rel}</span>
                     </div>
-                    <div class="cell-id" dir="ltr">{r.createdAt}</div>
+                    <div class="cell-id cell-date-jalali">{formatJalaliDate(r.createdAt)}</div>
                   </td>
                   <td>
                     <div class="cell-primary actor-line">

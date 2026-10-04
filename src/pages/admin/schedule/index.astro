@@ -3,6 +3,7 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
 import { env } from 'cloudflare:workers';
 import { listBusinessHours, listAllScheduleExceptions } from '../../../server/repositories';
 import { formatJalaliDate } from '../../../lib/datetime/jalali';
+import JalaliPicker from '../../../components/admin/JalaliPicker.astro';
 import Icon from '../../../components/ui/Icon.astro';
 
 let hours: Awaited<ReturnType<typeof listBusinessHours>> = [];
@@ -356,15 +357,9 @@ const weekdayNames = [
           <div class="form-field-wrap">
             <label class="modal-input-label">
               <Icon name="calendar" size={14} />
-              <span>تاریخ مورد نظر (YYYY-MM-DD):</span>
+              <span>تاریخ مورد نظر (شمسی):</span>
             </label>
-            <input
-              type="date"
-              id="exDate"
-              class="form-control-modal"
-              dir="ltr"
-              required
-            />
+            <JalaliPicker id="exDate" label="تاریخ روز استثنا (شمسی)" />
           </div>
 
           <div class="form-field-wrap">

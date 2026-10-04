@@ -17,6 +17,7 @@ import {
 import { consumeRateLimit, parseRateLimitPolicy } from '../../lib/security/rate-limit';
 import { verifyPassword } from '../../lib/security/password';
 import { resolveCanonicalOrigin } from '../../lib/seo/canonical';
+import { zonedTimeToUtc } from '../../lib/datetime/timezone';
 import { getSearchParams, handleRoute, ok, okWithStatus, parseBody, parseValue } from '../../lib/api/respond';
 import { ApiError } from '../../lib/api/errors';
 import {
@@ -1127,7 +1128,16 @@ export async function handleApiRequest(
       if (body.scheduleNextSession && body.nextSessionDate) {
         nextBookingId = crypto.randomUUID();
         const nextRef = 'TL-N' + Math.random().toString(36).substring(2, 6).toUpperCase();
-        const nextStartsAt = new Date(body.nextSessionDate).toISOString();
+        // The admin UI sends a clinic-local wall clock (Jalali picker + time field).
+        // `new Date(s)` would read it as UTC and shift the booking by the Tehran
+        // offset (+3:30) — the same reason the public booking flow goes through
+        // zonedTimeToUtc.
+        const localWall = body.nextSessionDate.trim();
+        const wallMatch = /^(\d{4}-\d{2}-\d{2})(?:[T ](\d{2}:\d{2}))?/.exec(localWall);
+        const nextStartsAt =
+          wallMatch && wallMatch[1] && wallMatch[2]
+            ? zonedTimeToUtc(wallMatch[1], wallMatch[2], env.BUSINESS_TIMEZONE || 'Asia/Tehran')
+            : new Date(localWall).toISOString();
         const nextEndsAt = new Date(new Date(nextStartsAt).getTime() + durationMs).toISOString();
 
         await run(

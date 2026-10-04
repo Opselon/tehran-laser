@@ -2,6 +2,7 @@
 import AdminLayout from '../../layouts/AdminLayout.astro';
 import { env } from 'cloudflare:workers';
 import { listPublicServices, listAdminCustomers } from '../../server/repositories';
+import JalaliPicker from '../../components/admin/JalaliPicker.astro';
 import Icon from '../../components/ui/Icon.astro';
 
 let services: Awaited<ReturnType<typeof listPublicServices>> = [];
@@ -42,7 +43,10 @@ try {
     </div>
 
     <div id="walkinSuccess" style="display: none; margin-bottom: 20px; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); color: #34d399; padding: 18px 24px; border-radius: 14px; font-weight: 700;">
-      <span id="walkinSuccessText">✓ نوبت مراجع و تراکنش مالی با موفقیت ثبت شد.</span>
+      <span id="walkinSuccessText" style="display: inline-flex; align-items: center; gap: 8px;">
+        <Icon name="checkCircle" size={16} />
+        <span>نوبت مراجع و تراکنش مالی با موفقیت ثبت شد.</span>
+      </span>
     </div>
 
     <form id="walkinForm">
@@ -108,7 +112,7 @@ try {
             </label>
             <select id="serviceSelect" class="form-control-modal" required>
               {services.map((s) => (
-                <option value={s.slug} data-price={s.prices.find(p => p.pricingCategory === 'female')?.amount || 320}>
+                <option value={s.slug} data-price={s.prices.find(p => p.pricingCategory === 'female')?.amount || 320} data-price-male={s.prices.find(p => p.pricingCategory === 'male')?.amount || 0}>
                   {s.name} ({s.durationMinutes} دقیقه)
                 </option>
               ))}
@@ -210,9 +214,16 @@ try {
 
           <div>
             <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">
-              تاریخ پیشنهادی جلسه بعدی:
+              تاریخ پیشنهادی جلسه بعدی (شمسی):
             </label>
-            <input type="datetime-local" id="nextSessionDateTime" class="form-control-modal" dir="ltr" />
+            <JalaliPicker id="nextSessionDate" label="تاریخ جلسه بعدی (شمسی)" />
+          </div>
+
+          <div>
+            <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">
+              ساعت جلسه بعدی:
+            </label>
+            <input type="time" id="nextSessionTime" class="form-control-modal" dir="ltr" value="16:00" />
           </div>
 
           <div>
@@ -243,7 +254,7 @@ try {
     const scheduleNextCheckbox = document.getElementById('scheduleNextCheckbox') as HTMLInputElement;
     const nextSessionFields = document.getElementById('nextSessionFields');
     const intervalWeeks = document.getElementById('intervalWeeks') as unknown as HTMLSelectElement;
-    const nextSessionDateTime = document.getElementById('nextSessionDateTime') as HTMLInputElement;
+    const nextSessionTime = document.getElementById('nextSessionTime') as HTMLInputElement;
 
     const form = document.getElementById('walkinForm') as HTMLFormElement;
     const submitBtn = document.getElementById('submitWalkinBtn') as HTMLButtonElement;
@@ -252,13 +263,10 @@ try {
     const successBox = document.getElementById('walkinSuccess');
     const successText = document.getElementById('walkinSuccessText');
 
-    // Auto-calculate next session date (6 weeks from now)
+    // Auto-calculate next session date (6 weeks from now). The picker stores the
+    // ISO day; the wall clock lives in its own field, so no UTC day-shift for Iran.
     function calcNextDate(weeks = 6) {
-      const d = new Date();
-      d.setDate(d.getDate() + weeks * 7);
-      d.setHours(16, 0, 0, 0); // Default to 16:00
-      const iso = d.toISOString().slice(0, 16);
-      if (nextSessionDateTime) nextSessionDateTime.value = iso;
+      window.TLJalaliPicker?.set('nextSessionDate', window.TLJalaliPicker.isoOffset(weeks * 7));
     }
     calcNextDate(6);
 
@@ -281,17 +289,21 @@ try {
       }
     });
 
-    serviceSelect?.addEventListener('change', () => {
+    function syncServicePrice() {
       const opt = serviceSelect.options[serviceSelect.selectedIndex];
-      if (opt && opt.dataset.price) {
-        paymentAmount.value = opt.dataset.price;
-      }
-    });
+      if (!opt) return;
+      const male = custCategory.value === 'male';
+      const amount = male ? opt.dataset.priceMale : opt.dataset.price;
+      if (amount && Number(amount) > 0) paymentAmount.value = amount;
+    }
+
+    serviceSelect?.addEventListener('change', syncServicePrice);
+    custCategory?.addEventListener('change', syncServicePrice);
 
     form?.addEventListener('submit', async (e) => {
       e.preventDefault();
       submitBtn.disabled = true;
-      submitBtn.innerText = '⏳ در حال ثبت در سامانه و صدور فاکتور...';
+      submitBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" style="vertical-align:middle;display:inline-block"><path d="M12 3.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17Zm0 3.5v5l3.5 2"/></svg> در حال ثبت در سامانه و صدور فاکتور...';
       if (alertBox) alertBox.style.display = 'none';
       if (successBox) successBox.style.display = 'none';
 
@@ -310,7 +322,7 @@ try {
         pulseWidthMs: Number((document.getElementById('pulseWidth') as HTMLInputElement).value),
         shotCount: Number((document.getElementById('shotCount') as HTMLInputElement).value),
         scheduleNextSession: scheduleNextCheckbox.checked,
-        nextSessionDate: scheduleNextCheckbox.checked ? nextSessionDateTime.value : null,
+        nextSessionDate: scheduleNextCheckbox.checked ? `${window.TLJalaliPicker?.get('nextSessionDate') || ''}T${nextSessionTime?.value || '16:00'}:00` : null,
       };
 
       try {
@@ -322,9 +334,9 @@ try {
 
         const json = await res.json() as any;
         if (res.ok && json.data) {
-          submitBtn.innerText = '✓ ثبت نوبت و جلسه آینده انجام شد!';
+          submitBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" style="vertical-align:middle;display:inline-block"><path d="M12 2.5a9.5 9.5 0 1 0 0 19 9.5 9.5 0 0 0 0-19Zm-3 10 2.5 2.5 5-5"/></svg> ثبت نوبت و جلسه آینده انجام شد!';
           if (successBox && successText) {
-            successText.innerText = `✓ نوبت حضوری با موفقیت ثبت شد. ${json.data.nextBookingId ? 'نوبت جلسه بعد نیز تنظیم گردید.' : ''}`;
+            successText.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" style="vertical-align:middle;display:inline-block"><path d="M12 2.5a9.5 9.5 0 1 0 0 19 9.5 9.5 0 0 0 0-19Zm-3 10 2.5 2.5 5-5"/></svg> نوبت حضوری با موفقیت ثبت شد. ${json.data.nextBookingId ? 'نوبت جلسه بعد نیز تنظیم گردید.' : ''}`;
             successBox.style.display = 'block';
           }
           setTimeout(() => {
@@ -334,13 +346,13 @@ try {
           if (alertText) alertText.innerText = json.error?.message || 'خطا در ثبت پذیرش حضوری.';
           if (alertBox) alertBox.style.display = 'flex';
           submitBtn.disabled = false;
-          submitBtn.innerText = '⚡ ثبت قطعی پذیرش، تراکنش مالی و نوبت جلسه بعد';
+          submitBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" style="vertical-align:middle;display:inline-block"><path d="M13.5 2.5 5 14h6l-1 7.5L19.5 10h-6l1-7.5Z"/></svg> ثبت قطعی پذیرش، تراکنش مالی و نوبت جلسه بعد';
         }
       } catch {
         if (alertText) alertText.innerText = 'خطای ارتباط با سرور.';
         if (alertBox) alertBox.style.display = 'flex';
         submitBtn.disabled = false;
-        submitBtn.innerText = '⚡ ثبت قطعی پذیرش، تراکنش مالی و نوبت جلسه بعد';
+        submitBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" style="vertical-align:middle;display:inline-block"><path d="M13.5 2.5 5 14h6l-1 7.5L19.5 10h-6l1-7.5Z"/></svg> ثبت قطعی پذیرش، تراکنش مالی و نوبت جلسه بعد';
       }
     });
   </script>

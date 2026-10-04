@@ -2,7 +2,7 @@
 // Offline strategy: cache static shell and public assets; NEVER allow offline booking
 // submissions to pretend success.
 
-const CACHE_NAME = 'tehran-laser-v1';
+const CACHE_NAME = 'tehran-laser-v2';
 const STATIC_ASSETS = [
   '/',
   '/services',
@@ -10,6 +10,9 @@ const STATIC_ASSETS = [
   '/contact',
   '/faq',
   '/manifest.webmanifest',
+  '/icons/icon-192.png',
+  '/icons/icon-512.png',
+  '/icons/apple-touch-icon-180.png',
 ];
 
 self.addEventListener('install', (event) => {

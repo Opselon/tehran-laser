@@ -52,12 +52,12 @@
 
 /* 1. Imperial Gold 3D Button (.btn-3d-gold) */
 .btn-3d-gold {
-  background: var(--gradient-gold-btn, linear-gradient(180deg, #f5d77f 0%, #d4af37 45%, #9e7822 100%));
-  color: var(--color-text-on-gold, #0d0a02);
-  border-color: rgba(245, 215, 127, 0.5);
+  background: var(--gradient-gold-btn, linear-gradient(180deg, #6ee7b7 0%, #34d399 45%, #059669 100%));
+  color: var(--color-text-on-gold, #04211d);
+  border-color: rgba(110, 231, 183, 0.5);
   box-shadow:
-    0 4px 0 #7a5d1a,
-    0 10px 24px rgba(212, 175, 55, 0.35),
+    0 4px 0 #0a4f45,
+    0 10px 24px rgba(52, 211, 153, 0.35),
     inset 0 1px 1.5px rgba(255, 255, 255, 0.65);
 }
 
@@ -66,33 +66,33 @@
   filter: brightness(1.06);
   border-color: rgba(255, 240, 180, 0.85);
   box-shadow:
-    0 6px 0 #7a5d1a,
-    0 16px 32px rgba(212, 175, 55, 0.5),
+    0 6px 0 #0a4f45,
+    0 16px 32px rgba(52, 211, 153, 0.5),
     inset 0 1px 1.5px rgba(255, 255, 255, 0.75);
 }
 
 .btn-3d-gold:active:not(:disabled) {
   transform: translateY(2px);
   box-shadow:
-    0 1px 0 #7a5d1a,
-    0 4px 12px rgba(212, 175, 55, 0.25),
+    0 1px 0 #0a4f45,
+    0 4px 12px rgba(52, 211, 153, 0.25),
     inset 0 2px 4px rgba(0, 0, 0, 0.2);
   filter: brightness(0.97);
 }
 
 .btn-3d-gold:focus-visible {
-  outline: 2px solid #f5d77f;
+  outline: 2px solid #34d399;
   outline-offset: 3px;
   box-shadow:
-    0 4px 0 #7a5d1a,
-    0 0 0 4px rgba(212, 175, 55, 0.35);
+    0 4px 0 #0a4f45,
+    0 0 0 4px rgba(52, 211, 153, 0.35);
 }
 
 .btn-3d-gold:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
-  box-shadow: 0 2px 0 #7a5d1a;
+  box-shadow: 0 2px 0 #0a4f45;
   filter: grayscale(0.5);
 }
 
@@ -205,8 +205,8 @@
   background: rgba(22, 28, 42, 0.65);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  color: var(--gold-400, #f5d77f);
-  border: 1px solid rgba(212, 175, 55, 0.35);
+  color: var(--gold-400, #34d399);
+  border: 1px solid rgba(52, 211, 153, 0.35);
   box-shadow:
     0 3px 10px rgba(0, 0, 0, 0.4),
     inset 0 1px 0 rgba(255, 255, 255, 0.08);
@@ -214,25 +214,25 @@
 
 .btn-3d-ghost:hover:not(:disabled) {
   transform: translateY(-2px);
-  background: rgba(212, 175, 55, 0.14);
-  border-color: rgba(245, 215, 127, 0.7);
+  background: rgba(52, 211, 153, 0.14);
+  border-color: rgba(110, 231, 183, 0.7);
   color: #ffffff;
   box-shadow:
     0 6px 20px rgba(0, 0, 0, 0.5),
-    0 0 16px rgba(212, 175, 55, 0.24),
+    0 0 16px rgba(52, 211, 153, 0.24),
     inset 0 1px 1px rgba(255, 255, 255, 0.15);
 }
 
 .btn-3d-ghost:active:not(:disabled) {
   transform: translateY(1px);
-  background: rgba(212, 175, 55, 0.2);
+  background: rgba(52, 211, 153, 0.2);
   box-shadow:
     0 1px 4px rgba(0, 0, 0, 0.5),
     inset 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .btn-3d-ghost:focus-visible {
-  outline: 2px solid #f5d77f;
+  outline: 2px solid #34d399;
   outline-offset: 2px;
 }
 
@@ -258,12 +258,12 @@
 
 .btn-3d-secondary:hover:not(:disabled) {
   transform: translateY(-2px);
-  background: rgba(212, 175, 55, 0.14);
-  border-color: rgba(212, 175, 55, 0.55);
+  background: rgba(52, 211, 153, 0.14);
+  border-color: rgba(52, 211, 153, 0.55);
   color: #ffffff;
   box-shadow:
     0 6px 18px rgba(0, 0, 0, 0.45),
-    0 0 14px rgba(212, 175, 55, 0.18);
+    0 0 14px rgba(52, 211, 153, 0.18);
 }
 
 .btn-3d-secondary:active:not(:disabled) {
@@ -309,8 +309,8 @@
 /* 7. Refresh & Logout Buttons */
 .btn-3d-refresh {
   background: linear-gradient(180deg, #242c3f 0%, #151b29 100%);
-  border: 1px solid rgba(212, 175, 55, 0.35);
-  color: #f5d77f;
+  border: 1px solid rgba(52, 211, 153, 0.35);
+  color: #34d399;
   box-shadow:
     0 3px 0 #0b0e16,
     0 6px 16px rgba(0, 0, 0, 0.4);
@@ -318,11 +318,11 @@
 
 .btn-3d-refresh:hover:not(:disabled) {
   transform: translateY(-2px);
-  border-color: rgba(245, 215, 127, 0.7);
+  border-color: rgba(110, 231, 183, 0.7);
   color: #ffffff;
   box-shadow:
     0 5px 0 #0b0e16,
-    0 10px 22px rgba(212, 175, 55, 0.25);
+    0 10px 22px rgba(52, 211, 153, 0.25);
 }
 
 .btn-3d-refresh:active:not(:disabled) {
@@ -391,13 +391,13 @@
   background: linear-gradient(160deg, rgba(22, 28, 44, 0.96) 0%, rgba(10, 13, 20, 0.98) 100%);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(212, 175, 55, 0.26);
+  border: 1px solid rgba(52, 211, 153, 0.26);
   border-radius: 20px;
   padding: 22px;
   box-shadow:
     0 18px 42px rgba(0, 0, 0, 0.6),
     inset 0 1px 1px rgba(255, 255, 255, 0.1),
-    inset 0 0 20px rgba(212, 175, 55, 0.03);
+    inset 0 0 20px rgba(52, 211, 153, 0.03);
   transition:
     transform 0.24s cubic-bezier(0.2, 0.8, 0.2, 1),
     box-shadow 0.24s ease,
@@ -409,17 +409,17 @@
   position: absolute;
   inset: 0 0 auto 0;
   height: 3px;
-  background: linear-gradient(90deg, transparent 0%, rgba(212, 175, 55, 0.75) 40%, rgba(245, 215, 127, 0.95) 70%, transparent 100%);
+  background: linear-gradient(90deg, transparent 0%, rgba(52, 211, 153, 0.75) 40%, rgba(110, 231, 183, 0.95) 70%, transparent 100%);
   opacity: 0.85;
   pointer-events: none;
 }
 
 .kpi-card-3d:hover {
   transform: translateY(-4px);
-  border-color: rgba(212, 175, 55, 0.58);
+  border-color: rgba(52, 211, 153, 0.58);
   box-shadow:
     0 26px 58px rgba(0, 0, 0, 0.7),
-    0 0 26px rgba(212, 175, 55, 0.22),
+    0 0 26px rgba(52, 211, 153, 0.22),
     inset 0 1px 1.5px rgba(255, 255, 255, 0.16);
 }
 
@@ -465,25 +465,25 @@
   background: linear-gradient(165deg, rgba(18, 23, 35, 0.94) 0%, rgba(9, 12, 18, 0.97) 100%);
   backdrop-filter: blur(28px) saturate(180%);
   -webkit-backdrop-filter: blur(28px) saturate(180%);
-  border: 1px solid rgba(212, 175, 55, 0.24);
+  border: 1px solid rgba(52, 211, 153, 0.24);
   border-radius: 26px;
   padding: 32px 30px;
   margin-bottom: 34px;
   box-shadow:
     0 22px 55px rgba(0, 0, 0, 0.68),
     inset 0 1px 1px rgba(255, 255, 255, 0.11),
-    inset 0 0 30px rgba(212, 175, 55, 0.02);
+    inset 0 0 30px rgba(52, 211, 153, 0.02);
   transition:
     border-color 0.2s ease,
     box-shadow 0.2s ease;
 }
 
 .admin-section-block:hover {
-  border-color: rgba(212, 175, 55, 0.35);
+  border-color: rgba(52, 211, 153, 0.35);
   box-shadow:
     0 24px 60px rgba(0, 0, 0, 0.72),
     inset 0 1px 1px rgba(255, 255, 255, 0.14),
-    inset 0 0 30px rgba(212, 175, 55, 0.03);
+    inset 0 0 30px rgba(52, 211, 153, 0.03);
 }
 
 /* 3. General Shared 3D Obsidian Card (.card-3d-obsidian) */
@@ -492,7 +492,7 @@
   background: linear-gradient(160deg, rgba(20, 25, 38, 0.94) 0%, rgba(10, 13, 20, 0.96) 100%);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(212, 175, 55, 0.22);
+  border: 1px solid rgba(52, 211, 153, 0.22);
   border-radius: 18px;
   padding: 20px;
   box-shadow:
@@ -506,10 +506,10 @@
 
 .card-3d-obsidian:hover {
   transform: translateY(-3px);
-  border-color: rgba(212, 175, 55, 0.48);
+  border-color: rgba(52, 211, 153, 0.48);
   box-shadow:
     0 20px 45px rgba(0, 0, 0, 0.65),
-    0 0 18px rgba(212, 175, 55, 0.16);
+    0 0 18px rgba(52, 211, 153, 0.16);
 }
 
 /* ── 3D MODAL BACKDROPS & SURFACES ─────────────────────────── */
@@ -531,12 +531,12 @@
   position: relative;
   width: 100%;
   background: linear-gradient(160deg, rgba(24, 30, 46, 0.98) 0%, rgba(11, 14, 23, 0.99) 100%);
-  border: 1px solid rgba(212, 175, 55, 0.42);
+  border: 1px solid rgba(52, 211, 153, 0.42);
   border-radius: 24px;
   padding: 30px;
   box-shadow:
     0 40px 95px rgba(0, 0, 0, 0.9),
-    0 0 38px rgba(212, 175, 55, 0.22),
+    0 0 38px rgba(52, 211, 153, 0.22),
     inset 0 1px 1.5px rgba(255, 255, 255, 0.16);
   animation: modalPop 0.26s cubic-bezier(0.2, 0.8, 0.2, 1);
   max-height: calc(100dvh - 48px);
@@ -550,7 +550,7 @@
   gap: 14px;
   margin-bottom: 22px;
   padding-bottom: 16px;
-  border-bottom: 1px solid rgba(212, 175, 55, 0.22);
+  border-bottom: 1px solid rgba(52, 211, 153, 0.22);
 }
 
 .modal-3d-title {
@@ -588,7 +588,7 @@
   display: block;
   font-size: 0.84rem;
   font-weight: 700;
-  color: rgba(245, 215, 127, 0.95);
+  color: #6ee7b7;
   letter-spacing: 0.01em;
   margin-bottom: 6px;
 }
@@ -610,7 +610,7 @@
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   border-radius: 20px;
-  border: 1px solid rgba(212, 175, 55, 0.24);
+  border: 1px solid rgba(52, 211, 153, 0.24);
   background: rgba(11, 14, 22, 0.92);
   box-shadow:
     inset 0 1px 1px rgba(255, 255, 255, 0.08),
@@ -622,7 +622,7 @@
 }
 
 .admin-table-container::-webkit-scrollbar-thumb {
-  background: rgba(212, 175, 55, 0.35);
+  background: rgba(52, 211, 153, 0.35);
   border-radius: 8px;
 }
 
@@ -636,12 +636,12 @@
 
 .admin-table-3d th {
   background: rgba(20, 26, 38, 0.98);
-  color: rgba(245, 215, 127, 0.95);
+  color: #6ee7b7;
   padding: 15px 18px;
   font-weight: 800;
   font-size: 0.84rem;
   white-space: nowrap;
-  border-bottom: 1.5px solid rgba(212, 175, 55, 0.28);
+  border-bottom: 1.5px solid rgba(52, 211, 153, 0.28);
   position: sticky;
   top: 0;
   z-index: 1;
@@ -659,7 +659,7 @@
 }
 
 .admin-table-3d tbody tr:hover {
-  background-color: rgba(212, 175, 55, 0.08);
+  background-color: rgba(52, 211, 153, 0.08);
 }
 
 .admin-table-3d tbody tr:last-child td {
@@ -684,8 +684,8 @@
 }
 
 .border-glow-gold {
-  border: 1px solid rgba(212, 175, 55, 0.45) !important;
-  box-shadow: 0 0 18px rgba(212, 175, 55, 0.22) !important;
+  border: 1px solid rgba(52, 211, 153, 0.45) !important;
+  box-shadow: 0 0 18px rgba(52, 211, 153, 0.22) !important;
 }
 
 .border-glow-emerald {
@@ -733,11 +733,11 @@
 .kpi-card-3d,
 .modal-3d-card {
   background: linear-gradient(160deg, rgba(28, 36, 56, 0.97) 0%, rgba(10, 13, 20, 0.99) 100%);
-  border: 1px solid rgba(212, 175, 55, 0.3);
+  border: 1px solid rgba(52, 211, 153, 0.3);
   box-shadow:
     0 22px 46px rgba(0, 0, 0, 0.6),
     inset 0 1px 1px rgba(255, 255, 255, 0.09),
-    inset 0 0 24px rgba(212, 175, 55, 0.04);
+    inset 0 0 24px rgba(52, 211, 153, 0.04);
   transition:
     transform var(--motion-fast, 180ms) var(--ease-out, ease-out),
     box-shadow var(--motion-fast, 180ms) ease,
@@ -749,15 +749,15 @@
   transform: translateY(-2px);
   box-shadow:
     0 26px 54px rgba(0, 0, 0, 0.66),
-    0 0 0 1px rgba(212, 175, 55, 0.42),
+    0 0 0 1px rgba(52, 211, 153, 0.42),
     inset 0 1px 1px rgba(255, 255, 255, 0.12),
-    inset 0 0 28px rgba(212, 175, 55, 0.07);
-  border-color: rgba(212, 175, 55, 0.5);
+    inset 0 0 28px rgba(52, 211, 153, 0.07);
+  border-color: rgba(52, 211, 153, 0.5);
 }
 
 .admin-section-block {
   background: linear-gradient(160deg, rgba(25, 31, 49, 0.97) 0%, rgba(10, 13, 20, 0.98) 100%);
-  border: 1px solid rgba(212, 175, 55, 0.24);
+  border: 1px solid rgba(52, 211, 153, 0.24);
   box-shadow:
     0 16px 40px rgba(0, 0, 0, 0.55),
     inset 0 1px 1px rgba(255, 255, 255, 0.07);
@@ -767,9 +767,9 @@
 .admin-section-block:hover {
   box-shadow:
     0 20px 48px rgba(0, 0, 0, 0.62),
-    0 0 0 1px rgba(212, 175, 55, 0.32),
+    0 0 0 1px rgba(52, 211, 153, 0.32),
     inset 0 1px 1px rgba(255, 255, 255, 0.1);
-  border-color: rgba(212, 175, 55, 0.42);
+  border-color: rgba(52, 211, 153, 0.42);
 }
 
 /* Obsidian modal backdrop — stacked scrim layers, blurred */
@@ -780,24 +780,24 @@
   -webkit-backdrop-filter: blur(8px) saturate(120%);
   backdrop-filter: blur(8px) saturate(120%);
   background:
-    radial-gradient(ellipse at 50% 0%, rgba(212, 175, 55, 0.08), transparent 62%),
+    radial-gradient(ellipse at 50% 0%, rgba(52, 211, 153, 0.08), transparent 62%),
     rgba(6, 8, 12, 0.72);
 }
 
 .modal-3d-card {
   box-shadow:
     0 40px 90px rgba(0, 0, 0, 0.72),
-    0 0 0 1px rgba(212, 175, 55, 0.38),
+    0 0 0 1px rgba(52, 211, 153, 0.38),
     inset 0 1px 1px rgba(255, 255, 255, 0.1),
-    inset 0 0 30px rgba(212, 175, 55, 0.05);
+    inset 0 0 30px rgba(52, 211, 153, 0.05);
 }
 
 /* 3D chip/pill primitives — obsidian with gold luminescent edge */
 .chip-3d,
 .badge-3d {
   background: linear-gradient(180deg, rgba(36, 44, 66, 0.95), rgba(14, 17, 26, 0.98));
-  border: 1px solid rgba(212, 175, 55, 0.32);
-  color: #f5d77f;
+  border: 1px solid rgba(52, 211, 153, 0.32);
+  color: #34d399;
   border-radius: 999px;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 2px 6px rgba(0, 0, 0, 0.4);
 }
@@ -811,10 +811,10 @@
 .btn-3d-ghost:focus-visible,
 .btn-3d-secondary:focus-visible,
 .btn-3d-complete:focus-visible {
-  outline: 2px solid #f5d77f;
+  outline: 2px solid #34d399;
   outline-offset: 2px;
   box-shadow:
-    0 0 0 4px rgba(212, 175, 55, 0.28),
+    0 0 0 4px rgba(52, 211, 153, 0.28),
     0 6px 16px rgba(0, 0, 0, 0.5);
 }
 

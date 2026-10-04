@@ -136,13 +136,13 @@ const structuredData = jsonLd
     <meta name="twitter:image:alt" content="کلینیک تخصصی تهران لیزر — مرکز لیزر موهای زائد پاسداران" />
 
     <!-- PWA metadata -->
-    <meta name="theme-color" content="#d4af37" />
+    <meta name="theme-color" content="#0f766e" />
     <meta name="application-name" content="کلینیک تهران لیزر" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="تهران لیزر" />
     <link rel="manifest" href="/manifest.webmanifest" />
-    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon-180.png" />
 
     <!-- Favicons -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -172,6 +172,9 @@ const structuredData = jsonLd
     </script>
   </head>
   <body class:list={[theme === 'dark' ? 'theme-dark-obsidian' : '', bodyClass]}>
+    <!-- WCAG 2.4.1 Bypass Blocks — first focusable element -->
+    <a href="#main-content" class="skip-link">پرش به محتوای اصلی</a>
+
     <!-- Top announcement / trust strip -->
     <div class="announcement-strip">
       <div class="container announcement-inner">
@@ -235,7 +238,7 @@ const structuredData = jsonLd
     </header>
 
     <!-- Main Content -->
-    <main id="mainContent">
+    <main id="main-content" tabindex="-1">
       <slot />
     </main>
 
@@ -313,6 +316,28 @@ const structuredData = jsonLd
       </div>
     </footer>
 
+    <!-- Mobile Bottom Navigation (≤768px) — A2 -->
+    <nav class="bottom-nav" aria-label="ناوبری پایین">
+      <div class="bottom-nav-inner">
+        <a href="/" class={currentPath === '/' ? 'bottom-nav-link active' : 'bottom-nav-link'}>
+          <Icon name="dashboard" size={20} aria-hidden />
+          <span class="bottom-nav-label">خانه</span>
+        </a>
+        <a href="/services" class={currentPath.startsWith('/services') ? 'bottom-nav-link active' : 'bottom-nav-link'}>
+          <Icon name="services" size={20} aria-hidden />
+          <span class="bottom-nav-label">خدمات</span>
+        </a>
+        <a href="/booking" class={currentPath.startsWith('/booking') ? 'bottom-nav-link active' : 'bottom-nav-link'}>
+          <Icon name="calendar" size={20} aria-hidden />
+          <span class="bottom-nav-label">رزرو</span>
+        </a>
+        <a href="/contact" class={currentPath.startsWith('/contact') ? 'bottom-nav-link active' : 'bottom-nav-link'}>
+          <Icon name="phone" size={20} aria-hidden />
+          <span class="bottom-nav-label">تماس</span>
+        </a>
+      </div>
+    </nav>
+
     <!-- Sticky Mobile CTA (§140, §141) -->
     <div class="mobile-sticky-bar">
       <a href="tel:+989035555090" class="btn btn-outline sticky-phone" aria-label="تماس تلفنی">
@@ -323,6 +348,41 @@ const structuredData = jsonLd
         <span class="promo-tag">۱۵٪ تخفیف</span>
       </a>
     </div>
+
+    <!-- A4 · ORDER BASKET (سبد سفارش) — FAB + drawer, sessionStorage-persisted -->
+    <button id="basketFab" class="basket-fab" type="button" aria-expanded="false" aria-controls="basketDrawer" aria-label="سبد سفارش">
+      <Icon name="shoppingBag" size={20} aria-hidden />
+      <span class="basket-fab-label">سبد</span>
+      <span id="basketCount" class="basket-count" hidden>0</span>
+    </button>
+
+    <div id="basketDrawer" class="basket-drawer" role="dialog" aria-modal="true" aria-label="سبد سفارش خدمات" hidden>
+      <div class="basket-head">
+        <strong class="basket-title">سبد سفارش</strong>
+        <button id="basketClose" class="basket-close" type="button" aria-label="بستن سبد">
+          <Icon name="x" size={18} aria-hidden />
+        </button>
+      </div>
+      <ul id="basketList" class="basket-list"></ul>
+      <p id="basketEmpty" class="basket-empty">سبد شما خالی است. از بخش خدمات و تعرفه‌ها می‌توانید خدمت مورد نظر را اضافه کنید.</p>
+      <div class="basket-foot">
+        <div class="basket-total">
+          <span>مجموع</span>
+          <strong id="basketTotal">۰ تومان</strong>
+        </div>
+        <a id="basketCta" href="/booking" class="btn btn-primary btn-block basket-cta">
+          ادامه و رزرو نوبت
+        </a>
+        <button id="basketClear" class="basket-clear" type="button">خالی کردن سبد</button>
+      </div>
+    </div>
+    <div id="basketScrim" class="basket-scrim" hidden></div>
+
+    <!-- PWA install control (A3) — revealed only on beforeinstallprompt -->
+    <button id="pwaInstallBtn" class="pwa-install" type="button" hidden>
+      <Icon name="sparkles" size={16} aria-hidden />
+      <span>نصب اپلیکیشن</span>
+    </button>
 
     <!-- Client-side navigation toggle script -->
     <script is:inline>
@@ -359,5 +419,204 @@ const structuredData = jsonLd
         });
       }
     </script>
+
+    <!-- A3 · PWA install prompt capture -->
+    <script is:inline>
+      (function () {
+        var deferred = null;
+        var installBtn = document.getElementById('pwaInstallBtn');
+        if (!installBtn) return;
+
+        window.addEventListener('beforeinstallprompt', function (e) {
+          e.preventDefault();
+          deferred = e;
+          installBtn.hidden = false;
+        });
+
+        installBtn.addEventListener('click', function () {
+          if (!deferred) return;
+          deferred.prompt();
+          deferred.userChoice.then(function () {
+            deferred = null;
+            installBtn.hidden = true;
+          });
+        });
+
+        window.addEventListener('appinstalled', function () {
+          deferred = null;
+          installBtn.hidden = true;
+        });
+      })();
+    </script>
+
+    <!-- A4 · ORDER BASKET — sessionStorage persistence, RTL drawer -->
+    <script is:inline define:vars={{ basketAddEndpoint: '/services' }}>
+      (function () {
+        var KEY = 'tl_basket_v1';
+        var fab = document.getElementById('basketFab');
+        var drawer = document.getElementById('basketDrawer');
+        var scrim = document.getElementById('basketScrim');
+        var closeBtn = document.getElementById('basketClose');
+        var list = document.getElementById('basketList');
+        var emptyMsg = document.getElementById('basketEmpty');
+        var countEl = document.getElementById('basketCount');
+        var totalEl = document.getElementById('basketTotal');
+        var cta = document.getElementById('basketCta');
+        var clearBtn = document.getElementById('basketClear');
+        if (!fab || !drawer) return;
+
+        var FA_DIGITS = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
+        function toFa(n) { return String(n).replace(/\d/g, function (d) { return FA_DIGITS[+d]; }); }
+        function faNum(n) { return toFa(n.toLocaleString('en-US')); }
+
+        function read() {
+          try { var raw = sessionStorage.getItem(KEY); return raw ? JSON.parse(raw) : []; }
+          catch (e) { return []; }
+        }
+        function write(items) {
+          try { sessionStorage.setItem(KEY, JSON.stringify(items)); } catch (e) {}
+        }
+
+        function render() {
+          var items = read();
+          countEl.textContent = toFa(items.length);
+          countEl.hidden = items.length === 0;
+          list.innerHTML = '';
+          var total = 0;
+          items.forEach(function (it) {
+            total += Number(it.price) || 0;
+            var li = document.createElement('li');
+            li.className = 'basket-item';
+
+            var name = document.createElement('span');
+            name.className = 'basket-item-name';
+            name.textContent = it.name;
+
+            var price = document.createElement('span');
+            price.className = 'basket-item-price';
+            price.textContent = faNum(it.price) + ' تومان';
+
+            var del = document.createElement('button');
+            del.type = 'button';
+            del.className = 'basket-item-del';
+            del.setAttribute('aria-label', 'حذف ' + it.name + ' از سبد');
+            del.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>';
+            del.addEventListener('click', function () {
+              var all = read().filter(function (x) { return x.id !== it.id; });
+              write(all); render();
+            });
+
+            li.appendChild(name);
+            var mid = document.createElement('span');
+            mid.className = 'basket-item-mid';
+            mid.appendChild(price);
+            li.appendChild(mid);
+            li.appendChild(del);
+            list.appendChild(li);
+          });
+          emptyMsg.hidden = items.length > 0;
+          totalEl.textContent = faNum(total) + ' تومان';
+          cta.setAttribute('aria-disabled', items.length === 0 ? 'true' : 'false');
+          fab.classList.toggle('basket-fab--has-items', items.length > 0);
+        }
+
+        function setOpen(open) {
+          drawer.hidden = !open;
+          scrim.hidden = !open;
+          fab.setAttribute('aria-expanded', String(open));
+          document.body.classList.toggle('basket-open', open);
+          if (open && closeBtn) closeBtn.focus();
+        }
+
+        fab.addEventListener('click', function () { setOpen(drawer.hidden); });
+        if (closeBtn) closeBtn.addEventListener('click', function () { setOpen(false); fab.focus(); });
+        if (scrim) scrim.addEventListener('click', function () { setOpen(false); });
+        if (clearBtn) clearBtn.addEventListener('click', function () { write([]); render(); });
+        document.addEventListener('keydown', function (e) {
+          if (e.key === 'Escape' && !drawer.hidden) { setOpen(false); fab.focus(); }
+        });
+        document.addEventListener('visibilitychange', function () {
+          if (document.hidden && !drawer.hidden) setOpen(false);
+        });
+
+        // Any page may add a service: dispatch `tl:basket-add` { id, name, price }
+        window.addEventListener('tl:basket-add', function (e) {
+          var d = e.detail || {};
+          if (!d.id || !d.name) return;
+          var items = read();
+          if (items.some(function (x) { return x.id === d.id; })) return;
+          items.push({ id: d.id, name: d.name, price: Number(d.price) || 0 });
+          write(items); render();
+          setOpen(true);
+        });
+
+        render();
+      })();
+    </script>
+
+    <style is:global>
+      /* A2 · Bottom nav must never force horizontal scroll */
+      .bottom-nav,
+      .bottom-nav-inner {
+        max-width: 100%;
+        box-sizing: border-box;
+      }
+
+      /* WCAG 2.4.1 Bypass Blocks (RTL-safe) */
+      .skip-link {
+        position: fixed;
+        inset-block-start: 8px;
+        inset-inline-start: 8px;
+        inset-inline-end: auto;
+        z-index: 200;
+        transform: translateY(-220%);
+        padding: 12px 22px;
+        background: var(--color-ink-bg, #16130f);
+        color: var(--color-on-ink, #f7f3ec);
+        border: 1.5px solid var(--gold-500, #10b981);
+        border-radius: var(--radius-md, 14px);
+        font-weight: 700;
+        font-size: 0.9rem;
+        text-decoration: none;
+        box-shadow: var(--elevation-3d-3, 0 18px 45px rgba(0, 0, 0, 0.65));
+        transition: transform var(--motion-fast, 180ms) var(--ease-out, ease);
+      }
+
+      .skip-link:focus,
+      .skip-link:focus-visible {
+        transform: translateY(0);
+        outline: 2px solid var(--gold-400, #34d399);
+        outline-offset: 2px;
+      }
+
+      /* A3 · Install control — obsidian/gold, ≥44px tap target */
+      .pwa-install {
+        position: fixed;
+        inset-block-end: calc(78px + env(safe-area-inset-bottom, 0px));
+        inset-inline-end: 14px;
+        z-index: 94;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 44px;
+        padding: 11px 18px;
+        background: var(--color-ink-bg-soft, #211d18);
+        color: var(--gold-400, #34d399);
+        border: 1px solid rgba(52, 211, 153, 0.5);
+        border-radius: 999px;
+        font-family: inherit;
+        font-size: 0.85rem;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
+      }
+
+      .pwa-install[hidden] { display: none !important; }
+      .pwa-install:hover { border-color: var(--gold-400, #6ee7b7); }
+
+      @media (min-width: 769px) {
+        .pwa-install { inset-block-end: 20px; }
+      }
+    </style>
   </body>
 </html>

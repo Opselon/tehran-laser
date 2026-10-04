@@ -1,0 +1,602 @@
+---
+/**
+ * JalaliPicker — Shamsi (Jalali) day picker for admin forms.
+ *
+ * Why this exists: staff read dates as شمسی, but every API route, Zod schema
+ * and DB column in this repo speaks ISO 'YYYY-MM-DD'. So the *visible* control
+ * is Persian and a hidden input carries the ISO value — the surrounding page
+ * script keeps reading `document.getElementById(id).value` unchanged. No API or
+ * schema change (contract C1).
+ *
+ * The month math is the same calendar system the public booking flow already
+ * uses (`src/components/booking/JalaliCalendar.tsx`, via the installed
+ * `jalaali-js` package) — not a second date library.
+ *
+ * Scripts are hoisted by Astro and deduped per component, so the module below
+ * runs once per page and wires up every picker on that page.
+ */
+import Icon from '../ui/Icon.astro';
+
+export interface Props {
+  /** id of the hidden ISO input — page scripts keep using this id. */
+  id: string;
+  /** form field name carrying the ISO value (for native GET/POST submits). */
+  name?: string;
+  /** initial ISO 'YYYY-MM-DD'. */
+  value?: string;
+  /** when `value` is empty, default to clinic-today + N days. */
+  defaultOffsetDays?: number;
+  required?: boolean;
+  /** aria-label / placeholder copy for the trigger. */
+  label?: string;
+  /** submit the enclosing form as soon as a day is chosen. */
+  submitOnChange?: boolean;
+  /** ISO 'YYYY-MM-DD' bounds. */
+  min?: string;
+  max?: string;
+}
+
+const {
+  id,
+  name,
+  value = '',
+  defaultOffsetDays = 0,
+  required = false,
+  label,
+  submitOnChange = false,
+  min,
+  max,
+} = Astro.props;
+---
+
+<div
+  class="jalali-picker"
+  data-jp
+  data-jp-id={id}
+  data-jp-value={value}
+  data-jp-offset={defaultOffsetDays}
+  data-jp-submit={submitOnChange ? '1' : '0'}
+  data-jp-min={min ?? ''}
+  data-jp-max={max ?? ''}
+>
+  <input
+    type="hidden"
+    id={id}
+    name={name}
+    value={value}
+    data-jp-hidden
+    {...required ? { required: true } : {}}
+  />
+  <button
+    type="button"
+    class="jp-trigger"
+    data-jp-trigger
+    aria-haspopup="dialog"
+    aria-expanded="false"
+    aria-label={label ?? 'انتخاب تاریخ شمسی'}
+  >
+    <Icon name="calendar" size={16} class="jp-trigger-icon" />
+    <span class="jp-display" data-jp-display>—</span>
+    <Icon name="chevronDown" size={14} class="jp-caret" />
+  </button>
+
+  <div class="jp-popover" data-jp-popover hidden role="dialog" aria-modal="false" aria-label="تقویم شمسی">
+    <div class="jp-head">
+      <button type="button" class="jp-nav" data-jp-prev aria-label="ماه قبل">
+        <Icon name="chevronRight" size={16} />
+      </button>
+      <span class="jp-month" data-jp-month aria-live="polite"></span>
+      <button type="button" class="jp-nav" data-jp-next aria-label="ماه بعد">
+        <Icon name="chevronLeft" size={16} />
+      </button>
+    </div>
+    <div class="jp-weekdays">
+      <span>ش</span><span>ی</span><span>د</span><span>س</span><span>چ</span><span>پ</span><span>ج</span>
+    </div>
+    <div class="jp-grid" data-jp-grid></div>
+    <div class="jp-foot">
+      <button type="button" class="jp-foot-btn" data-jp-today>امروز</button>
+      <button type="button" class="jp-foot-btn jp-foot-clear" data-jp-clear>پاک کردن</button>
+    </div>
+  </div>
+</div>
+
+<style is:global>
+  .jalali-picker {
+    position: relative;
+    width: 100%;
+  }
+
+  .jalali-picker .jp-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(212, 175, 55, 0.35);
+    background: rgba(7, 9, 14, 0.65);
+    color: #f5d77f;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: right;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+
+  .jalali-picker .jp-trigger:hover,
+  .jalali-picker .jp-trigger[aria-expanded='true'] {
+    border-color: rgba(212, 175, 55, 0.75);
+    background: rgba(212, 175, 55, 0.1);
+  }
+
+  .jalali-picker .jp-trigger:focus-visible {
+    outline: 2px solid #38bdf8;
+    outline-offset: 2px;
+  }
+
+  .jalali-picker .jp-display {
+    flex: 1 1 auto;
+    min-width: 0;
+    direction: rtl;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .jalali-picker .jp-display.is-empty {
+    color: #94a3b8;
+    font-weight: 500;
+  }
+
+  .jalali-picker .jp-trigger-icon,
+  .jalali-picker .jp-caret {
+    flex: 0 0 auto;
+    opacity: 0.9;
+  }
+
+  .jalali-picker .jp-popover {
+    position: absolute;
+    z-index: 60;
+    top: calc(100% + 6px);
+    right: 0;
+    width: min(320px, 92vw);
+    padding: 14px;
+    border-radius: 14px;
+    border: 1px solid rgba(212, 175, 55, 0.4);
+    background: linear-gradient(160deg, #12141a 0%, #07090e 100%);
+    box-shadow: 0 18px 44px rgba(0, 0, 0, 0.65);
+  }
+
+  .jalali-picker .jp-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .jalali-picker .jp-month {
+    color: #f7f3ec;
+    font-weight: 700;
+    font-size: 0.95rem;
+  }
+
+  .jalali-picker .jp-nav {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    background: rgba(148, 163, 184, 0.08);
+    color: #f5d77f;
+    cursor: pointer;
+  }
+
+  .jalali-picker .jp-nav:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+
+  .jalali-picker .jp-nav:hover:not(:disabled) {
+    border-color: rgba(212, 175, 55, 0.6);
+  }
+
+  .jalali-picker .jp-weekdays,
+  .jalali-picker .jp-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+  }
+
+  .jalali-picker .jp-weekdays {
+    margin-bottom: 6px;
+  }
+
+  .jalali-picker .jp-weekdays span {
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #b3aa9c;
+  }
+
+  .jalali-picker .jp-day {
+    aspect-ratio: 1 / 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 34px;
+    border-radius: 9px;
+    border: 1px solid transparent;
+    background: rgba(148, 163, 184, 0.07);
+    color: #f7f3ec;
+    font: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
+
+  .jalali-picker .jp-day:hover:not(:disabled) {
+    border-color: rgba(212, 175, 55, 0.65);
+  }
+
+  .jalali-picker .jp-day.is-friday {
+    color: #f5d77f;
+  }
+
+  .jalali-picker .jp-day.is-selected {
+    background: #d4af37;
+    color: #16130f;
+    font-weight: 700;
+  }
+
+  .jalali-picker .jp-day.is-today {
+    border-color: rgba(56, 189, 248, 0.7);
+  }
+
+  .jalali-picker .jp-day:disabled {
+    opacity: 0.28;
+    cursor: default;
+  }
+
+  .jalali-picker .jp-cell-empty {
+    min-height: 34px;
+  }
+
+  .jalali-picker .jp-foot {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(148, 163, 184, 0.2);
+  }
+
+  .jalali-picker .jp-foot-btn {
+    padding: 7px 12px;
+    border-radius: 9px;
+    border: 1px solid rgba(212, 175, 55, 0.35);
+    background: rgba(212, 175, 55, 0.1);
+    color: #f5d77f;
+    font: inherit;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .jalali-picker .jp-foot-clear {
+    border-color: rgba(148, 163, 184, 0.3);
+    background: transparent;
+    color: #b3aa9c;
+  }
+</style>
+
+<script>
+  import { jalaaliMonthLength, toGregorian, toJalaali } from 'jalaali-js';
+
+  const FA_DIGITS = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+  const FA_MONTHS = [
+    'فروردین',
+    'اردیبهشت',
+    'خرداد',
+    'تیر',
+    'مرداد',
+    'شهریور',
+    'مهر',
+    'آبان',
+    'آذر',
+    'دی',
+    'بهمن',
+    'اسفند',
+  ];
+
+  interface JalaliParts {
+    jy: number;
+    jm: number;
+    jd: number;
+  }
+
+  function fa(value: string | number): string {
+    return String(value).replace(/\d/g, (d) => FA_DIGITS[Number(d)] ?? d);
+  }
+
+  /** Clinic-local 'YYYY-MM-DD' (the site-wide convention is Asia/Tehran). */
+  function todayIso(): string {
+    return new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Asia/Tehran',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).format(new Date());
+  }
+
+  function addDaysIso(iso: string, days: number): string {
+    const [y, m, d] = iso.split('-').map(Number) as [number, number, number];
+    const next = new Date(Date.UTC(y, m - 1, d) + days * 86_400_000);
+    return `${next.getUTCFullYear()}-${String(next.getUTCMonth() + 1).padStart(2, '0')}-${String(
+      next.getUTCDate(),
+    ).padStart(2, '0')}`;
+  }
+
+  function isoToJalali(iso: string): JalaliParts {
+    const [y, m, d] = iso.split('-').map(Number) as [number, number, number];
+    return toJalaali(y, m, d);
+  }
+
+  function jalaliToIso(jy: number, jm: number, jd: number): string {
+    const g = toGregorian(jy, jm, jd);
+    return `${g.gy}-${String(g.gm).padStart(2, '0')}-${String(g.gd).padStart(2, '0')}`;
+  }
+
+  /** Persian week order for an ISO day: 0 = شنبه … 6 = جمعه. */
+  function persianWeekIndex(iso: string): number {
+    const [y, m, d] = iso.split('-').map(Number) as [number, number, number];
+    return (new Date(Date.UTC(y, m - 1, d)).getUTCDay() + 1) % 7;
+  }
+
+  function formatJalali(iso: string): string {
+    const { jy, jm, jd } = isoToJalali(iso);
+    return fa(`${jy}/${String(jm).padStart(2, '0')}/${String(jd).padStart(2, '0')}`);
+  }
+
+  function validIso(iso: string | null | undefined): iso is string {
+    return !!iso && /^\d{4}-\d{2}-\d{2}$/.test(iso);
+  }
+
+  interface PickerState {
+    root: HTMLElement;
+    hidden: HTMLInputElement;
+    trigger: HTMLButtonElement;
+    display: HTMLElement;
+    popover: HTMLElement;
+    monthLabel: HTMLElement;
+    grid: HTMLElement;
+    prev: HTMLButtonElement;
+    next: HTMLButtonElement;
+    min: string;
+    max: string;
+    submitOnChange: boolean;
+    /** Jalali month currently paged to. */
+    view: JalaliParts;
+  }
+
+  const states: PickerState[] = [];
+
+  function clampIso(state: PickerState, iso: string): string {
+    if (validIso(state.min) && iso < state.min) return state.min;
+    if (validIso(state.max) && iso > state.max) return state.max;
+    return iso;
+  }
+
+  function renderGrid(state: PickerState): void {
+    const { jy, jm } = state.view;
+    state.monthLabel.textContent = `${FA_MONTHS[jm - 1] ?? ''} ${fa(jy)}`;
+
+    const firstIso = jalaliToIso(jy, jm, 1);
+    const offset = persianWeekIndex(firstIso);
+    const length = jalaaliMonthLength(jy, jm);
+    const selected = state.hidden.value;
+    const today = todayIso();
+
+    state.grid.replaceChildren();
+    for (let i = 0; i < offset; i++) {
+      const pad = document.createElement('span');
+      pad.className = 'jp-cell-empty';
+      state.grid.appendChild(pad);
+    }
+    for (let day = 1; day <= length; day++) {
+      const iso = jalaliToIso(jy, jm, day);
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'jp-day';
+      btn.textContent = fa(day);
+      btn.dataset.jpDay = iso;
+      if (persianWeekIndex(iso) === 6) btn.classList.add('is-friday');
+      if (iso === selected) btn.classList.add('is-selected');
+      if (iso === today) btn.classList.add('is-today');
+      if ((validIso(state.min) && iso < state.min) || (validIso(state.max) && iso > state.max)) {
+        btn.disabled = true;
+      }
+      state.grid.appendChild(btn);
+    }
+  }
+
+  function sync(state: PickerState): void {
+    const iso = state.hidden.value;
+    if (validIso(iso)) {
+      state.display.textContent = formatJalali(iso);
+      state.display.classList.remove('is-empty');
+    } else {
+      state.display.textContent = 'انتخاب تاریخ…';
+      state.display.classList.add('is-empty');
+    }
+  }
+
+  /** Programmatic write used by page scripts (defaults, interval recalcs). */
+  function setValue(state: PickerState, iso: string | null): void {
+    state.hidden.value = iso ?? '';
+    if (validIso(iso)) {
+      state.view = isoToJalali(iso);
+    }
+    sync(state);
+    if (!state.popover.hidden) renderGrid(state);
+  }
+
+  function closeAll(except?: PickerState): void {
+    for (const state of states) {
+      if (state === except) continue;
+      state.popover.hidden = true;
+      state.trigger.setAttribute('aria-expanded', 'false');
+    }
+  }
+
+  function openFor(state: PickerState): void {
+    closeAll(state);
+    const iso = state.hidden.value;
+    if (validIso(iso)) state.view = isoToJalali(iso);
+    renderGrid(state);
+    state.popover.hidden = false;
+    state.trigger.setAttribute('aria-expanded', 'true');
+  }
+
+  function initPicker(root: HTMLElement): void {
+    const hidden = root.querySelector<HTMLInputElement>('[data-jp-hidden]');
+    const trigger = root.querySelector<HTMLButtonElement>('[data-jp-trigger]');
+    const display = root.querySelector<HTMLElement>('[data-jp-display]');
+    const popover = root.querySelector<HTMLElement>('[data-jp-popover]');
+    const monthLabel = root.querySelector<HTMLElement>('[data-jp-month]');
+    const grid = root.querySelector<HTMLElement>('[data-jp-grid]');
+    const prev = root.querySelector<HTMLButtonElement>('[data-jp-prev]');
+    const next = root.querySelector<HTMLButtonElement>('[data-jp-next]');
+    if (!hidden || !trigger || !display || !popover || !monthLabel || !grid || !prev || !next) {
+      return;
+    }
+
+    const offset = Number(root.dataset.jpOffset ?? '0') || 0;
+    if (!validIso(hidden.value)) {
+      hidden.value = addDaysIso(todayIso(), offset);
+    }
+
+    const state: PickerState = {
+      root,
+      hidden,
+      trigger,
+      display,
+      popover,
+      monthLabel,
+      grid,
+      prev,
+      next,
+      min: root.dataset.jpMin ?? '',
+      max: root.dataset.jpMax ?? '',
+      submitOnChange: root.dataset.jpSubmit === '1',
+      view: isoToJalali(validIso(hidden.value) ? hidden.value : todayIso()),
+    };
+    state.hidden.value = clampIso(state, state.hidden.value);
+    states.push(state);
+    sync(state);
+
+    trigger.addEventListener('click', () => {
+      if (state.popover.hidden) openFor(state);
+      else closeAll();
+    });
+
+    prev.addEventListener('click', () => {
+      const jm = state.view.jm - 1;
+      state.view = jm >= 1 ? { ...state.view, jm } : { jy: state.view.jy - 1, jm: 12, jd: 1 };
+      renderGrid(state);
+    });
+
+    next.addEventListener('click', () => {
+      const jm = state.view.jm + 1;
+      state.view = jm <= 12 ? { ...state.view, jm } : { jy: state.view.jy + 1, jm: 1, jd: 1 };
+      renderGrid(state);
+    });
+
+    grid.addEventListener('click', (event) => {
+      const target = (event.target as HTMLElement).closest<HTMLElement>('[data-jp-day]');
+      if (!target || !target.dataset.jpDay) return;
+      setValue(state, clampIso(state, target.dataset.jpDay));
+      closeAll();
+      const form = state.hidden.form;
+      if (state.submitOnChange && form) {
+        if (typeof form.requestSubmit === 'function') form.requestSubmit();
+        else form.submit();
+      }
+    });
+
+    root.querySelector('[data-jp-today]')?.addEventListener('click', () => {
+      setValue(state, clampIso(state, todayIso()));
+      closeAll();
+    });
+
+    root.querySelector('[data-jp-clear]')?.addEventListener('click', () => {
+      setValue(state, null);
+      closeAll();
+    });
+  }
+
+  function initAll(): void {
+    document.querySelectorAll<HTMLElement>('[data-jp]').forEach((root) => {
+      if (!root.dataset.jpReady) {
+        root.dataset.jpReady = '1';
+        initPicker(root);
+      }
+    });
+  }
+
+  document.addEventListener('click', (event) => {
+    const target = event.target as Node;
+    for (const state of states) {
+      if (!state.popover.hidden && !state.root.contains(target)) {
+        state.popover.hidden = true;
+        state.trigger.setAttribute('aria-expanded', 'false');
+      }
+    }
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') closeAll();
+  });
+
+  // Forms that reset (festival/new-service modals) must not leave a stale label.
+  document.addEventListener(
+    'reset',
+    (event) => {
+      const form = event.target as HTMLFormElement;
+      for (const state of states) {
+        if (state.hidden.form === form) setTimeout(() => sync(state), 0);
+      }
+    },
+    true,
+  );
+
+  window.TLJalaliPicker = {
+    set(id: string, iso: string | null) {
+      const state = states.find((s) => s.hidden.id === id);
+      if (state) setValue(state, iso);
+    },
+    setOffset(id: string, days: number) {
+      const state = states.find((s) => s.hidden.id === id);
+      if (state) setValue(state, addDaysIso(todayIso(), days));
+    },
+    get(id: string): string {
+      return states.find((s) => s.hidden.id === id)?.hidden.value ?? '';
+    },
+    /** ISO 'YYYY-MM-DD' for clinic-today + N days. */
+    isoOffset(days: number): string {
+      return addDaysIso(todayIso(), days);
+    },
+    /** Jalali text for any ISO 'YYYY-MM-DD' — lets pages render Shamsi without a picker. */
+    format(iso: string): string {
+      return validIso(iso) ? formatJalali(iso) : '';
+    },
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAll);
+  } else {
+    initAll();
+  }
+</script>

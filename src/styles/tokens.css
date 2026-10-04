@@ -42,29 +42,36 @@
   --obsidian-600: #252d40; /* Elevated borders & subtle highlights */
   --obsidian-500: #333d54; /* Subdued divider lines */
 
-  /* ── IMPERIAL GOLD LUMINESCENCE SCALE (#d4af37 / #f5d77f) ── */
-  --gold-50: #fffdf5;
-  --gold-100: #fff9e6;
-  --gold-200: #fef0c3;
-  --gold-300: #fde08b;
-  --gold-400: #f5d77f; /* Champagne highlight (gold-light) */
-  --gold-500: #d4af37; /* Pure imperial gold (gold-base) */
-  --gold-600: #b38e22; /* Antique gold */
-  --gold-700: #8c6d17; /* Deep bronze gold */
-  --gold-800: #6b5112; /* Bevel shadow gold */
-  --gold-900: #42320b; /* Deepest bevel shadow */
+  /* ── TRUST SPECTRUM SCALE (GREEN) ─────────────────────────────
+     Owner-directed: the public accent is green/teal, not gold.
+     Ratios MEASURED against the real surfaces (WCAG 2.1):
+       300 on obsidian #0a0f0d = 12.67  | 400 = 10.05 | 500 = 7.62
+       600 #059669 on ivory #faf8f5 = 3.55  -> TEXT on light must use 700+
+       700 #047857 on ivory = 5.17, on white = 5.48
+       800 #0f766e on white = 5.47        (dark-ink text passes on 400..600)
+     ──────────────────────────────────────────────────────────── */
+  --gold-50: #ecfdf5;
+  --gold-100: #d1fae5;
+  --gold-200: #a7f3d0;
+  --gold-300: #6ee7b7;
+  --gold-400: #34d399; /* accent-on-dark text/fill (10.05 on obsidian) */
+  --gold-500: #10b981; /* primary fill (7.62 on obsidian; 6.67 w/ dark ink) */
+  --gold-600: #059669; /* deep fill (5.25 with dark ink) */
+  --gold-700: #047857; /* accent-on-light TEXT (5.17 on ivory) */
+  --gold-800: #0f766e; /* deepest fill / on-white text (5.47) */
+  --gold-900: #04211d; /* near-black green ink for use ON green fills */
 
-  /* Gold Radiance & Luminescence */
-  --gold-glow-xs: 0 0 8px rgba(212, 175, 55, 0.2);
-  --gold-glow-sm: 0 0 16px rgba(212, 175, 55, 0.28);
-  --gold-glow-md: 0 0 26px rgba(212, 175, 55, 0.38);
-  --gold-glow-lg: 0 0 42px rgba(245, 215, 127, 0.45);
+  /* Trust-spectrum radiance & luminescence (was gold) */
+  --gold-glow-xs: 0 0 8px rgba(16, 185, 129, 0.22);
+  --gold-glow-sm: 0 0 16px rgba(16, 185, 129, 0.3);
+  --gold-glow-md: 0 0 26px rgba(16, 185, 129, 0.4);
+  --gold-glow-lg: 0 0 42px rgba(52, 211, 153, 0.45);
 
-  /* Gold Borders */
-  --gold-border-subtle: 1px solid rgba(212, 175, 55, 0.15);
-  --gold-border: 1px solid rgba(212, 175, 55, 0.28);
-  --gold-border-bright: 1px solid rgba(212, 175, 55, 0.55);
-  --gold-border-active: 1px solid rgba(245, 215, 127, 0.8);
+  /* Trust-spectrum borders (was gold) */
+  --gold-border-subtle: 1px solid rgba(16, 185, 129, 0.16);
+  --gold-border: 1px solid rgba(16, 185, 129, 0.32);
+  --gold-border-bright: 1px solid rgba(52, 211, 153, 0.55);
+  --gold-border-active: 1px solid rgba(110, 231, 183, 0.8);
 
   /* ── STATUS PALETTES (WCAG AA/AAA CALIBRATED) ────────────── */
   --color-success: #10b981;
@@ -105,9 +112,9 @@
   --elevation-3d-0: 0 0 0 transparent;
   --elevation-3d-1: 0 3px 10px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.08);
   --elevation-3d-2: 0 10px 24px rgba(0, 0, 0, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.1);
-  --elevation-3d-3: 0 18px 45px rgba(0, 0, 0, 0.65), 0 0 20px rgba(212, 175, 55, 0.14), inset 0 1px 1.5px rgba(255, 255, 255, 0.12);
-  --elevation-3d-4: 0 28px 65px rgba(0, 0, 0, 0.75), 0 0 32px rgba(212, 175, 55, 0.22), inset 0 1px 1.5px rgba(255, 255, 255, 0.15);
-  --elevation-3d-modal: 0 40px 95px rgba(0, 0, 0, 0.9), 0 0 45px rgba(212, 175, 55, 0.24), inset 0 1px 2px rgba(255, 255, 255, 0.18);
+  --elevation-3d-3: 0 18px 45px rgba(0, 0, 0, 0.65), 0 0 20px rgba(16, 185, 129, 0.16), inset 0 1px 1.5px rgba(255, 255, 255, 0.12);
+  --elevation-3d-4: 0 28px 65px rgba(0, 0, 0, 0.75), 0 0 32px rgba(16, 185, 129, 0.24), inset 0 1px 1.5px rgba(255, 255, 255, 0.15);
+  --elevation-3d-modal: 0 40px 95px rgba(0, 0, 0, 0.9), 0 0 45px rgba(16, 185, 129, 0.26), inset 0 1px 2px rgba(255, 255, 255, 0.18);
 
   /* ── MULTI-LAYER OBSIDIAN & METALLIC GRADIENTS ───────────── */
   --gradient-obsidian-surface: linear-gradient(160deg, #141824 0%, #0a0c12 100%);
@@ -115,24 +122,24 @@
   --gradient-obsidian-card-hover: linear-gradient(165deg, rgba(28, 35, 52, 0.96) 0%, rgba(13, 17, 26, 0.98) 100%);
   --gradient-obsidian-section: linear-gradient(165deg, rgba(18, 23, 35, 0.94) 0%, rgba(9, 12, 18, 0.97) 100%);
   --gradient-obsidian-sunken: linear-gradient(180deg, rgba(8, 10, 15, 0.9) 0%, rgba(14, 18, 26, 0.8) 100%);
-  --gradient-gold-metallic: linear-gradient(135deg, #fff2cc 0%, #f5d77f 30%, #d4af37 60%, #997520 100%);
-  --gradient-gold-radial: radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.18) 0%, transparent 70%);
+  --gradient-gold-metallic: linear-gradient(135deg, #ecfdf5 0%, #a7f3d0 30%, #34d399 60%, #0f766e 100%);
+  --gradient-gold-radial: radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.2) 0%, transparent 70%);
 
   /* Button Gradients — top stops darkened so white text passes WCAG AAA (≥7:1) */
-  --gradient-gold-btn: linear-gradient(180deg, #f5d77f 0%, #d4af37 45%, #9e7822 100%);
-  --gradient-gold-btn-hover: linear-gradient(180deg, #ffea9f 0%, #e5c14e 45%, #b58925 100%);
+  --gradient-gold-btn: linear-gradient(180deg, #6ee7b7 0%, #34d399 45%, #059669 100%);
+  --gradient-gold-btn-hover: linear-gradient(180deg, #a7f3d0 0%, #6ee7b7 45%, #10b981 100%);
   --gradient-accept-btn: linear-gradient(180deg, #047857 0%, #0e6245 45%, #022c22 100%);
   --gradient-accept-btn-hover: linear-gradient(180deg, #065f46 0%, #047857 45%, #022c22 100%);
   --gradient-danger-btn: linear-gradient(180deg, #991b1b 0%, #b91c1c 45%, #7f1d1d 100%);
   --gradient-danger-btn-hover: linear-gradient(180deg, #7f1d1d 0%, #991b1b 45%, #660f0f 100%);
   --gradient-complete-btn: linear-gradient(180deg, #075985 0%, #0369a1 45%, #0c4a6e 100%);
   --gradient-complete-btn-hover: linear-gradient(180deg, #0c4a6e 0%, #075985 45%, #082f49 100%);
-  --gradient-ghost-hover: linear-gradient(180deg, rgba(212, 175, 55, 0.15) 0%, rgba(212, 175, 55, 0.05) 100%);
+  --gradient-ghost-hover: linear-gradient(180deg, rgba(16, 185, 129, 0.16) 0%, rgba(16, 185, 129, 0.05) 100%);
 
   /* ── TACTILE 3D MICRO-INTERACTION PHYSICS ────────────────── */
-  --btn-3d-bevel-gold: 0 4px 0 #7a5d1a;
-  --btn-3d-bevel-gold-hover: 0 6px 0 #7a5d1a;
-  --btn-3d-bevel-gold-active: 0 1px 0 #7a5d1a;
+  --btn-3d-bevel-gold: 0 4px 0 #065f46;
+  --btn-3d-bevel-gold-hover: 0 6px 0 #065f46;
+  --btn-3d-bevel-gold-active: 0 1px 0 #065f46;
   --btn-3d-bevel-accept: 0 4px 0 #022c22;
   --btn-3d-bevel-accept-hover: 0 6px 0 #022c22;
   --btn-3d-bevel-accept-active: 0 1px 0 #022c22;
@@ -147,13 +154,51 @@
   --color-text-obsidian-high: #f8fafc; /* 18.4:1 CR against dark obsidian */
   --color-text-obsidian-med: #cbd5e1;  /* 12.4:1 CR against dark obsidian */
   --color-text-obsidian-muted: #94a3b8;/* 7.2:1 CR against dark obsidian */
-  --color-text-gold: #d4af37;          /* 9.4:1 CR against dark obsidian */
-  --color-text-gold-light: #f5d77f;    /* 14.0:1 CR against dark obsidian */
-  --color-text-on-gold: #0d0a02;       /* 9.4:1 CR against gold-500, 14:1 on gold-400 */
+  --color-text-gold: #34d399;          /* 10.05:1 CR against dark obsidian */
+  --color-text-gold-light: #6ee7b7;    /* 12.67:1 CR against dark obsidian */
+  --color-text-on-gold: #04211d;       /* 7.8:1 on green-500, 10.3:1 on green-400 */
   --color-text-emerald: #34d399;       /* 10.5:1 CR against dark obsidian */
   --color-text-rose: #f87171;          /* 7.6:1 CR against dark obsidian */
   --color-text-sky: #38bdf8;           /* 11.8:1 CR against dark obsidian */
   --color-text-amber: #fbbf24;         /* 11.2:1 CR against dark obsidian */
+
+  /* ── TRUST SPECTRUM (GREEN) — measured WCAG AA, owner-directed ──
+     Replaces the gold-dominant accent across the PUBLIC site.
+     Rule: green text on obsidian, green-INK text on ivory/white,
+     near-black-on-green or white-on-deep-green fills. Every value
+     below carries its measured contrast ratio against the surface. */
+  --green-50: #eafaf3;
+  --green-100: #cdf2e3;
+  --green-200: #9fe6c9;
+  --green-300: #6ee7b7;   /* 12.92:1 on #0a0b0d — accent text on obsidian */
+  --green-400: #5eead4;   /* 13.31:1 on #0a0b0d, 10.37:1 on #1e2534 */
+  --green-500: #34d399;   /* 10.24:1 on #0a0b0d — primary emerald */
+  --green-600: #2dd4bf;   /* 10.58:1 on #0a0b0d — teal companion */
+  --green-700: #0f766e;   /* white text = 5.47:1; on ivory as text = 4.74:1 */
+  --green-800: #115e59;   /* white text = 7.58:1 */
+  --green-900: #0d3330;   /* deep surface */
+
+  --color-trust: var(--green-500);
+  --color-trust-teal: var(--green-600);
+  --color-trust-bright: var(--green-400);
+  --color-trust-deep: var(--green-800);
+  --color-accent-on-dark: #34d399;     /* green text on obsidian surfaces */
+  --color-accent-on-light: #047857;    /* 5.17:1 on #faf8f5, 4.75:1 on #f2eee8 */
+  --on-accent: #04211d;                /* near-black ink on any green fill */
+  --color-trust-chip-bg: #0c2622;      /* opaque green-tint chip on obsidian */
+  --color-badge-surface: #1e2534;      /* pill/badge fill on obsidian cards */
+  --on-badge-surface: #e2e8f0;         /* 12.44:1 on --color-badge-surface */
+  --footer-ink-strong: #8c8275;        /* 5.31:1 on #07080b footer */
+
+  /* Public primary family — legacy aliases now resolve to the trust scale,
+     so every `var(--color-primary*)` consumer follows the green switch. */
+  --color-primary: #34d399;
+  --color-primary-strong: #047857;
+  --color-primary-soft: #cdf2e3;
+  --color-on-primary: #04211d;
+
+  /* Gold demoted to a thin secondary accent (borders/details only) */
+  --color-gold-accent-line: rgba(16, 185, 129, 0.35);
 
   /* Radii */
   --radius-sm: 8px;
