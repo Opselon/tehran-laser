@@ -24,21 +24,21 @@ export interface FaqItemSchema {
 export interface ServiceSchemaInput {
   name: string;
   slug: string;
-  description?: string;
-  durationMinutes?: number;
-  price?: number; // In Tomans (IRT)
-  currency?: string;
+  description?: string | undefined;
+  durationMinutes?: number | undefined;
+  price?: number | undefined; // In Tomans (IRT)
+  currency?: string | undefined;
 }
 
 export interface ArticleSchemaInput {
   title: string;
   slug: string;
   excerpt: string;
-  content?: string;
-  coverImage?: string;
-  author?: string;
-  publishedAt?: string;
-  updatedAt?: string;
+  content?: string | undefined;
+  coverImage?: string | undefined;
+  author?: string | undefined;
+  publishedAt?: string | undefined;
+  updatedAt?: string | undefined;
 }
 
 /**

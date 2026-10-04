@@ -1,52 +1,41 @@
 ---
 import PublicLayout from '../layouts/PublicLayout.astro';
 import Icon from '../components/ui/Icon.astro';
+import { createBreadcrumbSchema } from '../lib/seo';
 
-const clinicJsonLd = {
+// The layout already emits the canonical MedicalClinic entity (with geo, hours,
+// offer catalog). The /clinic page adds an AboutPage entity + breadcrumbs so
+// Google sees one consistent clinic node, not two conflicting ones.
+const aboutJsonLd = {
   '@context': 'https://schema.org',
-  '@type': 'MedicalClinic',
-  name: 'کلینیک تخصصی تهران لیزر',
-  alternateName: 'Tehran Laser Clinic',
-  image: 'https://tehranlaser.ir/og-image.jpg',
-  telephone: '+989035555090',
+  '@type': ['AboutPage', 'MedicalWebPage'],
+  '@id': 'https://tehranlaser.ir/clinic#about',
   url: 'https://tehranlaser.ir/clinic',
-  priceRange: 'IRR',
-  medicalSpecialty: ['Dermatology', 'LaserSurgery'],
+  name: 'درباره کلینیک تخصصی تهران لیزر پاسداران',
   description:
     'مرکز تخصصی لیزر و زیبایی تهران لیزر در پاسداران با تجهیزات اورجینال کندلا جنتل مکس پرو ۲۰۲۶، سیستم سرمایش DCD و کادر مجرب پزشکی.',
-  address: {
-    '@type': 'PostalAddress',
-    streetAddress: 'پاسداران، خیابان پایدارفرد، نبش بوستان هفتم',
-    addressLocality: 'تهران',
-    addressRegion: 'تهران',
-    addressCountry: 'IR',
-  },
-  geo: {
-    '@type': 'GeoCoordinates',
-    latitude: 35.7645,
-    longitude: 51.4628,
-  },
-  openingHoursSpecification: [
-    {
-      '@type': 'OpeningHoursSpecification',
-      dayOfWeek: ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday'],
-      opens: '09:00',
-      closes: '20:00',
-    },
-    {
-      '@type': 'OpeningHoursSpecification',
-      dayOfWeek: 'Thursday',
-      opens: '09:00',
-      closes: '18:00',
-    },
-  ],
+  inLanguage: 'fa-IR',
+  mainEntity: { '@id': 'https://tehranlaser.ir/#clinic' },
+  isPartOf: { '@id': 'https://tehranlaser.ir/#website' },
 };
+
+const breadcrumbJsonLd = createBreadcrumbSchema([
+  { name: 'صفحه اصلی', url: '/' },
+  { name: 'درباره کلینیک', url: '/clinic' },
+]);
 ---
 
 <PublicLayout
   title="درباره کلینیک و تکنولوژی کندلا ۲۰۲۶ — کلینیک تهران لیزر پاسداران"
   description="معرفی فناوری کندلا جنتل مکس پرو ۲۰۲۶ (الکساندرایت ۷۵۵nm و ان‌دی‌یاگ ۱۰۶۴nm)، خنک‌کننده کرایوژنیک DCD، اسپات سایز ۲۴mm و پروتکل‌های بهداشتی کلینیک تهران لیزر."
-  jsonLd={clinicJsonLd}
+  canonicalUrl="/clinic"
+  keywords={[
+    'کلینیک لیزر پاسداران',
+    'کندلا جنتل مکس پرو ۲۰۲۶',
+    'مرکز لیزر الکساندرایت تهران',
+    'کلینیک زیبایی پایدارفرد',
+  ]}
+  jsonLd={[aboutJsonLd, breadcrumbJsonLd]}
   bodyClass="clinic-obsidian-root"
 >
   <div class="clinic-page-wrapper">

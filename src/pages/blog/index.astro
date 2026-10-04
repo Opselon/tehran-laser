@@ -3,6 +3,7 @@ import PublicLayout from '../../layouts/PublicLayout.astro';
 import { env } from 'cloudflare:workers';
 import { listPublicBlogPosts } from '../../server/repositories';
 import { formatJalaliDate } from '../../lib/datetime/jalali';
+import { createBreadcrumbSchema } from '../../lib/seo';
 import Icon from '../../components/ui/Icon.astro';
 
 let postsPage: Awaited<ReturnType<typeof listPublicBlogPosts>> = { items: [], nextCursor: null };
@@ -43,11 +44,24 @@ const categories = [
   { id: 'health', label: 'سلامت و تیپ پوستی', icon: 'gem' },
   { id: 'standards', label: 'استاندارد کلینیکال', icon: 'sparkles' },
 ];
+
+const breadcrumbJsonLd = createBreadcrumbSchema([
+  { name: 'صفحه اصلی', url: '/' },
+  { name: 'مجله تخصصی', url: '/blog' },
+]);
 ---
 
 <PublicLayout
   title="مجله تخصصی زیبایی و لیزر — کلینیک تهران لیزر"
   description="مرجع علمی و کاربردی مراقبت‌های پوستی، چک‌لیست قبل و بعد از لیزر، تکنولوژی الکساندرایت و استانداردهای کلینیکال پاسداران."
+  canonicalUrl="/blog"
+  keywords={[
+    'مجله لیزر موهای زائد',
+    'مقالات لیزر الکساندرایت',
+    'مراقبت‌های بعد از لیزر',
+    'راهنمای لیزر موهای زائد',
+  ]}
+  jsonLd={breadcrumbJsonLd}
   theme="dark"
   bodyClass="blog-page-obsidian"
 >

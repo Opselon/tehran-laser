@@ -1,8 +1,10 @@
 ---
 import PublicLayout from '../../layouts/PublicLayout.astro';
 import { env } from 'cloudflare:workers';
-import { findPublicBlogPostBySlug } from '../../server/repositories';
+import { findPublicBlogPostBySlug, listPublicBlogPosts } from '../../server/repositories';
 import { formatJalaliDate } from '../../lib/datetime/jalali';
+import { createArticleSchema, createBreadcrumbSchema } from '../../lib/seo';
+import Icon from '../../components/ui/Icon.astro';
 
 const { slug } = Astro.params;
 if (!slug) return Astro.redirect('/blog');
@@ -10,99 +12,1248 @@ if (!slug) return Astro.redirect('/blog');
 const post = await findPublicBlogPostBySlug(env.DB, slug);
 if (!post) return Astro.redirect('/404');
 
-// Schema.org Article JSON-LD (§31, §135)
-const articleJsonLd = {
-  '@context': 'https://schema.org',
-  '@type': 'Article',
-  headline: post.title,
-  description: post.excerpt,
-  author: {
-    '@type': 'Person',
-    name: post.author || 'کلینیک تهران لیزر',
-  },
-  publisher: {
-    '@type': 'Organization',
-    name: 'کلینیک تهران لیزر',
-    url: 'https://tehranlaser.ir',
-  },
-  datePublished: post.publishedAt,
-};
+// Related posts (same published set, exclude current)
+let related: Awaited<ReturnType<typeof listPublicBlogPosts>>['items'] = [];
+try {
+  const page = await listPublicBlogPosts(env.DB, 6);
+  related = page.items.filter((p) => p.slug !== post.slug).slice(0, 3);
+} catch (e) {
+  console.error('Failed to load related posts:', e);
+}
+
+const readingMinutes = Math.max(
+  3,
+  Math.ceil(post.content.replace(/<[^>]*>/g, ' ').trim().split(/\s+/).filter(Boolean).length / 150),
+);
+
+// Table of contents extracted from H2/H3 headings in the article body
+interface TocItem {
+  id: string;
+  text: string;
+  level: number;
+}
+
+function extractToc(html: string): TocItem[] {
+  const items: TocItem[] = [];
+  const seen = new Set<string>();
+  const headingRe = /<h([23])[^>]*>([\s\S]*?)<\/h\1>/gi;
+  let match: RegExpExecArray | null;
+  while ((match = headingRe.exec(html)) !== null) {
+    if (!match[2]) continue;
+    const level = Number(match[1]);
+    const raw = match[2].replace(/<[^>]*>/g, '').trim();
+    if (!raw) continue;
+    let id = raw
+      .toLowerCase()
+      .replace(/[^\p{L}\p{N}]+/gu, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 60);
+    if (!id) id = 'section-' + items.length;
+    let unique = id;
+    let n = 2;
+    while (seen.has(unique)) {
+      unique = `${id}-${n}`;
+      n += 1;
+    }
+    seen.add(unique);
+    items.push({ id: unique, text: raw, level });
+  }
+  return items;
+}
+
+function injectHeadingIds(html: string, toc: TocItem[]): string {
+  let idx = 0;
+  const headingRe = /<h([23])([^>]*)>/gi;
+  return html.replace(headingRe, (full, level, attrs) => {
+    const item = toc[idx];
+    idx += 1;
+    if (!item) return full;
+    if (/id\s*=\s*["'][^"']*["']/i.test(attrs)) return full;
+    return `<h${level}${attrs} id="${item.id}">`;
+  });
+}
+
+const toc = extractToc(post.content);
+const contentWithIds = injectHeadingIds(post.content, toc);
+const hasToc = toc.length > 0;
+
+// Pre / post treatment callouts injected around the article body
+const preCareHtml = `
+<div class="clinical-callout callout-pre">
+  <div class="callout-icon-box"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.5 19.5 5.5v6c0 5-3.2 8.6-7.5 10-4.3-1.4-7.5-5-7.5-10v-6L12 2.5Zm-3.2 8.2 2.3 2.3 4.2-4.2"></path></svg></div>
+  <div class="callout-body">
+    <div class="callout-title">چک‌لیست قبل از جلسه لیزر</div>
+    <div class="callout-text">شیو با تیغ ۲۴ ساعت قبل، پوست تمیز و بدون لوسیون، پرهیز ۳ تا ۴ هفته‌ای از برنزه‌سازی و سولاریوم.</div>
+  </div>
+</div>`;
+
+const postCareHtml = `
+<div class="clinical-callout callout-post">
+  <div class="callout-icon-box"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.5a9.5 9.5 0 1 0 0 19 9.5 9.5 0 0 0 0-19Zm-3 10 2.5 2.5 5-5"></path></svg></div>
+  <div class="callout-body">
+    <div class="callout-title">مراقبت ۲۴ ساعت طلایی پس از درمان</div>
+    <div class="callout-text">استفاده از ژل زینک اکساید و آلوئه‌ورا، پرهیز از دوش آب داغ، استخر، سونا و ورزش‌های تعریق‌زا تا ۲۴ ساعت.</div>
+  </div>
+</div>`;
+
+// Schema.org Article + MedicalWebPage JSON-LD (§31, §135)
+const articleJsonLd = createArticleSchema({
+  title: post.title,
+  slug: post.slug,
+  excerpt: post.excerpt,
+  coverImage: post.coverImage ?? undefined,
+  author: post.author || undefined,
+  publishedAt: post.publishedAt || undefined,
+});
+
+// BreadcrumbList schema for nested blog detail pages (§31, §135)
+const breadcrumbJsonLd = createBreadcrumbSchema([
+  { name: 'صفحه اصلی', url: '/' },
+  { name: 'مجله تخصصی', url: '/blog' },
+  { name: post.title, url: `/blog/${post.slug}` },
+]);
+
+const blogJsonLdArray = [articleJsonLd, breadcrumbJsonLd];
 ---
 
 <PublicLayout
   title={`${post.seo.seoTitle || post.title} — تهران لیزر`}
   description={post.seo.seoDescription || post.excerpt}
-  jsonLd={articleJsonLd}
+  canonicalUrl={post.seo.canonicalUrl || `/blog/${post.slug}`}
+  ogType="article"
+  ogImage={post.coverImage ?? undefined}
+  jsonLd={blogJsonLdArray}
+  theme="dark"
+  bodyClass="blog-article-obsidian"
 >
-  <div class="page-header-strip">
-    <div class="container container-sm text-center">
-      <nav class="breadcrumbs mb-3">
-        <a href="/">صفحه اصلی</a>
-        <span class="bc-sep">/</span>
-        <a href="/blog">مجله تخصصی</a>
-        <span class="bc-sep">/</span>
-        <span class="bc-current">{post.title}</span>
-      </nav>
-      <h1 class="article-main-title">{post.title}</h1>
-      <div class="article-meta-row mt-2">
-        <span>✍️ نویسنده: {post.author || 'تیم علمی تهران لیزر'}</span>
-        <span class="meta-dot">•</span>
-        <span>📅 تاریخ انتشار: {formatJalaliDate(post.publishedAt.slice(0, 10))}</span>
+  <div class="article-obsidian-wrapper">
+    <!-- Article Header -->
+    <header class="article-hero-section">
+      <div class="container container-sm text-center">
+        <nav class="article-breadcrumbs" aria-label="مسیر صفحه">
+          <a href="/">صفحه اصلی</a>
+          <Icon name="chevronLeft" size={13} class="bc-sep-icon" />
+          <a href="/blog">مجله تخصصی</a>
+          <Icon name="chevronLeft" size={13} class="bc-sep-icon" />
+          <span class="bc-current">{post.title}</span>
+        </nav>
+
+        <h1 class="article-hero-title">{post.title}</h1>
+
+        <div class="article-meta-row">
+          <span class="meta-pill">
+            <Icon name="users" size={14} />
+            <span>{post.author || 'تیم علمی تهران لیزر'}</span>
+          </span>
+          <span class="meta-pill">
+            <Icon name="calendar" size={14} />
+            <span>{formatJalaliDate(post.publishedAt.slice(0, 10))}</span>
+          </span>
+          <span class="meta-pill meta-pill-gold">
+            <Icon name="clock" size={14} />
+            <span>{readingMinutes} دقیقه مطالعه</span>
+          </span>
+        </div>
       </div>
-    </div>
+    </header>
+
+    <!-- Article Body + Sticky TOC -->
+    <section class="article-body-section">
+      <div class="container article-layout-grid">
+        <!-- Sticky Table of Contents Sidebar (RTL: right column) -->
+        {hasToc && (
+          <aside class="article-toc-sidebar" id="tocSidebar" aria-label="فهرست بخش‌های مقاله">
+            <div class="toc-inner">
+              <div class="toc-header">
+                <Icon name="list" size={16} />
+                <span>فهرست بخش‌ها</span>
+              </div>
+              <nav class="toc-nav">
+                <ul class="toc-list">
+                  {toc.map((item) => (
+                    <li class={`toc-item toc-level-${item.level}`}>
+                      <a href={`#${item.id}`} class="toc-link" data-toc-id={item.id}>
+                        {item.text}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+              <a href="/booking" class="toc-cta-btn">
+                <Icon name="calendar" size={15} />
+                <span>رزرو نوبت</span>
+              </a>
+            </div>
+          </aside>
+        )}
+
+        <!-- Main Article Column -->
+        <article class="article-main-col">
+          {post.coverImage && (
+            <div class="article-cover-wrap">
+              <img src={post.coverImage} alt={post.title} class="article-cover-img" />
+              <div class="article-cover-shade"></div>
+            </div>
+          )}
+
+          <div class="article-excerpt-callout">
+            <Icon name="sparkles" size={17} class="callout-spark" />
+            <p>{post.excerpt}</p>
+          </div>
+
+          {hasToc && (
+            <details class="toc-mobile-details">
+              <summary class="toc-mobile-summary">
+                <span class="toc-mobile-title">
+                  <Icon name="list" size={16} />
+                  <span>فهرست بخش‌های مقاله</span>
+                </span>
+                <Icon name="chevronDown" size={16} class="toc-mobile-chevron" />
+              </summary>
+              <nav class="toc-nav toc-nav-mobile">
+                <ul class="toc-list">
+                  {toc.map((item) => (
+                    <li class={`toc-item toc-level-${item.level}`}>
+                      <a href={`#${item.id}`} class="toc-link" data-toc-id={item.id}>
+                        {item.text}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+            </details>
+          )}
+
+          <div class="article-content-body">
+            {hasToc && <Fragment set:html={preCareHtml} />}
+            {/<[a-z][\s\S]*>/i.test(contentWithIds) ? (
+              <div class="rich-article-content" set:html={contentWithIds} />
+            ) : (
+              <div class="rich-article-content">
+                {contentWithIds.split('\n\n').map((paragraph) => {
+                  if (paragraph.startsWith('## ')) {
+                    return <h2 class="article-h2">{paragraph.replace('## ', '')}</h2>;
+                  }
+                  if (paragraph.startsWith('### ')) {
+                    return <h3 class="article-h3">{paragraph.replace('### ', '')}</h3>;
+                  }
+                  if (paragraph.startsWith('- ')) {
+                    return (
+                      <ul class="article-list">
+                        {paragraph.split('\n').map((item) => (
+                          <li>{item.replace(/^- /, '')}</li>
+                        ))}
+                      </ul>
+                    );
+                  }
+                  return <p class="article-p">{paragraph}</p>;
+                })}
+              </div>
+            )}
+            {hasToc && <Fragment set:html={postCareHtml} />}
+          </div>
+
+          <!-- Author Footer -->
+          <div class="article-author-card">
+            <div class="author-avatar">
+              <Icon name="users" size={22} />
+            </div>
+            <div class="author-info">
+              <div class="author-label">نویسنده مقاله</div>
+              <div class="author-name-big">{post.author || 'تیم علمی تهران لیزر'}</div>
+              <div class="author-bio">تیم تولید محتوای علمی و کلینیکال کلینیک تخصصی تهران لیزر پاسداران</div>
+            </div>
+          </div>
+
+          <!-- Article CTA Cards -->
+          <div class="article-cta-grid">
+            <a href="/booking" class="article-cta-card cta-gold">
+              <div class="cta-icon-box">
+                <Icon name="calendar" size={22} />
+              </div>
+              <div class="cta-card-text">
+                <div class="cta-card-title">رزرو آنلاین نوبت</div>
+                <div class="cta-card-sub">با ۱۵٪ تخفیف ویژه پکیج کل بدن در سامانه رزرو</div>
+              </div>
+              <Icon name="arrowLeft" size={18} class="cta-arrow" />
+            </a>
+
+            <a href="tel:09000005090" class="article-cta-card cta-outline">
+              <div class="cta-icon-box">
+                <Icon name="phone" size={22} />
+              </div>
+              <div class="cta-card-text">
+                <div class="cta-card-title">مشاوره تلفنی رایگان</div>
+                <div class="cta-card-sub">پاسخگویی به سوالات شما توسط کارشناسان کلینیک</div>
+              </div>
+              <Icon name="arrowLeft" size={18} class="cta-arrow" />
+            </a>
+          </div>
+
+          <a href="/blog" class="back-to-blog">
+            <Icon name="arrowRight" size={16} />
+            <span>بازگشت به فهرست همه مقالات</span>
+          </a>
+        </article>
+      </div>
+    </section>
+
+    <!-- Related Articles -->
+    {related.length > 0 && (
+      <section class="related-section">
+        <div class="container">
+          <h2 class="related-section-title">
+            <Icon name="document" size={20} />
+            <span>مقالات مرتبط و پیشنهادی</span>
+          </h2>
+          <div class="related-grid">
+            {related.map((rp) => (
+              <a href={`/blog/${rp.slug}`} class="related-card">
+                {rp.coverImage ? (
+                  <div class="related-img-wrap">
+                    <img src={rp.coverImage} alt={rp.title} class="related-img" loading="lazy" />
+                  </div>
+                ) : (
+                  <div class="related-img-wrap related-img-fallback">
+                    <Icon name="document" size={26} />
+                  </div>
+                )}
+                <div class="related-body">
+                  <span class="related-date">
+                    <Icon name="calendar" size={12} />
+                    <span>{rp.publishedAt ? formatJalaliDate(rp.publishedAt.slice(0, 10)) : ''}</span>
+                  </span>
+                  <h3 class="related-title">{rp.title}</h3>
+                  <p class="related-excerpt">{rp.excerpt}</p>
+                  <span class="related-read-more">
+                    <span>مطالعه مقاله</span>
+                    <Icon name="arrowLeft" size={13} />
+                  </span>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+    )}
   </div>
 
-  <section class="section">
-    <div class="container container-sm">
-      <article class="article-container">
-        {post.coverImage && (
-          <div class="article-cover-wrapper mb-4" style="border-radius: 16px; overflow: hidden; max-height: 420px; box-shadow: 0 10px 30px rgba(0,0,0,0.15);">
-            <img src={post.coverImage} alt={post.title} style="width: 100%; height: 100%; object-fit: cover;" />
-          </div>
-        )}
+  <style>
+    /* ── Dark 3D Obsidian-Gold Article ── */
+    :global(body.blog-article-obsidian) {
+      background-color: #0a0b0d !important;
+      color: #f1f5f9;
+      overflow-x: hidden;
+    }
 
-        <div class="article-excerpt-callout">
-          <p>{post.excerpt}</p>
-        </div>
+    .article-obsidian-wrapper {
+      background-color: #0a0b0d;
+      background-image:
+        radial-gradient(ellipse 70% 45% at 50% -8%, rgba(212, 175, 55, 0.1) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 35% at 10% 30%, rgba(212, 175, 55, 0.03) 0%, transparent 60%);
+      min-height: 100vh;
+      padding-bottom: 60px;
+      overflow-x: hidden;
+      width: 100%;
+    }
 
-        {/<[a-z][\s\S]*>/i.test(post.content) ? (
-          <div class="article-content-body mt-4" set:html={post.content} />
-        ) : (
-          <div class="article-content-body mt-4">
-            {post.content.split('\n\n').map((paragraph) => {
-              if (paragraph.startsWith('## ')) {
-                return <h2 class="article-h2">{paragraph.replace('## ', '')}</h2>;
-              }
-              if (paragraph.startsWith('### ')) {
-                return <h3 class="article-h3">{paragraph.replace('### ', '')}</h3>;
-              }
-              if (paragraph.startsWith('- ')) {
-                return (
-                  <ul class="article-list">
-                    {paragraph.split('\n').map((item) => (
-                      <li>{item.replace(/^- /, '')}</li>
-                    ))}
-                  </ul>
-                );
-              }
-              return <p class="article-p">{paragraph}</p>;
-            })}
-          </div>
-        )}
+    .article-hero-section {
+      padding: 40px 16px 30px;
+      border-bottom: 1px solid rgba(212, 175, 55, 0.16);
+    }
 
-        <hr class="summary-divider my-5" />
+    .article-breadcrumbs {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      font-size: 0.82rem;
+      color: #94a3b8;
+      margin-bottom: 18px;
+    }
 
-        <!-- Article Footer CTA -->
-        <div class="article-bottom-cta card text-center p-4">
-          <h3 class="font-bold mb-2">مشاوره تخصصی و رزرو نوبت در تهران لیزر</h3>
-          <p class="text-muted small mb-3">
-            برای تجربه درمانی استاندارد و ایمن با اپراتورهای حرفه‌ای کلینیک پاسداران، نوبت خود را آنلاین ثبت نمایید.
-          </p>
-          <a href="/booking" class="btn btn-primary btn-lg">
-            ورود به سامانه رزرو آنلاین نوبت
-          </a>
-        </div>
-      </article>
-    </div>
-  </section>
+    .article-breadcrumbs a {
+      color: #cbd5e1;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .article-breadcrumbs a:hover {
+      color: #f5d77f;
+    }
+
+    .bc-sep-icon {
+      color: rgba(212, 175, 55, 0.6);
+      flex-shrink: 0;
+    }
+
+    .bc-current {
+      color: #f5d77f;
+      font-weight: 700;
+      max-width: 260px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .article-hero-title {
+      font-size: clamp(1.5rem, 3.6vw, 2.4rem);
+      font-weight: 900;
+      color: #ffffff;
+      line-height: 1.5;
+      margin-bottom: 20px;
+      letter-spacing: -0.02em;
+      text-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+    }
+
+    .article-meta-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .meta-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(18, 22, 31, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #cbd5e1;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 999px;
+    }
+
+    .meta-pill-gold {
+      background: rgba(212, 175, 55, 0.14);
+      border-color: rgba(212, 175, 55, 0.4);
+      color: #f5d77f;
+    }
+
+    /* ── Layout grid: TOC sidebar + article column ── */
+    .article-body-section {
+      padding: 34px 0 0;
+    }
+
+    .article-layout-grid {
+      display: grid;
+      grid-template-columns: 270px minmax(0, 1fr);
+      gap: 34px;
+      align-items: start;
+    }
+
+    /* Sticky TOC Sidebar */
+    .article-toc-sidebar {
+      position: sticky;
+      top: 24px;
+      max-height: calc(100vh - 48px);
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(212, 175, 55, 0.3) transparent;
+    }
+
+    .toc-inner {
+      background: linear-gradient(160deg, rgba(20, 24, 33, 0.9) 0%, rgba(12, 15, 22, 0.95) 100%);
+      border: 1px solid rgba(212, 175, 55, 0.22);
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+    }
+
+    .toc-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #f5d77f;
+      font-size: 0.88rem;
+      font-weight: 800;
+      padding-bottom: 12px;
+      margin-bottom: 12px;
+      border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+    }
+
+    .toc-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .toc-item {
+      margin: 0;
+    }
+
+    .toc-link {
+      display: block;
+      padding: 7px 10px;
+      border-radius: 8px;
+      color: #94a3b8;
+      font-size: 0.83rem;
+      line-height: 1.55;
+      text-decoration: none;
+      transition: color 0.18s, background 0.18s, border-right-color 0.18s;
+      border-right: 2px solid transparent;
+    }
+
+    .toc-link:hover {
+      color: #f5d77f;
+      background: rgba(212, 175, 55, 0.08);
+    }
+
+    .toc-link.toc-active {
+      color: #f5d77f;
+      background: rgba(212, 175, 55, 0.14);
+      border-right-color: #d4af37;
+      font-weight: 700;
+    }
+
+    .toc-level-3 .toc-link {
+      padding-right: 22px;
+      font-size: 0.78rem;
+    }
+
+    .toc-cta-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 16px;
+      width: 100%;
+      background: linear-gradient(135deg, #d4af37 0%, #aa8421 100%);
+      color: #0b0e14;
+      font-size: 0.82rem;
+      font-weight: 800;
+      padding: 9px 14px;
+      border-radius: 10px;
+      text-decoration: none;
+      box-shadow: 0 4px 14px rgba(212, 175, 55, 0.28);
+      transition: filter 0.2s, transform 0.2s;
+    }
+
+    .toc-cta-btn:hover {
+      filter: brightness(1.1);
+      transform: translateY(-1px);
+    }
+
+    /* Mobile TOC (details/summary) */
+    .toc-mobile-details {
+      display: none;
+      background: rgba(18, 22, 31, 0.8);
+      border: 1px solid rgba(212, 175, 55, 0.22);
+      border-radius: 14px;
+      padding: 0;
+      margin: 0 0 22px;
+      overflow: hidden;
+    }
+
+    .toc-mobile-summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 13px 16px;
+      cursor: pointer;
+      list-style: none;
+      color: #f5d77f;
+      font-size: 0.88rem;
+      font-weight: 800;
+    }
+
+    .toc-mobile-summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .toc-mobile-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toc-mobile-chevron {
+      transition: transform 0.22s;
+      color: #94a3b8;
+    }
+
+    .toc-mobile-details[open] .toc-mobile-chevron {
+      transform: rotate(180deg);
+    }
+
+    .toc-nav-mobile {
+      padding: 4px 12px 14px;
+      max-height: 260px;
+      overflow-y: auto;
+    }
+
+    /* ── Article main column ── */
+    .article-main-col {
+      min-width: 0;
+      overflow-wrap: break-word;
+    }
+
+    .article-cover-wrap {
+      position: relative;
+      border-radius: 18px;
+      overflow: hidden;
+      max-height: 420px;
+      border: 1px solid rgba(212, 175, 55, 0.25);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+      margin-bottom: 26px;
+    }
+
+    .article-cover-img {
+      width: 100%;
+      height: 100%;
+      max-height: 420px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .article-cover-shade {
+      position: absolute;
+      inset: auto 0 0 0;
+      height: 45%;
+      background: linear-gradient(to top, rgba(10, 11, 13, 0.75), transparent);
+      pointer-events: none;
+    }
+
+    .article-excerpt-callout {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      background: rgba(212, 175, 55, 0.09);
+      border: 1px solid rgba(212, 175, 55, 0.28);
+      border-right: 3px solid #d4af37;
+      border-radius: 14px;
+      padding: 16px 20px;
+      margin-bottom: 26px;
+    }
+
+    .callout-spark {
+      color: #f5d77f;
+      flex-shrink: 0;
+      margin-top: 3px;
+    }
+
+    .article-excerpt-callout p {
+      margin: 0;
+      color: #e2e8f0;
+      font-size: 0.96rem;
+      line-height: 1.9;
+      font-weight: 500;
+    }
+
+    /* ── Reading typography ── */
+    .article-content-body {
+      color: #d1d8e3;
+    }
+
+    .rich-article-content :global(h2),
+    .article-h2 {
+      font-size: clamp(1.25rem, 2.4vw, 1.6rem);
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 1.5;
+      margin: 34px 0 14px;
+      padding-right: 14px;
+      border-right: 3px solid rgba(212, 175, 55, 0.55);
+      scroll-margin-top: 90px;
+    }
+
+    .rich-article-content :global(h3),
+    .article-h3 {
+      font-size: clamp(1.05rem, 1.8vw, 1.25rem);
+      font-weight: 700;
+      color: #f5d77f;
+      line-height: 1.55;
+      margin: 26px 0 10px;
+      scroll-margin-top: 90px;
+    }
+
+    .rich-article-content :global(p),
+    .article-p {
+      font-size: 1.02rem;
+      line-height: 2.05;
+      color: #c3ccda;
+      margin: 0 0 18px;
+      text-align: justify;
+      text-justify: inter-word;
+    }
+
+    .rich-article-content :global(strong),
+    .rich-article-content :global(b) {
+      color: #f1f5f9;
+      font-weight: 800;
+    }
+
+    .rich-article-content :global(a) {
+      color: #f5d77f;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-color: rgba(212, 175, 55, 0.5);
+      transition: color 0.2s;
+    }
+
+    .rich-article-content :global(a:hover) {
+      color: #ffffff;
+    }
+
+    .rich-article-content :global(ul),
+    .article-list {
+      list-style: none;
+      padding: 0 0 0 6px;
+      margin: 0 0 20px;
+    }
+
+    .rich-article-content :global(li),
+    .article-list :global(li) {
+      position: relative;
+      padding-right: 26px;
+      margin-bottom: 10px;
+      color: #c3ccda;
+      font-size: 1rem;
+      line-height: 1.95;
+    }
+
+    .rich-article-content :global(li)::before,
+    .article-list :global(li)::before {
+      content: '';
+      position: absolute;
+      right: 4px;
+      top: 12px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #d4af37, #aa8421);
+      box-shadow: 0 0 8px rgba(212, 175, 55, 0.5);
+    }
+
+    .rich-article-content :global(ol) {
+      padding-right: 22px;
+      margin: 0 0 20px;
+      color: #c3ccda;
+      line-height: 1.95;
+    }
+
+    .rich-article-content :global(blockquote) {
+      margin: 22px 0;
+      padding: 14px 20px;
+      border-right: 3px solid rgba(212, 175, 55, 0.5);
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 10px;
+      color: #cbd5e1;
+      font-style: italic;
+      line-height: 1.9;
+    }
+
+    .rich-article-content :global(img) {
+      max-width: 100%;
+      height: auto;
+      border-radius: 12px;
+      margin: 18px 0;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .rich-article-content :global(hr) {
+      border: none;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.4), transparent);
+      margin: 30px 0;
+    }
+
+    .rich-article-content :global(table) {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      font-size: 0.92rem;
+      display: block;
+      overflow-x: auto;
+    }
+
+    .rich-article-content :global(th),
+    .rich-article-content :global(td) {
+      padding: 10px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      text-align: right;
+    }
+
+    .rich-article-content :global(th) {
+      background: rgba(212, 175, 55, 0.12);
+      color: #f5d77f;
+      font-weight: 700;
+    }
+
+    .rich-article-content :global(td) {
+      color: #c3ccda;
+    }
+
+    /* ── Pre / Post treatment callouts ── */
+    .clinical-callout {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      border-radius: 14px;
+      padding: 16px 18px;
+      margin: 24px 0;
+      border: 1px solid;
+    }
+
+    .callout-pre {
+      background: rgba(212, 175, 55, 0.1);
+      border-color: rgba(212, 175, 55, 0.35);
+      border-right: 4px solid #d4af37;
+    }
+
+    .callout-post {
+      background: rgba(56, 189, 248, 0.08);
+      border-color: rgba(56, 189, 248, 0.3);
+      border-right: 4px solid #38bdf8;
+    }
+
+    .callout-icon-box {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      flex-shrink: 0;
+    }
+
+    .callout-pre .callout-icon-box {
+      background: rgba(212, 175, 55, 0.18);
+      color: #f5d77f;
+    }
+
+    .callout-post .callout-icon-box {
+      background: rgba(56, 189, 248, 0.16);
+      color: #7dd3fc;
+    }
+
+    .callout-title {
+      font-size: 0.92rem;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .callout-pre .callout-title {
+      color: #f5d77f;
+    }
+
+    .callout-post .callout-title {
+      color: #7dd3fc;
+    }
+
+    .callout-text {
+      font-size: 0.88rem;
+      line-height: 1.8;
+      color: #cbd5e1;
+    }
+
+    /* ── Author card ── */
+    .article-author-card {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: linear-gradient(145deg, rgba(20, 24, 33, 0.8) 0%, rgba(12, 15, 22, 0.9) 100%);
+      border: 1px solid rgba(212, 175, 55, 0.22);
+      border-radius: 16px;
+      padding: 18px 20px;
+      margin: 34px 0 22px;
+      box-shadow: 0 10px 26px rgba(0, 0, 0, 0.4);
+    }
+
+    .author-avatar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.3), rgba(212, 175, 55, 0.12));
+      border: 1px solid rgba(212, 175, 55, 0.45);
+      color: #f5d77f;
+      flex-shrink: 0;
+    }
+
+    .author-label {
+      font-size: 0.75rem;
+      color: #94a3b8;
+      margin-bottom: 2px;
+    }
+
+    .author-name-big {
+      font-size: 1rem;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 3px;
+    }
+
+    .author-bio {
+      font-size: 0.84rem;
+      color: #94a3b8;
+      line-height: 1.6;
+    }
+
+    /* ── CTA cards ── */
+    .article-cta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      margin-bottom: 26px;
+    }
+
+    .article-cta-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 18px 20px;
+      border-radius: 16px;
+      text-decoration: none;
+      transition: transform 0.22s, border-color 0.22s, box-shadow 0.22s;
+      border: 1px solid;
+    }
+
+    .cta-gold {
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.18) 0%, rgba(212, 175, 55, 0.06) 100%);
+      border-color: rgba(212, 175, 55, 0.45);
+      box-shadow: 0 8px 22px rgba(212, 175, 55, 0.12);
+    }
+
+    .cta-gold:hover {
+      transform: translateY(-3px);
+      border-color: #d4af37;
+      box-shadow: 0 14px 32px rgba(212, 175, 55, 0.25);
+    }
+
+    .cta-outline {
+      background: rgba(255, 255, 255, 0.03);
+      border-color: rgba(255, 255, 255, 0.14);
+    }
+
+    .cta-outline:hover {
+      transform: translateY(-3px);
+      border-color: rgba(212, 175, 55, 0.5);
+      background: rgba(212, 175, 55, 0.08);
+    }
+
+    .cta-icon-box {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 46px;
+      height: 46px;
+      border-radius: 12px;
+      background: rgba(10, 13, 20, 0.6);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      color: #f5d77f;
+      flex-shrink: 0;
+    }
+
+    .cta-card-text {
+      flex-grow: 1;
+      min-width: 0;
+    }
+
+    .cta-card-title {
+      font-size: 0.96rem;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 3px;
+    }
+
+    .cta-card-sub {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+
+    .cta-arrow {
+      color: #f5d77f;
+      flex-shrink: 0;
+      transition: transform 0.2s;
+    }
+
+    .article-cta-card:hover .cta-arrow {
+      transform: translateX(-4px);
+    }
+
+    .back-to-blog {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #f5d77f;
+      font-size: 0.88rem;
+      font-weight: 700;
+      text-decoration: none;
+      padding: 10px 0;
+      transition: color 0.2s, transform 0.2s;
+    }
+
+    .back-to-blog:hover {
+      color: #ffffff;
+      transform: translateX(4px);
+    }
+
+    /* ── Related articles ── */
+    .related-section {
+      margin-top: 56px;
+      padding: 40px 16px 0;
+      border-top: 1px solid rgba(212, 175, 55, 0.16);
+    }
+
+    .related-section-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: clamp(1.2rem, 2.4vw, 1.5rem);
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 24px;
+    }
+
+    .related-section-title :global(svg) {
+      color: #f5d77f;
+    }
+
+    .related-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 22px;
+      padding-bottom: 10px;
+    }
+
+    .related-card {
+      display: flex;
+      flex-direction: column;
+      background: linear-gradient(165deg, rgba(20, 25, 36, 0.95) 0%, rgba(12, 15, 22, 0.95) 100%);
+      border: 1px solid rgba(212, 175, 55, 0.2);
+      border-radius: 16px;
+      overflow: hidden;
+      text-decoration: none;
+      box-shadow: 0 10px 26px rgba(0, 0, 0, 0.45);
+      transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;
+    }
+
+    .related-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(212, 175, 55, 0.55);
+      box-shadow: 0 18px 38px rgba(0, 0, 0, 0.6), 0 0 18px rgba(212, 175, 55, 0.12);
+    }
+
+    .related-img-wrap {
+      height: 158px;
+      width: 100%;
+      overflow: hidden;
+      background: #0d1017;
+    }
+
+    .related-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s;
+    }
+
+    .related-card:hover .related-img {
+      transform: scale(1.05);
+    }
+
+    .related-img-fallback {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(212, 175, 55, 0.35);
+    }
+
+    .related-body {
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+    }
+
+    .related-date {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.75rem;
+      color: #94a3b8;
+      margin-bottom: 8px;
+    }
+
+    .related-title {
+      font-size: 1rem;
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 1.55;
+      margin-bottom: 8px;
+    }
+
+    .related-excerpt {
+      font-size: 0.84rem;
+      color: #94a3b8;
+      line-height: 1.75;
+      margin-bottom: 12px;
+      flex-grow: 1;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .related-read-more {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #f5d77f;
+      font-size: 0.8rem;
+      font-weight: 800;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 992px) {
+      .article-layout-grid {
+        grid-template-columns: 1fr;
+        gap: 0;
+      }
+      .article-toc-sidebar {
+        display: none;
+      }
+      .toc-mobile-details {
+        display: block;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .article-hero-section {
+        padding: 28px 14px 22px;
+      }
+      .article-hero-title {
+        line-height: 1.55;
+      }
+      .related-grid {
+        grid-template-columns: 1fr;
+      }
+      .article-cta-grid {
+        grid-template-columns: 1fr;
+      }
+      .related-section {
+        margin-top: 40px;
+        padding: 30px 14px 0;
+      }
+      .article-body-section {
+        padding: 24px 0 0;
+      }
+    }
+
+    @media (max-width: 390px) {
+      .article-hero-title {
+        font-size: 1.35rem;
+      }
+      .meta-pill {
+        font-size: 0.74rem;
+        padding: 5px 10px;
+      }
+      .article-excerpt-callout {
+        padding: 13px 14px;
+      }
+      .article-cta-card {
+        padding: 14px;
+        gap: 10px;
+      }
+      .cta-icon-box {
+        width: 38px;
+        height: 38px;
+      }
+      .cta-card-title {
+        font-size: 0.88rem;
+      }
+      .cta-card-sub {
+        font-size: 0.74rem;
+      }
+      .article-author-card {
+        padding: 14px;
+        gap: 12px;
+      }
+      .author-avatar {
+        width: 44px;
+        height: 44px;
+      }
+    }
+
+    @media (max-width: 320px) {
+      .article-hero-section {
+        padding-left: 10px;
+        padding-right: 10px;
+      }
+      .article-cover-wrap {
+        border-radius: 12px;
+      }
+      .rich-article-content :global(p),
+      .article-p {
+        font-size: 0.95rem;
+        line-height: 1.95;
+      }
+    }
+  </style>
+
+  <script>
+    // Active TOC link highlighting on scroll
+    const tocLinks = document.querySelectorAll<HTMLAnchorElement>('.toc-link');
+    const headingMap = new Map<string, Element>();
+
+    tocLinks.forEach((link) => {
+      const id = link.dataset.tocId;
+      if (id) {
+        const heading = document.getElementById(id);
+        if (heading) headingMap.set(id, heading);
+      }
+    });
+
+    if (headingMap.size > 0) {
+      const setActive = () => {
+        let currentId: string | null = null;
+        let currentTop = -Infinity;
+        const scrollPos = window.scrollY + 120;
+
+        headingMap.forEach((heading, id) => {
+          const top = heading.getBoundingClientRect().top + window.scrollY;
+          if (top <= scrollPos && top > currentTop) {
+            currentTop = top;
+            currentId = id;
+          }
+        });
+
+        tocLinks.forEach((link) => {
+          if (link.dataset.tocId === currentId) {
+            link.classList.add('toc-active');
+          } else {
+            link.classList.remove('toc-active');
+          }
+        });
+      };
+
+      window.addEventListener('scroll', setActive, { passive: true });
+      setActive();
+    }
+
+    // Smooth scroll for TOC links
+    tocLinks.forEach((link) => {
+      link.addEventListener('click', (e) => {
+        const id = link.dataset.tocId;
+        if (!id) return;
+        const heading = document.getElementById(id);
+        if (!heading) return;
+        e.preventDefault();
+        const top = heading.getBoundingClientRect().top + window.scrollY - 84;
+        window.scrollTo({ top, behavior: 'smooth' });
+        if (history.replaceState) {
+          history.replaceState(null, '', `#${id}`);
+        }
+      });
+    });
+  </script>
 </PublicLayout>

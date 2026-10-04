@@ -7,6 +7,7 @@ import TestimonialsSection from '../components/public/TestimonialsSection.astro'
 import { defaultFaqs } from '../data/faqs';
 import { env } from 'cloudflare:workers';
 import { listPublicServices, listFaqItems } from '../server/repositories';
+import { createFAQPageSchema, createBreadcrumbSchema } from '../lib/seo';
 
 // Fetch public services and FAQs server-side for instant SEO & zero JS dependence (§3, §31, §191)
 let services: Awaited<ReturnType<typeof listPublicServices>> = [];
@@ -24,25 +25,21 @@ try {
 // Fallback FAQs if database is empty
 const activeFaqs = faqs && faqs.length > 0 ? faqs : defaultFaqs;
 
-// Generate FAQPage JSON-LD for rich snippets (§31, §135)
-const faqJsonLd = {
-  '@context': 'https://schema.org',
-  '@type': 'FAQPage',
-  mainEntity: activeFaqs.slice(0, 6).map((f) => ({
-    '@type': 'Question',
-    name: f.question,
-    acceptedAnswer: {
-      '@type': 'Answer',
-      text: f.answer,
-    },
-  })),
-};
+// Generate FAQPage + BreadcrumbList JSON-LD for rich snippets (§31, §135)
+const faqJsonLd = createFAQPageSchema(
+  activeFaqs.slice(0, 6).map((f) => ({ question: f.question, answer: f.answer })),
+);
+
+const breadcrumbJsonLd = createBreadcrumbSchema([
+  { name: 'صفحه اصلی', url: '/' },
+]);
 ---
 
 <PublicLayout
   title="تهران لیزر — مرکز تخصصی لیزر الکساندرایت کندلا ۲۰۲۶ در پاسداران"
   description="کلینیک تخصصی تهران لیزر در خیابان پایدارفرد پاسداران. مجهز به الکساندرایت کندلا ۲۰۲۶ آمریکایی با کولینگ داینامیک بدون درد، پک استریل اختصاصی، تعرفه شفاف و ۱۵٪ تخفیف رزرو آنلاین."
-  jsonLd={faqJsonLd}
+  canonicalUrl="/"
+  jsonLd={[faqJsonLd, breadcrumbJsonLd]}
   theme="dark"
 >
   <!-- Hero Section (§38) -->

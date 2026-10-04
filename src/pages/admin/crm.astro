@@ -22,14 +22,27 @@ try {
 } catch (e) {
   console.error('Failed to load CRM data:', e);
 }
+
+// Real KPIs computed from live data (no hardcoded fakes)
+const totalSessionsBooked = clinicalRecords.reduce((s, r) => s + (Number(r.total_sessions) || 0), 0);
+const completedSessions = clinicalRecords.length;
+const avgProgress = totalSessionsBooked > 0
+  ? Math.min(100, Math.round((completedSessions / totalSessionsBooked) * 100))
+  : 0;
+const totalShots = clinicalRecords.reduce((s, r) => s + (Number(r.shot_count) || 0), 0);
+const avgJoules = clinicalRecords.length > 0
+  ? clinicalRecords.reduce((s, r) => s + (Number(r.joules_energy) || 0), 0) / clinicalRecords.length
+  : 0;
+
+const DEVICE_LABEL = 'الکساندرایت کندلا جنتل پرومکس ۲۰۲۶';
 ---
 
 <AdminLayout title="پرونده بالینی و CRM" activeNav="crm">
-  <div class="admin-content-pad">
+  <div class="admin-content-pad crm-page">
     <div class="dashboard-header-row">
-      <div>
-        <h1 class="admin-page-title" style="display: flex; align-items: center; gap: 10px;">
-          <Icon name="stethoscope" size={26} class="title-icon" />
+      <div class="header-main-col">
+        <h1 class="admin-page-title">
+          <Icon name="doctor" size={26} class="title-gold-icon" />
           <span>پرونده بالینی و ارتباط با مراجعین (Clinical CRM)</span>
         </h1>
         <p class="section-block-sub">
@@ -38,52 +51,79 @@ try {
       </div>
       <div class="actions">
         <button id="openNewRecordModalBtn" class="btn-3d-gold">
-          <span>+ ثبت جلسه بالینی جدید</span>
+          <Icon name="plus" size={17} />
+          <span>ثبت جلسه بالینی جدید</span>
         </button>
       </div>
     </div>
 
     <!-- Stats summary row -->
-    <div class="kpi-grid-3d" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-bottom: 24px;">
+    <div class="kpi-grid-3d crm-kpi-grid">
       <div class="kpi-card-3d">
         <div class="kpi-header">
           <span class="kpi-title">کل مراجعین ثبت‌شده</span>
-          <span class="kpi-icon" style="color: #94a3b8;"><Icon name="users" size={20} /></span>
+          <span class="kpi-icon crm-kpi-icon-gold"><Icon name="users" size={20} /></span>
         </div>
-        <div class="kpi-value">{customersList.length}</div>
-        <div class="kpi-footer" style="color: #94a3b8;">بانک فعال مراجعین کلینیک</div>
+        <div class="kpi-value">{customersList.length.toLocaleString('fa-IR')}</div>
+        <div class="kpi-footer">بانک فعال مراجعین کلینیک</div>
       </div>
 
       <div class="kpi-card-3d">
         <div class="kpi-header">
           <span class="kpi-title">جلسات ثبت‌شده در پرونده</span>
-          <span class="kpi-icon" style="color: #38bdf8;"><Icon name="stethoscope" size={20} /></span>
+          <span class="kpi-icon crm-kpi-icon-blue"><Icon name="doctor" size={20} /></span>
         </div>
-        <div class="kpi-value">{clinicalRecords.length}</div>
-        <div class="kpi-footer" style="color: #38bdf8;">سوابق دوز و انرژی دستگاه</div>
+        <div class="kpi-value">{completedSessions.toLocaleString('fa-IR')}</div>
+        <div class="kpi-footer">سوابق دوز و انرژی دستگاه</div>
       </div>
 
       <div class="kpi-card-3d">
         <div class="kpi-header">
           <span class="kpi-title">میانگین پیشرفت جلسات</span>
-          <span class="kpi-icon" style="color: #34d399;"><Icon name="chart" size={20} /></span>
+          <span class="kpi-icon crm-kpi-icon-green"><Icon name="chart" size={20} /></span>
         </div>
-        <div class="kpi-value" style="color: #34d399;">۴.۲ <span style="font-size: 1rem; color: #94a3b8;">از ۸ جلسه</span></div>
-        <div class="kpi-footer" style="color: #34d399;">پایبندی به دوره درمان ۵۳٪</div>
+        <div class="kpi-value crm-kpi-progress-value">
+          {avgProgress.toLocaleString('fa-IR')}<span class="crm-kpi-unit">٪</span>
+        </div>
+        <div class="kpi-footer">{totalSessionsBooked.toLocaleString('fa-IR')} جلسه برنامه‌ریزی‌شده کل</div>
+      </div>
+
+      <div class="kpi-card-3d">
+        <div class="kpi-header">
+          <span class="kpi-title">مجموع شات‌های لیزر</span>
+          <span class="kpi-icon crm-kpi-icon-gold"><Icon name="lightning" size={20} /></span>
+        </div>
+        <div class="kpi-value">{totalShots.toLocaleString('fa-IR')}</div>
+        <div class="kpi-footer">
+          میانگین انرژی: {avgJoules.toLocaleString('fa-IR', { maximumFractionDigits: 1 })} J/cm²
+        </div>
       </div>
     </div>
 
     <!-- Layout: Customer dossiers and recent clinical records -->
-    <div class="g-side" style="display: grid; gap: 24px; align-items: start">
+    <div class="g-side crm-layout">
       <!-- Right: Customer list sidebar -->
-      <div class="admin-section-block" style="padding: 18px;">
-        <h3 style="font-size: 0.95rem; font-weight: 800; color: #f5d77f; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
-          <span>مراجعین اخیر</span>
-          <span style="font-size: 0.75rem; color: #94a3b8;">{customersList.length} پرونده</span>
+      <div class="admin-section-block crm-side-card">
+        <h3 class="crm-side-title">
+          <span class="crm-side-title-text">
+            <Icon name="users" size={16} class="title-gold-icon" />
+            <span>مراجعین اخیر</span>
+          </span>
+          <span class="crm-side-count">{customersList.length.toLocaleString('fa-IR')} پرونده</span>
         </h3>
-        <input type="text" id="custSearchInput" class="form-control-modal" placeholder="🔍 جستجوی نام یا تلفن..." style="margin-bottom: 14px; font-size: 0.85rem;" />
 
-        <div id="customerListContainer" style="display: flex; flex-direction: column; gap: 8px; max-height: 600px; overflow-y: auto;">
+        <div class="crm-search-wrap">
+          <Icon name="search" size={16} class="crm-search-icon" aria-hidden="true" />
+          <input
+            type="text"
+            id="custSearchInput"
+            class="form-control-modal crm-search-input"
+            placeholder="جستجوی نام یا تلفن..."
+            aria-label="جستجوی مراجع"
+          />
+        </div>
+
+        <div id="customerListContainer" class="crm-cust-list">
           {customersList.map((c, idx) => (
             <div
               class={`crm-cust-item ${idx === 0 ? 'active' : ''}`}
@@ -92,98 +132,122 @@ try {
               data-phone={c.phone}
               data-category={c.pricingCategory}
               data-count={c.bookingsCount || 1}
-              style="padding: 12px; border-radius: 10px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); cursor: pointer; transition: all 0.2s;"
+              role="button"
+              tabindex={0}
             >
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                <span style="font-weight: 700; color: #f8fafc; font-size: 0.9rem;">{c.name}</span>
-                <span style="font-size: 0.72rem; padding: 2px 6px; border-radius: 6px; background: rgba(212,175,55,0.15); color: #f5d77f;">
-                  {c.pricingCategory === 'female' ? 'بانوان' : 'آقایان'}
+              <span class="crm-cust-avatar" aria-hidden="true">{c.name?.trim()?.charAt(0) || '؟'}</span>
+              <span class="crm-cust-body">
+                <span class="crm-cust-top">
+                  <span class="crm-cust-name">{c.name}</span>
+                  <span class="crm-cust-cat">{c.pricingCategory === 'female' ? 'بانوان' : 'آقایان'}</span>
                 </span>
-              </div>
-              <div style="font-size: 0.78rem; color: #94a3b8; display: flex; justify-content: space-between;">
-                <span dir="ltr">{c.phone}</span>
-                <span>{c.bookingsCount || 1} نوبت</span>
-              </div>
+                <span class="crm-cust-meta">
+                  <span dir="ltr" class="crm-cust-phone">{c.phone}</span>
+                  <span class="crm-cust-count">{(c.bookingsCount || 1).toLocaleString('fa-IR')} نوبت</span>
+                </span>
+              </span>
             </div>
           ))}
+          {customersList.length === 0 && (
+            <p class="crm-side-empty">هنوز مراجعی ثبت نشده است.</p>
+          )}
         </div>
       </div>
 
       <!-- Left: Active Customer Clinical Dossier -->
-      <div class="admin-section-block" style="padding: 24px;">
-        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 16px; margin-bottom: 20px;">
-          <div>
-            <h2 id="dossierName" style="font-size: 1.25rem; font-weight: 800; color: #f8fafc; margin-bottom: 4px;">
+      <div class="admin-section-block crm-dossier-card">
+        <div class="crm-dossier-head">
+          <div class="crm-dossier-id">
+            <h2 id="dossierName" class="crm-dossier-name">
               {customersList[0]?.name || 'انتخاب مراجع'}
             </h2>
-            <div style="display: flex; gap: 12px; font-size: 0.85rem; color: #94a3b8;">
-              <span id="dossierPhone" dir="ltr">{customersList[0]?.phone || ''}</span>
-              <span>•</span>
-              <span id="dossierCategory">دسته: {customersList[0]?.pricingCategory === 'female' ? 'بانوان' : 'آقایان'}</span>
+            <div class="crm-dossier-meta">
+              <span class="crm-dossier-phone">
+                <Icon name="phone" size={14} class="meta-icon" />
+                <span id="dossierPhone" dir="ltr">{customersList[0]?.phone || ''}</span>
+              </span>
+              <span class="crm-dossier-cat">
+                <Icon name="tag" size={14} class="meta-icon" />
+                <span id="dossierCategory">دسته: {customersList[0]?.pricingCategory === 'female' ? 'بانوان' : 'آقایان'}</span>
+              </span>
             </div>
           </div>
 
-          <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-            <button id="sendDirectSmsBtn" class="btn-3d-complete" style="font-size: 0.82rem; padding: 8px 16px; display: inline-flex; align-items: center; gap: 6px;">
+          <div class="crm-dossier-actions">
+            <button id="sendDirectSmsBtn" class="btn-3d-complete crm-dossier-btn">
               <Icon name="sms" size={15} />
               <span>ارسال پیامک مستقیم</span>
             </button>
-            <button id="addSessionForCustBtn" class="btn-3d-gold" style="font-size: 0.82rem; padding: 8px 16px;">
-              + جلسه جدید کندلا
+            <button id="addSessionForCustBtn" class="btn-3d-gold crm-dossier-btn">
+              <Icon name="plus" size={15} />
+              <span>جلسه جدید کندلا</span>
             </button>
           </div>
         </div>
 
-        <!-- Course Progress Bar -->
-        <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.06); padding: 18px; border-radius: 12px; margin-bottom: 24px;">
-          <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.85rem; font-weight: 700;">
-            <span style="color: #cbd5e1;">وضعیت پیشرفت پکیج لیزر (تعداد جلسات سپری شده):</span>
-            <span id="dossierProgressText" style="color: #38bdf8;">جلسه ۲ از ۸ (۲۵٪)</span>
+        <!-- Device + Course Progress -->
+        <div class="crm-course-panel">
+          <div class="crm-device-line">
+            <Icon name="lightning" size={17} class="title-gold-icon" />
+            <span class="crm-device-name">دستگاه فعال:</span>
+            <span class="crm-device-value">{DEVICE_LABEL}</span>
           </div>
-          <div style="width: 100%; height: 10px; background: rgba(255,255,255,0.06); border-radius: 6px; overflow: hidden;">
-            <div id="dossierProgressBar" style="width: 25%; height: 100%; background: linear-gradient(90deg, #38bdf8, #818cf8); border-radius: 6px; transition: width 0.3s;"></div>
+
+          <div class="crm-progress-head">
+            <span class="crm-progress-label">وضعیت پیشرفت پکیج لیزر (تعداد جلسات سپری شده):</span>
+            <span id="dossierProgressText" class="crm-progress-value">جلسه ۲ از ۸ (۲۵٪)</span>
+          </div>
+          <div class="crm-progress-track">
+            <div id="dossierProgressBar" class="crm-progress-fill"></div>
           </div>
         </div>
 
         <!-- Clinical records table -->
-        <h4 style="font-size: 0.95rem; font-weight: 800; color: #f5d77f; margin-bottom: 14px; display: flex; align-items: center; gap: 8px;">
-          <Icon name="document" size={16} />
+        <h4 class="crm-records-title">
+          <Icon name="document" size={16} class="title-gold-icon" />
           <span>تاریخچه جلسات، شات‌ها و دوز انرژی کندلا</span>
         </h4>
 
-        <div class="admin-table-container">
-          <table class="admin-table-3d">
+        <div class="admin-table-container crm-table-wrap">
+          <table class="admin-table-3d crm-table">
             <thead>
               <tr>
-                <th>جلسه</th>
-                <th>تاریخ جلسه</th>
-                <th>ناحیه تحت درمان</th>
-                <th>انرژی (J/cm²)</th>
-                <th>عرض پالس</th>
-                <th>شات‌ها</th>
-                <th>واکنش پوست</th>
-                <th>اپراتور</th>
+                <th><Icon name="clock" size={14} class="th-icon" />جلسه</th>
+                <th><Icon name="calendar" size={14} class="th-icon" />تاریخ جلسه</th>
+                <th><Icon name="pin" size={14} class="th-icon" />ناحیه تحت درمان</th>
+                <th><Icon name="lightning" size={14} class="th-icon" />انرژی (J/cm²)</th>
+                <th><Icon name="clock" size={14} class="th-icon" />عرض پالس</th>
+                <th><Icon name="target" size={14} class="th-icon" />شات‌ها</th>
+                <th><Icon name="eye" size={14} class="th-icon" />واکنش پوست</th>
+                <th><Icon name="users" size={14} class="th-icon" />اپراتور</th>
               </tr>
             </thead>
             <tbody id="clinicalRecordsTbody">
               {clinicalRecords.map((r) => (
                 <tr data-custid={r.customer_id}>
                   <td>
-                    <span class="badge-status-completed">جلسه {r.session_number} از {r.total_sessions}</span>
+                    <span class="crm-session-badge">جلسه {r.session_number} از {r.total_sessions}</span>
                   </td>
-                  <td>{formatJalaliDate(r.created_at)}</td>
-                  <td style="font-weight: 700; color: #f8fafc;">{r.treated_areas}</td>
-                  <td style="color: #fbbf24; font-weight: 700;">{r.joules_energy} J</td>
-                  <td>{r.pulse_width_ms} ms</td>
-                  <td style="font-family: monospace;">{r.shot_count}</td>
-                  <td style="font-size: 0.82rem; color: #34d399;">{r.skin_reaction}</td>
-                  <td style="font-size: 0.82rem; color: #cbd5e1;">{r.operator_name || 'اپراتور'}</td>
+                  <td class="crm-date-cell">{formatJalaliDate(r.created_at)}</td>
+                  <td class="crm-area-cell">{r.treated_areas}</td>
+                  <td>
+                    <span class="crm-joule-chip">{r.joules_energy} J</span>
+                  </td>
+                  <td>
+                    <span class="crm-pulse-chip">{r.pulse_width_ms} ms</span>
+                  </td>
+                  <td>
+                    <span class="crm-shot-chip">{(Number(r.shot_count) || 0).toLocaleString('fa-IR')}</span>
+                  </td>
+                  <td class="crm-reaction-cell">{r.skin_reaction}</td>
+                  <td class="crm-operator-cell">{r.operator_name || 'اپراتور'}</td>
                 </tr>
               ))}
               {clinicalRecords.length === 0 && (
                 <tr>
-                  <td colspan="8" style="text-align: center; color: #94a3b8; padding: 24px;">
-                    هنوز جلسه بالینی ثبت نشده است. از دکمه بالا برای ثبت اولین جلسه استفاده کنید.
+                  <td colspan="8" class="crm-empty-row">
+                    <span class="empty-icon-3d"><Icon name="doctor" size={34} /></span>
+                    <span>هنوز جلسه بالینی ثبت نشده است. از دکمه بالا برای ثبت اولین جلسه استفاده کنید.</span>
                   </td>
                 </tr>
               )}
@@ -198,60 +262,92 @@ try {
   <div id="newRecordModal" class="modal-3d-backdrop" style="display: none;">
     <div class="modal-3d-card" style="max-width: 620px;">
       <div class="modal-3d-header">
-        <h3 class="modal-3d-title" style="display: flex; align-items: center; gap: 8px;">
-          <Icon name="stethoscope" size={20} />
+        <h3 class="modal-3d-title">
+          <Icon name="doctor" size={20} class="title-gold-icon" />
           <span>ثبت جلسه درمانی و پارامترهای لیزر</span>
         </h3>
-        <button id="closeRecordModalBtn" class="modal-close-btn">&times;</button>
+        <button id="closeRecordModalBtn" class="modal-close-btn" aria-label="بستن">
+          <Icon name="close" size={18} />
+        </button>
       </div>
 
-      <form id="recordForm" style="display: flex; flex-direction: column; gap: 16px;">
+      <form id="recordForm" class="crm-form">
         <input type="hidden" id="recordCustId" value={customersList[0]?.id || ''} />
 
-        <div class="g-2" style="display: grid; gap: 14px">
-          <div>
-            <label class="form-label-modal">شماره جلسه:</label>
+        <div class="g-2 crm-form-row">
+          <div class="customers-field">
+            <label class="form-label-modal" for="recSessionNum">
+              <Icon name="clock" size={14} class="field-icon" />
+              <span>شماره جلسه:</span>
+            </label>
             <input type="number" id="recSessionNum" class="form-control-modal" value="1" min="1" max="15" required />
           </div>
-          <div>
-            <label class="form-label-modal">کل جلسات پکیج:</label>
+          <div class="customers-field">
+            <label class="form-label-modal" for="recTotalSessions">
+              <Icon name="calendar" size={14} class="field-icon" />
+              <span>کل جلسات پکیج:</span>
+            </label>
             <input type="number" id="recTotalSessions" class="form-control-modal" value="8" min="1" max="15" required />
           </div>
         </div>
 
-        <div>
-          <label class="form-label-modal">نواحی تحت درمان:</label>
+        <div class="customers-field">
+          <label class="form-label-modal" for="recAreas">
+            <Icon name="pin" size={14} class="field-icon" />
+            <span>نواحی تحت درمان:</span>
+          </label>
           <input type="text" id="recAreas" class="form-control-modal" value="فول بادی کاربردی (ساق، ساعد، زیربغل، بیکینی)" required />
         </div>
 
-        <div class="g-3" style="display: grid; gap: 12px">
-          <div>
-            <label class="form-label-modal">انرژی (J/cm²):</label>
-            <input type="number" id="recJoules" step="0.5" class="form-control-modal" value="14.0" required />
+        <div class="crm-dose-grid">
+          <div class="customers-field">
+            <label class="form-label-modal" for="recJoules">
+              <Icon name="lightning" size={14} class="field-icon" />
+              <span>انرژی (J/cm²):</span>
+            </label>
+            <input type="number" id="recJoules" step="0.5" class="form-control-modal crm-dose-input" value="14.0" required />
           </div>
-          <div>
-            <label class="form-label-modal">عرض پالس (ms):</label>
-            <input type="number" id="recPulse" step="0.5" class="form-control-modal" value="3.0" required />
+          <div class="customers-field">
+            <label class="form-label-modal" for="recPulse">
+              <Icon name="clock" size={14} class="field-icon" />
+              <span>عرض پالس (ms):</span>
+            </label>
+            <input type="number" id="recPulse" step="0.5" class="form-control-modal crm-dose-input" value="3.0" required />
           </div>
-          <div>
-            <label class="form-label-modal">تعداد شات:</label>
-            <input type="number" id="recShots" class="form-control-modal" value="550" required />
+          <div class="customers-field">
+            <label class="form-label-modal" for="recShots">
+              <Icon name="target" size={14} class="field-icon" />
+              <span>تعداد شات:</span>
+            </label>
+            <input type="number" id="recShots" class="form-control-modal crm-dose-input" value="550" required />
           </div>
         </div>
 
-        <div>
-          <label class="form-label-modal">واکنش پوست مراجع:</label>
+        <div class="customers-field">
+          <label class="form-label-modal" for="recReaction">
+            <Icon name="eye" size={14} class="field-icon" />
+            <span>واکنش پوست مراجع:</span>
+          </label>
           <input type="text" id="recReaction" class="form-control-modal" value="اریتم خفیف طبیعی، بدون سوختگی، کمپرس سرد اعمال شد" />
         </div>
 
-        <div>
-          <label class="form-label-modal">اپراتور / پزشک ناظر:</label>
+        <div class="customers-field">
+          <label class="form-label-modal" for="recOperator">
+            <Icon name="users" size={14} class="field-icon" />
+            <span>اپراتور / پزشک ناظر:</span>
+          </label>
           <input type="text" id="recOperator" class="form-control-modal" value="خانم دکتر افشار / اپراتور ارشد" />
         </div>
 
-        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
-          <button type="button" id="cancelRecordBtn" class="btn-3d-secondary">انصراف</button>
-          <button type="submit" id="saveRecordSubmitBtn" class="btn-3d-accept">ثبت دائم در پرونده بالینی</button>
+        <div class="crm-form-actions">
+          <button type="button" id="cancelRecordBtn" class="btn-3d-secondary">
+            <Icon name="close" size={16} />
+            <span>انصراف</span>
+          </button>
+          <button type="submit" id="saveRecordSubmitBtn" class="btn-3d-gold">
+            <Icon name="check" size={17} />
+            <span>ثبت دائم در پرونده بالینی</span>
+          </button>
         </div>
       </form>
     </div>

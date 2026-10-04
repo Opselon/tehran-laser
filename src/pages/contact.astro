@@ -1,54 +1,40 @@
 ---
 import PublicLayout from '../layouts/PublicLayout.astro';
 import Icon from '../components/ui/Icon.astro';
+import { createBreadcrumbSchema } from '../lib/seo';
 
-const clinicJsonLd = {
+// ContactPage entity + breadcrumbs. The clinic node itself is emitted once by
+// the layout (canonical @id https://tehranlaser.ir/#clinic), so we only link to it.
+const contactJsonLd = {
   '@context': 'https://schema.org',
-  '@type': 'MedicalClinic',
-  name: 'کلینیک تخصصی تهران لیزر',
-  alternateName: 'Tehran Laser Clinic',
+  '@type': ['ContactPage', 'MedicalWebPage'],
+  '@id': 'https://tehranlaser.ir/contact#contact',
   url: 'https://tehranlaser.ir/contact',
-  telephone: '+989035555090',
-  priceRange: 'IRR',
-  image: 'https://tehranlaser.ir/images/og-share.jpg',
-  address: {
-    '@type': 'PostalAddress',
-    streetAddress: 'خیابان پایدارفرد، نبش بوستان هفتم',
-    addressLocality: 'تهران',
-    addressRegion: 'پاسداران',
-    postalCode: '1666612345',
-    addressCountry: 'IR',
-  },
-  geo: {
-    '@type': 'GeoCoordinates',
-    latitude: 35.7645,
-    longitude: 51.4628,
-  },
-  openingHoursSpecification: [
-    {
-      '@type': 'OpeningHoursSpecification',
-      dayOfWeek: ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday'],
-      opens: '09:00',
-      closes: '20:00',
-    },
-    {
-      '@type': 'OpeningHoursSpecification',
-      dayOfWeek: 'Thursday',
-      opens: '09:00',
-      closes: '18:00',
-    },
-  ],
-  sameAs: [
-    'https://t.me/tehranlaser_clinic',
-    'https://instagram.com/tehranlaser',
-  ],
+  name: 'تماس و آدرس کلینیک تهران لیزر پاسداران',
+  description:
+    'راه‌های ارتباطی، آدرس دقیق در پاسداران خیابان پایدارفرد، شماره تماس مستقیم پذیرش، مشاوره فوری در واتساپ و لوکیشن مسیریابی.',
+  inLanguage: 'fa-IR',
+  mainEntity: { '@id': 'https://tehranlaser.ir/#clinic' },
+  isPartOf: { '@id': 'https://tehranlaser.ir/#website' },
 };
+
+const breadcrumbJsonLd = createBreadcrumbSchema([
+  { name: 'صفحه اصلی', url: '/' },
+  { name: 'تماس و آدرس', url: '/contact' },
+]);
 ---
 
 <PublicLayout
   title="تماس و آدرس کلینیک تهران لیزر — پاسداران، خیابان پایدارفرد"
   description="راه‌های ارتباطی، آدرس دقیق در پاسداران خیابان پایدارفرد، شماره تماس مستقیم پذیرش، مشاوره فوری در واتساپ و لوکیشن مسیریابی کلینیک تهران لیزر."
-  jsonLd={clinicJsonLd}
+  canonicalUrl="/contact"
+  keywords={[
+    'تماس کلینیک تهران لیزر',
+    'آدرس لیزر پاسداران',
+    'شماره تلفن لیزر پایدارفرد',
+    'واتساپ کلینیک لیزر تهران',
+  ]}
+  jsonLd={[contactJsonLd, breadcrumbJsonLd]}
   theme="dark"
 >
   <div class="contact-page-wrapper">

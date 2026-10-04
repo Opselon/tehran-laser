@@ -2,6 +2,7 @@
 import AdminLayout from '../../../layouts/AdminLayout.astro';
 import { env } from 'cloudflare:workers';
 import { listAdminServices } from '../../../server/repositories';
+import Icon from '../../../components/ui/Icon.astro';
 
 let services: Awaited<ReturnType<typeof listAdminServices>> = [];
 try {
@@ -9,94 +10,400 @@ try {
 } catch (e) {
   console.error('Failed to load admin services:', e);
 }
+
+interface CategoryMeta {
+  key: string;
+  label: string;
+  icon: string;
+  color: string;
+  bg: string;
+  border: string;
+}
+
+function getServiceCategory(slug: string, name: string): CategoryMeta {
+  const s = slug.toLowerCase();
+  const n = name.toLowerCase();
+  if (s.includes('body') || n.includes('بدن') || s.includes('package') || n.includes('پکیج')) {
+    return {
+      key: 'package',
+      label: 'پکیج طلایی',
+      icon: 'gem',
+      color: '#f5d77f',
+      bg: 'rgba(212, 175, 55, 0.15)',
+      border: 'rgba(212, 175, 55, 0.4)',
+    };
+  }
+  if (
+    s.includes('face') ||
+    s.includes('lip') ||
+    s.includes('chin') ||
+    s.includes('neck') ||
+    n.includes('صورت') ||
+    n.includes('لب') ||
+    n.includes('چانه') ||
+    n.includes('گردن')
+  ) {
+    return {
+      key: 'face',
+      label: 'صورت و گردن',
+      icon: 'sparkles',
+      color: '#f472b6',
+      bg: 'rgba(244, 114, 182, 0.12)',
+      border: 'rgba(244, 114, 182, 0.35)',
+    };
+  }
+  if (
+    s.includes('arm') ||
+    s.includes('forearm') ||
+    s.includes('underarm') ||
+    n.includes('دست') ||
+    n.includes('بازو') ||
+    n.includes('ساعد') ||
+    n.includes('زیر بغل') ||
+    n.includes('زیربغل')
+  ) {
+    return {
+      key: 'arms',
+      label: 'دست و بازو',
+      icon: 'services',
+      color: '#38bdf8',
+      bg: 'rgba(56, 189, 248, 0.12)',
+      border: 'rgba(56, 189, 248, 0.35)',
+    };
+  }
+  if (
+    s.includes('chest') ||
+    s.includes('abdomen') ||
+    s.includes('navel') ||
+    s.includes('back') ||
+    n.includes('سینه') ||
+    n.includes('شکم') ||
+    n.includes('ناف') ||
+    n.includes('کمر') ||
+    n.includes('پشت')
+  ) {
+    return {
+      key: 'torso',
+      label: 'تنه و بالاتنه',
+      icon: 'shield',
+      color: '#c084fc',
+      bg: 'rgba(192, 132, 252, 0.12)',
+      border: 'rgba(192, 132, 252, 0.35)',
+    };
+  }
+  if (
+    s.includes('leg') ||
+    s.includes('thigh') ||
+    s.includes('bikini') ||
+    s.includes('buttock') ||
+    s.includes('gluteal') ||
+    n.includes('پا') ||
+    n.includes('ران') ||
+    n.includes('ساق') ||
+    n.includes('بیکینی') ||
+    n.includes('باسن')
+  ) {
+    return {
+      key: 'legs',
+      label: 'پا و نواحی خاص',
+      icon: 'tag',
+      color: '#34d399',
+      bg: 'rgba(52, 211, 153, 0.12)',
+      border: 'rgba(52, 211, 153, 0.35)',
+    };
+  }
+  return {
+    key: 'other',
+    label: 'سایر خدمات',
+    icon: 'gem',
+    color: '#94a3b8',
+    bg: 'rgba(148, 163, 184, 0.12)',
+    border: 'rgba(148, 163, 184, 0.35)',
+  };
+}
+
+const activeCount = services.filter((s) => s.active).length;
+const inactiveCount = services.length - activeCount;
+const maxDisplayOrder = services.reduce((max, s) => Math.max(max, s.displayOrder || 0), 0);
+const nextDisplayOrder = maxDisplayOrder + 1;
+
+interface CategoryCounters {
+  all: number;
+  face: number;
+  arms: number;
+  torso: number;
+  legs: number;
+  package: number;
+  other: number;
+}
+
+const categoryCounts: CategoryCounters = {
+  all: services.length,
+  face: 0,
+  arms: 0,
+  torso: 0,
+  legs: 0,
+  package: 0,
+  other: 0,
+};
+
+for (const s of services) {
+  const cat = getServiceCategory(s.slug, s.name);
+  const key = cat.key as keyof CategoryCounters;
+  categoryCounts[key] = (categoryCounts[key] || 0) + 1;
+}
 ---
 
 <AdminLayout title="خدمات و تعرفه‌ها" activeNav="services">
-  <div class="admin-content-pad">
+  <div class="admin-content-pad services-page-container">
     <!-- 3D Header Row -->
-    <div class="dashboard-header-row">
-      <div>
-        <h1 class="admin-page-title">کاتالوگ خدمات و تعرفه‌های مصوب کلینیک</h1>
+    <div class="dashboard-header-row services-header-3d">
+      <div class="services-header-info">
+        <div class="services-title-wrapper">
+          <span class="services-icon-box">
+            <Icon name="services" size={24} />
+          </span>
+          <h1 class="admin-page-title">کاتالوگ خدمات و تعرفه‌های مصوب کلینیک</h1>
+        </div>
         <p class="section-block-sub">
-          مدیریت نواحی تحت پوشش لیزر، ویرایش زمان جلسات و به‌روزرسانی قیمت‌ها (کاملاً API First)
+          مدیریت نواحی تحت پوشش لیزر، ویرایش زمان جلسات و به‌روزرسانی تعرفه مصوب بانوان و آقایان (کاملاً API First)
         </p>
       </div>
-      <div class="actions">
-        <span style="font-size: 0.88rem; color: #f5d77f; background: rgba(212, 175, 55, 0.15); border: 1px solid rgba(212, 175, 55, 0.35); padding: 8px 16px; border-radius: 12px;">
-          تعداد خدمات فعال: {services.filter(s => s.active).length.toLocaleString('fa-IR')} از {services.length.toLocaleString('fa-IR')}
-        </span>
+
+      <div class="services-header-actions">
+        <div class="stats-pills-row">
+          <span class="stat-pill stat-pill--active" title="تعداد خدمات فعال در وب‌سایت">
+            <Icon name="checkCircle" size={14} />
+            <span>فعال: {activeCount.toLocaleString('fa-IR')}</span>
+          </span>
+          <span class="stat-pill stat-pill--inactive" title="تعداد خدمات غیرفعال">
+            <Icon name="eye" size={14} />
+            <span>غیرفعال: {inactiveCount.toLocaleString('fa-IR')}</span>
+          </span>
+          <span class="stat-pill stat-pill--total" title="کل خدمات ثبت شده در سامانه">
+            <Icon name="list" size={14} />
+            <span>مجموع: {services.length.toLocaleString('fa-IR')}</span>
+          </span>
+        </div>
+
+        <button type="button" id="openNewServiceBtn" class="btn-3d-gold add-service-btn">
+          <Icon name="plus" size={16} />
+          <span>افزودن خدمت جدید</span>
+        </button>
       </div>
     </div>
 
-    <!-- 3D Services Table -->
-    <div class="admin-section-block" style="padding: 0; overflow: hidden;">
-      <div class="today-table-wrapper" style="border: none; border-radius: 0;">
-        <table class="admin-table">
+    <!-- 3D Filter & Search Toolbar -->
+    <div class="admin-section-block services-toolbar-block">
+      <div class="services-toolbar-top">
+        <div class="services-search-col">
+          <div class="search-input-wrap">
+            <span class="search-icon">
+              <Icon name="search" size={16} />
+            </span>
+            <input
+              type="text"
+              id="serviceSearchInput"
+              class="form-control-modal search-input-field"
+              placeholder="جستجوی سریع با نام خدمت یا شناسه (مثال: صورت، arms، زیر بغل)..."
+            />
+            <button type="button" id="clearSearchBtn" class="clear-search-btn" style="display: none;" title="پاک کردن جستجو">
+              <Icon name="close" size={14} />
+            </button>
+          </div>
+        </div>
+
+        <div class="services-status-filter-col">
+          <select id="statusFilterSelect" class="form-control-modal status-filter-select">
+            <option value="all">همه وضعیت‌ها (فعال و غیرفعال)</option>
+            <option value="active">فقط خدمات فعال (منتشر شده)</option>
+            <option value="inactive">فقط خدمات غیرفعال (مخفی)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Category Filter Pills -->
+      <div class="services-categories-bar">
+        <div class="category-tabs-scroll">
+          <button type="button" class="category-tab-btn active" data-category="all">
+            <Icon name="list" size={14} />
+            <span>همه ({categoryCounts.all.toLocaleString('fa-IR')})</span>
+          </button>
+          <button type="button" class="category-tab-btn" data-category="face">
+            <Icon name="sparkles" size={14} />
+            <span>صورت و گردن ({categoryCounts.face.toLocaleString('fa-IR')})</span>
+          </button>
+          <button type="button" class="category-tab-btn" data-category="arms">
+            <Icon name="services" size={14} />
+            <span>دست و بازو ({categoryCounts.arms.toLocaleString('fa-IR')})</span>
+          </button>
+          <button type="button" class="category-tab-btn" data-category="torso">
+            <Icon name="shield" size={14} />
+            <span>تنه و بالاتنه ({categoryCounts.torso.toLocaleString('fa-IR')})</span>
+          </button>
+          <button type="button" class="category-tab-btn" data-category="legs">
+            <Icon name="tag" size={14} />
+            <span>پا و نواحی خاص ({categoryCounts.legs.toLocaleString('fa-IR')})</span>
+          </button>
+          <button type="button" class="category-tab-btn" data-category="package">
+            <Icon name="gem" size={14} />
+            <span>پکیج طلایی ({categoryCounts.package.toLocaleString('fa-IR')})</span>
+          </button>
+        </div>
+
+        <div class="services-counter-indicator" id="servicesCounterIndicator">
+          نمایش {services.length.toLocaleString('fa-IR')} خدمت
+        </div>
+      </div>
+    </div>
+
+    <!-- 3D Services Management Table (Desktop View) -->
+    <div class="admin-section-block services-table-section desktop-only-table" style="padding: 0; overflow: hidden;">
+      <div class="today-table-wrapper services-table-wrapper" style="border: none; border-radius: 0;">
+        <table class="admin-table services-3d-table" id="servicesTable">
           <thead>
             <tr>
-              <th style="width: 60px;">ترتیب</th>
-              <th>نام خدمت / ناحیه</th>
+              <th style="width: 50px; text-align: center;">ترتیب</th>
+              <th>نام خدمت و دسته‌بندی</th>
               <th>شناسه یکتا (Slug)</th>
-              <th>مدت زمان</th>
+              <th>مدت جلسه</th>
               <th>تعرفه مصوب بانوان</th>
-              <th>وضعیت در وب‌سایت</th>
-              <th>عملیات ویرایش</th>
+              <th>تعرفه مصوب آقایان</th>
+              <th style="text-align: center;">وضعیت سایت</th>
+              <th style="text-align: center;">عملیات</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody id="servicesTableBody">
             {services.map((s) => {
               const femalePrice = s.prices.find((p) => p.pricingCategory === 'female');
-              const priceAmount = femalePrice ? femalePrice.amount : 0;
+              const malePrice = s.prices.find((p) => p.pricingCategory === 'male');
+              const femalePriceAmount = femalePrice ? femalePrice.amount : 0;
+              const malePriceAmount = malePrice ? malePrice.amount : 0;
               const isPromo = s.slug === 'full-body';
+              const cat = getServiceCategory(s.slug, s.name);
 
               return (
-                <tr>
-                  <td style={{ textAlign: 'center', color: '#94a3b8' }}>{s.displayOrder}</td>
-                  <td style={{ fontWeight: 800, color: '#ffffff' }}>{s.name}</td>
+                <tr
+                  class="service-row"
+                  data-id={s.id}
+                  data-name={s.name.toLowerCase()}
+                  data-slug={s.slug.toLowerCase()}
+                  data-category={cat.key}
+                  data-active={s.active ? 'true' : 'false'}
+                >
+                  <td style={{ textAlign: 'center' }}>
+                    <span class="order-pill-badge">{s.displayOrder}</span>
+                  </td>
+                  <td>
+                    <div class="service-name-cell">
+                      <div class="service-title-text">{s.name}</div>
+                      <div class="service-category-badge" style={`color: ${cat.color}; background: ${cat.bg}; border: 1px solid ${cat.border};`}>
+                        <Icon name={cat.icon} size={11} />
+                        <span>{cat.label}</span>
+                      </div>
+                      {s.shortDescription && (
+                        <div class="service-short-desc">{s.shortDescription}</div>
+                      )}
+                    </div>
+                  </td>
                   <td dir="ltr" style={{ fontFamily: 'monospace', color: '#f5d77f', fontSize: '0.85rem' }}>
-                    {s.slug}
+                    <span class="slug-tag">{s.slug}</span>
                   </td>
                   <td>
-                    <span style={{ color: '#38bdf8', fontWeight: 600 }}>⏱ {s.durationMinutes} دقیقه</span>
-                  </td>
-                  <td>
-                    {femalePrice ? (
-                      isPromo ? (
-                        <div>
-                          <span style={{ textDecoration: 'line-through', color: '#94a3b8', fontSize: '0.8rem', marginLeft: '6px' }}>
-                            ۲٬۲۹۰٬۰۰۰
-                          </span>
-                          <span style={{ color: '#34d399', fontWeight: 800 }}>
-                            ۱٬۹۴۰٬۰۰۰ تومان
-                          </span>
-                        </div>
-                      ) : (
-                        <span style={{ fontWeight: 800, color: '#f5d77f' }}>
-                          {(femalePrice.amount * 1000).toLocaleString('fa-IR')} تومان
-                        </span>
-                      )
-                    ) : (
-                      <span style={{ color: '#94a3b8' }}>استعلام تلفنی</span>
-                    )}
-                  </td>
-                  <td>
-                    <span class={`badge-status ${s.active ? 'badge-status-confirmed' : 'badge-status-rejected'}`}>
-                      {s.active ? 'فعال' : 'غیرفعال'}
+                    <span class="duration-badge">
+                      <Icon name="clock" size={13} />
+                      <span>{s.durationMinutes} دقیقه</span>
                     </span>
                   </td>
                   <td>
+                    <div class="tariff-cell-wrap">
+                      {femalePrice ? (
+                        isPromo ? (
+                          <div class="promo-price-block">
+                            <span class="promo-old-price">
+                              ۲٬۲۹۰٬۰۰۰
+                            </span>
+                            <span class="promo-new-price">
+                              ۱٬۹۴۰٬۰۰۰ تومان
+                            </span>
+                            <span class="promo-tag">ویژه سایت</span>
+                          </div>
+                        ) : (
+                          <span class="price-badge-female">
+                            {(femalePrice.amount * 1000).toLocaleString('fa-IR')} تومان
+                          </span>
+                        )
+                      ) : (
+                        <span class="price-badge-unset">
+                          <Icon name="info" size={11} />
+                          <span>استعلام تلفنی</span>
+                        </span>
+                      )}
+                      <button
+                        type="button"
+                        class="btn-quick-edit js-quick-edit-price"
+                        title="ویرایش سریع تعرفه بانوان"
+                        data-id={s.id}
+                        data-target="female"
+                      >
+                        <Icon name="edit" size={11} />
+                      </button>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="tariff-cell-wrap">
+                      {malePrice && malePrice.amount > 0 ? (
+                        <span class="price-badge-male">
+                          {(malePrice.amount * 1000).toLocaleString('fa-IR')} تومان
+                        </span>
+                      ) : (
+                        <span class="price-badge-unset">
+                          <Icon name="info" size={11} />
+                          <span>استعلام تلفنی</span>
+                        </span>
+                      )}
+                      <button
+                        type="button"
+                        class="btn-quick-edit js-quick-edit-price"
+                        title="ویرایش سریع تعرفه آقایان"
+                        data-id={s.id}
+                        data-target="male"
+                      >
+                        <Icon name="edit" size={11} />
+                      </button>
+                    </div>
+                  </td>
+                  <td style={{ textAlign: 'center' }}>
+                    <button
+                      type="button"
+                      class="switch-3d js-toggle-active"
+                      data-id={s.id}
+                      data-active={s.active ? 'true' : 'false'}
+                      data-name={s.name}
+                      title={s.active ? 'کلیک جهت غیرفعال کردن خدمت' : 'کلیک جهت فعال کردن خدمت'}
+                    >
+                      <span class={`switch-3d-track ${s.active ? 'active' : ''}`}>
+                        <span class="switch-3d-thumb"></span>
+                      </span>
+                      <span class="switch-3d-label">{s.active ? 'فعال' : 'غیرفعال'}</span>
+                    </button>
+                  </td>
+                  <td style={{ textAlign: 'center' }}>
                     <button
                       type="button"
                       class="btn-table-action edit-service-btn"
-                      style="border-color: rgba(212, 175, 55, 0.45); color: #f5d77f;"
                       data-id={s.id}
                       data-name={s.name}
                       data-slug={s.slug}
                       data-duration={s.durationMinutes}
                       data-active={s.active ? 'true' : 'false'}
-                      data-price={priceAmount}
+                      data-order={s.displayOrder}
+                      data-shortdesc={s.shortDescription || ''}
+                      data-price-female={femalePriceAmount}
+                      data-price-male={malePriceAmount}
                     >
-                      ✏️ ویرایش خدمت و قیمت
+                      <Icon name="edit" size={13} />
+                      <span>ویرایش خدمت</span>
                     </button>
                   </td>
                 </tr>
@@ -104,182 +411,1871 @@ try {
             })}
           </tbody>
         </table>
+
+        <!-- Empty state row -->
+        <div id="noResultsDesktop" class="empty-results-box" style="display: none;">
+          <Icon name="search" size={28} />
+          <p>هیچ خدمتی مطابق با جستجو یا فیلتر دسته‌بندی انتخاب‌شده یافت نشد.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3D Mobile Cards View (< 768px, specifically 320px & 390px) -->
+    <div class="services-cards-mobile" id="servicesMobileList">
+      {services.map((s) => {
+        const femalePrice = s.prices.find((p) => p.pricingCategory === 'female');
+        const malePrice = s.prices.find((p) => p.pricingCategory === 'male');
+        const femalePriceAmount = femalePrice ? femalePrice.amount : 0;
+        const malePriceAmount = malePrice ? malePrice.amount : 0;
+        const isPromo = s.slug === 'full-body';
+        const cat = getServiceCategory(s.slug, s.name);
+
+        return (
+          <div
+            class="service-card-mobile service-row"
+            data-id={s.id}
+            data-name={s.name.toLowerCase()}
+            data-slug={s.slug.toLowerCase()}
+            data-category={cat.key}
+            data-active={s.active ? 'true' : 'false'}
+          >
+            <div class="card-mobile-top">
+              <div class="card-mobile-title-col">
+                <span class="order-pill-badge">{s.displayOrder}</span>
+                <span class="card-service-title">{s.name}</span>
+                <span class="service-category-badge" style={`color: ${cat.color}; background: ${cat.bg}; border: 1px solid ${cat.border};`}>
+                  <Icon name={cat.icon} size={11} />
+                  <span>{cat.label}</span>
+                </span>
+              </div>
+              <div class="card-mobile-switch-col">
+                <button
+                  type="button"
+                  class="switch-3d js-toggle-active"
+                  data-id={s.id}
+                  data-active={s.active ? 'true' : 'false'}
+                  data-name={s.name}
+                  title={s.active ? 'کلیک جهت غیرفعال کردن' : 'کلیک جهت فعال کردن'}
+                >
+                  <span class={`switch-3d-track ${s.active ? 'active' : ''}`}>
+                    <span class="switch-3d-thumb"></span>
+                  </span>
+                  <span class="switch-3d-label">{s.active ? 'فعال' : 'غیرفعال'}</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="card-mobile-meta">
+              <span class="slug-tag" dir="ltr">{s.slug}</span>
+              <span class="duration-badge">
+                <Icon name="clock" size={12} />
+                <span>{s.durationMinutes} دقیقه</span>
+              </span>
+            </div>
+
+            {s.shortDescription && (
+              <div class="card-mobile-desc">{s.shortDescription}</div>
+            )}
+
+            <div class="card-mobile-tariffs">
+              <div class="tariff-box-mobile">
+                <span class="tariff-box-label">تعرفه مصوب بانوان:</span>
+                <div class="tariff-box-val">
+                  {femalePrice ? (
+                    isPromo ? (
+                      <span class="promo-new-price" style="font-size: 0.86rem;">
+                        ۱٬۹۴۰٬۰۰۰ تومان (تخفیف سایت)
+                      </span>
+                    ) : (
+                      <span class="price-badge-female">
+                        {(femalePrice.amount * 1000).toLocaleString('fa-IR')} تومان
+                      </span>
+                    )
+                  ) : (
+                    <span class="price-badge-unset">استعلام تلفنی</span>
+                  )}
+                </div>
+              </div>
+
+              <div class="tariff-box-mobile">
+                <span class="tariff-box-label">تعرفه مصوب آقایان:</span>
+                <div class="tariff-box-val">
+                  {malePrice && malePrice.amount > 0 ? (
+                    <span class="price-badge-male">
+                      {(malePrice.amount * 1000).toLocaleString('fa-IR')} تومان
+                    </span>
+                  ) : (
+                    <span class="price-badge-unset">استعلام تلفنی</span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div class="card-mobile-actions">
+              <button
+                type="button"
+                class="btn-table-action edit-service-btn btn-mobile-edit"
+                data-id={s.id}
+                data-name={s.name}
+                data-slug={s.slug}
+                data-duration={s.durationMinutes}
+                data-active={s.active ? 'true' : 'false'}
+                data-order={s.displayOrder}
+                data-shortdesc={s.shortDescription || ''}
+                data-price-female={femalePriceAmount}
+                data-price-male={malePriceAmount}
+              >
+                <Icon name="edit" size={14} />
+                <span>ویرایش مشخصات و تعرفه خدمت</span>
+              </button>
+            </div>
+          </div>
+        );
+      })}
+
+      <div id="noResultsMobile" class="empty-results-box" style="display: none;">
+        <Icon name="search" size={28} />
+        <p>هیچ خدمتی مطابق با جستجو یا فیلتر دسته‌بندی انتخاب‌شده یافت نشد.</p>
       </div>
     </div>
 
     <!-- 3D Edit Service Modal -->
-    <div id="serviceEditModal" class="modal-backdrop" style="display: none;">
-      <div class="modal-dialog">
-        <h3 class="modal-title">✏️ ویرایش خدمت و تعرفه مصوب</h3>
-        <p style="color: rgba(226, 232, 240, 0.7); font-size: 0.86rem; margin: 0 0 18px;">
-          تغییر نام، زمان تخصیصی جلسه و قیمت خدمت مستقیماً در دیتابیس D1 ذخیره می‌شود.
+    <div id="serviceEditModal" class="modal-backdrop services-modal-backdrop" style="display: none;">
+      <div class="modal-dialog services-modal-dialog">
+        <div class="modal-header-row">
+          <div class="modal-title-wrap">
+            <span class="modal-title-icon-gold">
+              <Icon name="edit" size={20} />
+            </span>
+            <h3 class="modal-title">ویرایش خدمت و تعرفه مصوب</h3>
+          </div>
+          <button type="button" id="closeEditModalX" class="modal-close-icon-btn" title="بستن">
+            <Icon name="close" size={16} />
+          </button>
+        </div>
+
+        <p class="modal-subtitle-text">
+          تغییر نام ناحیه، زمان تخصیصی جلسه و قیمت مصوب بانوان و آقایان مستقیماً در دیتابیس D1 ذخیره می‌شود.
         </p>
 
-        <div id="serviceAlert" class="alert-3d-danger" style="display: none; margin-bottom: 16px;">
+        <div id="serviceAlert" class="alert-3d-danger" style="display: none;">
+          <Icon name="warning" size={16} />
           <span id="serviceAlertText"></span>
         </div>
 
-        <form id="editServiceForm">
+        <form id="editServiceForm" class="services-modal-form">
           <input type="hidden" id="editServiceId" />
 
-          <div style="margin-bottom: 14px;">
-            <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #e2e8f0; margin-bottom: 6px;">
-              نام ناحیه / خدمت:
-            </label>
-            <input
-              type="text"
-              id="editServiceName"
-              class="form-control-modal"
-              required
-            />
+          <div class="form-grid-2col">
+            <div class="form-group-item">
+              <label for="editServiceName" class="form-label-gold">نام ناحیه / خدمت (فارسی):</label>
+              <input
+                type="text"
+                id="editServiceName"
+                class="form-control-modal"
+                required
+                minlength="2"
+                maxlength="80"
+              />
+            </div>
+
+            <div class="form-group-item">
+              <label for="editServiceSlug" class="form-label-gold">شناسه یکتا (Slug):</label>
+              <input
+                type="text"
+                id="editServiceSlug"
+                class="form-control-modal slug-input"
+                dir="ltr"
+                required
+                pattern="^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                title="حروف کوچک انگلیسی و خط تیره (-) بدون فاصله"
+              />
+            </div>
           </div>
 
-          <div class="g-2" style="display: grid; gap: 14px; margin-bottom: 14px">
-            <div>
-              <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #e2e8f0; margin-bottom: 6px;">
-                مدت زمان جلسه (دقیقه):
+          <div class="form-grid-2col">
+            <div class="form-group-item">
+              <label for="editServiceDuration" class="form-label-gold">
+                <span class="label-with-icon">
+                  <Icon name="clock" size={13} />
+                  <span>مدت زمان جلسه (دقیقه):</span>
+                </span>
               </label>
               <input
                 type="number"
                 id="editServiceDuration"
                 class="form-control-modal"
                 min="5"
-                max="180"
+                max="600"
                 required
               />
             </div>
 
-            <div>
-              <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #e2e8f0; margin-bottom: 6px;">
-                وضعیت انتشار:
-              </label>
-              <select id="editServiceActive" class="form-control-modal">
-                <option value="true">فعال (قابل رزرو)</option>
-                <option value="false">غیرفعال (مخفی)</option>
-              </select>
+            <div class="form-group-item">
+              <label for="editServiceOrder" class="form-label-gold">ترتیب نمایش در کاتالوگ:</label>
+              <input
+                type="number"
+                id="editServiceOrder"
+                class="form-control-modal"
+                min="0"
+                max="9999"
+                required
+              />
             </div>
           </div>
 
-          <div style="margin-bottom: 18px;">
-            <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #e2e8f0; margin-bottom: 6px;">
-              تعرفه مصوب بانوان (هزار تومان - ضرب در ۱۰۰۰):
-            </label>
-            <input
-              type="number"
-              id="editServicePrice"
-              class="form-control-modal"
-              placeholder="مثال: ۳۲۰ برای ۳۲۰٬۰۰۰ تومان"
-              min="0"
-            />
-            <span style="display: block; font-size: 0.78rem; color: #94a3b8; margin-top: 4px;">
-              توجه: عدد بر حسب هزار تومان است (مثال: عدد ۲۵۰ معادل ۲۵۰٬۰۰۰ تومان محاسبه می‌شود).
-            </span>
+          <div class="form-grid-2col">
+            <div class="form-group-item">
+              <label for="editServiceActive" class="form-label-gold">وضعیت انتشار در وب‌سایت:</label>
+              <select id="editServiceActive" class="form-control-modal">
+                <option value="true">فعال (قابل مشاهده و رزرو در سایت)</option>
+                <option value="false">غیرفعال (مخفی از فرم رزرو و تعرفه‌ها)</option>
+              </select>
+            </div>
+
+            <div class="form-group-item">
+              <label for="editServiceShortDesc" class="form-label-gold">توضیح مختصر خدمت (اختیاری):</label>
+              <input
+                type="text"
+                id="editServiceShortDesc"
+                class="form-control-modal"
+                placeholder="مثال: شامل مچ تا شانه با شات نامحدود"
+                maxlength="200"
+              />
+            </div>
+          </div>
+
+          <!-- Dual Tariffs 3D Card -->
+          <div class="modal-tariffs-panel">
+            <div class="tariffs-panel-header">
+              <span class="tariffs-header-icon">
+                <Icon name="tag" size={14} />
+              </span>
+              <span class="tariffs-header-title">نرخ‌گذاری تعرفه‌های مصوب (واحد: هزار تومان)</span>
+            </div>
+
+            <div class="form-grid-2col">
+              <div class="form-group-item">
+                <label for="editServicePriceFemale" class="form-label-gold">تعرفه مصوب بانوان:</label>
+                <div class="input-with-hint">
+                  <input
+                    type="number"
+                    id="editServicePriceFemale"
+                    class="form-control-modal price-input"
+                    placeholder="مثال: ۳۲۰"
+                    min="0"
+                    step="5"
+                  />
+                  <div class="toman-live-preview" id="editFemaleTomanPreview">
+                    معادل: استعلام تلفنی
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group-item">
+                <label for="editServicePriceMale" class="form-label-gold">تعرفه مصوب آقایان:</label>
+                <div class="input-with-hint">
+                  <input
+                    type="number"
+                    id="editServicePriceMale"
+                    class="form-control-modal price-input"
+                    placeholder="مثال: ۴۰۰"
+                    min="0"
+                    step="5"
+                  />
+                  <div class="toman-live-preview" id="editMaleTomanPreview">
+                    معادل: استعلام تلفنی
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div class="modal-actions-row">
-            <button type="button" id="cancelServiceBtn" class="btn-table-action">
-              انصراف
+            <button type="button" id="cancelServiceBtn" class="btn-table-action btn-modal-cancel">
+              <Icon name="close" size={14} />
+              <span>انصراف</span>
             </button>
-            <button type="submit" id="saveServiceBtn" class="btn-3d-accept" style="flex: none; padding: 12px 24px;">
-              ✓ ذخیره تغییرات خدمت
+            <button type="submit" id="saveServiceBtn" class="btn-3d-accept btn-modal-save">
+              <Icon name="check" size={16} />
+              <span>ذخیره تغییرات خدمت و تعرفه</span>
             </button>
           </div>
         </form>
       </div>
     </div>
+
+    <!-- 3D New Service Modal -->
+    <div id="newServiceModal" class="modal-backdrop services-modal-backdrop" style="display: none;">
+      <div class="modal-dialog services-modal-dialog">
+        <div class="modal-header-row">
+          <div class="modal-title-wrap">
+            <span class="modal-title-icon-gold">
+              <Icon name="plus" size={20} />
+            </span>
+            <h3 class="modal-title">افزودن خدمت جدید به کاتالوگ</h3>
+          </div>
+          <button type="button" id="closeNewModalX" class="modal-close-icon-btn" title="بستن">
+            <Icon name="close" size={16} />
+          </button>
+        </div>
+
+        <p class="modal-subtitle-text">
+          تعریف ناحیه جدید لیزر، تنظیم مدت جلسه و نرخ‌گذاری همزمان تعرفه مصوب بانوان و آقایان.
+        </p>
+
+        <div id="newServiceAlert" class="alert-3d-danger" style="display: none;">
+          <Icon name="warning" size={16} />
+          <span id="newServiceAlertText"></span>
+        </div>
+
+        <form id="newServiceForm" class="services-modal-form">
+          <div class="form-grid-2col">
+            <div class="form-group-item">
+              <label for="newServiceName" class="form-label-gold">نام ناحیه / خدمت (فارسی):</label>
+              <input
+                type="text"
+                id="newServiceName"
+                class="form-control-modal"
+                placeholder="مثال: خط ریش و گردن آقایان"
+                required
+                minlength="2"
+                maxlength="80"
+              />
+            </div>
+
+            <div class="form-group-item">
+              <label for="newServiceSlug" class="form-label-gold">شناسه یکتا (Slug انگلیسی):</label>
+              <input
+                type="text"
+                id="newServiceSlug"
+                class="form-control-modal slug-input"
+                dir="ltr"
+                placeholder="مثال: beard-neck"
+                required
+                pattern="^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                title="حروف کوچک انگلیسی و خط تیره (-) بدون فاصله"
+              />
+            </div>
+          </div>
+
+          <div class="form-grid-2col">
+            <div class="form-group-item">
+              <label for="newServiceDuration" class="form-label-gold">
+                <span class="label-with-icon">
+                  <Icon name="clock" size={13} />
+                  <span>مدت زمان جلسه (دقیقه):</span>
+                </span>
+              </label>
+              <input
+                type="number"
+                id="newServiceDuration"
+                class="form-control-modal"
+                min="5"
+                max="600"
+                value="15"
+                required
+              />
+            </div>
+
+            <div class="form-group-item">
+              <label for="newServiceOrder" class="form-label-gold">ترتیب نمایش در کاتالوگ:</label>
+              <input
+                type="number"
+                id="newServiceOrder"
+                class="form-control-modal"
+                min="0"
+                max="9999"
+                value={nextDisplayOrder}
+                required
+              />
+            </div>
+          </div>
+
+          <div class="form-grid-2col">
+            <div class="form-group-item">
+              <label for="newServiceActive" class="form-label-gold">وضعیت انتشار اولیه:</label>
+              <select id="newServiceActive" class="form-control-modal">
+                <option value="true" selected>فعال (بلافاصله منتشر شود)</option>
+                <option value="false">غیرفعال (پیش‌نویس / مخفی)</option>
+              </select>
+            </div>
+
+            <div class="form-group-item">
+              <label for="newServiceShortDesc" class="form-label-gold">توضیح کوتاه خدمت (اختیاری):</label>
+              <input
+                type="text"
+                id="newServiceShortDesc"
+                class="form-control-modal"
+                placeholder="مثال: خط بالا و پایین گردن با خنک‌کننده اختصاصی"
+                maxlength="200"
+              />
+            </div>
+          </div>
+
+          <!-- Dual Tariffs 3D Card -->
+          <div class="modal-tariffs-panel">
+            <div class="tariffs-panel-header">
+              <span class="tariffs-header-icon">
+                <Icon name="tag" size={14} />
+              </span>
+              <span class="tariffs-header-title">نرخ‌گذاری اولیه تعرفه (واحد: هزار تومان)</span>
+            </div>
+
+            <div class="form-grid-2col">
+              <div class="form-group-item">
+                <label for="newServicePriceFemale" class="form-label-gold">تعرفه مصوب بانوان:</label>
+                <div class="input-with-hint">
+                  <input
+                    type="number"
+                    id="newServicePriceFemale"
+                    class="form-control-modal price-input"
+                    placeholder="مثال: ۳۲۰ برای ۳۲۰٬۰۰۰ تومان"
+                    min="0"
+                    step="5"
+                  />
+                  <div class="toman-live-preview" id="newFemaleTomanPreview">
+                    معادل: استعلام تلفنی
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group-item">
+                <label for="newServicePriceMale" class="form-label-gold">تعرفه مصوب آقایان:</label>
+                <div class="input-with-hint">
+                  <input
+                    type="number"
+                    id="newServicePriceMale"
+                    class="form-control-modal price-input"
+                    placeholder="مثال: ۳۸۰ برای ۳۸۰٬۰۰۰ تومان"
+                    min="0"
+                    step="5"
+                  />
+                  <div class="toman-live-preview" id="newMaleTomanPreview">
+                    معادل: استعلام تلفنی
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-actions-row">
+            <button type="button" id="cancelNewServiceBtn" class="btn-table-action btn-modal-cancel">
+              <Icon name="close" size={14} />
+              <span>انصراف</span>
+            </button>
+            <button type="submit" id="saveNewServiceBtn" class="btn-3d-gold btn-modal-save">
+              <Icon name="plus" size={16} />
+              <span>ایجاد خدمت و ثبت تعرفه</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="servicesToast" class="services-toast" style="display: none;">
+      <span id="toastIcon" class="toast-icon">
+        <Icon name="checkCircle" size={18} />
+      </span>
+      <span id="toastMessage" class="toast-message"></span>
+    </div>
   </div>
 
-  <script>
-    const modal = document.getElementById('serviceEditModal');
-    const form = document.getElementById('editServiceForm') as HTMLFormElement;
-    const cancelBtn = document.getElementById('cancelServiceBtn');
-    const saveBtn = document.getElementById('saveServiceBtn') as HTMLButtonElement;
-    const alertBox = document.getElementById('serviceAlert');
-    const alertText = document.getElementById('serviceAlertText');
+  <style>
+    .services-page-container {
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+      overflow-x: hidden;
+    }
 
-    const idInput = document.getElementById('editServiceId') as HTMLInputElement;
-    const nameInput = document.getElementById('editServiceName') as HTMLInputElement;
-    const durationInput = document.getElementById('editServiceDuration') as HTMLInputElement;
-    const activeSelect = document.getElementById('editServiceActive') as unknown as HTMLSelectElement;
-    const priceInput = document.getElementById('editServicePrice') as HTMLInputElement;
+    .services-header-3d {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 22px;
+    }
+
+    .services-title-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 6px;
+    }
+
+    .services-icon-box {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(18, 22, 30, 0.8));
+      border: 1px solid rgba(212, 175, 55, 0.45);
+      color: #f5d77f;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      flex-shrink: 0;
+    }
+
+    .services-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .stats-pills-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .stat-pill {
+      font-size: 0.82rem;
+      font-weight: 700;
+      padding: 7px 12px;
+      border-radius: 10px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      white-space: nowrap;
+    }
+
+    .stat-pill--active {
+      color: #34d399;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+    }
+
+    .stat-pill--inactive {
+      color: #94a3b8;
+      background: rgba(148, 163, 184, 0.1);
+      border: 1px solid rgba(148, 163, 184, 0.25);
+    }
+
+    .stat-pill--total {
+      color: #f5d77f;
+      background: rgba(212, 175, 55, 0.12);
+      border: 1px solid rgba(212, 175, 55, 0.35);
+    }
+
+    .add-service-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 18px;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 0.88rem;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+
+    /* Toolbar */
+    .services-toolbar-block {
+      padding: 16px 20px;
+      margin-bottom: 22px;
+      background: linear-gradient(145deg, rgba(20, 24, 32, 0.95), rgba(12, 14, 18, 0.98));
+      border: 1px solid rgba(212, 175, 55, 0.22);
+      border-radius: 16px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+
+    .services-toolbar-top {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    .services-search-col {
+      flex: 1;
+      min-width: 260px;
+    }
+
+    .search-input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      width: 100%;
+    }
+
+    .search-icon {
+      position: absolute;
+      right: 14px;
+      color: #94a3b8;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-input-field {
+      width: 100%;
+      padding: 10px 42px 10px 38px !important;
+      font-size: 0.88rem;
+      margin: 0 !important;
+      border-radius: 12px;
+      box-sizing: border-box;
+    }
+
+    .clear-search-btn {
+      position: absolute;
+      left: 12px;
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      cursor: pointer;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+    }
+    .clear-search-btn:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .services-status-filter-col {
+      min-width: 200px;
+    }
+
+    .status-filter-select {
+      width: 100%;
+      padding: 10px 14px !important;
+      font-size: 0.86rem;
+      margin: 0 !important;
+      border-radius: 12px;
+      cursor: pointer;
+      box-sizing: border-box;
+    }
+
+    /* Categories Bar */
+    .services-categories-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      flex-wrap: wrap;
+    }
+
+    .category-tabs-scroll {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 4px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(212, 175, 55, 0.3) transparent;
+      max-width: 100%;
+    }
+
+    .category-tab-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(18, 22, 32, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 7px 14px;
+      color: #94a3b8;
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+
+    .category-tab-btn:hover {
+      color: #f5d77f;
+      border-color: rgba(212, 175, 55, 0.4);
+      background: rgba(212, 175, 55, 0.08);
+    }
+
+    .category-tab-btn.active {
+      color: #121417;
+      background: linear-gradient(135deg, #f5d77f, #d4af37);
+      border-color: #f5d77f;
+      box-shadow: 0 2px 10px rgba(212, 175, 55, 0.4);
+    }
+
+    .services-counter-indicator {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #94a3b8;
+      white-space: nowrap;
+    }
+
+    /* 3D Table Styling */
+    .services-table-section {
+      background: linear-gradient(145deg, rgba(18, 22, 30, 0.95), rgba(10, 12, 16, 0.98));
+      border: 1px solid rgba(212, 175, 55, 0.22);
+      border-radius: 16px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+
+    .services-3d-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .services-3d-table th {
+      background: rgba(14, 18, 26, 0.98);
+      color: #f5d77f;
+      font-size: 0.84rem;
+      font-weight: 800;
+      padding: 14px 16px;
+      border-bottom: 2px solid rgba(212, 175, 55, 0.35);
+      white-space: nowrap;
+    }
+
+    .services-3d-table td {
+      padding: 13px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      vertical-align: middle;
+      color: #e2e8f0;
+      font-size: 0.88rem;
+    }
+
+    .services-3d-table tbody tr:hover {
+      background: rgba(212, 175, 55, 0.06);
+    }
+
+    .order-pill-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #94a3b8;
+      font-weight: 700;
+      font-size: 0.8rem;
+    }
+
+    .service-name-cell {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .service-title-text {
+      font-weight: 800;
+      color: #ffffff;
+      font-size: 0.92rem;
+    }
+
+    .service-category-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 6px;
+      width: fit-content;
+    }
+
+    .service-short-desc {
+      font-size: 0.78rem;
+      color: #94a3b8;
+    }
+
+    .slug-tag {
+      background: rgba(212, 175, 55, 0.1);
+      border: 1px solid rgba(212, 175, 55, 0.25);
+      padding: 2px 8px;
+      border-radius: 6px;
+      letter-spacing: 0.02em;
+    }
+
+    .duration-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: #38bdf8;
+      font-weight: 700;
+      font-size: 0.84rem;
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      padding: 3px 8px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+
+    .tariff-cell-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .price-badge-female {
+      font-weight: 800;
+      color: #f5d77f;
+      background: rgba(212, 175, 55, 0.12);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      padding: 4px 10px;
+      border-radius: 8px;
+      white-space: nowrap;
+      font-size: 0.86rem;
+    }
+
+    .price-badge-male {
+      font-weight: 800;
+      color: #60a5fa;
+      background: rgba(96, 165, 250, 0.12);
+      border: 1px solid rgba(96, 165, 250, 0.3);
+      padding: 4px 10px;
+      border-radius: 8px;
+      white-space: nowrap;
+      font-size: 0.86rem;
+    }
+
+    .price-badge-unset {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: #94a3b8;
+      background: rgba(148, 163, 184, 0.08);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      padding: 4px 8px;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      white-space: nowrap;
+    }
+
+    .promo-price-block {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .promo-old-price {
+      text-decoration: line-through;
+      color: #94a3b8;
+      font-size: 0.78rem;
+    }
+
+    .promo-new-price {
+      color: #34d399;
+      font-weight: 800;
+      font-size: 0.88rem;
+    }
+
+    .promo-tag {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 800;
+      color: #f5d77f;
+      background: rgba(212, 175, 55, 0.18);
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      padding: 1px 6px;
+      border-radius: 4px;
+      width: fit-content;
+    }
+
+    .btn-quick-edit {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 6px;
+      color: #94a3b8;
+      cursor: pointer;
+      padding: 3px 6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+    }
+
+    .btn-quick-edit:hover {
+      color: #f5d77f;
+      border-color: rgba(212, 175, 55, 0.5);
+      background: rgba(212, 175, 55, 0.1);
+    }
+
+    /* 3D Switch */
+    .switch-3d {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 6px;
+      border-radius: 20px;
+      transition: all 0.2s ease;
+    }
+
+    .switch-3d:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .switch-3d-track {
+      width: 44px;
+      height: 24px;
+      background: #1b202c;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 12px;
+      position: relative;
+      transition: all 0.25s ease;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6);
+      flex-shrink: 0;
+    }
+
+    .switch-3d-track.active {
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.35), rgba(180, 140, 30, 0.5));
+      border-color: rgba(212, 175, 55, 0.7);
+      box-shadow: 0 0 10px rgba(212, 175, 55, 0.3), inset 0 1px 3px rgba(0, 0, 0, 0.4);
+    }
+
+    .switch-3d-thumb {
+      width: 18px;
+      height: 18px;
+      background: #94a3b8;
+      border-radius: 50%;
+      position: absolute;
+      top: 2px;
+      right: 3px;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+    }
+
+    .switch-3d-track.active .switch-3d-thumb {
+      right: 21px;
+      background: linear-gradient(135deg, #f5d77f, #d4af37);
+      box-shadow: 0 0 8px rgba(245, 215, 127, 0.8), 0 2px 4px rgba(0, 0, 0, 0.6);
+    }
+
+    .switch-3d-label {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #94a3b8;
+      min-width: 44px;
+      text-align: right;
+    }
+
+    .switch-3d-track.active + .switch-3d-label {
+      color: #34d399;
+    }
+
+    /* Mobile Cards View */
+    .services-cards-mobile {
+      display: none;
+      flex-direction: column;
+      gap: 14px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .service-card-mobile {
+      background: linear-gradient(145deg, rgba(20, 24, 32, 0.95), rgba(12, 14, 18, 0.98));
+      border: 1px solid rgba(212, 175, 55, 0.25);
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-sizing: border-box;
+      width: 100%;
+    }
+
+    .card-mobile-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .card-mobile-title-col {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .card-service-title {
+      font-weight: 800;
+      color: #ffffff;
+      font-size: 0.96rem;
+    }
+
+    .card-mobile-switch-col {
+      flex-shrink: 0;
+    }
+
+    .card-mobile-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .card-mobile-desc {
+      font-size: 0.82rem;
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+
+    .card-mobile-tariffs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      background: rgba(14, 18, 26, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 10px 12px;
+    }
+
+    .tariff-box-mobile {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .tariff-box-label {
+      font-size: 0.74rem;
+      color: #94a3b8;
+      font-weight: 600;
+    }
+
+    .tariff-box-val {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .card-mobile-actions {
+      margin-top: 4px;
+    }
+
+    .btn-mobile-edit {
+      width: 100%;
+      justify-content: center;
+      padding: 10px;
+      font-size: 0.88rem;
+    }
+
+    .empty-results-box {
+      text-align: center;
+      padding: 40px 20px;
+      color: #94a3b8;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.92rem;
+    }
+
+    /* Modals */
+    .services-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.78);
+      backdrop-filter: blur(8px);
+      z-index: 999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      box-sizing: border-box;
+    }
+
+    .services-modal-dialog {
+      background: linear-gradient(160deg, #181c26 0%, #0e1118 100%);
+      border: 1.5px solid rgba(212, 175, 55, 0.4);
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(212, 175, 55, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      width: 100%;
+      max-width: 580px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 24px;
+      box-sizing: border-box;
+    }
+
+    .modal-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .modal-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .modal-title-icon-gold {
+      color: #f5d77f;
+      display: flex;
+      align-items: center;
+    }
+
+    .modal-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #ffffff;
+      margin: 0;
+    }
+
+    .modal-close-icon-btn {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+      color: #94a3b8;
+      cursor: pointer;
+      padding: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .modal-close-icon-btn:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .modal-subtitle-text {
+      color: rgba(226, 232, 240, 0.7);
+      font-size: 0.85rem;
+      margin: 0 0 18px;
+      line-height: 1.5;
+    }
+
+    .form-grid-2col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .form-group-item {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-label-gold {
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: #e2e8f0;
+    }
+
+    .label-with-icon {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .slug-input {
+      font-family: monospace;
+      letter-spacing: 0.02em;
+    }
+
+    .modal-tariffs-panel {
+      background: rgba(14, 18, 26, 0.8);
+      border: 1px solid rgba(212, 175, 55, 0.25);
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-bottom: 18px;
+      box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4);
+    }
+
+    .tariffs-panel-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      color: #f5d77f;
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+
+    .input-with-hint {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .toman-live-preview {
+      font-size: 0.78rem;
+      color: #34d399;
+      font-weight: 700;
+      min-height: 18px;
+    }
+
+    .toman-live-preview.muted {
+      color: #94a3b8;
+      font-weight: 400;
+    }
+
+    .modal-actions-row {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .btn-modal-cancel {
+      padding: 10px 18px;
+      font-size: 0.88rem;
+    }
+
+    .btn-modal-save {
+      padding: 11px 22px;
+      font-size: 0.88rem;
+      font-weight: 800;
+    }
+
+    /* Toast */
+    .services-toast {
+      position: fixed;
+      bottom: 24px;
+      left: 24px;
+      z-index: 9999;
+      background: linear-gradient(135deg, rgba(20, 24, 32, 0.96), rgba(12, 14, 18, 0.98));
+      border: 1px solid rgba(212, 175, 55, 0.45);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), 0 0 15px rgba(212, 175, 55, 0.2);
+      padding: 12px 20px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #f8fafc;
+      font-size: 0.88rem;
+      font-weight: 600;
+      backdrop-filter: blur(12px);
+    }
+
+    .toast-icon {
+      color: #34d399;
+      display: flex;
+      align-items: center;
+    }
+
+    /* Responsive Queries */
+    @media (max-width: 768px) {
+      .desktop-only-table {
+        display: none !important;
+      }
+
+      .services-cards-mobile {
+        display: flex;
+      }
+
+      .services-header-3d {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .services-header-actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .stats-pills-row {
+        justify-content: space-between;
+        width: 100%;
+      }
+
+      .add-service-btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .services-toolbar-top {
+        flex-direction: column;
+      }
+
+      .services-status-filter-col {
+        width: 100%;
+      }
+
+      .form-grid-2col {
+        grid-template-columns: 1fr;
+      }
+
+      .services-modal-dialog {
+        padding: 18px 14px;
+        border-radius: 16px;
+      }
+
+      .modal-actions-row {
+        flex-direction: column-reverse;
+        width: 100%;
+      }
+
+      .btn-modal-cancel,
+      .btn-modal-save {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    /* Ultra-compact Mobile (320px - 390px) */
+    @media (max-width: 390px) {
+      .admin-content-pad {
+        padding: 10px 8px;
+      }
+
+      .card-mobile-tariffs {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+
+      .services-title-wrapper {
+        gap: 8px;
+      }
+
+      .services-icon-box {
+        width: 38px;
+        height: 38px;
+      }
+
+      .admin-page-title {
+        font-size: 1.15rem;
+      }
+
+      .stat-pill {
+        padding: 5px 8px;
+        font-size: 0.76rem;
+      }
+    }
+  </style>
+
+  <script>
+    // State management
+    let activeCategory = 'all';
+    let activeStatus = 'all';
+    let searchQuery = '';
+
+    // Elements
+    const searchInput = document.getElementById('serviceSearchInput') as HTMLInputElement | null;
+    const clearSearchBtn = document.getElementById('clearSearchBtn') as HTMLButtonElement | null;
+    const statusSelect = document.getElementById('statusFilterSelect') as HTMLSelectElement | null;
+    const categoryBtns = document.querySelectorAll('.category-tab-btn');
+    const counterDisplay = document.getElementById('servicesCounterIndicator');
+
+    const editModal = document.getElementById('serviceEditModal');
+    const editForm = document.getElementById('editServiceForm') as HTMLFormElement | null;
+    const cancelEditBtn = document.getElementById('cancelServiceBtn');
+    const closeEditX = document.getElementById('closeEditModalX');
+    const saveEditBtn = document.getElementById('saveServiceBtn') as HTMLButtonElement | null;
+    const editAlertBox = document.getElementById('serviceAlert');
+    const editAlertText = document.getElementById('serviceAlertText');
+
+    const editIdInput = document.getElementById('editServiceId') as HTMLInputElement | null;
+    const editNameInput = document.getElementById('editServiceName') as HTMLInputElement | null;
+    const editSlugInput = document.getElementById('editServiceSlug') as HTMLInputElement | null;
+    const editDurationInput = document.getElementById('editServiceDuration') as HTMLInputElement | null;
+    const editOrderInput = document.getElementById('editServiceOrder') as HTMLInputElement | null;
+    const editActiveSelect = document.getElementById('editServiceActive') as HTMLSelectElement | null;
+    const editShortDescInput = document.getElementById('editServiceShortDesc') as HTMLInputElement | null;
+    const editPriceFemaleInput = document.getElementById('editServicePriceFemale') as HTMLInputElement | null;
+    const editPriceMaleInput = document.getElementById('editServicePriceMale') as HTMLInputElement | null;
+    const editFemalePreview = document.getElementById('editFemaleTomanPreview');
+    const editMalePreview = document.getElementById('editMaleTomanPreview');
+
+    // New Service Modal Elements
+    const newModal = document.getElementById('newServiceModal');
+    const newForm = document.getElementById('newServiceForm') as HTMLFormElement | null;
+    const openNewBtn = document.getElementById('openNewServiceBtn');
+    const cancelNewBtn = document.getElementById('cancelNewServiceBtn');
+    const closeNewX = document.getElementById('closeNewModalX');
+    const saveNewBtn = document.getElementById('saveNewServiceBtn') as HTMLButtonElement | null;
+    const newAlertBox = document.getElementById('newServiceAlert');
+    const newAlertText = document.getElementById('newServiceAlertText');
+
+    const newNameInput = document.getElementById('newServiceName') as HTMLInputElement | null;
+    const newSlugInput = document.getElementById('newServiceSlug') as HTMLInputElement | null;
+    const newDurationInput = document.getElementById('newServiceDuration') as HTMLInputElement | null;
+    const newOrderInput = document.getElementById('newServiceOrder') as HTMLInputElement | null;
+    const newActiveSelect = document.getElementById('newServiceActive') as HTMLSelectElement | null;
+    const newShortDescInput = document.getElementById('newServiceShortDesc') as HTMLInputElement | null;
+    const newPriceFemaleInput = document.getElementById('newServicePriceFemale') as HTMLInputElement | null;
+    const newPriceMaleInput = document.getElementById('newServicePriceMale') as HTMLInputElement | null;
+    const newFemalePreview = document.getElementById('newFemaleTomanPreview');
+    const newMalePreview = document.getElementById('newMaleTomanPreview');
+
+    // Toast
+    const toast = document.getElementById('servicesToast');
+    const toastMsg = document.getElementById('toastMessage');
+    let toastTimer: number | undefined;
+
+    function showToast(message: string) {
+      if (!toast || !toastMsg) return;
+      toastMsg.textContent = message;
+      toast.style.display = 'flex';
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = window.setTimeout(() => {
+        toast.style.display = 'none';
+      }, 3000);
+    }
+
+    // Helper: update live Toman preview
+    function updateTomanPreview(input: HTMLInputElement | null, preview: HTMLElement | null) {
+      if (!input || !preview) return;
+      const val = Number(input.value);
+      if (val > 0) {
+        const toman = (val * 1000).toLocaleString('fa-IR');
+        preview.textContent = `معادل: ${toman} تومان`;
+        preview.classList.remove('muted');
+      } else {
+        preview.textContent = 'معادل: استعلام تلفنی';
+        preview.classList.add('muted');
+      }
+    }
+
+    // Bind preview listeners
+    if (editPriceFemaleInput && editFemalePreview) {
+      editPriceFemaleInput.addEventListener('input', () => updateTomanPreview(editPriceFemaleInput, editFemalePreview));
+    }
+    if (editPriceMaleInput && editMalePreview) {
+      editPriceMaleInput.addEventListener('input', () => updateTomanPreview(editPriceMaleInput, editMalePreview));
+    }
+    if (newPriceFemaleInput && newFemalePreview) {
+      newPriceFemaleInput.addEventListener('input', () => updateTomanPreview(newPriceFemaleInput, newFemalePreview));
+    }
+    if (newPriceMaleInput && newMalePreview) {
+      newPriceMaleInput.addEventListener('input', () => updateTomanPreview(newPriceMaleInput, newMalePreview));
+    }
+
+    // Auto slug sanitizer for new service
+    if (newSlugInput) {
+      newSlugInput.addEventListener('input', () => {
+        newSlugInput.value = newSlugInput.value
+          .toLowerCase()
+          .replace(/[^a-z0-9-]/g, '-')
+          .replace(/-+/g, '-');
+      });
+    }
+
+    // Filter Logic
+    function applyFilters() {
+      const allRows = document.querySelectorAll<HTMLElement>('.service-row');
+      let visibleDesktop = 0;
+      let visibleMobile = 0;
+
+      allRows.forEach((row) => {
+        const cat = row.dataset.category || '';
+        const active = row.dataset.active || 'true';
+        const name = row.dataset.name || '';
+        const slug = row.dataset.slug || '';
+
+        const matchesCategory = activeCategory === 'all' || cat === activeCategory;
+        const matchesStatus =
+          activeStatus === 'all' ||
+          (activeStatus === 'active' && active === 'true') ||
+          (activeStatus === 'inactive' && active === 'false');
+        const matchesSearch =
+          !searchQuery || name.includes(searchQuery) || slug.includes(searchQuery);
+
+        const isVisible = matchesCategory && matchesStatus && matchesSearch;
+        row.style.display = isVisible ? '' : 'none';
+
+        if (isVisible) {
+          if (row.classList.contains('service-card-mobile')) {
+            visibleMobile++;
+          } else {
+            visibleDesktop++;
+          }
+        }
+      });
+
+      const noResDesktop = document.getElementById('noResultsDesktop');
+      const noResMobile = document.getElementById('noResultsMobile');
+      if (noResDesktop) noResDesktop.style.display = visibleDesktop === 0 ? 'flex' : 'none';
+      if (noResMobile) noResMobile.style.display = visibleMobile === 0 ? 'flex' : 'none';
+
+      if (counterDisplay) {
+        counterDisplay.textContent = `نمایش ${visibleDesktop.toLocaleString('fa-IR')} خدمت`;
+      }
+    }
+
+    // Search event
+    if (searchInput) {
+      searchInput.addEventListener('input', () => {
+        searchQuery = searchInput.value.trim().toLowerCase();
+        if (clearSearchBtn) {
+          clearSearchBtn.style.display = searchQuery ? 'flex' : 'none';
+        }
+        applyFilters();
+      });
+    }
+
+    if (clearSearchBtn && searchInput) {
+      clearSearchBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        searchQuery = '';
+        clearSearchBtn.style.display = 'none';
+        applyFilters();
+        searchInput.focus();
+      });
+    }
+
+    // Status filter event
+    if (statusSelect) {
+      statusSelect.addEventListener('change', () => {
+        activeStatus = statusSelect.value;
+        applyFilters();
+      });
+    }
+
+    // Category filter tabs
+    categoryBtns.forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        const target = e.currentTarget as HTMLElement;
+        categoryBtns.forEach((b) => b.classList.remove('active'));
+        target.classList.add('active');
+        activeCategory = target.dataset.category || 'all';
+        applyFilters();
+      });
+    });
+
+    // Populate and open edit modal
+    function openEditModal(btn: HTMLElement, focusTarget?: 'female' | 'male') {
+      if (!editModal || !editIdInput || !editNameInput || !editSlugInput || !editDurationInput || !editOrderInput || !editActiveSelect || !editShortDescInput || !editPriceFemaleInput || !editPriceMaleInput) return;
+
+      const id = btn.dataset.id || '';
+      editIdInput.value = id;
+      editNameInput.value = btn.dataset.name || '';
+      editSlugInput.value = btn.dataset.slug || '';
+      editDurationInput.value = btn.dataset.duration || '15';
+      editOrderInput.value = btn.dataset.order || '0';
+      editActiveSelect.value = btn.dataset.active || 'true';
+      editShortDescInput.value = btn.dataset.shortdesc || '';
+      editPriceFemaleInput.value = btn.dataset.priceFemale || '0';
+      editPriceMaleInput.value = btn.dataset.priceMale || '0';
+
+      updateTomanPreview(editPriceFemaleInput, editFemalePreview);
+      updateTomanPreview(editPriceMaleInput, editMalePreview);
+
+      if (editAlertBox) editAlertBox.style.display = 'none';
+      editModal.style.display = 'flex';
+
+      if (focusTarget === 'female') {
+        setTimeout(() => editPriceFemaleInput.focus(), 100);
+      } else if (focusTarget === 'male') {
+        setTimeout(() => editPriceMaleInput.focus(), 100);
+      } else {
+        setTimeout(() => editNameInput.focus(), 100);
+      }
+    }
 
     document.querySelectorAll('.edit-service-btn').forEach((btn) => {
       btn.addEventListener('click', (e) => {
         const target = e.currentTarget as HTMLElement;
-        if (!target) return;
-
-        idInput.value = target.dataset.id || '';
-        nameInput.value = target.dataset.name || '';
-        durationInput.value = target.dataset.duration || '15';
-        activeSelect.value = target.dataset.active || 'true';
-        priceInput.value = target.dataset.price || '0';
-
-        if (alertBox) alertBox.style.display = 'none';
-        if (modal) modal.style.display = 'flex';
+        openEditModal(target);
       });
     });
 
-    if (cancelBtn && modal) {
-      cancelBtn.addEventListener('click', () => {
-        modal.style.display = 'none';
+    // Quick Edit price trigger
+    document.querySelectorAll('.js-quick-edit-price').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        const target = e.currentTarget as HTMLElement;
+        const gender = target.dataset.target as 'female' | 'male';
+        const parentRow = target.closest('tr');
+        if (!parentRow) return;
+        const mainEditBtn = parentRow.querySelector('.edit-service-btn') as HTMLElement | null;
+        if (mainEditBtn) {
+          openEditModal(mainEditBtn, gender);
+        }
+      });
+    });
+
+    // Close edit modal
+    function closeEditModal() {
+      if (editModal) editModal.style.display = 'none';
+    }
+    if (cancelEditBtn) cancelEditBtn.addEventListener('click', closeEditModal);
+    if (closeEditX) closeEditX.addEventListener('click', closeEditModal);
+
+    // Open/Close new service modal
+    if (openNewBtn && newModal) {
+      openNewBtn.addEventListener('click', () => {
+        if (newForm) newForm.reset();
+        updateTomanPreview(newPriceFemaleInput, newFemalePreview);
+        updateTomanPreview(newPriceMaleInput, newMalePreview);
+        if (newAlertBox) newAlertBox.style.display = 'none';
+        newModal.style.display = 'flex';
+        if (newNameInput) setTimeout(() => newNameInput.focus(), 100);
       });
     }
 
-    if (form && modal) {
-      form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const serviceId = idInput.value;
+    function closeNewModal() {
+      if (newModal) newModal.style.display = 'none';
+    }
+    if (cancelNewBtn) cancelNewBtn.addEventListener('click', closeNewModal);
+    if (closeNewX) closeNewX.addEventListener('click', closeNewModal);
+
+    // Close on backdrop click
+    window.addEventListener('click', (e) => {
+      if (e.target === editModal) closeEditModal();
+      if (e.target === newModal) closeNewModal();
+    });
+
+    // Close on Escape key
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeEditModal();
+        closeNewModal();
+      }
+    });
+
+    // Active Toggle Switch handler
+    document.querySelectorAll('.js-toggle-active').forEach((btn) => {
+      btn.addEventListener('click', async (e) => {
+        const target = e.currentTarget as HTMLButtonElement;
+        const serviceId = target.dataset.id;
         if (!serviceId) return;
 
-        saveBtn.disabled = true;
-        saveBtn.innerText = 'در حال ذخیره...';
-        if (alertBox) alertBox.style.display = 'none';
+        const currentActive = target.dataset.active === 'true';
+        const newActive = !currentActive;
+
+        target.disabled = true;
 
         try {
-          const promises = [
+          const res = await fetch(`/api/v1/admin/services/${serviceId}`, {
+            method: 'PUT',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ active: newActive }),
+          });
+
+          if (res.ok) {
+            // Update switch state
+            target.dataset.active = String(newActive);
+            const track = target.querySelector('.switch-3d-track');
+            const label = target.querySelector('.switch-3d-label');
+            if (track) track.classList.toggle('active', newActive);
+            if (label) label.textContent = newActive ? 'فعال' : 'غیرفعال';
+
+            // Also synchronize peer switches (e.g. mobile vs desktop)
+            document.querySelectorAll(`.js-toggle-active[data-id="${serviceId}"]`).forEach((peer) => {
+              if (peer !== target) {
+                peer.setAttribute('data-active', String(newActive));
+                const peerTrack = peer.querySelector('.switch-3d-track');
+                const peerLabel = peer.querySelector('.switch-3d-label');
+                if (peerTrack) peerTrack.classList.toggle('active', newActive);
+                if (peerLabel) peerLabel.textContent = newActive ? 'فعال' : 'غیرفعال';
+              }
+            });
+
+            // Update row dataset
+            document.querySelectorAll(`.service-row[data-id="${serviceId}"]`).forEach((row) => {
+              (row as HTMLElement).dataset.active = String(newActive);
+            });
+
+            // Update edit buttons dataset
+            document.querySelectorAll(`.edit-service-btn[data-id="${serviceId}"]`).forEach((editBtn) => {
+              (editBtn as HTMLElement).dataset.active = String(newActive);
+            });
+
+            showToast(newActive ? 'خدمت با موفقیت در وب‌سایت فعال شد' : 'خدمت به حالت غیرفعال (مخفی) درآمد');
+          } else {
+            showToast('خطا در تغییر وضعیت انتشار خدمت');
+          }
+        } catch {
+          showToast('خطای شبکه در ارتباط با سرور');
+        } finally {
+          target.disabled = false;
+        }
+      });
+    });
+
+    // Submit Edit Service Form
+    if (editForm && editModal) {
+      editForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!editIdInput || !editNameInput || !editSlugInput || !editDurationInput || !editOrderInput || !editActiveSelect || !editShortDescInput || !editPriceFemaleInput || !editPriceMaleInput || !saveEditBtn) return;
+
+        const serviceId = editIdInput.value;
+        if (!serviceId) return;
+
+        saveEditBtn.disabled = true;
+        saveEditBtn.textContent = 'در حال ذخیره...';
+        if (editAlertBox) editAlertBox.style.display = 'none';
+
+        try {
+          const promises: Promise<Response>[] = [
             fetch(`/api/v1/admin/services/${serviceId}`, {
               method: 'PUT',
               headers: { 'content-type': 'application/json' },
               body: JSON.stringify({
-                name: nameInput.value.trim(),
-                durationMinutes: Number(durationInput.value),
-                active: activeSelect.value === 'true',
+                name: editNameInput.value.trim(),
+                slug: editSlugInput.value.trim().toLowerCase(),
+                durationMinutes: Number(editDurationInput.value),
+                displayOrder: Number(editOrderInput.value),
+                active: editActiveSelect.value === 'true',
+                shortDescription: editShortDescInput.value.trim() || null,
               }),
             }),
           ];
 
-          const priceVal = Number(priceInput.value);
-          if (priceVal > 0) {
-            promises.push(
-              fetch(`/api/v1/admin/pricing/${serviceId}`, {
-                method: 'PUT',
-                headers: { 'content-type': 'application/json' },
-                body: JSON.stringify({
-                  pricingCategory: 'female',
-                  amount: priceVal,
-                  currency: 'IRR_TOMAN',
-                }),
-              })
-            );
-          }
+          const femalePriceVal = Number(editPriceFemaleInput.value);
+          promises.push(
+            fetch(`/api/v1/admin/pricing/${serviceId}`, {
+              method: 'PUT',
+              headers: { 'content-type': 'application/json' },
+              body: JSON.stringify({
+                pricingCategory: 'female',
+                amount: femalePriceVal >= 0 ? femalePriceVal : 0,
+                currency: 'IRT',
+              }),
+            })
+          );
+
+          const malePriceVal = Number(editPriceMaleInput.value);
+          promises.push(
+            fetch(`/api/v1/admin/pricing/${serviceId}`, {
+              method: 'PUT',
+              headers: { 'content-type': 'application/json' },
+              body: JSON.stringify({
+                pricingCategory: 'male',
+                amount: malePriceVal >= 0 ? malePriceVal : 0,
+                currency: 'IRT',
+              }),
+            })
+          );
 
           const results = await Promise.all(promises);
           const allOk = results.every((r) => r.ok);
 
           if (allOk) {
-            saveBtn.innerText = '✓ ذخیره شد!';
-            setTimeout(() => window.location.reload(), 400);
+            saveEditBtn.textContent = 'ذخیره شد!';
+            showToast('تغییرات خدمت و تعرفه با موفقیت ثبت شد');
+            setTimeout(() => window.location.reload(), 450);
           } else {
-            if (alertText) alertText.innerText = 'خطا در ثبت تغییرات خدمت یا تعرفه.';
-            if (alertBox) alertBox.style.display = 'flex';
-            saveBtn.disabled = false;
-            saveBtn.innerText = '✓ ذخیره تغییرات خدمت';
+            const errRes = results.find((r) => !r.ok);
+            let errMsg = 'خطا در ثبت تغییرات خدمت یا تعرفه.';
+            if (errRes) {
+              try {
+                const errData = (await errRes.json()) as { error?: string };
+                if (errData?.error) errMsg = errData.error;
+              } catch {
+                // ignore
+              }
+            }
+            if (editAlertText) editAlertText.textContent = errMsg;
+            if (editAlertBox) editAlertBox.style.display = 'flex';
+            saveEditBtn.disabled = false;
+            saveEditBtn.textContent = 'ذخیره تغییرات خدمت و تعرفه';
           }
         } catch {
-          if (alertText) alertText.innerText = 'خطای ارتباط با سرور.';
-          if (alertBox) alertBox.style.display = 'flex';
-          saveBtn.disabled = false;
-          saveBtn.innerText = '✓ ذخیره تغییرات خدمت';
+          if (editAlertText) editAlertText.textContent = 'خطای ارتباط با سرور.';
+          if (editAlertBox) editAlertBox.style.display = 'flex';
+          saveEditBtn.disabled = false;
+          saveEditBtn.textContent = 'ذخیره تغییرات خدمت و تعرفه';
+        }
+      });
+    }
+
+    // Submit New Service Form
+    if (newForm && newModal) {
+      newForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!newNameInput || !newSlugInput || !newDurationInput || !newOrderInput || !newActiveSelect || !newShortDescInput || !newPriceFemaleInput || !newPriceMaleInput || !saveNewBtn) return;
+
+        saveNewBtn.disabled = true;
+        saveNewBtn.textContent = 'در حال ایجاد...';
+        if (newAlertBox) newAlertBox.style.display = 'none';
+
+        try {
+          const createRes = await fetch('/api/v1/admin/services', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({
+              name: newNameInput.value.trim(),
+              slug: newSlugInput.value.trim().toLowerCase(),
+              durationMinutes: Number(newDurationInput.value),
+              displayOrder: Number(newOrderInput.value),
+              active: newActiveSelect.value === 'true',
+              featured: false,
+              description: newShortDescInput.value.trim() || '',
+              shortDescription: newShortDescInput.value.trim() || null,
+            }),
+          });
+
+          if (!createRes.ok) {
+            let errMsg = 'خطا در تعریف خدمت جدید.';
+            try {
+              const errData = (await createRes.json()) as { error?: string };
+              if (errData?.error) errMsg = errData.error;
+            } catch {
+              // ignore
+            }
+            if (newAlertText) newAlertText.textContent = errMsg;
+            if (newAlertBox) newAlertBox.style.display = 'flex';
+            saveNewBtn.disabled = false;
+            saveNewBtn.textContent = 'ایجاد خدمت و ثبت تعرفه';
+            return;
+          }
+
+          const createdData = (await createRes.json()) as { id?: string };
+          const newId = createdData.id;
+
+          // Pricing promises
+          const pricingPromises: Promise<Response>[] = [];
+
+          const femalePrice = Number(newPriceFemaleInput.value);
+          if (femalePrice > 0) {
+            pricingPromises.push(
+              fetch(`/api/v1/admin/pricing/${newId}`, {
+                method: 'PUT',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({
+                  pricingCategory: 'female',
+                  amount: femalePrice,
+                  currency: 'IRT',
+                }),
+              })
+            );
+          }
+
+          const malePrice = Number(newPriceMaleInput.value);
+          if (malePrice > 0) {
+            pricingPromises.push(
+              fetch(`/api/v1/admin/pricing/${newId}`, {
+                method: 'PUT',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({
+                  pricingCategory: 'male',
+                  amount: malePrice,
+                  currency: 'IRT',
+                }),
+              })
+            );
+          }
+
+          if (pricingPromises.length > 0) {
+            await Promise.all(pricingPromises);
+          }
+
+          saveNewBtn.textContent = 'ایجاد شد!';
+          showToast('خدمت جدید با موفقیت به کاتالوگ اضافه شد');
+          setTimeout(() => window.location.reload(), 450);
+        } catch {
+          if (newAlertText) newAlertText.textContent = 'خطای ارتباط با سرور.';
+          if (newAlertBox) newAlertBox.style.display = 'flex';
+          saveNewBtn.disabled = false;
+          saveNewBtn.textContent = 'ایجاد خدمت و ثبت تعرفه';
         }
       });
     }

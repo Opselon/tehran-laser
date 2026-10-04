@@ -2,6 +2,7 @@
 import PublicLayout from '../../layouts/PublicLayout.astro';
 import { env } from 'cloudflare:workers';
 import { listPublicServices } from '../../server/repositories';
+import { createBreadcrumbSchema } from '../../lib/seo';
 import Icon from '../../components/ui/Icon.astro';
 
 // Clinical services catalogue definition with fallback and rich metadata
@@ -424,41 +425,53 @@ function formatToman(amountInThousands: number): string {
   return (amountInThousands * 1000).toLocaleString('fa-IR');
 }
 
-// Structured Data: MedicalBusiness / PriceList (§31, §135)
+// Structured Data: CollectionPage + OfferCatalog price list (§31, §135)
+// Linked to the canonical clinic node (@id /#clinic) emitted by the layout,
+// so there is exactly one MedicalClinic entity site-wide.
 const priceListJsonLd = {
   '@context': 'https://schema.org',
-  '@type': 'MedicalClinic',
-  name: 'کلینیک تخصصی تهران لیزر',
-  priceRange: 'IRR',
-  telephone: '+989035555090',
-  address: {
-    '@type': 'PostalAddress',
-    streetAddress: 'پاسداران، خیابان پایدارفرد، نبش بوستان هفتم',
-    addressLocality: 'تهران',
-    addressCountry: 'IR',
-  },
-  hasOfferCatalog: {
+  '@type': ['CollectionPage', 'MedicalWebPage'],
+  '@id': 'https://tehranlaser.ir/services#prices',
+  url: 'https://tehranlaser.ir/services',
+  name: 'تعرفه‌های مصوب لیزر موهای زائد کندلا جنتل مکس پرو',
+  inLanguage: 'fa-IR',
+  mainEntity: { '@id': 'https://tehranlaser.ir/#clinic' },
+  isPartOf: { '@id': 'https://tehranlaser.ir/#website' },
+  about: {
     '@type': 'OfferCatalog',
     name: 'تعرفه‌های مصوب لیزر کندلا جنتل‌مکس پرو',
     itemListElement: services.map((s, idx) => ({
       '@type': 'Offer',
+      position: idx + 1,
       itemOffered: {
-        '@type': 'Service',
+        '@type': 'MedicalProcedure',
         name: `لیزر ${s.name}`,
         description: s.shortDescription,
       },
       price: (s.femalePromoPrice || s.femalePrice) * 1000,
       priceCurrency: 'IRR',
-      position: idx + 1,
+      availability: 'https://schema.org/InStock',
     })),
   },
 };
+
+const breadcrumbJsonLd = createBreadcrumbSchema([
+  { name: 'صفحه اصلی', url: '/' },
+  { name: 'خدمات و تعرفه‌ها', url: '/services' },
+]);
 ---
 
 <PublicLayout
-  title="لیست خدمات و تعرفه‌های مصوب لیزر ۱۴۰۳ — کلینیک تهران لیزر پاسداران"
-  description="مشاهده لیست کامل تعرفه‌های لیزر موهای زائد بانوان و آقایان در کلینیک تهران لیزر پاسداران. مجهز به دستگاه کندلا جنتل‌مکس پرو ۲۰۲۴ آمریکا با ۱۵٪ تخفیف رزرو آنلاین پکیج طلایی."
-  jsonLd={priceListJsonLd}
+  title="تعرفه لیزر موهای زائد ۱۴۰۵ — بانوان و آقایان | کلینیک تهران لیزر پاسداران"
+  description="مشاهده لیست کامل تعرفه‌های لیزر موهای زائد بانوان و آقایان در کلینیک تهران لیزر پاسداران. مجهز به دستگاه کندلا جنتل‌مکس پرو آمریکا با ۱۵٪ تخفیف رزرو آنلاین پکیج طلایی."
+  canonicalUrl="/services"
+  keywords={[
+    'قیمت لیزر موهای زائد تهران',
+    'تعرفه لیزر پاسداران',
+    'قیمت لیزر فول بادی بانوان',
+    'لیزر بانوان و آقایان کندلا',
+  ]}
+  jsonLd={[priceListJsonLd, breadcrumbJsonLd]}
 >
   <!-- Hero / Header Strip with 3D Obsidian-Gold Depth -->
   <section class="services-hero">

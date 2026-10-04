@@ -2,6 +2,10 @@
 import PublicLayout from '../../layouts/PublicLayout.astro';
 import { env } from 'cloudflare:workers';
 import { findPublicServiceBySlug } from '../../server/repositories';
+import {
+  createMedicalProcedureSchema,
+  createBreadcrumbSchema,
+} from '../../lib/seo';
 
 const { slug } = Astro.params;
 if (!slug) return Astro.redirect('/services');
@@ -13,38 +17,30 @@ const femalePrice = service.prices.find((p) => p.pricingCategory === 'female');
 const isPromo = service.slug === 'full-body';
 const basePrice = femalePrice?.amount ?? 0;
 
-// Schema.org Service JSON-LD (§31, §135)
-const serviceJsonLd = {
-  '@context': 'https://schema.org',
-  '@type': 'Service',
-  name: `لیزر ${service.name}`,
+// Schema.org MedicalProcedure JSON-LD for Candela GentleMax Pro treatments (§31, §135)
+const serviceJsonLd = createMedicalProcedureSchema({
+  name: service.name,
+  slug: service.slug,
   description: service.description,
-  provider: {
-    '@type': 'MedicalClinic',
-    name: 'کلینیک تهران لیزر',
-    telephone: '+989035555090',
-    address: {
-      '@type': 'PostalAddress',
-      streetAddress: 'پاسداران، خیابان پایدارفرد، نبش بوستان هفتم',
-      addressLocality: 'تهران',
-      addressCountry: 'IR',
-    },
-  },
-  offers: femalePrice
-    ? {
-        '@type': 'Offer',
-        price: isPromo ? 1940000 : basePrice * 1000,
-        priceCurrency: 'IRR',
-        availability: 'https://schema.org/InStock',
-      }
-    : undefined,
-};
+  durationMinutes: service.durationMinutes,
+  price: isPromo ? 1940000 : basePrice || undefined,
+});
+
+// BreadcrumbList schema for nested service pages (§31, §135)
+const breadcrumbJsonLd = createBreadcrumbSchema([
+  { name: 'صفحه اصلی', url: '/' },
+  { name: 'خدمات و تعرفه‌ها', url: '/services' },
+  { name: service.name, url: `/services/${service.slug}` },
+]);
+
+const serviceJsonLdArray = [serviceJsonLd, breadcrumbJsonLd];
 ---
 
 <PublicLayout
   title={`لیزر ${service.name} در پاسداران — تعرفه و رزرو | کلینیک تهران لیزر`}
   description={`خدمات تخصصی لیزر ${service.name} در کلینیک تهران لیزر پاسداران. مدت زمان ${service.durationMinutes} دقیقه، اپراتور مجرب، دستگاه خنک‌کننده بدون درد و تعرفه مصوب.`}
-  jsonLd={serviceJsonLd}
+  canonicalUrl={`/services/${service.slug}`}
+  jsonLd={serviceJsonLdArray}
 >
   <div class="page-header-strip">
     <div class="container text-center">

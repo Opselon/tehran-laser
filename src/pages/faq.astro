@@ -3,6 +3,7 @@ import PublicLayout from '../layouts/PublicLayout.astro';
 import Icon from '../components/ui/Icon.astro';
 import { env } from 'cloudflare:workers';
 import { listFaqItems } from '../server/repositories';
+import { createFAQPageSchema, createBreadcrumbSchema } from '../lib/seo';
 
 // Fetch operational FAQs from D1 if available
 let dbFaqs: Awaited<ReturnType<typeof listFaqItems>> = [];
@@ -209,25 +210,22 @@ if (dbFaqs && dbFaqs.length > 0) {
   });
 }
 
-// Generate FAQPage JSON-LD schema for SEO rich snippets
-const faqJsonLd = {
-  '@context': 'https://schema.org',
-  '@type': 'FAQPage',
-  mainEntity: combinedFaqs.map((f) => ({
-    '@type': 'Question',
-    name: f.question,
-    acceptedAnswer: {
-      '@type': 'Answer',
-      text: f.answer,
-    },
-  })),
-};
+// Generate FAQPage + BreadcrumbList JSON-LD schema for SEO rich snippets
+const faqJsonLd = createFAQPageSchema(
+  combinedFaqs.map((f) => ({ question: f.question, answer: f.answer })),
+);
+
+const breadcrumbJsonLd = createBreadcrumbSchema([
+  { name: 'صفحه اصلی', url: '/' },
+  { name: 'سوالات متداول', url: '/faq' },
+]);
 ---
 
 <PublicLayout
   title="سوالات متداول لیزر موهای زائد — کلینیک تخصصی تهران لیزر"
   description="مرجع کامل پرسش و پاسخ‌های لیزر موهای زائد در پاسداران: مراقبت‌های قبل و بعد، راکوتان و بارداری، فواصل جلسات، سیستم خنک‌کننده بدون درد و تعرفه‌ها."
-  jsonLd={faqJsonLd}
+  canonicalUrl="/faq"
+  jsonLd={[faqJsonLd, breadcrumbJsonLd]}
   theme="dark"
 >
   <div class="faq-page-wrapper">

@@ -3,6 +3,7 @@ import PublicLayout from '../layouts/PublicLayout.astro';
 import { BookingWizard } from '../components/booking/BookingWizard';
 import { env } from 'cloudflare:workers';
 import { listPublicServices } from '../server/repositories';
+import { createBreadcrumbSchema } from '../lib/seo';
 
 let services: Awaited<ReturnType<typeof listPublicServices>> = [];
 try {
@@ -12,11 +13,25 @@ try {
 }
 
 const serviceParam = Astro.url.searchParams.get('service') ?? undefined;
+
+// BreadcrumbList schema for the booking funnel (§31, §135)
+const breadcrumbJsonLd = createBreadcrumbSchema([
+  { name: 'صفحه اصلی', url: '/' },
+  { name: 'رزرو آنلاین نوبت', url: '/booking' },
+]);
 ---
 
 <PublicLayout
   title="رزرو آنلاین نوبت — کلینیک تخصصی تهران لیزر"
   description="سامانه هوشمند و شبانه‌روزی رزرو آنلاین نوبت کلینیک تهران لیزر پاسداران. انتخاب خدمت، ساعت و تاریخ بدون معطلی با ۱۵٪ تخفیف ویژه سایت."
+  canonicalUrl="/booking"
+  keywords={[
+    'رزرو آنلاین نوبت لیزر تهران',
+    'رزرو وقت لیزر پاسداران',
+    'نوبت دهی لیزر تهران لیزر',
+    'تخفیف رزرو آنلاین لیزر',
+  ]}
+  jsonLd={breadcrumbJsonLd}
 >
   <div class="booking-page-header">
     <div class="container text-center">
