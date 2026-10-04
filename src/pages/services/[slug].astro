@@ -699,28 +699,39 @@ const afterCareSteps = [
   .service-long-description {
     font-size: 0.95rem;
     color: #c9c3b8;
-    line-height: 1.95;
-    margin: 0 0 22px;
+    line-height: 1.9;
+    margin: 0 0 18px;
   }
 
   /* ════ Pricing tier card ════ */
   .pricing-tier-card {
-    background: #0f131a;
-    border: 1px solid rgba(212, 175, 55, 0.25);
+    background: linear-gradient(160deg, rgba(212, 175, 55, 0.09) 0%, #0f131a 55%);
+    border: 1.5px solid rgba(212, 175, 55, 0.45);
     border-radius: 18px;
-    padding: 20px;
+    padding: 22px;
     margin-bottom: 20px;
-    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.55), 0 0 22px rgba(212, 175, 55, 0.1);
+    position: relative;
+  }
+
+  .pricing-tier-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 18px;
+    pointer-events: none;
+    background: linear-gradient(145deg, rgba(245, 215, 127, 0.14) 0%, transparent 42%);
   }
 
   .tier-card-title {
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 1rem;
+    font-size: 1.02rem;
     font-weight: 800;
     color: var(--gold-light);
     margin-bottom: 14px;
+    position: relative;
   }
 
   .tier-row {
