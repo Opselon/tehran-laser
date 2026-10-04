@@ -4,6 +4,7 @@ import { env } from 'cloudflare:workers';
 import { listAdminBookings, listPublicServices } from '../../../server/repositories';
 import { formatJalaliDate } from '../../../lib/datetime/jalali';
 import type { BookingStatus } from '../../../domain/booking/booking.types';
+import Icon from '../../../components/ui/Icon.astro';
 
 const url = Astro.url;
 const statusFilter = (url.searchParams.get('status') as BookingStatus) || undefined;
@@ -33,26 +34,33 @@ try {
     <!-- 3D Header Row -->
     <div class="dashboard-header-row">
       <div>
-        <h1 class="admin-page-title">کنسول مدیریت و ویرایش نوبت‌های کلینیک</h1>
+        <h1 class="admin-page-title page-title-with-icon">
+          <span class="page-title-icon-box">
+            <Icon name="bookings" size={26} />
+          </span>
+          <span>کنسول مدیریت و ویرایش نوبت‌های کلینیک</span>
+        </h1>
         <p class="section-block-sub">
           تأیید فوری نوبت‌ها، لغو، تغییر وضعیت، ویرایش مشخصات مراجعین و مبالغ مصوب (API First)
         </p>
       </div>
       <div class="actions">
-        <span style="font-size: 0.88rem; color: #f5d77f; background: rgba(212, 175, 55, 0.15); border: 1px solid rgba(212, 175, 55, 0.35); padding: 8px 16px; border-radius: 12px;">
-          تعداد کل نوبت‌ها: {bookings.items.length.toLocaleString('fa-IR')} مورد
+        <span class="bookings-total-pill">
+          <Icon name="list" size={16} />
+          <span>تعداد کل نوبت‌ها: <strong>{bookings.items.length.toLocaleString('fa-IR')}</strong> مورد</span>
         </span>
       </div>
     </div>
 
     <!-- 3D Filter Bar -->
-    <div class="admin-section-block" style="padding: 22px; margin-bottom: 26px;">
-      <form method="GET" style="display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap;">
-        <div style="flex: 1; min-width: 170px;">
-          <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">
-            فیلتر وضعیت نوبت:
+    <div class="admin-section-block filter-section-card">
+      <form method="GET" class="bookings-filter-form">
+        <div class="filter-field-col">
+          <label class="filter-field-label">
+            <Icon name="filter" size={14} />
+            <span>فیلتر وضعیت نوبت:</span>
           </label>
-          <select name="status" class="form-control-modal" style="margin-top: 0; padding: 10px 14px;">
+          <select name="status" class="form-control-modal filter-input">
             <option value="">همه وضعیت‌ها</option>
             <option value="pending" selected={statusFilter === 'pending'}>در انتظار تأیید</option>
             <option value="confirmed" selected={statusFilter === 'confirmed'}>تأییدشده</option>
@@ -63,11 +71,12 @@ try {
           </select>
         </div>
 
-        <div style="flex: 1; min-width: 170px;">
-          <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">
-            فیلتر خدمت / ناحیه:
+        <div class="filter-field-col">
+          <label class="filter-field-label">
+            <Icon name="sparkles" size={14} />
+            <span>فیلتر خدمت / ناحیه:</span>
           </label>
-          <select name="service" class="form-control-modal" style="margin-top: 0; padding: 10px 14px;">
+          <select name="service" class="form-control-modal filter-input">
             <option value="">همه خدمات</option>
             {services.map((s) => (
               <option value={s.slug} selected={serviceFilter === s.slug}>
@@ -77,41 +86,45 @@ try {
           </select>
         </div>
 
-        <div style="flex: 1.5; min-width: 220px;">
-          <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">
-            جستجوی مراجع / کد رهگیری / تلفن:
+        <div class="filter-field-col filter-field-wide">
+          <label class="filter-field-label">
+            <Icon name="search" size={14} />
+            <span>جستجوی مراجع / کد رهگیری / تلفن:</span>
           </label>
           <input
             type="text"
             name="q"
-            class="form-control-modal"
-            style="margin-top: 0; padding: 10px 14px;"
+            class="form-control-modal filter-input"
             placeholder="نام، ۰۹۱۲ یا کد رهگیری..."
             value={searchFilter || ''}
           />
         </div>
 
-        <div style="display: flex; gap: 8px;">
-          <button type="submit" class="btn-3d-refresh" style="padding: 10px 18px;">
-            🔍 اعمال فیلتر
+        <div class="filter-btn-group">
+          <button type="submit" class="btn-3d-gold filter-action-btn">
+            <Icon name="search" size={16} />
+            <span>اعمال فیلتر</span>
           </button>
-          <a href="/admin/bookings" class="btn-table-action" style="display: inline-flex; align-items: center; padding: 10px 14px;">
-            ✕ پاک کردن
+          <a href="/admin/bookings" class="btn-3d-secondary filter-action-btn">
+            <Icon name="refresh" size={16} />
+            <span>پاک کردن</span>
           </a>
         </div>
       </form>
     </div>
 
     <!-- 3D Bookings Table -->
-    <div class="admin-section-block" style="padding: 0; overflow: hidden;">
+    <div class="admin-section-block table-section-block">
       {bookings.items.length === 0 ? (
-        <div class="empty-state-card" style="border: none; margin: 20px;">
-          <span class="empty-icon">🔍</span>
+        <div class="empty-state-card" style="border: none; margin: 24px;">
+          <span class="empty-icon-wrap">
+            <Icon name="search" size={40} />
+          </span>
           <p class="empty-text">نوبتی با مشخصات واردشده یافت نشد.</p>
         </div>
       ) : (
-        <div class="today-table-wrapper" style="border: none; border-radius: 0;">
-          <table class="admin-table">
+        <div class="table-responsive-container">
+          <table class="admin-table-3d bookings-custom-table">
             <thead>
               <tr>
                 <th>کد رزرو</th>
@@ -122,7 +135,7 @@ try {
                 <th>تاریخ و ساعت نوبت</th>
                 <th>مبلغ مصوب</th>
                 <th>وضعیت</th>
-                <th>مدیریت و ویرایش</th>
+                <th>مدیریت و عملیات</th>
               </tr>
             </thead>
             <tbody>
@@ -136,53 +149,94 @@ try {
 
                 return (
                   <tr>
-                    <td dir="ltr" style={{ fontFamily: 'monospace', fontWeight: 800, color: '#f5d77f' }}>
-                      {b.reference}
+                    <td dir="ltr" class="ref-col-cell">
+                      <span class="booking-ref-tag">
+                        <Icon name="document" size={12} />
+                        <span>{b.reference}</span>
+                      </span>
                     </td>
-                    <td style={{ fontWeight: 700 }}>{b.customer.name}</td>
-                    <td dir="ltr">
-                      <a href={`tel:${b.customer.phone}`} style={{ color: '#38bdf8', textDecoration: 'none' }}>
-                        📞 {b.customer.phone}
+                    <td class="customer-name-cell">
+                      <span>{b.customer.name}</span>
+                    </td>
+                    <td dir="ltr" class="phone-col-cell">
+                      <a href={`tel:${b.customer.phone}`} class="phone-direct-link">
+                        <Icon name="phone" size={14} />
+                        <span>{b.customer.phone}</span>
                       </a>
                     </td>
                     <td>{b.service.name}</td>
                     <td>
                       <span class={`badge-status ${b.pricingCategory === 'female' ? 'badge-status-completed' : 'badge-status-pending'}`}>
-                        {b.pricingCategory === 'female' ? 'بانوان' : 'آقایان'}
+                        <Icon name="users" size={12} />
+                        <span>{b.pricingCategory === 'female' ? 'بانوان' : 'آقایان'}</span>
                       </span>
                     </td>
                     <td>
-                      <div style={{ fontWeight: 600 }}>{formatJalaliDate(dateStr)}</div>
-                      <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>⏱ ساعت {timeStr}</span>
+                      <div class="date-time-cell-main">{formatJalaliDate(dateStr)}</div>
+                      <span class="date-time-cell-sub">
+                        <Icon name="clock" size={13} />
+                        <span>ساعت {timeStr}</span>
+                      </span>
                     </td>
                     <td>
-                      <div style={{ fontWeight: 700 }}>{(b.quotedAmount * 1000).toLocaleString('fa-IR')} تومان</div>
+                      <div class="amount-cell-main">{(b.quotedAmount * 1000).toLocaleString('fa-IR')} تومان</div>
                       {b.discountAmount > 0 && (
-                        <span style={{ fontSize: '0.75rem', color: '#34d399' }}>
+                        <span class="amount-cell-discount">
                           (تخفیف: {(b.discountAmount * 1000).toLocaleString('fa-IR')})
                         </span>
                       )}
                     </td>
                     <td>
                       <span class={`badge-status badge-status-${b.status}`}>
-                        {b.status === 'confirmed' && 'تأییدشده'}
-                        {b.status === 'pending' && 'در انتظار تأیید'}
-                        {b.status === 'completed' && 'انجام‌شده'}
-                        {b.status === 'cancelled' && 'لغوشده'}
-                        {b.status === 'no_show' && 'عدم حضور'}
-                        {b.status === 'rejected' && 'ردشده'}
+                        {b.status === 'confirmed' && (
+                          <>
+                            <Icon name="checkCircle" size={13} />
+                            <span>تأییدشده</span>
+                          </>
+                        )}
+                        {b.status === 'pending' && (
+                          <>
+                            <Icon name="clock" size={13} />
+                            <span>در انتظار تأیید</span>
+                          </>
+                        )}
+                        {b.status === 'completed' && (
+                          <>
+                            <Icon name="check" size={13} />
+                            <span>انجام‌شده</span>
+                          </>
+                        )}
+                        {b.status === 'cancelled' && (
+                          <>
+                            <Icon name="x" size={13} />
+                            <span>لغوشده</span>
+                          </>
+                        )}
+                        {b.status === 'no_show' && (
+                          <>
+                            <Icon name="warning" size={13} />
+                            <span>عدم حضور</span>
+                          </>
+                        )}
+                        {b.status === 'rejected' && (
+                          <>
+                            <Icon name="close" size={13} />
+                            <span>ردشده</span>
+                          </>
+                        )}
                       </span>
                     </td>
                     <td>
-                      <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                      <div class="row-actions-group">
                         {b.status === 'pending' && (
                           <button
                             type="button"
                             class="btn-3d-accept accept-booking-btn"
-                            style="padding: 6px 12px; font-size: 0.78rem;"
                             data-id={b.id}
+                            title="تأیید فوری نوبت"
                           >
-                            ✓ تأیید
+                            <Icon name="check" size={14} />
+                            <span>تأیید</span>
                           </button>
                         )}
 
@@ -190,28 +244,29 @@ try {
                           <button
                             type="button"
                             class="btn-3d-reject reject-booking-btn"
-                            style="padding: 6px 10px; font-size: 0.78rem;"
                             data-id={b.id}
+                            title="رد و لغو نوبت"
                           >
-                            ✕ رد
+                            <Icon name="close" size={14} />
+                            <span>رد</span>
                           </button>
                         )}
 
                         {b.status === 'confirmed' && (
                           <button
                             type="button"
-                            class="btn-table-action complete-booking-btn"
-                            style="padding: 6px 10px; font-size: 0.78rem; border-color: rgba(56, 189, 248, 0.4); color: #38bdf8;"
+                            class="btn-3d-complete complete-booking-btn"
                             data-id={b.id}
+                            title="ثبت خاتمه و انجام خدمت"
                           >
-                            ✓ انجام شد
+                            <Icon name="checkCircle" size={14} />
+                            <span>انجام شد</span>
                           </button>
                         )}
 
                         <button
                           type="button"
                           class="btn-table-action edit-booking-btn"
-                          style="padding: 6px 10px; font-size: 0.78rem; border-color: rgba(212, 175, 55, 0.45); color: #f5d77f;"
                           data-id={b.id}
                           data-customer-id={b.customer.id}
                           data-customer-name={b.customer.name}
@@ -219,8 +274,10 @@ try {
                           data-customer-note={b.customerNote || ''}
                           data-admin-note={b.adminNote || ''}
                           data-amount={b.quotedAmount}
+                          title="ویرایش پرونده و مشخصات"
                         >
-                          ✏️ ویرایش
+                          <Icon name="edit" size={14} />
+                          <span>ویرایش</span>
                         </button>
                       </div>
                     </td>
@@ -234,14 +291,26 @@ try {
     </div>
 
     <!-- 3D Edit Booking & Customer Modal -->
-    <div id="bookingEditModal" class="modal-backdrop" style="display: none;">
-      <div class="modal-dialog">
-        <h3 class="modal-title">✏️ ویرایش مشخصات نوبت و مراجع</h3>
-        <p style="color: rgba(226, 232, 240, 0.7); font-size: 0.86rem; margin: 0 0 18px;">
+    <div id="bookingEditModal" class="modal-backdrop modal-custom-backdrop" style="display: none;">
+      <div class="modal-dialog modal-custom-dialog">
+        <div class="modal-header-with-icon">
+          <div class="modal-title-row">
+            <span class="modal-icon-badge">
+              <Icon name="edit" size={20} />
+            </span>
+            <h3 class="modal-title">ویرایش مشخصات نوبت و مراجع</h3>
+          </div>
+          <button type="button" class="modal-close-icon-btn" id="closeEditModalBtn" aria-label="بستن">
+            <Icon name="close" size={18} />
+          </button>
+        </div>
+
+        <p class="modal-sub-desc">
           ویرایش نام، شماره تلفن، یادداشت‌های پرونده و مبلغ مصوب (API First)
         </p>
 
         <div id="bookingEditAlert" class="alert-3d-danger" style="display: none; margin-bottom: 16px;">
+          <Icon name="warning" size={18} />
           <span id="bookingEditAlertText"></span>
         </div>
 
@@ -249,10 +318,11 @@ try {
           <input type="hidden" id="editBookingId" />
           <input type="hidden" id="editBookingCustomerId" />
 
-          <div class="g-2" style="display: grid; gap: 14px; margin-bottom: 14px">
+          <div class="form-grid-pair">
             <div>
-              <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #e2e8f0; margin-bottom: 6px;">
-                نام و نام خانوادگی مراجع:
+              <label class="modal-input-label">
+                <Icon name="users" size={14} />
+                <span>نام و نام خانوادگی مراجع:</span>
               </label>
               <input
                 type="text"
@@ -263,8 +333,9 @@ try {
             </div>
 
             <div>
-              <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #e2e8f0; margin-bottom: 6px;">
-                شماره همراه:
+              <label class="modal-input-label">
+                <Icon name="phone" size={14} />
+                <span>شماره همراه:</span>
               </label>
               <input
                 type="tel"
@@ -276,9 +347,10 @@ try {
             </div>
           </div>
 
-          <div style="margin-bottom: 14px;">
-            <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #e2e8f0; margin-bottom: 6px;">
-              مبلغ مصوب فاکتور (هزار تومان):
+          <div class="form-field-wrap">
+            <label class="modal-input-label">
+              <Icon name="cash" size={14} />
+              <span>مبلغ مصوب فاکتور (هزار تومان):</span>
             </label>
             <input
               type="number"
@@ -288,9 +360,10 @@ try {
             />
           </div>
 
-          <div style="margin-bottom: 14px;">
-            <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #e2e8f0; margin-bottom: 6px;">
-              یادداشت مراجع (توضیحات رزرو):
+          <div class="form-field-wrap">
+            <label class="modal-input-label">
+              <Icon name="document" size={14} />
+              <span>یادداشت مراجع (توضیحات رزرو):</span>
             </label>
             <input
               type="text"
@@ -300,9 +373,10 @@ try {
             />
           </div>
 
-          <div style="margin-bottom: 18px;">
-            <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #e2e8f0; margin-bottom: 6px;">
-              یادداشت محرمانه داخلی اپراتور / کلینیک:
+          <div class="form-field-wrap">
+            <label class="modal-input-label">
+              <Icon name="shield" size={14} />
+              <span>یادداشت محرمانه داخلی اپراتور / کلینیک:</span>
             </label>
             <textarea
               id="editBookingAdminNote"
@@ -313,11 +387,12 @@ try {
           </div>
 
           <div class="modal-actions-row">
-            <button type="button" id="cancelBookingEditBtn" class="btn-table-action">
+            <button type="button" id="cancelBookingEditBtn" class="btn-3d-secondary modal-btn">
               انصراف
             </button>
-            <button type="submit" id="saveBookingBtn" class="btn-3d-accept" style="flex: none; padding: 12px 24px;">
-              ✓ ذخیره تغییرات نوبت
+            <button type="submit" id="saveBookingBtn" class="btn-3d-accept modal-btn modal-btn-submit">
+              <Icon name="check" size={16} />
+              <span>ذخیره تغییرات نوبت</span>
             </button>
           </div>
         </form>
@@ -325,17 +400,32 @@ try {
     </div>
 
     <!-- 3D Rejection Modal -->
-    <div id="bookingRejectModal" class="modal-backdrop" style="display: none;">
-      <div class="modal-dialog">
-        <h3 class="modal-title" style="color: #f87171;">✕ ثبت دلیل رد نوبت</h3>
-        <p style="color: rgba(226, 232, 240, 0.7); font-size: 0.86rem; margin: 0 0 16px;">
+    <div id="bookingRejectModal" class="modal-backdrop modal-custom-backdrop" style="display: none;">
+      <div class="modal-dialog modal-custom-dialog">
+        <div class="modal-header-with-icon">
+          <div class="modal-title-row" style="color: #f87171;">
+            <span class="modal-icon-badge reject-icon-badge">
+              <Icon name="close" size={20} />
+            </span>
+            <h3 class="modal-title" style="color: #f87171;">ثبت دلیل رد نوبت</h3>
+          </div>
+          <button type="button" class="modal-close-icon-btn" id="closeRejectModalBtn" aria-label="بستن">
+            <Icon name="close" size={18} />
+          </button>
+        </div>
+
+        <p class="modal-sub-desc">
           دلیل عدم امکان پذیرش جهت اطلاع مراجع و آزادسازی فوری اسلات در سامانه:
         </p>
 
         <form id="rejectBookingForm">
           <input type="hidden" id="rejectBookingId" />
 
-          <div style="margin-bottom: 18px;">
+          <div class="form-field-wrap">
+            <label class="modal-input-label">
+              <Icon name="list" size={14} />
+              <span>علت پیش‌فرض:</span>
+            </label>
             <select id="rejectReasonPreset" class="form-control-modal" style="margin-bottom: 10px;">
               <option value="عدم امکان ارائه خدمت در ساعت درخواستی به دلیل تکمیل ظرفیت">عدم امکان ارائه خدمت در ساعت درخواستی</option>
               <option value="ضرورت تغییر زمان با هماهنگی تلفنی با مراجع">ضرورت تغییر زمان با هماهنگی تلفنی</option>
@@ -351,11 +441,12 @@ try {
           </div>
 
           <div class="modal-actions-row">
-            <button type="button" id="cancelRejectBtn" class="btn-table-action">
+            <button type="button" id="cancelRejectBtn" class="btn-3d-secondary modal-btn">
               انصراف
             </button>
-            <button type="submit" id="confirmRejectBtn" class="btn-3d-reject" style="flex: none; padding: 12px 24px;">
-              ثبت قطعی رد نوبت
+            <button type="submit" id="confirmRejectBtn" class="btn-3d-reject modal-btn modal-btn-submit">
+              <Icon name="close" size={16} />
+              <span>ثبت قطعی رد نوبت</span>
             </button>
           </div>
         </form>
@@ -363,11 +454,425 @@ try {
     </div>
   </div>
 
+  <style>
+    .page-title-with-icon {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .page-title-icon-box {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.22) 0%, rgba(212, 175, 55, 0.06) 100%);
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      color: #f5d77f;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+      flex-shrink: 0;
+    }
+
+    .bookings-total-pill {
+      font-size: 0.88rem;
+      color: #f5d77f;
+      background: rgba(212, 175, 55, 0.12);
+      border: 1px solid rgba(212, 175, 55, 0.35);
+      padding: 8px 16px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .filter-section-card {
+      padding: 22px;
+      margin-bottom: 26px;
+      background: linear-gradient(160deg, rgba(20, 26, 40, 0.95) 0%, rgba(10, 13, 20, 0.95) 100%);
+      border: 1px solid rgba(212, 175, 55, 0.24);
+      border-radius: 20px;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.08);
+    }
+
+    .bookings-filter-form {
+      display: flex;
+      gap: 16px;
+      align-items: flex-end;
+      flex-wrap: wrap;
+    }
+
+    .filter-field-col {
+      flex: 1;
+      min-width: 170px;
+    }
+
+    .filter-field-wide {
+      flex: 1.5;
+      min-width: 220px;
+    }
+
+    .filter-field-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #cbd5e1;
+      margin-bottom: 6px;
+    }
+
+    .filter-input {
+      margin-top: 0;
+      padding: 10px 14px;
+      min-height: 42px;
+      background: rgba(8, 10, 16, 0.85);
+      border: 1px solid rgba(212, 175, 55, 0.25);
+      border-radius: 12px;
+      color: #ffffff;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .filter-input:focus {
+      border-color: #d4af37;
+      box-shadow: 0 0 12px rgba(212, 175, 55, 0.25);
+      outline: none;
+    }
+
+    .filter-btn-group {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .filter-action-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 18px;
+      min-height: 42px;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 800;
+      font-size: 0.88rem;
+    }
+
+    .table-section-block {
+      padding: 0;
+      overflow: hidden;
+      border-radius: 20px;
+      border: 1px solid rgba(212, 175, 55, 0.24);
+      background: rgba(11, 14, 22, 0.95);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.08);
+    }
+
+    .table-responsive-container {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      width: 100%;
+    }
+
+    .table-responsive-container::-webkit-scrollbar {
+      height: 8px;
+    }
+
+    .table-responsive-container::-webkit-scrollbar-track {
+      background: rgba(15, 20, 31, 0.8);
+    }
+
+    .table-responsive-container::-webkit-scrollbar-thumb {
+      background: rgba(212, 175, 55, 0.35);
+      border-radius: 6px;
+    }
+
+    .bookings-custom-table {
+      width: 100%;
+      min-width: 880px;
+      border-collapse: collapse;
+      text-align: right;
+      font-size: 0.88rem;
+    }
+
+    .bookings-custom-table th {
+      background: rgba(20, 26, 38, 0.98);
+      color: rgba(212, 175, 55, 0.95);
+      padding: 15px 18px;
+      font-weight: 800;
+      font-size: 0.82rem;
+      white-space: nowrap;
+      border-bottom: 1.5px solid rgba(212, 175, 55, 0.3);
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    .bookings-custom-table td {
+      padding: 14px 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      color: #e2e8f0;
+      vertical-align: middle;
+    }
+
+    .bookings-custom-table tbody tr:hover {
+      background-color: rgba(212, 175, 55, 0.08);
+    }
+
+    .ref-col-cell {
+      font-family: monospace;
+      font-weight: 800;
+      color: #f5d77f;
+    }
+
+    .booking-ref-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(212, 175, 55, 0.12);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      padding: 3px 8px;
+      border-radius: 7px;
+      letter-spacing: 0.03em;
+    }
+
+    .customer-name-cell {
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .phone-col-cell {
+      white-space: nowrap;
+    }
+
+    .phone-direct-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #38bdf8;
+      text-decoration: none;
+      font-family: monospace;
+      font-weight: 600;
+      transition: color 0.15s ease;
+    }
+
+    .phone-direct-link:hover {
+      color: #7dd3fc;
+      text-decoration: underline;
+    }
+
+    .date-time-cell-main {
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    .date-time-cell-sub {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.78rem;
+      color: #94a3b8;
+      margin-top: 2px;
+    }
+
+    .amount-cell-main {
+      font-weight: 800;
+      color: #f8fafc;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .amount-cell-discount {
+      display: block;
+      font-size: 0.75rem;
+      color: #34d399;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .row-actions-group {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .empty-icon-wrap {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 68px;
+      height: 68px;
+      border-radius: 20px;
+      background: rgba(212, 175, 55, 0.1);
+      border: 1px solid rgba(212, 175, 55, 0.25);
+      color: #f5d77f;
+      margin-bottom: 12px;
+    }
+
+    /* Modal Enhancements */
+    .modal-custom-backdrop {
+      background: rgba(5, 7, 11, 0.88);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      padding: 16px;
+    }
+
+    .modal-custom-dialog {
+      background: linear-gradient(160deg, rgba(22, 28, 44, 0.98) 0%, rgba(11, 14, 22, 0.98) 100%);
+      border: 1.5px solid rgba(212, 175, 55, 0.42);
+      border-radius: 22px;
+      padding: 26px;
+      max-width: 520px;
+      width: 100%;
+      box-shadow: 0 35px 80px rgba(0, 0, 0, 0.85), 0 0 32px rgba(212, 175, 55, 0.2);
+      max-height: calc(100dvh - 32px);
+      overflow-y: auto;
+    }
+
+    .modal-header-with-icon {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .modal-title-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .modal-icon-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: rgba(212, 175, 55, 0.15);
+      border: 1px solid rgba(212, 175, 55, 0.35);
+      color: #f5d77f;
+      flex-shrink: 0;
+    }
+
+    .reject-icon-badge {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: rgba(239, 68, 68, 0.35);
+      color: #f87171;
+    }
+
+    .modal-close-icon-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: #cbd5e1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      flex-shrink: 0;
+    }
+
+    .modal-close-icon-btn:hover {
+      background: rgba(239, 68, 68, 0.22);
+      border-color: rgba(239, 68, 68, 0.5);
+      color: #ffffff;
+    }
+
+    .modal-sub-desc {
+      color: rgba(226, 232, 240, 0.7);
+      font-size: 0.85rem;
+      margin: 0 0 18px;
+      line-height: 1.5;
+    }
+
+    .form-grid-pair {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .form-field-wrap {
+      margin-bottom: 14px;
+    }
+
+    .modal-input-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: #e2e8f0;
+      margin-bottom: 6px;
+    }
+
+    .modal-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 18px;
+      font-size: 0.88rem;
+    }
+
+    .modal-btn-submit {
+      flex: none;
+      padding: 12px 24px;
+    }
+
+    /* Small Screen Media Queries (320px & 390px) */
+    @media (max-width: 480px) {
+      .filter-section-card {
+        padding: 16px;
+      }
+
+      .filter-field-col,
+      .filter-field-wide {
+        flex: 1 1 100%;
+        min-width: 100%;
+      }
+
+      .filter-btn-group {
+        width: 100%;
+      }
+
+      .filter-btn-group > .filter-action-btn {
+        flex: 1 1 calc(50% - 4px);
+      }
+
+      .form-grid-pair {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 12px;
+      }
+
+      .modal-custom-dialog {
+        padding: 18px;
+      }
+
+      .modal-actions-row {
+        flex-direction: column-reverse;
+        gap: 8px;
+      }
+
+      .modal-actions-row .modal-btn {
+        width: 100%;
+      }
+    }
+  </style>
+
   <script>
     // Edit Modal Elements
     const editModal = document.getElementById('bookingEditModal');
     const editForm = document.getElementById('editBookingForm') as HTMLFormElement;
     const cancelEditBtn = document.getElementById('cancelBookingEditBtn');
+    const closeEditModalBtn = document.getElementById('closeEditModalBtn');
     const saveBookingBtn = document.getElementById('saveBookingBtn') as HTMLButtonElement;
     const editAlertBox = document.getElementById('bookingEditAlert');
     const editAlertText = document.getElementById('bookingEditAlertText');
@@ -384,6 +889,7 @@ try {
     const rejectModal = document.getElementById('bookingRejectModal');
     const rejectForm = document.getElementById('rejectBookingForm') as HTMLFormElement;
     const cancelRejectBtn = document.getElementById('cancelRejectBtn');
+    const closeRejectModalBtn = document.getElementById('closeRejectModalBtn');
     const rejectBookingId = document.getElementById('rejectBookingId') as HTMLInputElement;
     const rejectReasonPreset = document.getElementById('rejectReasonPreset') as unknown as HTMLSelectElement;
     const rejectReasonText = document.getElementById('rejectReasonText') as HTMLTextAreaElement;
@@ -396,7 +902,8 @@ try {
         if (!id) return;
 
         target.disabled = true;
-        target.innerText = '...';
+        const origContent = target.innerHTML;
+        target.innerHTML = '<span>...</span>';
 
         try {
           const res = await fetch(`/api/v1/admin/bookings/${id}/accept`, {
@@ -404,17 +911,17 @@ try {
             headers: { 'content-type': 'application/json' },
           });
           if (res.ok) {
-            target.innerText = '✓ تأیید شد';
+            target.innerHTML = '<span>تأیید شد</span>';
             setTimeout(() => window.location.reload(), 400);
           } else {
             alert('خطا در تأیید نوبت.');
             target.disabled = false;
-            target.innerText = '✓ تأیید';
+            target.innerHTML = origContent;
           }
         } catch {
           alert('خطای ارتباط با سرور.');
           target.disabled = false;
-          target.innerText = '✓ تأیید';
+          target.innerHTML = origContent;
         }
       });
     });
@@ -429,7 +936,8 @@ try {
         if (!confirm('آیا این نوبت با موفقیت به پایان رسید؟')) return;
 
         target.disabled = true;
-        target.innerText = '...';
+        const origContent = target.innerHTML;
+        target.innerHTML = '<span>...</span>';
 
         try {
           const res = await fetch(`/api/v1/admin/bookings/${id}/complete`, {
@@ -437,17 +945,17 @@ try {
             headers: { 'content-type': 'application/json' },
           });
           if (res.ok) {
-            target.innerText = '✓ ثبت شد';
+            target.innerHTML = '<span>ثبت شد</span>';
             setTimeout(() => window.location.reload(), 400);
           } else {
             alert('خطا در تغییر وضعیت نوبت.');
             target.disabled = false;
-            target.innerText = '✓ انجام شد';
+            target.innerHTML = origContent;
           }
         } catch {
           alert('خطای ارتباط با سرور.');
           target.disabled = false;
-          target.innerText = '✓ انجام شد';
+          target.innerHTML = origContent;
         }
       });
     });
@@ -471,11 +979,12 @@ try {
       });
     }
 
-    if (cancelRejectBtn && rejectModal) {
-      cancelRejectBtn.addEventListener('click', () => {
-        rejectModal.style.display = 'none';
-      });
+    function closeReject() {
+      if (rejectModal) rejectModal.style.display = 'none';
     }
+
+    if (cancelRejectBtn) cancelRejectBtn.addEventListener('click', closeReject);
+    if (closeRejectModalBtn) closeRejectModalBtn.addEventListener('click', closeReject);
 
     if (rejectForm && rejectModal) {
       rejectForm.addEventListener('submit', async (e) => {
@@ -521,11 +1030,12 @@ try {
       });
     });
 
-    if (cancelEditBtn && editModal) {
-      cancelEditBtn.addEventListener('click', () => {
-        editModal.style.display = 'none';
-      });
+    function closeEdit() {
+      if (editModal) editModal.style.display = 'none';
     }
+
+    if (cancelEditBtn) cancelEditBtn.addEventListener('click', closeEdit);
+    if (closeEditModalBtn) closeEditModalBtn.addEventListener('click', closeEdit);
 
     if (editForm && editModal) {
       editForm.addEventListener('submit', async (e) => {
@@ -535,7 +1045,8 @@ try {
         if (!bId) return;
 
         saveBookingBtn.disabled = true;
-        saveBookingBtn.innerText = '⏳ در حال ذخیره...';
+        const origText = saveBookingBtn.innerHTML;
+        saveBookingBtn.innerHTML = '<span>در حال ذخیره...</span>';
 
         try {
           // Parallel API calls: Update Customer and Update Booking
@@ -568,19 +1079,19 @@ try {
           const allOk = results.every((r) => r.ok);
 
           if (allOk) {
-            saveBookingBtn.innerText = '✓ ذخیره شد!';
+            saveBookingBtn.innerHTML = '<span>ذخیره شد!</span>';
             setTimeout(() => window.location.reload(), 400);
           } else {
             if (editAlertText) editAlertText.innerText = 'خطا در ثبت برخی از تغییرات.';
             if (editAlertBox) editAlertBox.style.display = 'flex';
             saveBookingBtn.disabled = false;
-            saveBookingBtn.innerText = '✓ ذخیره تغییرات نوبت';
+            saveBookingBtn.innerHTML = origText;
           }
         } catch {
           if (editAlertText) editAlertText.innerText = 'خطای ارتباط با سرور.';
           if (editAlertBox) editAlertBox.style.display = 'flex';
           saveBookingBtn.disabled = false;
-          saveBookingBtn.innerText = '✓ ذخیره تغییرات نوبت';
+          saveBookingBtn.innerHTML = origText;
         }
       });
     }

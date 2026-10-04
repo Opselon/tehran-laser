@@ -3,11 +3,21 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 import { env } from 'cloudflare:workers';
 import { listAdminBookings } from '../../server/repositories';
 import { formatJalaliDate } from '../../lib/datetime/jalali';
+import Icon from '../../components/ui/Icon.astro';
 
 const url = Astro.url;
 const targetDate = url.searchParams.get('date') || new Date().toISOString().slice(0, 10);
 const fromIso = `${targetDate}T00:00:00.000Z`;
 const toIso = `${targetDate}T23:59:59.999Z`;
+
+// Calculate date navigation (RTL: previous day is right arrow, next day is left arrow)
+const currDateObj = new Date(targetDate + 'T12:00:00Z');
+const prevDateObj = new Date(currDateObj.getTime() - 86400000);
+const nextDateObj = new Date(currDateObj.getTime() + 86400000);
+const todayIso = new Date().toISOString().slice(0, 10);
+const prevDateStr = prevDateObj.toISOString().slice(0, 10);
+const nextDateStr = nextDateObj.toISOString().slice(0, 10);
+const isToday = targetDate === todayIso;
 
 let bookings: Awaited<ReturnType<typeof listAdminBookings>> = { items: [], nextCursor: null };
 try {
@@ -26,20 +36,60 @@ try {
     <!-- 3D Header Row -->
     <div class="dashboard-header-row">
       <div>
-        <h1 class="admin-page-title">تقویم زمان‌بندی روزانه کلینیک</h1>
+        <h1 class="admin-page-title page-title-with-icon">
+          <span class="page-title-icon-box">
+            <Icon name="calendar" size={26} />
+          </span>
+          <span>تقویم زمان‌بندی روزانه کلینیک</span>
+        </h1>
         <p class="section-block-sub">
           نمایش نوبت‌ها به تفکیک روز انتخابی — <strong style="color: #f5d77f;">{formatJalaliDate(targetDate)}</strong>
         </p>
       </div>
 
-      <div class="date-selector-form">
-        <form method="GET" style="display: flex; align-items: center; gap: 10px;">
-          <label style="font-size: 0.85rem; font-weight: 700; color: #cbd5e1;">انتخاب تاریخ:</label>
+      <!-- Calendar Grid Navigation Toolbar -->
+      <div class="calendar-nav-toolbar">
+        <div class="calendar-step-controls">
+          <a
+            href={`/admin/calendar?date=${prevDateStr}`}
+            class="btn-cal-step"
+            title={`روز قبل (${prevDateStr})`}
+            aria-label="روز قبل"
+          >
+            <Icon name="chevronRight" size={18} />
+            <span>روز قبل</span>
+          </a>
+
+          <a
+            href={`/admin/calendar?date=${todayIso}`}
+            class={`btn-cal-today ${isToday ? 'btn-cal-today-active' : ''}`}
+            title="رفتن به نوبت‌های امروز"
+          >
+            <Icon name="clock" size={15} />
+            <span>امروز</span>
+          </a>
+
+          <a
+            href={`/admin/calendar?date=${nextDateStr}`}
+            class="btn-cal-step"
+            title={`روز بعد (${nextDateStr})`}
+            aria-label="روز بعد"
+          >
+            <span>روز بعد</span>
+            <Icon name="chevronLeft" size={18} />
+          </a>
+        </div>
+
+        <form method="GET" class="cal-date-picker-form">
+          <label class="cal-date-label" for="calDateInput">
+            <Icon name="calendar" size={16} />
+            <span>انتخاب تاریخ:</span>
+          </label>
           <input
+            id="calDateInput"
             type="date"
             name="date"
-            class="form-control-modal"
-            style="margin-top: 0; padding: 8px 14px;"
+            class="cal-date-input"
             value={targetDate}
             onchange="this.form.submit()"
           />
@@ -48,23 +98,39 @@ try {
     </div>
 
     <!-- Day Schedule Visual Timeline -->
-    <div class="admin-section-block">
-      <div class="section-block-header">
-        <h2 class="section-block-title">
-          <span>📅 جدول زمان‌بندی نوبت‌های {formatJalaliDate(targetDate)}</span>
-          <span style="font-size: 0.85rem; color: #f5d77f; background: rgba(212, 175, 55, 0.15); border: 1px solid rgba(212, 175, 55, 0.35); padding: 2px 10px; border-radius: 999px;">
-            {bookings.items.length.toLocaleString('fa-IR')} نوبت ثبت‌شده
+    <div class="admin-section-block calendar-section-block">
+      <div class="section-block-header cal-section-header">
+        <h2 class="section-block-title cal-section-title">
+          <span class="cal-title-text">
+            <Icon name="calendar" size={22} />
+            <span>جدول زمان‌بندی نوبت‌های {formatJalaliDate(targetDate)}</span>
+          </span>
+          <span class="cal-count-badge">
+            <Icon name="list" size={14} />
+            <span>{bookings.items.length.toLocaleString('fa-IR')} نوبت ثبت‌شده</span>
           </span>
         </h2>
       </div>
 
       {bookings.items.length === 0 ? (
-        <div class="empty-state-card">
-          <span class="empty-icon">🗓️</span>
+        <div class="empty-state-card cal-empty-state">
+          <div class="empty-icon-wrap">
+            <Icon name="calendar" size={42} />
+          </div>
           <p class="empty-text">هیچ نوبتی برای این روز ثبت نشده است.</p>
+          <div class="cal-empty-actions">
+            <a href={`/admin/calendar?date=${todayIso}`} class="btn-3d-gold" style="font-size: 0.85rem; padding: 8px 16px;">
+              <Icon name="clock" size={15} />
+              <span>مشاهده نوبت‌های امروز</span>
+            </a>
+            <a href="/admin/bookings" class="btn-3d-secondary" style="font-size: 0.85rem; padding: 8px 16px;">
+              <Icon name="bookings" size={15} />
+              <span>کنسول مدیریت تمام نوبت‌ها</span>
+            </a>
+          </div>
         </div>
       ) : (
-        <div class="pending-bookings-list">
+        <div class="pending-bookings-list cal-bookings-grid">
           {bookings.items.map((b) => {
             const timeStr = new Date(b.startsAt).toLocaleTimeString('fa-IR', {
               hour: '2-digit',
@@ -73,44 +139,102 @@ try {
             });
 
             return (
-              <div class="pending-booking-card" style="border-color: rgba(212, 175, 55, 0.35);">
+              <div class="pending-booking-card cal-booking-card">
                 <div>
                   <div class="card-top-row">
                     <div class="customer-info">
                       <span class="customer-name">{b.customer.name}</span>
                       <a href={`tel:${b.customer.phone}`} class="customer-phone" dir="ltr">
-                        📞 {b.customer.phone}
+                        <Icon name="phone" size={13} />
+                        <span>{b.customer.phone}</span>
                       </a>
                     </div>
-                    <div class="booking-ref-badge" dir="ltr">{b.reference}</div>
+                    <div class="booking-ref-badge" dir="ltr" title="کد پیگیری">
+                      <Icon name="document" size={12} />
+                      <span>{b.reference}</span>
+                    </div>
                   </div>
 
-                  <div class="card-meta-grid">
-                    <div class="meta-item">
-                      <strong>زمان:</strong> ساعت {timeStr}
+                  <div class="card-meta-grid cal-card-meta">
+                    <div class="meta-item cal-meta-item">
+                      <span class="meta-item-label">
+                        <Icon name="clock" size={14} />
+                        <strong>زمان:</strong>
+                      </span>
+                      <span class="meta-item-value">ساعت {timeStr}</span>
                     </div>
-                    <div class="meta-item">
-                      <strong>خدمت:</strong> {b.service.name}
+                    <div class="meta-item cal-meta-item">
+                      <span class="meta-item-label">
+                        <Icon name="sparkles" size={14} />
+                        <strong>خدمت:</strong>
+                      </span>
+                      <span class="meta-item-value">{b.service.name}</span>
                     </div>
-                    <div class="meta-item">
-                      <strong>بخش:</strong> {b.pricingCategory === 'female' ? 'بانوان' : 'آقایان'}
+                    <div class="meta-item cal-meta-item">
+                      <span class="meta-item-label">
+                        <Icon name="users" size={14} />
+                        <strong>بخش:</strong>
+                      </span>
+                      <span class="meta-item-value">{b.pricingCategory === 'female' ? 'بانوان' : 'آقایان'}</span>
                     </div>
-                    <div class="meta-item">
-                      <strong>مبلغ:</strong> {(b.quotedAmount * 1000).toLocaleString('fa-IR')} ت
+                    <div class="meta-item cal-meta-item">
+                      <span class="meta-item-label">
+                        <Icon name="cash" size={14} />
+                        <strong>مبلغ:</strong>
+                      </span>
+                      <span class="meta-item-value font-tabular">{(b.quotedAmount * 1000).toLocaleString('fa-IR')} ت</span>
                     </div>
                   </div>
                 </div>
 
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255, 255, 255, 0.08);">
+                <div class="cal-card-footer">
                   <span class={`badge-status badge-status-${b.status}`}>
-                    {b.status === 'confirmed' && 'تأییدشده'}
-                    {b.status === 'pending' && 'در انتظار'}
-                    {b.status === 'completed' && 'انجام‌شده'}
-                    {b.status === 'cancelled' && 'لغوشده'}
-                    {b.status === 'rejected' && 'ردشده'}
-                    {b.status === 'no_show' && 'عدم حضور'}
+                    {b.status === 'confirmed' && (
+                      <>
+                        <Icon name="checkCircle" size={12} />
+                        <span>تأییدشده</span>
+                      </>
+                    )}
+                    {b.status === 'pending' && (
+                      <>
+                        <Icon name="clock" size={12} />
+                        <span>در انتظار تأیید</span>
+                      </>
+                    )}
+                    {b.status === 'completed' && (
+                      <>
+                        <Icon name="check" size={12} />
+                        <span>انجام‌شده</span>
+                      </>
+                    )}
+                    {b.status === 'cancelled' && (
+                      <>
+                        <Icon name="x" size={12} />
+                        <span>لغوشده</span>
+                      </>
+                    )}
+                    {b.status === 'rejected' && (
+                      <>
+                        <Icon name="close" size={12} />
+                        <span>ردشده</span>
+                      </>
+                    )}
+                    {b.status === 'no_show' && (
+                      <>
+                        <Icon name="warning" size={12} />
+                        <span>عدم حضور</span>
+                      </>
+                    )}
                   </span>
-                  <span style="font-size: 0.8rem; color: #94a3b8;">کد: {b.id.slice(0, 10)}</span>
+
+                  <a
+                    href={`/admin/bookings?q=${encodeURIComponent(b.reference)}`}
+                    class="btn-card-manage"
+                    title="مدیریت و ویرایش این نوبت"
+                  >
+                    <Icon name="edit" size={13} />
+                    <span>مدیریت نوبت</span>
+                  </a>
                 </div>
               </div>
             );
@@ -119,4 +243,383 @@ try {
       )}
     </div>
   </div>
+
+  <style>
+    .page-title-with-icon {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .page-title-icon-box {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.22) 0%, rgba(212, 175, 55, 0.06) 100%);
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      color: #f5d77f;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+      flex-shrink: 0;
+    }
+
+    /* Calendar Grid Navigation Toolbar */
+    .calendar-nav-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .calendar-step-controls {
+      display: inline-flex;
+      align-items: center;
+      background: rgba(14, 19, 30, 0.85);
+      border: 1px solid rgba(212, 175, 55, 0.25);
+      border-radius: 14px;
+      padding: 4px;
+      gap: 4px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+    }
+
+    .btn-cal-step {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 12px;
+      border-radius: 10px;
+      color: #cbd5e1;
+      text-decoration: none;
+      font-size: 0.82rem;
+      font-weight: 700;
+      transition: all 0.2s ease;
+    }
+
+    .btn-cal-step:hover {
+      background: rgba(212, 175, 55, 0.12);
+      color: #f5d77f;
+    }
+
+    .btn-cal-today {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #e2e8f0;
+      text-decoration: none;
+      font-size: 0.82rem;
+      font-weight: 800;
+      transition: all 0.2s ease;
+    }
+
+    .btn-cal-today:hover {
+      background: rgba(212, 175, 55, 0.18);
+      border-color: rgba(212, 175, 55, 0.4);
+      color: #ffffff;
+    }
+
+    .btn-cal-today-active {
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.3) 0%, rgba(212, 175, 55, 0.15) 100%);
+      border-color: rgba(212, 175, 55, 0.5);
+      color: #f5d77f;
+      box-shadow: 0 2px 8px rgba(212, 175, 55, 0.2);
+    }
+
+    .cal-date-picker-form {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(14, 19, 30, 0.85);
+      border: 1px solid rgba(212, 175, 55, 0.25);
+      border-radius: 14px;
+      padding: 4px 10px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+    }
+
+    .cal-date-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #cbd5e1;
+      white-space: nowrap;
+    }
+
+    .cal-date-input {
+      background: rgba(8, 10, 16, 0.9);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      border-radius: 10px;
+      color: #ffffff;
+      padding: 6px 10px;
+      font-size: 0.84rem;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+
+    .cal-date-input:focus {
+      border-color: #d4af37;
+      box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+    }
+
+    /* Section & Cards */
+    .calendar-section-block {
+      padding: 24px;
+      border-radius: 22px;
+      border: 1px solid rgba(212, 175, 55, 0.24);
+      background: rgba(11, 14, 22, 0.95);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.08);
+    }
+
+    .cal-section-header {
+      margin-bottom: 22px;
+    }
+
+    .cal-section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .cal-title-text {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.12rem;
+      color: #ffffff;
+    }
+
+    .cal-count-badge {
+      font-size: 0.84rem;
+      color: #f5d77f;
+      background: rgba(212, 175, 55, 0.14);
+      border: 1px solid rgba(212, 175, 55, 0.35);
+      padding: 6px 14px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 700;
+    }
+
+    .cal-empty-state {
+      padding: 48px 20px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .empty-icon-wrap {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 72px;
+      height: 72px;
+      border-radius: 20px;
+      background: rgba(212, 175, 55, 0.1);
+      border: 1px solid rgba(212, 175, 55, 0.25);
+      color: #f5d77f;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .cal-empty-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 8px;
+    }
+
+    .cal-bookings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(380px, 100%), 1fr));
+      gap: 18px;
+    }
+
+    .cal-booking-card {
+      background: linear-gradient(160deg, rgba(20, 26, 42, 0.95) 0%, rgba(10, 13, 22, 0.95) 100%);
+      border: 1px solid rgba(212, 175, 55, 0.32);
+      border-radius: 18px;
+      padding: 20px;
+      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.08);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .cal-booking-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(212, 175, 55, 0.55);
+      box-shadow: 0 18px 36px rgba(0, 0, 0, 0.65), 0 0 16px rgba(212, 175, 55, 0.2);
+    }
+
+    .customer-name {
+      font-weight: 800;
+      font-size: 1.02rem;
+      color: #ffffff;
+    }
+
+    .customer-phone {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: #38bdf8;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-family: monospace;
+      font-weight: 600;
+      margin-top: 4px;
+      transition: color 0.15s ease;
+    }
+
+    .customer-phone:hover {
+      color: #7dd3fc;
+      text-decoration: underline;
+    }
+
+    .booking-ref-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(212, 175, 55, 0.12);
+      border: 1px solid rgba(212, 175, 55, 0.32);
+      color: #f5d77f;
+      font-family: monospace;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 8px;
+      letter-spacing: 0.03em;
+    }
+
+    .cal-card-meta {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      background: rgba(6, 8, 14, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 12px;
+    }
+
+    .cal-meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .meta-item-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.76rem;
+      color: #94a3b8;
+    }
+
+    .meta-item-value {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #f1f5f9;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .font-tabular {
+      font-variant-numeric: tabular-nums;
+    }
+
+    .cal-card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn-card-manage {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 10px;
+      background: rgba(212, 175, 55, 0.12);
+      border: 1px solid rgba(212, 175, 55, 0.32);
+      color: #f5d77f;
+      text-decoration: none;
+      font-size: 0.8rem;
+      font-weight: 800;
+      transition: all 0.15s ease;
+    }
+
+    .btn-card-manage:hover {
+      background: rgba(212, 175, 55, 0.24);
+      border-color: #d4af37;
+      color: #ffffff;
+      box-shadow: 0 0 10px rgba(212, 175, 55, 0.25);
+    }
+
+    /* Small Screen Media Queries (320px & 390px) */
+    @media (max-width: 480px) {
+      .calendar-section-block {
+        padding: 16px;
+      }
+
+      .cal-booking-card {
+        padding: 14px;
+      }
+
+      .calendar-nav-toolbar {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .calendar-step-controls {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .cal-date-picker-form {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .cal-card-meta {
+        grid-template-columns: 1fr;
+        gap: 8px;
+        padding: 10px;
+      }
+
+      .card-top-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+
+      .cal-card-footer {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .btn-card-manage {
+        justify-content: center;
+      }
+    }
+  </style>
 </AdminLayout>

@@ -3,6 +3,7 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
 import { env } from 'cloudflare:workers';
 import { listBusinessHours, listAllScheduleExceptions } from '../../../server/repositories';
 import { formatJalaliDate } from '../../../lib/datetime/jalali';
+import Icon from '../../../components/ui/Icon.astro';
 
 let hours: Awaited<ReturnType<typeof listBusinessHours>> = [];
 let exceptions: Awaited<ReturnType<typeof listAllScheduleExceptions>> = [];
@@ -32,31 +33,45 @@ const weekdayNames = [
     <!-- 3D Header Row -->
     <div class="dashboard-header-row">
       <div>
-        <h1 class="admin-page-title">⏱️ تنظیمات ساعات کاری و زمان‌بندی کلینیک</h1>
+        <h1 class="admin-page-title page-title-with-icon">
+          <span class="page-title-icon-box">
+            <Icon name="schedule" size={26} />
+          </span>
+          <span>تنظیمات ساعات کاری و زمان‌بندی کلینیک</span>
+        </h1>
         <p class="section-block-sub">
           مدیریت بازه‌های نوبت‌دهی هفتگی، تغییر ساعات کاری و تقویم تعطیلات رسمی (کاملاً API First و بلادرنگ)
         </p>
       </div>
       <div class="actions">
-        <button type="button" id="openExceptionModalBtn" class="btn-3d-refresh" style="display: inline-flex; align-items: center; gap: 8px;">
-          <span>+</span> ثبت روز تعطیل یا استثنا
+        <button type="button" id="openExceptionModalBtn" class="btn-3d-gold" style="display: inline-flex; align-items: center; gap: 8px;">
+          <Icon name="plus" size={16} />
+          <span>ثبت روز تعطیل یا استثنا</span>
         </button>
       </div>
     </div>
 
     <!-- Alert / Status -->
     <div id="scheduleAlert" class="alert-3d-danger" style="display: none; margin-bottom: 20px;">
+      <Icon name="warning" size={18} />
       <span id="scheduleAlertText"></span>
     </div>
 
     <!-- 1. Weekly Business Hours Table -->
-    <div class="admin-section-block" style="padding: 24px; margin-bottom: 30px;">
-      <h3 class="section-block-title" style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
-        <span>📅</span> برنامه کاری هفتگی کلینیک تهران لیزر
+    <div class="admin-section-block schedule-section-card" style="margin-bottom: 30px;">
+      <h3 class="section-block-title schedule-section-title">
+        <span class="title-with-icon">
+          <Icon name="calendar" size={22} />
+          <span>برنامه کاری هفتگی کلینیک تهران لیزر</span>
+        </span>
+        <span class="schedule-pill-note">
+          <Icon name="clock" size={14} />
+          <span>مبنای زمان‌بندی هوشمند اسلات‌ها</span>
+        </span>
       </h3>
 
-      <div class="today-table-wrapper" style="border: none; border-radius: 0;">
-        <table class="admin-table">
+      <div class="table-responsive-container">
+        <table class="schedule-custom-table">
           <thead>
             <tr>
               <th>روز هفته</th>
@@ -75,30 +90,54 @@ const weekdayNames = [
 
               return (
                 <tr>
-                  <td style={{ fontWeight: 800, color: '#ffffff', fontSize: '1rem' }}>{w.name}</td>
-                  <td dir="ltr" style={{ fontWeight: 700, color: isOpen ? '#38bdf8' : '#64748b' }}>
-                    {isOpen ? `⏱ ${opensAt}` : '—'}
+                  <td class="weekday-name-cell">{w.name}</td>
+                  <td dir="ltr" class="time-col-cell">
+                    {isOpen ? (
+                      <span class="time-slot-badge">
+                        <Icon name="clock" size={13} />
+                        <span>{opensAt}</span>
+                      </span>
+                    ) : (
+                      <span class="time-slot-inactive">—</span>
+                    )}
                   </td>
-                  <td dir="ltr" style={{ fontWeight: 700, color: isOpen ? '#38bdf8' : '#64748b' }}>
-                    {isOpen ? `⏱ ${closesAt}` : '—'}
+                  <td dir="ltr" class="time-col-cell">
+                    {isOpen ? (
+                      <span class="time-slot-badge">
+                        <Icon name="clock" size={13} />
+                        <span>{closesAt}</span>
+                      </span>
+                    ) : (
+                      <span class="time-slot-inactive">—</span>
+                    )}
                   </td>
                   <td>
                     <span class={`badge-status ${isOpen ? 'badge-status-completed' : 'badge-status-rejected'}`}>
-                      {isOpen ? 'فعال و باز' : 'تعطیل هفتگی'}
+                      {isOpen ? (
+                        <>
+                          <Icon name="checkCircle" size={12} />
+                          <span>فعال و باز</span>
+                        </>
+                      ) : (
+                        <>
+                          <Icon name="close" size={12} />
+                          <span>تعطیل هفتگی</span>
+                        </>
+                      )}
                     </span>
                   </td>
                   <td>
                     <button
                       type="button"
                       class="btn-table-action edit-hour-btn"
-                      style="border-color: rgba(212, 175, 55, 0.45); color: #f5d77f;"
                       data-weekday={w.index}
                       data-name={w.name}
                       data-is-open={isOpen ? 'true' : 'false'}
                       data-opens-at={opensAt}
                       data-closes-at={closesAt}
                     >
-                      ✏️ ویرایش ساعت کاری
+                      <Icon name="edit" size={14} />
+                      <span>ویرایش ساعت کاری</span>
                     </button>
                   </td>
                 </tr>
@@ -110,19 +149,28 @@ const weekdayNames = [
     </div>
 
     <!-- 2. Exceptions and Holidays Table -->
-    <div class="admin-section-block" style="padding: 24px;">
-      <h3 class="section-block-title" style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
-        <span>🏖️</span> تعطیلات رسمی، تغییرات مقطعی و مسدودی‌های تقویم
+    <div class="admin-section-block schedule-section-card">
+      <h3 class="section-block-title schedule-section-title">
+        <span class="title-with-icon">
+          <Icon name="calendar" size={22} />
+          <span>تعطیلات رسمی، تغییرات مقطعی و مسدودی‌های تقویم</span>
+        </span>
+        <span class="schedule-pill-note">
+          <Icon name="list" size={14} />
+          <span>{exceptions.length.toLocaleString('fa-IR')} مورد ثبت‌شده</span>
+        </span>
       </h3>
 
       {exceptions.length === 0 ? (
         <div class="empty-state-card" style="border: none; margin: 10px;">
-          <span class="empty-icon">🏖️</span>
+          <div class="empty-icon-wrap">
+            <Icon name="calendar" size={40} />
+          </div>
           <p class="empty-text">هیچ روز تعطیل یا استثنای فعالی ثبت نشده است.</p>
         </div>
       ) : (
-        <div class="today-table-wrapper" style="border: none; border-radius: 0;">
-          <table class="admin-table">
+        <div class="table-responsive-container">
+          <table class="schedule-custom-table">
             <thead>
               <tr>
                 <th>تاریخ (شمسی و میلادی)</th>
@@ -136,34 +184,71 @@ const weekdayNames = [
               {exceptions.map((ex) => (
                 <tr>
                   <td>
-                    <div style={{ fontWeight: 700, color: '#f5d77f' }}>
-                      {formatJalaliDate(ex.exceptionDate)}
+                    <div class="date-cell-jalali">
+                      <Icon name="calendar" size={13} />
+                      <span>{formatJalaliDate(ex.exceptionDate)}</span>
                     </div>
-                    <span dir="ltr" style={{ fontSize: '0.78rem', color: '#94a3b8', fontFamily: 'monospace' }}>
+                    <span dir="ltr" class="date-cell-gregorian">
                       {ex.exceptionDate}
                     </span>
                   </td>
                   <td>
                     <span class={`badge-status ${ex.kind === 'holiday' ? 'badge-status-rejected' : 'badge-status-pending'}`}>
-                      {ex.kind === 'holiday' && 'تعطیل رسمی'}
-                      {ex.kind === 'closed' && 'تعطیل کلینیک'}
-                      {ex.kind === 'special_hours' && 'ساعات کاری ویژه'}
-                      {ex.kind === 'blocked_time' && 'مسدودی موقت'}
-                      {ex.kind === 'temporary_change' && 'تغییر موقت'}
+                      {ex.kind === 'holiday' && (
+                        <>
+                          <Icon name="close" size={12} />
+                          <span>تعطیل رسمی</span>
+                        </>
+                      )}
+                      {ex.kind === 'closed' && (
+                        <>
+                          <Icon name="lock" size={12} />
+                          <span>تعطیل کلینیک</span>
+                        </>
+                      )}
+                      {ex.kind === 'special_hours' && (
+                        <>
+                          <Icon name="clock" size={12} />
+                          <span>ساعات کاری ویژه</span>
+                        </>
+                      )}
+                      {ex.kind === 'blocked_time' && (
+                        <>
+                          <Icon name="warning" size={12} />
+                          <span>مسدودی موقت</span>
+                        </>
+                      )}
+                      {ex.kind === 'temporary_change' && (
+                        <>
+                          <Icon name="refresh" size={12} />
+                          <span>تغییر موقت</span>
+                        </>
+                      )}
                     </span>
                   </td>
-                  <td dir="ltr" style={{ color: ex.opensAt ? '#38bdf8' : '#94a3b8' }}>
-                    {ex.opensAt && ex.closesAt ? `${ex.opensAt} تا ${ex.closesAt}` : 'تمام روز تعطیل'}
+                  <td dir="ltr" class="time-col-cell">
+                    {ex.opensAt && ex.closesAt ? (
+                      <span class="time-slot-badge">
+                        <Icon name="clock" size={13} />
+                        <span>{ex.opensAt} تا {ex.closesAt}</span>
+                      </span>
+                    ) : (
+                      <span class="badge-all-day-closed">
+                        <Icon name="lock" size={12} />
+                        <span>تمام روز تعطیل</span>
+                      </span>
+                    )}
                   </td>
                   <td style={{ color: '#cbd5e1' }}>{ex.note || '—'}</td>
                   <td>
                     <button
                       type="button"
                       class="btn-3d-reject delete-exception-btn"
-                      style="padding: 6px 14px; font-size: 0.8rem;"
+                      style="padding: 6px 14px; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 6px;"
                       data-id={ex.id}
                     >
-                      ✕ حذف
+                      <Icon name="trash" size={13} />
+                      <span>حذف</span>
                     </button>
                   </td>
                 </tr>
@@ -175,19 +260,31 @@ const weekdayNames = [
     </div>
 
     <!-- 3D Edit Hours Modal -->
-    <div id="hourEditModal" class="modal-backdrop" style="display: none;">
-      <div class="modal-dialog">
-        <h3 class="modal-title">✏️ تنظیم ساعت کاری <span id="modalDayName"></span></h3>
-        <p style="color: rgba(226, 232, 240, 0.7); font-size: 0.86rem; margin: 0 0 18px;">
+    <div id="hourEditModal" class="modal-backdrop modal-custom-backdrop" style="display: none;">
+      <div class="modal-dialog modal-custom-dialog">
+        <div class="modal-header-with-icon">
+          <div class="modal-title-row">
+            <span class="modal-icon-badge">
+              <Icon name="edit" size={20} />
+            </span>
+            <h3 class="modal-title">تنظیم ساعت کاری <span id="modalDayName"></span></h3>
+          </div>
+          <button type="button" class="modal-close-icon-btn" id="closeHourModalBtn" aria-label="بستن">
+            <Icon name="close" size={18} />
+          </button>
+        </div>
+
+        <p class="modal-sub-desc">
           تغییرات مستقیماً در دیتابیس D1 اعمال شده و موتور نوبت‌دهی بلافاصله بر این اساس اسلات‌های آزاد را محاسبه می‌کند.
         </p>
 
         <form id="editHourForm">
           <input type="hidden" id="editWeekday" />
 
-          <div style="margin-bottom: 16px;">
-            <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #e2e8f0; margin-bottom: 6px;">
-              وضعیت فعالیت در این روز:
+          <div class="form-field-wrap">
+            <label class="modal-input-label">
+              <Icon name="clock" size={14} />
+              <span>وضعیت فعالیت در این روز:</span>
             </label>
             <select id="editDayIsOpen" class="form-control-modal">
               <option value="true">فعال و باز (نوبت‌دهی فعال)</option>
@@ -195,10 +292,11 @@ const weekdayNames = [
             </select>
           </div>
 
-          <div class="g-2" id="hoursInputGroup" style="display: grid; gap: 14px; margin-bottom: 18px">
+          <div class="form-grid-pair" id="hoursInputGroup" style="display: grid; gap: 14px; margin-bottom: 18px">
             <div>
-              <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #e2e8f0; margin-bottom: 6px;">
-                ساعت شروع فعالیت:
+              <label class="modal-input-label">
+                <Icon name="clock" size={14} />
+                <span>ساعت شروع فعالیت:</span>
               </label>
               <input
                 type="time"
@@ -209,8 +307,9 @@ const weekdayNames = [
             </div>
 
             <div>
-              <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #e2e8f0; margin-bottom: 6px;">
-                ساعت پایان فعالیت:
+              <label class="modal-input-label">
+                <Icon name="clock" size={14} />
+                <span>ساعت پایان فعالیت:</span>
               </label>
               <input
                 type="time"
@@ -222,11 +321,12 @@ const weekdayNames = [
           </div>
 
           <div class="modal-actions-row">
-            <button type="button" id="cancelHourBtn" class="btn-table-action">
+            <button type="button" id="cancelHourBtn" class="btn-3d-secondary modal-btn">
               انصراف
             </button>
-            <button type="submit" id="saveHourBtn" class="btn-3d-accept" style="flex: none; padding: 12px 24px;">
-              ✓ ذخیره تغییرات ساعت
+            <button type="submit" id="saveHourBtn" class="btn-3d-accept modal-btn modal-btn-submit">
+              <Icon name="check" size={16} />
+              <span>ذخیره تغییرات ساعت</span>
             </button>
           </div>
         </form>
@@ -234,17 +334,29 @@ const weekdayNames = [
     </div>
 
     <!-- 3D New Exception / Holiday Modal -->
-    <div id="newExceptionModal" class="modal-backdrop" style="display: none;">
-      <div class="modal-dialog">
-        <h3 class="modal-title">🏖️ ثبت روز تعطیل یا بازه استثنا</h3>
-        <p style="color: rgba(226, 232, 240, 0.7); font-size: 0.86rem; margin: 0 0 18px;">
+    <div id="newExceptionModal" class="modal-backdrop modal-custom-backdrop" style="display: none;">
+      <div class="modal-dialog modal-custom-dialog">
+        <div class="modal-header-with-icon">
+          <div class="modal-title-row">
+            <span class="modal-icon-badge">
+              <Icon name="calendar" size={20} />
+            </span>
+            <h3 class="modal-title">ثبت روز تعطیل یا بازه استثنا</h3>
+          </div>
+          <button type="button" class="modal-close-icon-btn" id="closeExModalBtn" aria-label="بستن">
+            <Icon name="close" size={18} />
+          </button>
+        </div>
+
+        <p class="modal-sub-desc">
           بستن نوبت‌دهی برای یک تاریخ مشخص یا تنظیم ساعات کاری ویژه در روزهای خاص.
         </p>
 
         <form id="newExceptionForm">
-          <div style="margin-bottom: 14px;">
-            <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #e2e8f0; margin-bottom: 6px;">
-              تاریخ مورد نظر (YYYY-MM-DD):
+          <div class="form-field-wrap">
+            <label class="modal-input-label">
+              <Icon name="calendar" size={14} />
+              <span>تاریخ مورد نظر (YYYY-MM-DD):</span>
             </label>
             <input
               type="date"
@@ -255,9 +367,10 @@ const weekdayNames = [
             />
           </div>
 
-          <div style="margin-bottom: 14px;">
-            <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #e2e8f0; margin-bottom: 6px;">
-              نوع رویداد:
+          <div class="form-field-wrap">
+            <label class="modal-input-label">
+              <Icon name="list" size={14} />
+              <span>نوع رویداد:</span>
             </label>
             <select id="exKind" class="form-control-modal">
               <option value="holiday">تعطیل رسمی / مناسبتی</option>
@@ -267,24 +380,27 @@ const weekdayNames = [
             </select>
           </div>
 
-          <div class="g-2" id="exHoursGroup" style="display: none; gap: 14px; margin-bottom: 14px">
+          <div class="form-grid-pair" id="exHoursGroup" style="display: none; gap: 14px; margin-bottom: 14px">
             <div>
-              <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #e2e8f0; margin-bottom: 6px;">
-                ساعت شروع:
+              <label class="modal-input-label">
+                <Icon name="clock" size={14} />
+                <span>ساعت شروع:</span>
               </label>
               <input type="time" id="exOpensAt" class="form-control-modal" dir="ltr" />
             </div>
             <div>
-              <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #e2e8f0; margin-bottom: 6px;">
-                ساعت پایان:
+              <label class="modal-input-label">
+                <Icon name="clock" size={14} />
+                <span>ساعت پایان:</span>
               </label>
               <input type="time" id="exClosesAt" class="form-control-modal" dir="ltr" />
             </div>
           </div>
 
-          <div style="margin-bottom: 18px;">
-            <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #e2e8f0; margin-bottom: 6px;">
-              توضیحات و علت (مثال: عید نوروز):
+          <div class="form-field-wrap">
+            <label class="modal-input-label">
+              <Icon name="document" size={14} />
+              <span>توضیحات و علت (مثال: عید نوروز):</span>
             </label>
             <input
               type="text"
@@ -295,11 +411,12 @@ const weekdayNames = [
           </div>
 
           <div class="modal-actions-row">
-            <button type="button" id="cancelExBtn" class="btn-table-action">
+            <button type="button" id="cancelExBtn" class="btn-3d-secondary modal-btn">
               انصراف
             </button>
-            <button type="submit" id="saveExBtn" class="btn-3d-accept" style="flex: none; padding: 12px 24px;">
-              ✓ ثبت رویداد در تقویم
+            <button type="submit" id="saveExBtn" class="btn-3d-accept modal-btn modal-btn-submit">
+              <Icon name="check" size={16} />
+              <span>ثبت رویداد در تقویم</span>
             </button>
           </div>
         </form>
@@ -307,11 +424,326 @@ const weekdayNames = [
     </div>
   </div>
 
+  <style>
+    .page-title-with-icon {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .page-title-icon-box {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.22) 0%, rgba(212, 175, 55, 0.06) 100%);
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      color: #f5d77f;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+      flex-shrink: 0;
+    }
+
+    .schedule-section-card {
+      padding: 24px;
+      border-radius: 20px;
+      border: 1px solid rgba(212, 175, 55, 0.24);
+      background: rgba(11, 14, 22, 0.95);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.08);
+    }
+
+    .schedule-section-title {
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .title-with-icon {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.05rem;
+      color: #ffffff;
+    }
+
+    .schedule-pill-note {
+      font-size: 0.82rem;
+      color: #cbd5e1;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 4px 12px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+    }
+
+    .table-responsive-container {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      width: 100%;
+      border-radius: 14px;
+    }
+
+    .table-responsive-container::-webkit-scrollbar {
+      height: 7px;
+    }
+
+    .table-responsive-container::-webkit-scrollbar-track {
+      background: rgba(15, 20, 31, 0.8);
+    }
+
+    .table-responsive-container::-webkit-scrollbar-thumb {
+      background: rgba(212, 175, 55, 0.35);
+      border-radius: 6px;
+    }
+
+    .schedule-custom-table {
+      width: 100%;
+      min-width: 740px;
+      border-collapse: collapse;
+      text-align: right;
+      font-size: 0.88rem;
+    }
+
+    .schedule-custom-table th {
+      background: rgba(20, 26, 38, 0.98);
+      color: rgba(212, 175, 55, 0.95);
+      padding: 14px 18px;
+      font-weight: 800;
+      font-size: 0.82rem;
+      white-space: nowrap;
+      border-bottom: 1.5px solid rgba(212, 175, 55, 0.3);
+    }
+
+    .schedule-custom-table td {
+      padding: 14px 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      color: #e2e8f0;
+      vertical-align: middle;
+    }
+
+    .schedule-custom-table tbody tr:hover {
+      background-color: rgba(212, 175, 55, 0.08);
+    }
+
+    .weekday-name-cell {
+      font-weight: 800;
+      color: #ffffff;
+      font-size: 0.95rem;
+    }
+
+    .time-col-cell {
+      font-family: monospace;
+      font-weight: 700;
+    }
+
+    .time-slot-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: #38bdf8;
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      padding: 3px 8px;
+      border-radius: 8px;
+      font-size: 0.84rem;
+    }
+
+    .time-slot-inactive {
+      color: #64748b;
+      font-weight: 600;
+    }
+
+    .badge-all-day-closed {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: #f87171;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.25);
+      padding: 3px 8px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+    }
+
+    .date-cell-jalali {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 700;
+      color: #f5d77f;
+    }
+
+    .date-cell-gregorian {
+      display: block;
+      font-size: 0.78rem;
+      color: #94a3b8;
+      font-family: monospace;
+      margin-top: 2px;
+    }
+
+    .empty-icon-wrap {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 68px;
+      height: 68px;
+      border-radius: 20px;
+      background: rgba(212, 175, 55, 0.1);
+      border: 1px solid rgba(212, 175, 55, 0.25);
+      color: #f5d77f;
+      margin-bottom: 12px;
+    }
+
+    /* Modal Enhancements */
+    .modal-custom-backdrop {
+      background: rgba(5, 7, 11, 0.88);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      padding: 16px;
+    }
+
+    .modal-custom-dialog {
+      background: linear-gradient(160deg, rgba(22, 28, 44, 0.98) 0%, rgba(11, 14, 22, 0.98) 100%);
+      border: 1.5px solid rgba(212, 175, 55, 0.42);
+      border-radius: 22px;
+      padding: 26px;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 35px 80px rgba(0, 0, 0, 0.85), 0 0 32px rgba(212, 175, 55, 0.2);
+      max-height: calc(100dvh - 32px);
+      overflow-y: auto;
+    }
+
+    .modal-header-with-icon {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .modal-title-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .modal-icon-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: rgba(212, 175, 55, 0.15);
+      border: 1px solid rgba(212, 175, 55, 0.35);
+      color: #f5d77f;
+      flex-shrink: 0;
+    }
+
+    .modal-close-icon-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: #cbd5e1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      flex-shrink: 0;
+    }
+
+    .modal-close-icon-btn:hover {
+      background: rgba(239, 68, 68, 0.22);
+      border-color: rgba(239, 68, 68, 0.5);
+      color: #ffffff;
+    }
+
+    .modal-sub-desc {
+      color: rgba(226, 232, 240, 0.7);
+      font-size: 0.85rem;
+      margin: 0 0 18px;
+      line-height: 1.5;
+    }
+
+    .form-grid-pair {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .form-field-wrap {
+      margin-bottom: 14px;
+    }
+
+    .modal-input-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: #e2e8f0;
+      margin-bottom: 6px;
+    }
+
+    .modal-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 18px;
+      font-size: 0.88rem;
+    }
+
+    .modal-btn-submit {
+      flex: none;
+      padding: 12px 24px;
+    }
+
+    /* Small Screen Media Queries (320px & 390px) */
+    @media (max-width: 480px) {
+      .schedule-section-card {
+        padding: 16px;
+      }
+
+      .form-grid-pair {
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 12px;
+      }
+
+      .modal-custom-dialog {
+        padding: 18px;
+      }
+
+      .modal-actions-row {
+        flex-direction: column-reverse;
+        gap: 8px;
+      }
+
+      .modal-actions-row .modal-btn {
+        width: 100%;
+      }
+    }
+  </style>
+
   <script>
     // Hours Modal Elements
     const hourModal = document.getElementById('hourEditModal');
     const hourForm = document.getElementById('editHourForm') as HTMLFormElement;
     const cancelHourBtn = document.getElementById('cancelHourBtn');
+    const closeHourModalBtn = document.getElementById('closeHourModalBtn');
     const saveHourBtn = document.getElementById('saveHourBtn') as HTMLButtonElement;
     const modalDayName = document.getElementById('modalDayName');
     const editWeekday = document.getElementById('editWeekday') as HTMLInputElement;
@@ -325,6 +757,7 @@ const weekdayNames = [
     const openExBtn = document.getElementById('openExceptionModalBtn');
     const exForm = document.getElementById('newExceptionForm') as HTMLFormElement;
     const cancelExBtn = document.getElementById('cancelExBtn');
+    const closeExModalBtn = document.getElementById('closeExModalBtn');
     const saveExBtn = document.getElementById('saveExBtn') as HTMLButtonElement;
     const exDate = document.getElementById('exDate') as HTMLInputElement;
     const exKind = document.getElementById('exKind') as unknown as HTMLSelectElement;
@@ -372,11 +805,12 @@ const weekdayNames = [
       });
     });
 
-    if (cancelHourBtn && hourModal) {
-      cancelHourBtn.addEventListener('click', () => {
-        hourModal.style.display = 'none';
-      });
+    function closeHour() {
+      if (hourModal) hourModal.style.display = 'none';
     }
+
+    if (cancelHourBtn) cancelHourBtn.addEventListener('click', closeHour);
+    if (closeHourModalBtn) closeHourModalBtn.addEventListener('click', closeHour);
 
     if (hourForm && hourModal) {
       hourForm.addEventListener('submit', async (e) => {
@@ -385,7 +819,8 @@ const weekdayNames = [
         const isOpen = editDayIsOpen.value === 'true';
 
         saveHourBtn.disabled = true;
-        saveHourBtn.innerText = 'در حال ذخیره...';
+        const origText = saveHourBtn.innerHTML;
+        saveHourBtn.innerHTML = '<span>در حال ذخیره...</span>';
 
         try {
           const res = await fetch(`/api/v1/admin/schedule/hours/${weekday}`, {
@@ -399,17 +834,17 @@ const weekdayNames = [
           });
 
           if (res.ok) {
-            saveHourBtn.innerText = '✓ ذخیره شد!';
+            saveHourBtn.innerHTML = '<span>ذخیره شد!</span>';
             setTimeout(() => window.location.reload(), 400);
           } else {
             alert('خطا در ذخیره ساعت کاری.');
             saveHourBtn.disabled = false;
-            saveHourBtn.innerText = '✓ ذخیره تغییرات ساعت';
+            saveHourBtn.innerHTML = origText;
           }
         } catch {
           alert('خطای ارتباط با سرور.');
           saveHourBtn.disabled = false;
-          saveHourBtn.innerText = '✓ ذخیره تغییرات ساعت';
+          saveHourBtn.innerHTML = origText;
         }
       });
     }
@@ -421,17 +856,19 @@ const weekdayNames = [
       });
     }
 
-    if (cancelExBtn && exModal) {
-      cancelExBtn.addEventListener('click', () => {
-        exModal.style.display = 'none';
-      });
+    function closeEx() {
+      if (exModal) exModal.style.display = 'none';
     }
+
+    if (cancelExBtn) cancelExBtn.addEventListener('click', closeEx);
+    if (closeExModalBtn) closeExModalBtn.addEventListener('click', closeEx);
 
     if (exForm && exModal) {
       exForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         saveExBtn.disabled = true;
-        saveExBtn.innerText = 'در حال ثبت...';
+        const origText = saveExBtn.innerHTML;
+        saveExBtn.innerHTML = '<span>در حال ثبت...</span>';
 
         try {
           const res = await fetch('/api/v1/admin/schedule/exceptions', {
@@ -447,17 +884,17 @@ const weekdayNames = [
           });
 
           if (res.ok) {
-            saveExBtn.innerText = '✓ ثبت شد!';
+            saveExBtn.innerHTML = '<span>ثبت شد!</span>';
             setTimeout(() => window.location.reload(), 400);
           } else {
             alert('خطا در ثبت رویداد.');
             saveExBtn.disabled = false;
-            saveExBtn.innerText = '✓ ثبت رویداد در تقویم';
+            saveExBtn.innerHTML = origText;
           }
         } catch {
           alert('خطای ارتباط با سرور.');
           saveExBtn.disabled = false;
-          saveExBtn.innerText = '✓ ثبت رویداد در تقویم';
+          saveExBtn.innerHTML = origText;
         }
       });
     }
