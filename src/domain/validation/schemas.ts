@@ -305,11 +305,12 @@ export const paymentMethodSchema = z.enum(['pos', 'cash', 'card_to_card', 'onlin
 export const transactionTypeSchema = z.enum(['income', 'expense', 'refund']);
 export const transactionCategorySchema = z.string().trim().min(1).max(60);
 
-export const walkinBookSchema = z.object({
-  customerId: z.string().trim().min(1).max(64).optional(),
-  customerName: nameSchema.optional(),
-  customerPhone: phoneSchema.optional(),
-  pricingCategory: pricingCategorySchema.optional(),
+export const walkinBookSchema = z
+  .object({
+    customerId: z.string().trim().min(1).max(64).optional(),
+    customerName: nameSchema.optional(),
+    customerPhone: phoneSchema.optional(),
+    pricingCategory: pricingCategorySchema.optional(),
   serviceId: z.string().trim().max(64).optional(),
   startsAt: isoInstantSchema.optional(),
   amount: z.number().int().min(0).max(1_000_000_000).optional(),
