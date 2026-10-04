@@ -2,6 +2,7 @@
 import AdminLayout from '../../layouts/AdminLayout.astro';
 import { env } from 'cloudflare:workers';
 import { formatJalaliDate } from '../../lib/datetime/jalali';
+import Icon from '../../components/ui/Icon.astro';
 
 let todayIncome = 0;
 let monthIncome = 0;
@@ -39,7 +40,10 @@ try {
   <div class="admin-content-pad">
     <div class="dashboard-header-row">
       <div>
-        <h1 class="admin-page-title">💰 سامانه حسابداری، تراز مالی و چارت‌های تحلیلی</h1>
+        <h1 class="admin-page-title" style="display: flex; align-items: center; gap: 10px;">
+          <Icon name="accounting" size={26} class="title-icon" />
+          <span>سامانه حسابداری، تراز مالی و چارت‌های تحلیلی</span>
+        </h1>
         <p class="section-block-sub">
           گزارش درآمدهای نوبت‌ها، تحلیل پوزهای بانکی، هزینه‌های اقلام مصرفی و سود خالص کلینیک (API First)
         </p>
@@ -56,7 +60,7 @@ try {
       <div class="kpi-card-3d">
         <div class="kpi-header">
           <span class="kpi-title">درآمد امروز کلینیک</span>
-          <span class="kpi-icon">💵</span>
+          <span class="kpi-icon" style="color: #34d399;"><Icon name="cash" size={20} /></span>
         </div>
         <div class="kpi-value" style="color: #34d399;">
           {(todayIncome).toLocaleString('fa-IR')} <span style="font-size: 0.9rem; color: #94a3b8;">هزار تومان</span>
@@ -67,7 +71,7 @@ try {
       <div class="kpi-card-3d">
         <div class="kpi-header">
           <span class="kpi-title">درآمد کل این ماه</span>
-          <span class="kpi-icon">📈</span>
+          <span class="kpi-icon" style="color: #f5d77f;"><Icon name="chart" size={20} /></span>
         </div>
         <div class="kpi-value" style="color: #f5d77f;">
           {(monthIncome).toLocaleString('fa-IR')} <span style="font-size: 0.9rem; color: #94a3b8;">هزار تومان</span>
@@ -78,7 +82,7 @@ try {
       <div class="kpi-card-3d">
         <div class="kpi-header">
           <span class="kpi-title">هزینه‌ها و اقلام مصرفی</span>
-          <span class="kpi-icon">🧾</span>
+          <span class="kpi-icon" style="color: #f87171;"><Icon name="document" size={20} /></span>
         </div>
         <div class="kpi-value" style="color: #f87171;">
           {(monthExpense).toLocaleString('fa-IR')} <span style="font-size: 0.9rem; color: #94a3b8;">هزار تومان</span>
@@ -89,7 +93,7 @@ try {
       <div class="kpi-card-3d">
         <div class="kpi-header">
           <span class="kpi-title">سود خالص عملیاتی</span>
-          <span class="kpi-icon">💎</span>
+          <span class="kpi-icon" style="color: #38bdf8;"><Icon name="gem" size={20} /></span>
         </div>
         <div class="kpi-value" style="color: #38bdf8;">
           {(netProfit).toLocaleString('fa-IR')} <span style="font-size: 0.9rem; color: #94a3b8;">هزار تومان</span>
@@ -103,7 +107,10 @@ try {
       <!-- Weekly Revenue Bar Chart -->
       <div class="admin-section-block" style="padding: 24px;">
         <h3 class="section-block-title" style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
-          <span>📊 نمودار روند درآمد ۷ روز اخیر (میلیون تومان)</span>
+          <span style="display: flex; align-items: center; gap: 8px;">
+            <Icon name="chart" size={18} />
+            <span>نمودار روند درآمد ۷ روز اخیر (میلیون تومان)</span>
+          </span>
           <span style="font-size: 0.78rem; color: #34d399; background: rgba(16, 185, 129, 0.12); padding: 4px 10px; border-radius: 8px;">+۱۸٪ رشد نسبت به هفته گذشته</span>
         </h3>
 
@@ -133,14 +140,18 @@ try {
 
       <!-- Payment Method & Distribution Donut -->
       <div class="admin-section-block" style="padding: 24px;">
-        <h3 class="section-block-title" style="margin-bottom: 20px;">
-          💳 تفکیک روش‌های پرداخت
+        <h3 class="section-block-title" style="margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+          <Icon name="card" size={18} />
+          <span>تفکیک روش‌های پرداخت</span>
         </h3>
 
         <div style="display: flex; flex-direction: column; gap: 16px; justify-content: center; height: 200px;">
           <div>
             <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 6px;">
-              <span style="color: #cbd5e1;">💳 کارت‌خوان پوز کلینیک (POS)</span>
+              <span style="color: #cbd5e1; display: inline-flex; align-items: center; gap: 6px;">
+                <Icon name="card" size={14} />
+                <span>کارت‌خوان پوز کلینیک (POS)</span>
+              </span>
               <span style="color: #34d399; font-weight: 700;">۸۲٪</span>
             </div>
             <div style="width: 100%; height: 8px; background: rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden;">
@@ -150,7 +161,10 @@ try {
 
           <div>
             <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 6px;">
-              <span style="color: #cbd5e1;">📱 کارت‌به‌کارت و شبا</span>
+              <span style="color: #cbd5e1; display: inline-flex; align-items: center; gap: 6px;">
+                <Icon name="mobile" size={14} />
+                <span>کارت‌به‌کارت و شبا</span>
+              </span>
               <span style="color: #38bdf8; font-weight: 700;">۱۳٪</span>
             </div>
             <div style="width: 100%; height: 8px; background: rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden;">
@@ -160,7 +174,10 @@ try {
 
           <div>
             <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 6px;">
-              <span style="color: #cbd5e1;">💵 پرداخت نقدی مراجع</span>
+              <span style="color: #cbd5e1; display: inline-flex; align-items: center; gap: 6px;">
+                <Icon name="cash" size={14} />
+                <span>پرداخت نقدی مراجع</span>
+              </span>
               <span style="color: #f5d77f; font-weight: 700;">۵٪</span>
             </div>
             <div style="width: 100%; height: 8px; background: rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden;">
@@ -174,7 +191,10 @@ try {
     <!-- Transactions Table -->
     <div class="admin-section-block" style="padding: 24px;">
       <h3 class="section-block-title" style="margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
-        <span>📜 ریز تراکنش‌ها و اسناد مالی کلینیک</span>
+        <span style="display: flex; align-items: center; gap: 8px;">
+          <Icon name="document" size={18} />
+          <span>ریز تراکنش‌ها و اسناد مالی کلینیک</span>
+        </span>
         <span style="font-size: 0.8rem; color: #94a3b8;">نمایش ۵۰ سند اخیر</span>
       </h3>
 
@@ -238,7 +258,10 @@ try {
   <div id="newTxModal" class="modal-3d-backdrop" style="display: none;">
     <div class="modal-3d-card" style="max-width: 520px;">
       <div class="modal-3d-header">
-        <h3 class="modal-3d-title">💰 ثبت سند مالی (درآمد / هزینه)</h3>
+        <h3 class="modal-3d-title" style="display: flex; align-items: center; gap: 8px;">
+          <Icon name="accounting" size={20} />
+          <span>ثبت سند مالی (درآمد / هزینه)</span>
+        </h3>
         <button id="closeTxModalBtn" class="modal-close-btn">&times;</button>
       </div>
 
