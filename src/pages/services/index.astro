@@ -2,124 +2,2364 @@
 import PublicLayout from '../../layouts/PublicLayout.astro';
 import { env } from 'cloudflare:workers';
 import { listPublicServices } from '../../server/repositories';
+import Icon from '../../components/ui/Icon.astro';
 
-let services: Awaited<ReturnType<typeof listPublicServices>> = [];
-try {
-  services = await listPublicServices(env.DB);
-} catch (e) {
-  console.error('Failed to load services:', e);
+// Clinical services catalogue definition with fallback and rich metadata
+interface ServiceItem {
+  id: string;
+  name: string;
+  slug: string;
+  category: 'packages' | 'face' | 'upper' | 'lower';
+  categoryName: string;
+  shortDescription: string;
+  description: string;
+  durationMinutes: number;
+  femalePrice: number; // in thousands (IRT)
+  femalePromoPrice?: number; // in thousands (IRT)
+  malePriceText: string;
+  maleEstimatedPrice?: number;
+  wavelength: 'Alexandrite 755nm' | 'Nd:YAG 1064nm' | 'Dual Wavelength';
+  wavelengthLabel: string;
+  recommendedSessions: string;
+  sessionInterval: string;
+  isPromo?: boolean;
+  promoBadge?: string;
+  features: string[];
 }
+
+const defaultServices: ServiceItem[] = [
+  {
+    id: 'svc_full_body',
+    name: 'کل بدن (فول بادی طلایی)',
+    slug: 'full-body',
+    category: 'packages',
+    categoryName: 'پکیج طلایی',
+    shortDescription: 'دست کامل، پا کامل، زیر بغل، بیکینی، خط باسن، شکم و خط ناف',
+    description: 'کامل‌ترین و محبوب‌ترین پکیج لیزر بانوان با دستگاه کندلا جنتل‌مکس پرو ۲۰۲۴ اصل آمریکا با شات نامحدود و سیستم خنک‌کننده کرایو DCD بدون درد.',
+    durationMinutes: 60,
+    femalePrice: 2290,
+    femalePromoPrice: 1940,
+    malePriceText: 'استعلام حضوری بر اساس تراکم و وسعت',
+    wavelength: 'Dual Wavelength',
+    wavelengthLabel: 'الکساندرایت ۷۵۵nm + ان‌دی‌یاگ ۱۰۶۴nm',
+    recommendedSessions: '۶ تا ۸ جلسه',
+    sessionInterval: '۶ تا ۸ هفته',
+    isPromo: true,
+    promoBadge: '۱۵٪ تخفیف ویژه رزرو سایت',
+    features: ['شات نامحدود واقعی', 'کولینگ منهای ۳۰ درجه بدون ژل', 'سری شخصی یکبار مصرف'],
+  },
+  {
+    id: 'svc_underarm',
+    name: 'زیر بغل',
+    slug: 'underarm',
+    category: 'upper',
+    categoryName: 'بالاتنه',
+    shortDescription: 'پوشش هر دو زیر بغل با رفع تیرگی ناشی از شیو',
+    description: 'لیزر موهای زائد هر دو زیر بغل با طول موج الکساندرایت ۷۵۵ نانومتر کندلا با سیستم کولینگ مبرد پویا.',
+    durationMinutes: 20,
+    femalePrice: 390,
+    malePriceText: 'استعلام تلفنی / پذیرش در لاین آقایان',
+    maleEstimatedPrice: 490,
+    wavelength: 'Alexandrite 755nm',
+    wavelengthLabel: 'الکساندرایت ۷۵۵nm',
+    recommendedSessions: '۶ تا ۸ جلسه',
+    sessionInterval: '۵ تا ۶ هفته',
+    features: ['روشن‌سازی تدریجی پوست', 'پیشگیری از کیست مویی', 'زمان کوتاه جلسه'],
+  },
+  {
+    id: 'svc_bikini',
+    name: 'بیکینی و خط مایو',
+    slug: 'bikini',
+    category: 'lower',
+    categoryName: 'پایین‌تنه',
+    shortDescription: 'ناحیه کامل بیکینی و خط مایو با سری کاملاً استریل',
+    description: 'لیزر تخصصی ناحیه حساس بیکینی با بالاترین پروتکل‌های بهداشتی، بدون درد با خنک‌کننده اسپری کرایو DCD.',
+    durationMinutes: 25,
+    femalePrice: 590,
+    malePriceText: 'لاین اختصاصی ندارد',
+    wavelength: 'Alexandrite 755nm',
+    wavelengthLabel: 'الکساندرایت ۷۵۵nm',
+    recommendedSessions: '۶ تا ۸ جلسه',
+    sessionInterval: '۶ تا ۸ هفته',
+    features: ['سری کاملاً اختصاصی', 'حفظ صددرصد بهداشت', 'حذف موهای زیرپوستی'],
+  },
+  {
+    id: 'svc_full_legs',
+    name: 'پا کامل',
+    slug: 'full-legs',
+    category: 'lower',
+    categoryName: 'پایین‌تنه',
+    shortDescription: 'هر دو پا از ران تا مچ و انگشتان پا',
+    description: 'لیزر کامل پاها با اسپات سایز بزرگ ۲۲ الی ۲۴ میلی‌متری کندلا آمریکایی برای حداکثر سرعت و پوشش یکنواخت.',
+    durationMinutes: 45,
+    femalePrice: 790,
+    malePriceText: 'استعلام قیمت تلفنی بر اساس وسعت',
+    maleEstimatedPrice: 990,
+    wavelength: 'Alexandrite 755nm',
+    wavelengthLabel: 'الکساندرایت ۷۵۵nm',
+    recommendedSessions: '۶ تا ۸ جلسه',
+    sessionInterval: '۶ تا ۸ هفته',
+    features: ['اسپات سایز ۲۴mm فوق سریع', 'بدون سوزش و سوختگی', 'پوشش ران تا مچ پا'],
+  },
+  {
+    id: 'svc_full_arms',
+    name: 'دست کامل',
+    slug: 'full-arms',
+    category: 'upper',
+    categoryName: 'بالاتنه',
+    shortDescription: 'هر دو دست از سرشانه تا انگشتان',
+    description: 'لیزر کامل هر دو دست با تنظیم انرژی اختصاصی برای موهای نازک بازو و موهای ضخیم‌تر ساعد.',
+    durationMinutes: 35,
+    femalePrice: 570,
+    malePriceText: 'استعلام قیمت بر اساس تراکم موها',
+    maleEstimatedPrice: 750,
+    wavelength: 'Alexandrite 755nm',
+    wavelengthLabel: 'الکساندرایت ۷۵۵nm',
+    recommendedSessions: '۶ تا ۸ جلسه',
+    sessionInterval: '۵ تا ۷ هفته',
+    features: ['شات یکدست تا سرشانه', 'تنظیم فرکانس هوشمند', 'پوست لطیف و بدون لک'],
+  },
+  {
+    id: 'svc_face',
+    name: 'صورت کامل',
+    slug: 'face',
+    category: 'face',
+    categoryName: 'صورت و گردن',
+    shortDescription: 'گونه‌ها، چانه، پیشانی، شقیقه‌ها و پشت لب',
+    description: 'لیزر تخصصی پوست حساس صورت با عینک محافظ استاندارد و نظارت دقیق پزشک کلینیک.',
+    durationMinutes: 30,
+    femalePrice: 320,
+    malePriceText: 'آنکارد ریش و گونه آقایان: ۳۹۰/۰۰۰ تومان',
+    maleEstimatedPrice: 390,
+    wavelength: 'Alexandrite 755nm',
+    wavelengthLabel: 'الکساندرایت ۷۵۵nm',
+    recommendedSessions: '۶ تا ۸ جلسه',
+    sessionInterval: '۴ تا ۵ هفته',
+    features: ['عینک محافظ فوتونیک', 'تنظیم انرژی موهای ریز صورت', 'تحت نظارت پزشک'],
+  },
+  {
+    id: 'svc_upper_lip',
+    name: 'پشت لب',
+    slug: 'upper-lip',
+    category: 'face',
+    categoryName: 'صورت و گردن',
+    shortDescription: 'حذف دقیق موهای زائد بالای لب',
+    description: 'لیزر سریع ناحیه پشت لب با خنک‌کننده قوی بدون کوچک‌ترین احساس درد در ۵ الی ۱۰ دقیقه.',
+    durationMinutes: 15,
+    femalePrice: 90,
+    malePriceText: 'شامل پکیج آنکارد ریش آقایان',
+    wavelength: 'Alexandrite 755nm',
+    wavelengthLabel: 'الکساندرایت ۷۵۵nm',
+    recommendedSessions: '۶ تا ۸ جلسه',
+    sessionInterval: '۴ هفته',
+    features: ['انجام سریع در ۵ دقیقه', 'کولینگ مبرد نقطه به نقطه', 'حذف موهای مقاوم'],
+  },
+  {
+    id: 'svc_chin',
+    name: 'چانه',
+    slug: 'chin',
+    category: 'face',
+    categoryName: 'صورت و گردن',
+    shortDescription: 'ریشه‌کنی موهای هورمونی و ضخیم چانه',
+    description: 'لیزر عمیق ریشه‌های ضخیم و هورمونی چانه با قدرت نفوذ بالای دستگاه کندلا اصل آمریکا.',
+    durationMinutes: 15,
+    femalePrice: 145,
+    malePriceText: 'شامل پکیج آنکارد ریش آقایان',
+    wavelength: 'Dual Wavelength',
+    wavelengthLabel: 'الکساندرایت + ان‌دی‌یاگ',
+    recommendedSessions: '۶ تا ۸ جلسه',
+    sessionInterval: '۴ تا ۵ هفته',
+    features: ['نفوذ بالا در موهای هورمونی', 'جلوگیری از ضخیم شدن موها', 'پوست صاف و یکدست'],
+  },
+  {
+    id: 'svc_neck',
+    name: 'گردن',
+    slug: 'neck',
+    category: 'face',
+    categoryName: 'صورت و گردن',
+    shortDescription: 'جلو و پشت گردن با خط‌گیری منظم',
+    description: 'لیزر دقیق ناحیه گردن با حفظ یکنواختی خط ریش و مو و پیشگیری از فولیکولیت بعد از شیو.',
+    durationMinutes: 20,
+    femalePrice: 190,
+    malePriceText: 'خط گردن و زیر ریش آقایان: ۲۹۰/۰۰۰ تومان',
+    maleEstimatedPrice: 290,
+    wavelength: 'Alexandrite 755nm',
+    wavelengthLabel: 'الکساندرایت ۷۵۵nm',
+    recommendedSessions: '۶ تا ۸ جلسه',
+    sessionInterval: '۵ تا ۶ هفته',
+    features: ['خط‌گیری هندسی دقیق', 'رفع جوش‌های التهابی گردن', 'تنظیم خط رشد مو'],
+  },
+  {
+    id: 'svc_forearm',
+    name: 'ساق دست (ساعد)',
+    slug: 'forearm',
+    category: 'upper',
+    categoryName: 'بالاتنه',
+    shortDescription: 'از آرنج تا مچ هر دو دست',
+    description: 'لیزر سریع و مؤثر موهای ساعد با پوشش ۳۶۰ درجه‌ای و کولینگ پیوسته کندلا.',
+    durationMinutes: 25,
+    femalePrice: 320,
+    malePriceText: 'استعلام قیمت تلفنی بر اساس وسعت',
+    maleEstimatedPrice: 420,
+    wavelength: 'Alexandrite 755nm',
+    wavelengthLabel: 'الکساندرایت ۷۵۵nm',
+    recommendedSessions: '۶ تا ۸ جلسه',
+    sessionInterval: '۵ تا ۶ هفته',
+    features: ['پوشش کامل مچ تا آرنج', 'بدون پوسته شدن یا سوزش', 'نتیجه‌گیری سریع'],
+  },
+  {
+    id: 'svc_upper_arm',
+    name: 'بازو',
+    slug: 'upper-arm',
+    category: 'upper',
+    categoryName: 'بالاتنه',
+    shortDescription: 'بازوی هر دو دست از سرشانه تا بالای آرنج',
+    description: 'تنظیم فرکانس هوشمند برای پیشگیری از تحریک ریشه‌های کرکی بازو با طول موج الکساندرایت.',
+    durationMinutes: 25,
+    femalePrice: 370,
+    malePriceText: 'استعلام قیمت تلفنی',
+    maleEstimatedPrice: 480,
+    wavelength: 'Alexandrite 755nm',
+    wavelengthLabel: 'الکساندرایت ۷۵۵nm',
+    recommendedSessions: '۶ تا ۸ جلسه',
+    sessionInterval: '۶ تا ۷ هفته',
+    features: ['تنظیم مخصوص موهای کرکی', 'بدون تحریک ریشه‌های خفته', 'حفظ لطافت بازو'],
+  },
+  {
+    id: 'svc_chest',
+    name: 'دور سینه',
+    slug: 'chest',
+    category: 'upper',
+    categoryName: 'بالاتنه',
+    shortDescription: 'ناحیه دور هاله سینه با ملایمت بالا',
+    description: 'لیزر ایمن موهای زائد دور سینه با کولینگ بهینه و عایق‌بندی حرارتی برای حفظ سلامت بافت.',
+    durationMinutes: 20,
+    femalePrice: 145,
+    malePriceText: 'سینه کامل آقایان: ۵۹۰/۰۰۰ تومان',
+    maleEstimatedPrice: 590,
+    wavelength: 'Alexandrite 755nm',
+    wavelengthLabel: 'الکساندرایت ۷۵۵nm',
+    recommendedSessions: '۶ تا ۸ جلسه',
+    sessionInterval: '۵ تا ۶ هفته',
+    features: ['حفظ کامل سلامت بافت سینه', 'کولینگ بسیار ملایم', 'رفع ریشه‌های زبر'],
+  },
+  {
+    id: 'svc_abdomen',
+    name: 'شکم کامل',
+    slug: 'abdomen',
+    category: 'upper',
+    categoryName: 'بالاتنه',
+    shortDescription: 'پوشش کامل سطح پوست شکم',
+    description: 'لیزر یکدست ناحیه شکم با شات‌های متوالی و سرعت بالای پرتاب پالس دستگاه جنتل‌مکس پرو.',
+    durationMinutes: 30,
+    femalePrice: 470,
+    malePriceText: 'شکم کامل آقایان: ۵۵۰/۰۰۰ تومان',
+    maleEstimatedPrice: 550,
+    wavelength: 'Alexandrite 755nm',
+    wavelengthLabel: 'الکساندرایت ۷۵۵nm',
+    recommendedSessions: '۶ تا ۸ جلسه',
+    sessionInterval: '۶ تا ۸ هفته',
+    features: ['پوشش یکنواخت و بدون جاافتادگی', 'خنک‌سازی پیوسته با گاز کرایو', 'تخریب قطعی پیاز مو'],
+  },
+  {
+    id: 'svc_navel_line',
+    name: 'خط ناف',
+    slug: 'navel-line',
+    category: 'upper',
+    categoryName: 'بالاتنه',
+    shortDescription: 'خط باریک و عمودی بین ناف و بیکینی',
+    description: 'لیزر دقیق خط ناف در کمتر از ۱۰ دقیقه با بازدهی بسیار بالا از جلسات ابتدایی.',
+    durationMinutes: 15,
+    femalePrice: 190,
+    malePriceText: 'استعلام قیمت تلفنی',
+    maleEstimatedPrice: 250,
+    wavelength: 'Alexandrite 755nm',
+    wavelengthLabel: 'الکساندرایت ۷۵۵nm',
+    recommendedSessions: '۶ تا ۸ جلسه',
+    sessionInterval: '۵ تا ۶ هفته',
+    features: ['انجام سریع در کمتر از ۱۰ دقیقه', 'خط‌کشی قرینه و منظم', 'تخفیف در ترکیب با بیکینی'],
+  },
+  {
+    id: 'svc_back',
+    name: 'کمر کامل',
+    slug: 'back',
+    category: 'upper',
+    categoryName: 'بالاتنه',
+    shortDescription: 'پوشش کامل ناحیه پشت و گودی کمر',
+    description: 'لیزر وسیع کمر با اسپات سایز ۲۴ میلی‌متری و بدون ایجاد جوش‌های چرکی بعد از لیزر.',
+    durationMinutes: 35,
+    femalePrice: 540,
+    malePriceText: 'کمر کامل آقایان: ۷۵۰/۰۰۰ تومان',
+    maleEstimatedPrice: 750,
+    wavelength: 'Dual Wavelength',
+    wavelengthLabel: 'الکساندرایت + ان‌دی‌یاگ',
+    recommendedSessions: '۶ تا ۸ جلسه',
+    sessionInterval: '۶ تا ۸ هفته',
+    features: ['پوشش سریع با اسپات ۲۴mm', 'خنک‌سازی منهای ۳۰ درجه', 'پیشگیری از جوش‌های ناحیه پشت'],
+  },
+  {
+    id: 'svc_buttocks',
+    name: 'باسن',
+    slug: 'buttocks',
+    category: 'lower',
+    categoryName: 'پایین‌تنه',
+    shortDescription: 'پوشش کامل هر دو سمت باسن',
+    description: 'لیزر بهداشتی و آرامش‌بخش باسن با حفظ کامل محرمانگی و حریم خصوصی در اتاق‌های ایزوله.',
+    durationMinutes: 25,
+    femalePrice: 380,
+    malePriceText: 'استعلام تلفنی در کلینیک',
+    maleEstimatedPrice: 490,
+    wavelength: 'Alexandrite 755nm',
+    wavelengthLabel: 'الکساندرایت ۷۵۵nm',
+    recommendedSessions: '۶ تا ۸ جلسه',
+    sessionInterval: '۶ تا ۸ هفته',
+    features: ['رعایت صددرصد پروتکل‌های بهداشتی', 'کاهش زبری و جوش پوستی', 'محیط کاملاً خصوصی'],
+  },
+  {
+    id: 'svc_gluteal_line',
+    name: 'خط باسن (شیار باسن)',
+    slug: 'gluteal-line',
+    category: 'lower',
+    categoryName: 'پایین‌تنه',
+    shortDescription: 'لیزر دقیق خط میانی باسن با سری باریک',
+    description: 'حذف موهای زائد خط باسن با سری بهداشتی و زاویه پرتاب کنترل‌شده با ملایمت کامل.',
+    durationMinutes: 15,
+    femalePrice: 240,
+    malePriceText: 'استعلام تلفنی در کلینیک',
+    maleEstimatedPrice: 320,
+    wavelength: 'Alexandrite 755nm',
+    wavelengthLabel: 'الکساندرایت ۷۵۵nm',
+    recommendedSessions: '۶ تا ۸ جلسه',
+    sessionInterval: '۶ تا ۸ هفته',
+    features: ['سری یکبار مصرف ضدعفونی‌شده', 'دقت شات فوق‌العاده بالا', 'بدون کمترین احساس درد'],
+  },
+  {
+    id: 'svc_thigh',
+    name: 'ران پا',
+    slug: 'thigh',
+    category: 'lower',
+    categoryName: 'پایین‌تنه',
+    shortDescription: 'ران هر دو پا از بالای زانو تا خط لگن',
+    description: 'پوشش وسیع و پرقدرت ران‌ها با تنظیم فرکانس برای موهای نرم‌تر جلوی ران و ضخیم‌تر پشت ران.',
+    durationMinutes: 30,
+    femalePrice: 570,
+    malePriceText: 'استعلام قیمت تلفنی بر اساس وسعت',
+    maleEstimatedPrice: 690,
+    wavelength: 'Alexandrite 755nm',
+    wavelengthLabel: 'الکساندرایت ۷۵۵nm',
+    recommendedSessions: '۶ تا ۸ جلسه',
+    sessionInterval: '۶ تا ۸ هفته',
+    features: ['اسپات بزرگ و سرعت عمل بالا', 'خنک‌کنندگی عالی بدون سوختگی', 'پوشش یکدست جلو و پشت ران'],
+  },
+  {
+    id: 'svc_inner_thigh',
+    name: 'کشاله ران',
+    slug: 'inner-thigh',
+    category: 'lower',
+    categoryName: 'پایین‌تنه',
+    shortDescription: 'ناحیه داخلی ران با پیشگیری از تیرگی',
+    description: 'رفع موهای زائد کشاله ران جهت جلوگیری از عرق‌سوز شدن و تیرگی اصطکاکی پوست.',
+    durationMinutes: 20,
+    femalePrice: 390,
+    malePriceText: 'استعلام تلفنی در کلینیک',
+    maleEstimatedPrice: 480,
+    wavelength: 'Alexandrite 755nm',
+    wavelengthLabel: 'الکساندرایت ۷۵۵nm',
+    recommendedSessions: '۶ تا ۸ جلسه',
+    sessionInterval: '۶ تا ۸ هفته',
+    features: ['رفع تیرگی ناشی از اصطکاک', 'جلوگیری از التهاب و سوزش', 'خنک‌کننده پیوسته'],
+  },
+  {
+    id: 'svc_lower_leg',
+    name: 'ساق پا',
+    slug: 'lower-leg',
+    category: 'lower',
+    categoryName: 'پایین‌تنه',
+    shortDescription: 'هر دو پا از زانو تا مچ پا و روی انگشتان',
+    description: 'لیزر پرطرفدار ساق پا با حذف قطعی موهای ریشه‌دار و رهایی همیشگی از شیو هفتگی.',
+    durationMinutes: 30,
+    femalePrice: 480,
+    malePriceText: 'استعلام تلفنی در کلینیک',
+    maleEstimatedPrice: 590,
+    wavelength: 'Alexandrite 755nm',
+    wavelengthLabel: 'الکساندرایت ۷۵۵nm',
+    recommendedSessions: '۶ تا ۸ جلسه',
+    sessionInterval: '۶ تا ۸ هفته',
+    features: ['تخریب قطعی ریشه‌های سیاه و ضخیم', 'بدون درد روی استخوان ساق پا', 'پوستی شفاف و درخشان'],
+  },
+];
+
+// Fetch live database services to overlay any dynamic admin updates
+let services: ServiceItem[] = [...defaultServices];
+
+try {
+  if (env && env.DB) {
+    const dbServices = await listPublicServices(env.DB);
+    if (dbServices && dbServices.length > 0) {
+      services = defaultServices.map((def) => {
+        const match = dbServices.find((s) => s.slug === def.slug);
+        if (!match) return def;
+
+        const fPrice = match.prices.find((p) => p.pricingCategory === 'female');
+        const mPrice = match.prices.find((p) => p.pricingCategory === 'male');
+
+        return {
+          ...def,
+          name: match.name || def.name,
+          shortDescription: match.shortDescription || def.shortDescription,
+          description: match.description || def.description,
+          durationMinutes: match.durationMinutes || def.durationMinutes,
+          femalePrice: fPrice ? fPrice.amount : def.femalePrice,
+          malePriceText: mPrice ? `${(mPrice.amount * 1000).toLocaleString('fa-IR')} تومان` : def.malePriceText,
+        };
+      });
+    }
+  }
+} catch (e) {
+  console.warn('Using clinical fallback service catalogue:', e);
+}
+
+// Persian number formatter
+function formatToman(amountInThousands: number): string {
+  return (amountInThousands * 1000).toLocaleString('fa-IR');
+}
+
+// Structured Data: MedicalBusiness / PriceList (§31, §135)
+const priceListJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'MedicalClinic',
+  name: 'کلینیک تخصصی تهران لیزر',
+  priceRange: 'IRR',
+  telephone: '+989035555090',
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: 'پاسداران، خیابان پایدارفرد، نبش بوستان هفتم',
+    addressLocality: 'تهران',
+    addressCountry: 'IR',
+  },
+  hasOfferCatalog: {
+    '@type': 'OfferCatalog',
+    name: 'تعرفه‌های مصوب لیزر کندلا جنتل‌مکس پرو',
+    itemListElement: services.map((s, idx) => ({
+      '@type': 'Offer',
+      itemOffered: {
+        '@type': 'Service',
+        name: `لیزر ${s.name}`,
+        description: s.shortDescription,
+      },
+      price: (s.femalePromoPrice || s.femalePrice) * 1000,
+      priceCurrency: 'IRR',
+      position: idx + 1,
+    })),
+  },
+};
 ---
 
 <PublicLayout
-  title="لیست خدمات و تعرفه‌های مصوب — کلینیک تهران لیزر"
-  description="مشاهده لیست کامل تعرفه‌ها و قیمت لیزر موهای زائد بانوان در کلینیک تهران لیزر پاسداران. بیش از ۲۰ ناحیه تخصصی با تعرفه مصوب و ۱۵٪ تخفیف ویژه رزرو سایت برای کل بدن."
+  title="لیست خدمات و تعرفه‌های مصوب لیزر ۱۴۰۳ — کلینیک تهران لیزر پاسداران"
+  description="مشاهده لیست کامل تعرفه‌های لیزر موهای زائد بانوان و آقایان در کلینیک تهران لیزر پاسداران. مجهز به دستگاه کندلا جنتل‌مکس پرو ۲۰۲۴ آمریکا با ۱۵٪ تخفیف رزرو آنلاین پکیج طلایی."
+  jsonLd={priceListJsonLd}
 >
-  <div class="page-header-strip">
-    <div class="container text-center">
-      <span class="section-subtitle">شفافیت کامل در هزینه‌ها</span>
-      <h1 class="page-title">تعرفه‌های مصوب خدمات لیزر تهران لیزر</h1>
-      <p class="page-subtitle">
-        تمامی قیمت‌ها به صورت شفاف، قطعی و بر اساس تعرفه مصوب کلینیک تهران لیزر ارائه گردیده است.
+  <!-- Hero / Header Strip with 3D Obsidian-Gold Depth -->
+  <section class="services-hero">
+    <div class="container hero-container">
+      <div class="hero-badge">
+        <Icon name="sparkles" size={15} />
+        <span>تضمین تعرفه مصوب کلینیکال و شفافیت صددرصدی</span>
+      </div>
+      <h1 class="hero-title">
+        تعرفه‌های مصوب خدمات تخصصی <span class="gold-gradient">تهران لیزر</span>
+      </h1>
+      <p class="hero-subtitle">
+        تمامی تعرفه‌ها بر اساس مصوبه رسمی کلینیک تهران لیزر (پاسداران) و با بهره‌گیری از قدرتمندترین دستگاه لیزر جهان
+        <strong>Candela GentleMax Pro 2024 اصل آمریکا</strong> بدون شات محدود و با کولینگ گاز مبرد DCD ارائه می‌گردد.
       </p>
-    </div>
-  </div>
 
-  <section class="section">
+      <!-- Candela GentleMax Pro Technology Badges -->
+      <div class="tech-badges-strip">
+        <div class="tech-badge">
+          <Icon name="lightning" size={16} />
+          <span>کندلا جنتل‌مکس پرو ۲۰۲۴ (Candela USA)</span>
+        </div>
+        <div class="tech-badge">
+          <Icon name="shield" size={16} />
+          <span>طول موج الکساندرایت ۷۵۵nm + ان‌دی‌یاگ ۱۰۶۴nm</span>
+        </div>
+        <div class="tech-badge">
+          <Icon name="snowflake" size={16} />
+          <span>کولینگ هوشمند کرایو DCD منهای ۳۰ درجه بدون درد</span>
+        </div>
+        <div class="tech-badge">
+          <Icon name="award" size={16} />
+          <span>تحت نظارت مستقیم پزشک و اپراتورهای دارای مدرک بین‌المللی</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Interactive Female / Male Category Switcher -->
+  <section class="section category-switch-section">
     <div class="container">
-      <!-- Special Offer Banner -->
-      <div class="featured-promo-card mb-5">
-        <div class="promo-badge-ribbon">تخفیف ویژه ۱۵٪</div>
-        <div class="promo-content">
-          <div class="promo-info">
-            <h3 class="promo-title">پکیج طلایی کل بدن بانوان (Full Body)</h3>
-            <p class="promo-desc">
-              شامل دست کامل، پا کامل، زیر بغل، بیکینی، خط باسن، خط ناف و شکم با شات نامحدود و سیستم خنک‌کننده پیشرفته
-            </p>
+      <div class="category-toggle-wrapper">
+        <div class="category-toggle-pills" role="tablist" aria-label="انتخاب بخش بانوان یا آقایان">
+          <button
+            type="button"
+            class="toggle-pill active"
+            id="tab-female"
+            role="tab"
+            aria-selected="true"
+            aria-controls="panel-female"
+            data-target="female"
+          >
+            <Icon name="sparkles" size={18} />
+            <span class="pill-label">تعرفه و پکیج‌های بانوان</span>
+            <span class="pill-discount-badge">۱۵٪ تخفیف سایت</span>
+          </button>
+          <button
+            type="button"
+            class="toggle-pill"
+            id="tab-male"
+            role="tab"
+            aria-selected="false"
+            aria-controls="panel-male"
+            data-target="male"
+          >
+            <Icon name="users" size={18} />
+            <span class="pill-label">لاین اختصاصی آقایان</span>
+            <span class="pill-note-badge">اپراتور آقا + فضای مجزا</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ============================================================== -->
+      <!-- PANEL 1: WOMEN'S PRICING & PACKAGES -->
+      <!-- ============================================================== -->
+      <div id="panel-female" class="tab-panel active" role="tabpanel" aria-labelledby="tab-female">
+        <!-- Curated Packages Grid -->
+        <div class="packages-header mb-4">
+          <div class="packages-title-wrap">
+            <span class="badge-gold">
+              <Icon name="gem" size={14} />
+              <span>پکیج‌های اقتصادی و طلایی</span>
+            </span>
+            <h2 class="section-h2">محبوب‌ترین پکیج‌های تخفیف‌دار بانوان</h2>
           </div>
-          <div class="promo-pricing-box">
-            <div class="old-price">
-              <span class="strikethrough">۲/۲۹۰/۰۰۰</span>
-              <span class="price-unit">تومان</span>
+          <p class="section-desc">
+            پکیج‌های تلفیقی با تخفیف ویژه در رزرو آنلاین سایت، شات نامحدود واقعی و دستگاه کندلا جنتل‌مکس پرو
+          </p>
+        </div>
+
+        <div class="packages-grid">
+          <!-- Package 1: Full Body Golden (Featured 3D Card) -->
+          <div class="package-card package-card-golden featured-3d">
+            <div class="card-ribbon">
+              <Icon name="star" size={13} />
+              <span>پیشنهاد طلایی ۱۵٪ تخفیف</span>
             </div>
-            <div class="new-price">
-              <span class="final-amount">۱/۹۴۰/۰۰۰</span>
-              <span class="price-unit">تومان</span>
+            <div class="package-header">
+              <span class="package-badge-tag">کامل‌ترین پکیج کلینیک</span>
+              <h3 class="package-title">پکیج طلایی کل بدن (Full Body)</h3>
+              <p class="package-subtitle">
+                شامل: دست کامل، پا کامل، زیر بغل، بیکینی، خط باسن، شکم و خط ناف با شات نامحدود
+              </p>
             </div>
-            <a href="/booking?service=full-body" class="btn btn-primary btn-block mt-3">
-              رزرو نوبت کل بدن با تخفیف سایت
-            </a>
+
+            <div class="package-specs">
+              <div class="spec-item">
+                <Icon name="clock" size={16} />
+                <span>مدت هر جلسه: <strong>۶۰ دقیقه</strong></span>
+              </div>
+              <div class="spec-item">
+                <Icon name="calendar" size={16} />
+                <span>تعداد جلسات: <strong>۶ الی ۸ جلسه</strong></span>
+              </div>
+              <div class="spec-item">
+                <Icon name="snowflake" size={16} />
+                <span>کولینگ: <strong>گاز کرایو DCD بدون درد</strong></span>
+              </div>
+              <div class="spec-item">
+                <Icon name="shield" size={16} />
+                <span>طول موج: <strong>الکساندرایت ۷۵۵nm اصل کندلا</strong></span>
+              </div>
+            </div>
+
+            <div class="package-pricing-box">
+              <div class="price-row-old">
+                <span class="label">تعرفه مصوب:</span>
+                <span class="old-amount strikethrough">۲/۲۹۰/۰۰۰ تومان</span>
+              </div>
+              <div class="price-row-final">
+                <span class="final-amount">۱/۹۴۰/۰۰۰</span>
+                <span class="unit">تومان / هر جلسه</span>
+              </div>
+              <div class="save-tag">
+                <Icon name="percent" size={14} />
+                <span>۳۵۰/۰۰۰ تومان صرفه‌جویی در هر جلسه</span>
+              </div>
+            </div>
+
+            <div class="package-actions">
+              <a href="/booking?service=full-body" class="btn-3d-gold btn-block">
+                <Icon name="calendar" size={18} />
+                <span>رزرو نوبت پکیج طلایی با تخفیف</span>
+              </a>
+              <a href="/services/full-body" class="btn-3d-subtle btn-block mt-2">
+                <span>مشاهده جزئیات کامل و مراقبت‌ها</span>
+                <Icon name="chevronLeft" size={16} />
+              </a>
+            </div>
+          </div>
+
+          <!-- Package 2: Practical Essentials -->
+          <div class="package-card">
+            <div class="package-header">
+              <span class="package-badge-tag">پکیج اقتصادی و پرکاربرد</span>
+              <h3 class="package-title">پکیج کاربردی (Essential Body)</h3>
+              <p class="package-subtitle">
+                شامل: ساق دست، ساق پا، زیر بغل و بیکینی کامل — انتخابی سریع و بدون درد
+              </p>
+            </div>
+
+            <div class="package-specs">
+              <div class="spec-item">
+                <Icon name="clock" size={16} />
+                <span>مدت جلسه: <strong>۴۰ دقیقه</strong></span>
+              </div>
+              <div class="spec-item">
+                <Icon name="calendar" size={16} />
+                <span>توصیه بالینی: <strong>۶ الی ۸ جلسه</strong></span>
+              </div>
+              <div class="spec-item">
+                <Icon name="snowflake" size={16} />
+                <span>سیستم مبرد: <strong>اسپری داینامیک DCD</strong></span>
+              </div>
+            </div>
+
+            <div class="package-pricing-box">
+              <div class="price-row-old">
+                <span class="label">مجموع تک‌ناحیه‌ای:</span>
+                <span class="old-amount strikethrough">۱/۸۰۰/۰۰۰ تومان</span>
+              </div>
+              <div class="price-row-final">
+                <span class="final-amount">۱/۴۹۰/۰۰۰</span>
+                <span class="unit">تومان / جلسه</span>
+              </div>
+              <div class="save-tag">
+                <Icon name="tag" size={14} />
+                <span>۱۷٪ تخفیف بسته تلفیقی</span>
+              </div>
+            </div>
+
+            <div class="package-actions">
+              <a href="/booking?service=underarm" class="btn-3d-gold btn-block">
+                <Icon name="calendar" size={18} />
+                <span>رزرو پکیج کاربردی</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Package 3: Poolside Duo -->
+          <div class="package-card">
+            <div class="package-header">
+              <span class="package-badge-tag">پکیج سریع و استخری</span>
+              <h3 class="package-title">پکیج استخری (Duo Sensitive)</h3>
+              <p class="package-subtitle">
+                شامل: زیر بغل کامل + بیکینی و خط باسن با رعایت بالاترین استانداردهای بهداشتی
+              </p>
+            </div>
+
+            <div class="package-specs">
+              <div class="spec-item">
+                <Icon name="clock" size={16} />
+                <span>مدت جلسه: <strong>۳۰ دقیقه</strong></span>
+              </div>
+              <div class="spec-item">
+                <Icon name="calendar" size={16} />
+                <span>توصیه بالینی: <strong>۶ الی ۸ جلسه</strong></span>
+              </div>
+              <div class="spec-item">
+                <Icon name="shield" size={16} />
+                <span>پروتکل: <strong>سری کاملاً شخصی و استریل</strong></span>
+              </div>
+            </div>
+
+            <div class="package-pricing-box">
+              <div class="price-row-old">
+                <span class="label">مجموع تک‌ناحیه‌ای:</span>
+                <span class="old-amount strikethrough">۱/۲۲۰/۰۰۰ تومان</span>
+              </div>
+              <div class="price-row-final">
+                <span class="final-amount">۹۸۰/۰۰۰</span>
+                <span class="unit">تومان / جلسه</span>
+              </div>
+              <div class="save-tag">
+                <Icon name="tag" size={14} />
+                <span>۲۰٪ تخفیف ویژه پکیج</span>
+              </div>
+            </div>
+
+            <div class="package-actions">
+              <a href="/booking?service=bikini" class="btn-3d-gold btn-block">
+                <Icon name="calendar" size={18} />
+                <span>رزرو پکیج استخری</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filter & View Controls -->
+        <div class="catalog-controls-bar mt-5">
+          <div class="filter-pills" role="tablist" aria-label="فیلتر نواحی لیزر">
+            <button type="button" class="filter-btn active" data-filter="all">
+              <Icon name="sparkles" size={15} />
+              <span>همه ۲۰ ناحیه تخصصی</span>
+            </button>
+            <button type="button" class="filter-btn" data-filter="face">
+              <Icon name="star" size={15} />
+              <span>صورت و گردن</span>
+            </button>
+            <button type="button" class="filter-btn" data-filter="upper">
+              <Icon name="shield" size={15} />
+              <span>دست و بالاتنه</span>
+            </button>
+            <button type="button" class="filter-btn" data-filter="lower">
+              <Icon name="gem" size={15} />
+              <span>پا و پایین‌تنه</span>
+            </button>
+          </div>
+
+          <div class="view-switch-btns">
+            <button type="button" class="view-toggle-btn active" id="viewCardsBtn" aria-label="نمایش کارتی">
+              <Icon name="gem" size={16} />
+              <span>نمایش کارتی</span>
+            </button>
+            <button type="button" class="view-toggle-btn" id="viewTableBtn" aria-label="نمایش جدول تعرفه‌ها">
+              <Icon name="list" size={16} />
+              <span>جدول تعرفه‌ها</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 3D Obsidian-Gold Cards Grid -->
+        <div id="servicesCardGrid" class="services-3d-grid mt-4">
+          {services.map((service) => {
+            const isFullBody = service.slug === 'full-body';
+            const price = isFullBody ? service.femalePromoPrice! : service.femalePrice;
+
+            return (
+              <div
+                class={`service-obsidian-card ${isFullBody ? 'border-gold-glow' : ''}`}
+                data-category={service.category}
+              >
+                <div class="card-top-row">
+                  <span class="category-chip">{service.categoryName}</span>
+                  <div class="duration-chip">
+                    <Icon name="clock" size={14} />
+                    <span>{service.durationMinutes} دقیقه</span>
+                  </div>
+                </div>
+
+                <h3 class="service-card-title">
+                  <a href={`/services/${service.slug}`}>{service.name}</a>
+                  {isFullBody && (
+                    <span class="promo-tag-mini">
+                      <Icon name="star" size={12} />
+                      <span>۱۵٪ تخفیف</span>
+                    </span>
+                  )}
+                </h3>
+
+                <p class="service-card-desc">{service.shortDescription}</p>
+
+                <!-- Candela GentleMax Pro Wavelength Badge -->
+                <div class="card-wavelength-tag">
+                  <Icon name="lightning" size={13} />
+                  <span>{service.wavelengthLabel}</span>
+                </div>
+
+                <!-- Session Recommendation Pill -->
+                <div class="card-sessions-hint">
+                  <Icon name="calendar" size={13} />
+                  <span>توصیه بالینی: {service.recommendedSessions} (فواصل {service.sessionInterval})</span>
+                </div>
+
+                <div class="service-card-pricing">
+                  <span class="price-title">تعرفه مصوب جلسه:</span>
+                  <div class="price-value-box">
+                    {isFullBody && (
+                      <span class="strikethrough-price">{formatToman(service.femalePrice)}</span>
+                    )}
+                    <span class="bold-price">{formatToman(price)}</span>
+                    <span class="price-currency">تومان</span>
+                  </div>
+                </div>
+
+                <div class="service-card-footer">
+                  <a
+                    href={`/booking?service=${service.slug}`}
+                    class="btn-3d-primary-sm"
+                    aria-label={`رزرو نوبت ${service.name}`}
+                  >
+                    <Icon name="calendar" size={15} />
+                    <span>رزرو نوبت</span>
+                  </a>
+                  <a
+                    href={`/services/${service.slug}`}
+                    class="btn-3d-outline-sm"
+                    aria-label={`جزئیات ${service.name}`}
+                  >
+                    <span>جزئیات</span>
+                    <Icon name="chevronLeft" size={14} />
+                  </a>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <!-- Responsive Structured Table View -->
+        <div id="servicesTableView" class="table-responsive-wrapper mt-4 hidden">
+          <table class="table-obsidian-pricing" role="table">
+            <thead>
+              <tr>
+                <th scope="col" class="th-num">ردیف</th>
+                <th scope="col">ناحیه خدمت</th>
+                <th scope="col">دستگاه و طول موج</th>
+                <th scope="col">مدت جلسه</th>
+                <th scope="col">جلسات پیشنهادی</th>
+                <th scope="col">تعرفه بانوان</th>
+                <th scope="col">لاین آقایان</th>
+                <th scope="col" class="th-action">عملیات رزرو</th>
+              </tr>
+            </thead>
+            <tbody>
+              {services.map((service, index) => {
+                const isFullBody = service.slug === 'full-body';
+                const price = isFullBody ? service.femalePromoPrice! : service.femalePrice;
+
+                return (
+                  <tr class={isFullBody ? 'highlight-row' : ''} data-category={service.category}>
+                    <td class="td-num">{(index + 1).toLocaleString('fa-IR')}</td>
+                    <td class="td-service">
+                      <a href={`/services/${service.slug}`} class="service-table-link">
+                        {service.name}
+                      </a>
+                      {isFullBody && (
+                        <span class="badge-promo-inline">
+                          <Icon name="star" size={11} />
+                          <span>۱۵٪ تخفیف</span>
+                        </span>
+                      )}
+                      <div class="service-subtext">{service.shortDescription}</div>
+                    </td>
+                    <td class="td-tech">
+                      <span class="badge-wavelength-cell">
+                        <Icon name="lightning" size={12} />
+                        <span>{service.wavelengthLabel}</span>
+                      </span>
+                    </td>
+                    <td class="td-duration">
+                      <div class="duration-badge-table">
+                        <Icon name="clock" size={13} />
+                        <span>{service.durationMinutes} دقیقه</span>
+                      </div>
+                    </td>
+                    <td class="td-sessions">
+                      <span class="sessions-text">{service.recommendedSessions}</span>
+                    </td>
+                    <td class="td-price">
+                      {isFullBody ? (
+                        <div>
+                          <span class="strikethrough-mini">{formatToman(service.femalePrice)}</span>
+                          <span class="price-highlight">{formatToman(price)} تومان</span>
+                        </div>
+                      ) : (
+                        <span class="price-highlight">{formatToman(price)} تومان</span>
+                      )}
+                    </td>
+                    <td class="td-male">
+                      <span class="male-note-cell">
+                        {service.maleEstimatedPrice
+                          ? `از ${formatToman(service.maleEstimatedPrice)} تومان`
+                          : service.malePriceText}
+                      </span>
+                    </td>
+                    <td class="td-action">
+                      <a href={`/booking?service=${service.slug}`} class="btn-table-book">
+                        <Icon name="calendar" size={14} />
+                        <span>رزرو</span>
+                      </a>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Clinical Session Recommendations Accordion & Guidance -->
+        <div class="clinical-guidance-card mt-5">
+          <div class="guidance-header">
+            <div class="icon-circle-gold">
+              <Icon name="award" size={22} />
+            </div>
+            <div>
+              <h3 class="guidance-title">راهنمای بالینی و توصیه‌های متخصصین تهران لیزر</h3>
+              <p class="guidance-subtitle">
+                پروتکل‌های درمانی استاندارد برای دستیابی به حداکثر بازدهی (کاهش دائمی ۸۵٪ الی ۹۵٪ موهای زائد)
+              </p>
+            </div>
+          </div>
+
+          <div class="guidance-grid">
+            <div class="guidance-col">
+              <div class="guidance-box">
+                <div class="box-title">
+                  <Icon name="calendar" size={16} />
+                  <span>تعداد و فواصل جلسات بانوان</span>
+                </div>
+                <p>
+                  برای پاسخ‌دهی کامل فولیکول‌ها، به طور میانگین به <strong>۶ الی ۸ جلسه</strong> نیاز است. فواصل جلسات برای ناحیه صورت <strong>۴ الی ۵ هفته</strong> و برای نواحی بدن <strong>۶ الی ۸ هفته</strong> تنظیم می‌گردد تا چرخه رشد مو (فاز آناژن) به طور کامل پوشش داده شود.
+                </p>
+              </div>
+            </div>
+
+            <div class="guidance-col">
+              <div class="guidance-box">
+                <div class="box-title">
+                  <Icon name="snowflake" size={16} />
+                  <span>تکنولوژی خنک‌کننده کرایو DCD</span>
+                </div>
+                <p>
+                  دستگاه Candela GentleMax Pro با اسپری گاز برودتی منهای ۳۰ درجه، چند میلی‌ثانیه قبل از هر شات لیزر پوست را کاملاً بی‌حس و خنک می‌کند. نیازی به استفاده از ژل‌های چسبناک سنتی نبوده و درد و ریسک سوختگی به صفر می‌رسد.
+                </p>
+              </div>
+            </div>
+
+            <div class="guidance-col">
+              <div class="guidance-box">
+                <div class="box-title">
+                  <Icon name="shield" size={16} />
+                  <span>بهداشت و سری‌های اختصاصی</span>
+                </div>
+                <p>
+                  کلیه خدمات با سری‌های شخصی و استریل یکبار مصرف برای هر مراجع انجام می‌پذیرد. همچنین ملحفه، عینک فوتونیک و محیط اتاق لیزر پس از هر مراجع به صورت کامل ضدعفونی می‌گردد.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Services Catalog Table / Grid -->
-      <div class="pricing-table-container">
-        <table class="table-pricing">
-          <thead>
-            <tr>
-              <th scope="col">ردیف</th>
-              <th scope="col">ناحیه خدمت</th>
-              <th scope="col">مدت زمان تقریبی</th>
-              <th scope="col">تعرفه بانوان (تومان)</th>
-              <th scope="col">بخش آقایان</th>
-              <th scope="col">عملیات</th>
-            </tr>
-          </thead>
-          <tbody>
-            {services.map((service, index) => {
-              const femalePrice = service.prices.find((p) => p.pricingCategory === 'female');
-              const isPromo = service.slug === 'full-body';
+      <!-- ============================================================== -->
+      <!-- PANEL 2: MEN'S PRICING & SPECIALIZED LINE -->
+      <!-- ============================================================== -->
+      <div id="panel-male" class="tab-panel hidden" role="tabpanel" aria-labelledby="tab-male">
+        <!-- Men's Introduction Banner -->
+        <div class="mens-banner-card mb-5">
+          <div class="mens-banner-content">
+            <div class="badge-gold">
+              <Icon name="users" size={14} />
+              <span>لاین تخصصی آقایان</span>
+            </div>
+            <h2 class="mens-banner-title">خدمات لیزر آقایان با اپراتور مجرب آقا و فضای تفکیک‌شده</h2>
+            <p class="mens-banner-desc">
+              با توجه به اینکه ریشه موهای آقایان تراکم و ضخامت بیشتری دارد، دستگاه کندلا جنتل‌مکس پرو ۲۰۲۴ با بهره‌گیری از
+              <strong>طول موج نفوذی ان‌دی‌یاگ (Nd:YAG 1064nm)</strong> عمیق‌ترین فولیکول‌ها را بدون سوختگی پوست درمان می‌کند. کلیه خدمات در فضایی کاملاً خصوصی با اپراتور آقا انجام می‌پذیرد.
+            </p>
 
-              return (
-                <tr class={isPromo ? 'highlight-promo-row' : ''}>
-                  <td class="row-num">{(index + 1).toLocaleString('fa-IR')}</td>
-                  <td class="service-cell">
-                    <a href={`/services/${service.slug}`} class="service-link font-semibold">
-                      {service.name}
-                    </a>
-                    {isPromo && <span class="badge badge-promo mr-2">۱۵٪ تخفیف سایت</span>}
-                    <div class="text-muted small">{service.shortDescription}</div>
-                  </td>
-                  <td class="duration-cell">⏱ {service.durationMinutes} دقیقه</td>
-                  <td class="price-cell">
-                    {femalePrice ? (
-                      isPromo ? (
-                        <div>
-                          <span class="strikethrough text-muted small ml-1">۲/۲۹۰/۰۰۰</span>
-                          <span class="font-bold text-success">۱/۹۴۰/۰۰۰</span>
-                        </div>
-                      ) : (
-                        <span class="font-bold">
-                          {(femalePrice.amount * 1000).toLocaleString('fa-IR')} تومان
-                        </span>
-                      )
-                    ) : (
-                      'استعلام تلفنی'
-                    )}
-                  </td>
-                  <td class="male-cell">
-                    <span class="text-muted small">استعلام قیمت / تماس</span>
-                  </td>
-                  <td class="action-cell">
-                    <a href={`/booking?service=${service.slug}`} class="btn btn-primary btn-sm">
-                      رزرو نوبت
-                    </a>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+            <div class="mens-features-row">
+              <div class="m-feat">
+                <Icon name="checkCircle" size={16} />
+                <span>اپراتور دارای گواهینامه پزشکی آقا</span>
+              </div>
+              <div class="m-feat">
+                <Icon name="checkCircle" size={16} />
+                <span>فضای کاملاً مجزا و نوبت‌دهی خصوصی</span>
+              </div>
+              <div class="m-feat">
+                <Icon name="checkCircle" size={16} />
+                <span>طول موج Nd:YAG 1064nm مناسب ریشه‌های متراکم</span>
+              </div>
+              <div class="m-feat">
+                <Icon name="checkCircle" size={16} />
+                <span>کولینگ قوی بدون درد و بدون ژل</span>
+              </div>
+            </div>
+          </div>
 
-      <!-- Men's Services Explanatory Card (§11) -->
-      <div class="alert alert-info mt-5 p-4">
-        <h4 class="font-bold mb-2">📌 توضیحات در خصوص تعرفه خدمات آقایان:</h4>
-        <p class="mb-0">
-          با توجه به تفاوت در الگوی رشد، تراکم و ضخامت موهای آقایان و نیاز به تنظیمات اختصاصی دستگاه، تعرفه بخش آقایان متناسب با ناحیه و وسعت مورد نظر پس از بررسی در کلینیک یا از طریق تماس تلفنی با شماره <a href="tel:+989035555090" class="bold" dir="ltr">+98 903 555 5090</a> اعلام می‌گردد. لاین آقایان دارای اپراتور مجرب آقا و فضایی کاملاً مجزا می‌باشد.
-        </p>
+          <div class="mens-banner-cta-box">
+            <span class="cta-box-title">مشاوره و رزرو سریع بخش آقایان</span>
+            <p class="cta-box-text">برای استعلام دقیق بر اساس تراکم و آنکارد با کارشناسان ما گفتگو کنید:</p>
+            <a href="tel:+989035555090" class="btn-3d-gold btn-block">
+              <Icon name="phone" size={18} />
+              <span>تماس مستقیم: ۰۹۰۳ ۵۵۵ ۵۰۹۰</span>
+            </a>
+            <a href="/booking" class="btn-3d-subtle btn-block mt-2">
+              <Icon name="calendar" size={18} />
+              <span>رزرو آنلاین نوبت مشاوره</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Men's Popular Packages Grid -->
+        <h3 class="section-h2 mb-4">پکیج‌های پرطرفدار لیزر آقایان</h3>
+
+        <div class="packages-grid">
+          <!-- Men Package 1: Beard Line -->
+          <div class="package-card featured-3d">
+            <div class="package-header">
+              <span class="package-badge-tag">پرطرفدارترین لاین آقایان</span>
+              <h3 class="package-title">آنکارد ریش و خط گردن (Beard Grooming)</h3>
+              <p class="package-subtitle">
+                تنظیم دقیق خط گونه، خط گردن، زیر ریش، پشت گردن و روی گوش‌ها با خط‌گیری منظم
+              </p>
+            </div>
+
+            <div class="package-specs">
+              <div class="spec-item">
+                <Icon name="clock" size={16} />
+                <span>مدت جلسه: <strong>۲۰ دقیقه</strong></span>
+              </div>
+              <div class="spec-item">
+                <Icon name="lightning" size={16} />
+                <span>طول موج: <strong>Nd:YAG 1064nm</strong></span>
+              </div>
+              <div class="spec-item">
+                <Icon name="shield" size={16} />
+                <span>نتیجه: <strong>رهایی همیشگی از تیغ و جوش زیر ریش</strong></span>
+              </div>
+            </div>
+
+            <div class="package-pricing-box">
+              <div class="price-row-final">
+                <span class="final-amount">۴۹۰/۰۰۰</span>
+                <span class="unit">تومان / جلسه</span>
+              </div>
+              <div class="save-tag">
+                <Icon name="checkCircle" size={14} />
+                <span>شامل خط گونه + خط گردن و گوش</span>
+              </div>
+            </div>
+
+            <div class="package-actions">
+              <a href="/booking?service=face" class="btn-3d-gold btn-block">
+                <Icon name="calendar" size={18} />
+                <span>رزرو آنلاین آنکارد ریش</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Men Package 2: Athletic Upper Body -->
+          <div class="package-card">
+            <div class="package-header">
+              <span class="package-badge-tag">پکیج ویژه ورزشکاران</span>
+              <h3 class="package-title">بالاتنه ورزشکاری (Athletic Upper)</h3>
+              <p class="package-subtitle">
+                شامل: سینه کامل، شکم، خط سرشانه و کول‌ها — نمایش حداکثری تفکیک عضلات
+              </p>
+            </div>
+
+            <div class="package-specs">
+              <div class="spec-item">
+                <Icon name="clock" size={16} />
+                <span>مدت جلسه: <strong>۴۰ دقیقه</strong></span>
+              </div>
+              <div class="spec-item">
+                <Icon name="calendar" size={16} />
+                <span>توصیه بالینی: <strong>۸ الی ۱۰ جلسه</strong></span>
+              </div>
+              <div class="spec-item">
+                <Icon name="snowflake" size={16} />
+                <span>کولینگ: <strong>کرایو گاز مبرد پویا</strong></span>
+              </div>
+            </div>
+
+            <div class="package-pricing-box">
+              <div class="price-row-final">
+                <span class="final-amount">۸۹۰/۰۰۰</span>
+                <span class="unit">تومان / جلسه</span>
+              </div>
+              <div class="save-tag">
+                <Icon name="tag" size={14} />
+                <span>تعرفه پکیج ترکیبی بالاتنه</span>
+              </div>
+            </div>
+
+            <div class="package-actions">
+              <a href="/booking?service=chest" class="btn-3d-gold btn-block">
+                <Icon name="calendar" size={18} />
+                <span>رزرو بالاتنه آقایان</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Men Package 3: Back & Shoulders -->
+          <div class="package-card">
+            <div class="package-header">
+              <span class="package-badge-tag">تخفیف ویژه لاین آقایان</span>
+              <h3 class="package-title">کمر، شانه و کول (Back & Shoulders)</h3>
+              <p class="package-subtitle">
+                پوشش کامل کمر از گردن تا گودی کمر، پشت شانه و کتف‌ها بدون ایجاد جوش
+              </p>
+            </div>
+
+            <div class="package-specs">
+              <div class="spec-item">
+                <Icon name="clock" size={16} />
+                <span>مدت جلسه: <strong>۳۵ دقیقه</strong></span>
+              </div>
+              <div class="spec-item">
+                <Icon name="calendar" size={16} />
+                <span>توصیه بالینی: <strong>۸ الی ۱۰ جلسه</strong></span>
+              </div>
+              <div class="spec-item">
+                <Icon name="shield" size={16} />
+                <span>اسپات سایز: <strong>۲۴ میلی‌متری فوق سریع</strong></span>
+              </div>
+            </div>
+
+            <div class="package-pricing-box">
+              <div class="price-row-final">
+                <span class="final-amount">۷۹۰/۰۰۰</span>
+                <span class="unit">تومان / جلسه</span>
+              </div>
+              <div class="save-tag">
+                <Icon name="tag" size={14} />
+                <span>شات عمیق و یکدست</span>
+              </div>
+            </div>
+
+            <div class="package-actions">
+              <a href="/booking?service=back" class="btn-3d-gold btn-block">
+                <Icon name="calendar" size={18} />
+                <span>رزرو پکیج کمر و کتف</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Men's Clinical Advice Card -->
+        <div class="mens-advice-card mt-5">
+          <div class="guidance-header">
+            <div class="icon-circle-gold">
+              <Icon name="info" size={22} />
+            </div>
+            <div>
+              <h3 class="guidance-title">نکات مهم لیزر موهای زائد آقایان</h3>
+              <p class="guidance-subtitle">
+                پاسخ به سوالات پرتکرار مراجعین آقایان در کلینیک تهران لیزر
+              </p>
+            </div>
+          </div>
+
+          <div class="guidance-grid">
+            <div class="guidance-col">
+              <div class="guidance-box">
+                <div class="box-title">
+                  <Icon name="clock" size={16} />
+                  <span>تعداد جلسات آقایان (۸ الی ۱۰ جلسه)</span>
+                </div>
+                <p>
+                  به دلیل ترشح هورمون‌های مردانه (تستوسترون) و عمق بیشتر ریشه موها، آقایان عموماً به ۸ تا ۱۰ جلسه با فواصل ۶ الی ۸ هفته نیاز دارند. پس از پایان دوره، جلسات شارژ سالانه ۱ الی ۲ بار توصیه می‌گردد.
+                </p>
+              </div>
+            </div>
+
+            <div class="guidance-col">
+              <div class="guidance-box">
+                <div class="box-title">
+                  <Icon name="lightning" size={16} />
+                  <span>چرا طول موج Nd:YAG برای آقایان؟</span>
+                </div>
+                <p>
+                  طول موج ۱۰۶۴ نانومتر عمق نفوذ بالاتری دارد و انرژی را مستقیماً به پاپیلا و فولیکول‌های ضخیم ریش، سینه و کمر می‌رساند بدون اینکه ملانین سطحی پوست را بسوزاند؛ بنابراین برای پوست‌های گندمی و سبزه آقایان ۱۰۰٪ ایمن است.
+                </p>
+              </div>
+            </div>
+
+            <div class="guidance-col">
+              <div class="guidance-box">
+                <div class="box-title">
+                  <Icon name="phone" size={16} />
+                  <span>تعیین وقت و استعلام قیمت اختصاصی</span>
+                </div>
+                <p>
+                  در صورتی که ناحیه خاصی مانند دست کامل، پا کامل یا کل بدن مد نظرتان است، می‌توانید قبل از مراجعه با شماره 
+                  <a href="tel:+989035555090" class="gold-link" dir="ltr">۰۹۰۳ ۵۵۵ ۵۰۹۰</a>
+                  تماس حاصل فرموده و با اپراتور ارشد آقا مشورت فرمایید.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </section>
+
+  <!-- Client-side Interactive Toggle & Filter Script -->
+  <script is:inline>
+    // Tab switching: Female vs Male
+    const tabFemale = document.getElementById('tab-female');
+    const tabMale = document.getElementById('tab-male');
+    const panelFemale = document.getElementById('panel-female');
+    const panelMale = document.getElementById('panel-male');
+
+    function setActiveCategory(cat) {
+      if (cat === 'male') {
+        tabMale?.classList.add('active');
+        tabMale?.setAttribute('aria-selected', 'true');
+        tabFemale?.classList.remove('active');
+        tabFemale?.setAttribute('aria-selected', 'false');
+        panelMale?.classList.remove('hidden');
+        panelMale?.classList.add('active');
+        panelFemale?.classList.add('hidden');
+        panelFemale?.classList.remove('active');
+      } else {
+        tabFemale?.classList.add('active');
+        tabFemale?.setAttribute('aria-selected', 'true');
+        tabMale?.classList.remove('active');
+        tabMale?.setAttribute('aria-selected', 'false');
+        panelFemale?.classList.remove('hidden');
+        panelFemale?.classList.add('active');
+        panelMale?.classList.add('hidden');
+        panelMale?.classList.remove('active');
+      }
+    }
+
+    tabFemale?.addEventListener('click', () => setActiveCategory('female'));
+    tabMale?.addEventListener('click', () => setActiveCategory('male'));
+
+    // Filter Buttons (Women's section)
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const cards = document.querySelectorAll('.service-obsidian-card');
+    const tableRows = document.querySelectorAll('.table-obsidian-pricing tbody tr');
+
+    filterBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        filterBtns.forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+        const filter = btn.getAttribute('data-filter') || 'all';
+
+        // Filter cards
+        cards.forEach((card) => {
+          const cardCat = card.getAttribute('data-category');
+          if (filter === 'all' || cardCat === filter) {
+            card.style.display = 'flex';
+          } else {
+            card.style.display = 'none';
+          }
+        });
+
+        // Filter table rows
+        tableRows.forEach((row) => {
+          const rowCat = row.getAttribute('data-category');
+          if (filter === 'all' || rowCat === filter) {
+            row.style.display = '';
+          } else {
+            row.style.display = 'none';
+          }
+        });
+      });
+    });
+
+    // View Switch: Cards vs Table
+    const viewCardsBtn = document.getElementById('viewCardsBtn');
+    const viewTableBtn = document.getElementById('viewTableBtn');
+    const cardGrid = document.getElementById('servicesCardGrid');
+    const tableView = document.getElementById('servicesTableView');
+
+    viewCardsBtn?.addEventListener('click', () => {
+      viewCardsBtn.classList.add('active');
+      viewTableBtn?.classList.remove('active');
+      cardGrid?.classList.remove('hidden');
+      tableView?.classList.add('hidden');
+    });
+
+    viewTableBtn?.addEventListener('click', () => {
+      viewTableBtn.classList.add('active');
+      viewCardsBtn?.classList.remove('active');
+      tableView?.classList.remove('hidden');
+      cardGrid?.classList.add('hidden');
+    });
+  </script>
 </PublicLayout>
+
+<style>
+  /* ─────────────────────────────────────────────────────────────
+     Dark 3D Obsidian-Gold Aesthetics (#0a0b0d / #121417 / #d4af37)
+     ───────────────────────────────────────────────────────────── */
+  :root {
+    --obsidian-bg: #0a0b0d;
+    --obsidian-surface: #12151c;
+    --obsidian-card: #151922;
+    --obsidian-hover: #1c222e;
+    --gold-primary: #d4af37;
+    --gold-light: #f5d77f;
+    --gold-dark: #997224;
+    --gold-glow: rgba(212, 175, 55, 0.25);
+    --border-gold-subtle: rgba(212, 175, 55, 0.22);
+    --border-gold-strong: rgba(212, 175, 55, 0.45);
+  }
+
+  /* Zero horizontal overflow insurance */
+  .services-hero,
+  .category-switch-section,
+  .hero-container,
+  .container {
+    width: 100%;
+    max-width: 1200px;
+    margin-inline: auto;
+    box-sizing: border-box;
+  }
+
+  /* Hero Section */
+  .services-hero {
+    background: radial-gradient(circle at 50% 0%, #1a1e28 0%, #0a0b0d 75%);
+    padding: clamp(36px, 6vw, 68px) 16px clamp(28px, 4vw, 48px);
+    text-align: center;
+    border-bottom: 1px solid var(--border-gold-subtle);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(212, 175, 55, 0.12);
+    color: var(--gold-light);
+    border: 1px solid var(--border-gold-strong);
+    padding: 6px 16px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 18px;
+    box-shadow: 0 0 16px rgba(212, 175, 55, 0.15);
+  }
+
+  .hero-title {
+    font-size: clamp(1.65rem, 4vw, 2.6rem);
+    font-weight: 800;
+    color: #ffffff;
+    line-height: 1.4;
+    margin: 0 0 16px;
+    letter-spacing: -0.02em;
+  }
+
+  .gold-gradient {
+    background: linear-gradient(135deg, #fff2cc 0%, #f5d77f 40%, #d4af37 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: inline-block;
+  }
+
+  .hero-subtitle {
+    font-size: clamp(0.925rem, 2vw, 1.1rem);
+    color: #c9c3b8;
+    line-height: 1.9;
+    max-width: 860px;
+    margin: 0 auto 32px;
+  }
+
+  .hero-subtitle strong {
+    color: var(--gold-light);
+  }
+
+  /* Technology Badges Strip */
+  .tech-badges-strip {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 10px;
+  }
+
+  .tech-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(21, 25, 34, 0.85);
+    color: #e5e0d8;
+    border: 1px solid rgba(212, 175, 55, 0.28);
+    border-radius: 12px;
+    padding: 8px 14px;
+    font-size: 0.825rem;
+    font-weight: 500;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+  }
+
+  .tech-badge :global(svg) {
+    color: var(--gold-light);
+    flex-shrink: 0;
+  }
+
+  /* Category Switch Pills */
+  .category-switch-section {
+    padding-top: 36px;
+    padding-bottom: 72px;
+  }
+
+  .category-toggle-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 36px;
+  }
+
+  .category-toggle-pills {
+    display: inline-flex;
+    background: #0f1218;
+    padding: 6px;
+    border-radius: 16px;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  .toggle-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: transparent;
+    color: #b5ada0;
+    border: none;
+    border-radius: 12px;
+    padding: 10px 22px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+    white-space: nowrap;
+  }
+
+  .toggle-pill:hover {
+    color: #ffffff;
+  }
+
+  .toggle-pill.active {
+    background: linear-gradient(145deg, #1e2430 0%, #131720 100%);
+    color: var(--gold-light);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(212, 175, 55, 0.45);
+  }
+
+  .pill-discount-badge {
+    background: linear-gradient(90deg, #d4af37, #f5d77f);
+    color: #0a0b0d;
+    font-size: 0.725rem;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 999px;
+  }
+
+  .pill-note-badge {
+    background: rgba(212, 175, 55, 0.15);
+    color: var(--gold-light);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    font-size: 0.725rem;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 999px;
+  }
+
+  /* Section Headings */
+  .section-h2 {
+    font-size: clamp(1.35rem, 3vw, 1.85rem);
+    font-weight: 800;
+    color: #ffffff;
+    margin: 8px 0 6px;
+  }
+
+  .section-desc {
+    color: #a8a29e;
+    font-size: 0.925rem;
+    margin: 0;
+  }
+
+  .badge-gold {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(212, 175, 55, 0.15);
+    color: var(--gold-light);
+    font-size: 0.775rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+  }
+
+  /* Curated Packages Grid */
+  .packages-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+    margin-bottom: 24px;
+  }
+
+  .package-card {
+    background: linear-gradient(145deg, #151922 0%, #0d1017 100%);
+    border: 1px solid var(--border-gold-subtle);
+    border-radius: 22px;
+    padding: 28px 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 14px 34px -10px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .package-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--border-gold-strong);
+    box-shadow: 0 20px 42px -12px rgba(0, 0, 0, 0.8), 0 0 20px rgba(212, 175, 55, 0.2);
+  }
+
+  .package-card-golden {
+    border-color: rgba(212, 175, 55, 0.5);
+    background: linear-gradient(145deg, #1b202c 0%, #11141c 100%);
+  }
+
+  .card-ribbon {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: linear-gradient(90deg, #d4af37, #f5d77f);
+    color: #0a0b0d;
+    font-size: 0.75rem;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  }
+
+  .package-badge-tag {
+    font-size: 0.775rem;
+    color: var(--gold-light);
+    font-weight: 600;
+    display: inline-block;
+    margin-bottom: 6px;
+  }
+
+  .package-title {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0 0 10px;
+    line-height: 1.4;
+  }
+
+  .package-subtitle {
+    font-size: 0.875rem;
+    color: #a8a29e;
+    line-height: 1.7;
+    margin: 0 0 18px;
+    min-height: 48px;
+  }
+
+  .package-specs {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 22px;
+    background: rgba(10, 12, 17, 0.6);
+    padding: 14px 16px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+  }
+
+  .spec-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.825rem;
+    color: #d1c8bd;
+  }
+
+  .spec-item :global(svg) {
+    color: var(--gold-light);
+    flex-shrink: 0;
+  }
+
+  .spec-item strong {
+    color: #ffffff;
+  }
+
+  .package-pricing-box {
+    background: rgba(212, 175, 55, 0.05);
+    border: 1px solid rgba(212, 175, 55, 0.25);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  .price-row-old {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: #8c857b;
+    margin-bottom: 4px;
+  }
+
+  .old-amount.strikethrough {
+    text-decoration: line-through;
+  }
+
+  .price-row-final {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 6px;
+  }
+
+  .final-amount {
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: var(--gold-light);
+    letter-spacing: -0.01em;
+  }
+
+  .unit {
+    font-size: 0.825rem;
+    color: #d1c8bd;
+  }
+
+  .save-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.775rem;
+    color: #4ade80;
+    font-weight: 600;
+  }
+
+  /* 3D Button Styles */
+  .btn-3d-gold {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: linear-gradient(180deg, #f0cf75 0%, #cba24f 40%, #997224 100%);
+    color: #0a0b0d;
+    font-weight: 800;
+    font-size: 0.95rem;
+    padding: 12px 20px;
+    border-radius: 14px;
+    border: none;
+    text-decoration: none;
+    box-shadow: 0 4px 16px rgba(212, 175, 55, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .btn-3d-gold:hover {
+    filter: brightness(1.08);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.5);
+    color: #0a0b0d;
+  }
+
+  .btn-3d-subtle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    color: #e5e0d8;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 10px 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+
+  .btn-3d-subtle:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(212, 175, 55, 0.35);
+    color: var(--gold-light);
+  }
+
+  .btn-block {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Catalog Controls Bar */
+  .catalog-controls-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    background: #0f131a;
+    padding: 12px 18px;
+    border-radius: 16px;
+    border: 1px solid rgba(212, 175, 55, 0.2);
+  }
+
+  .filter-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .filter-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    color: #a8a29e;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    padding: 6px 14px;
+    font-family: inherit;
+    font-size: 0.825rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .filter-btn:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  .filter-btn.active {
+    background: rgba(212, 175, 55, 0.15);
+    color: var(--gold-light);
+    border-color: rgba(212, 175, 55, 0.35);
+  }
+
+  .view-switch-btns {
+    display: flex;
+    gap: 6px;
+  }
+
+  .view-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.04);
+    color: #8c857b;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 6px 12px;
+    font-family: inherit;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .view-toggle-btn.active {
+    background: #181d26;
+    color: var(--gold-light);
+    border-color: rgba(212, 175, 55, 0.35);
+  }
+
+  /* 3D Services Cards Grid */
+  .services-3d-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    gap: 20px;
+  }
+
+  .service-obsidian-card {
+    background: linear-gradient(145deg, #151922 0%, #0d1017 100%);
+    border: 1px solid rgba(212, 175, 55, 0.18);
+    border-radius: 18px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  .service-obsidian-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(212, 175, 55, 0.4);
+    box-shadow: 0 14px 32px -8px rgba(0, 0, 0, 0.7), 0 0 16px rgba(212, 175, 55, 0.15);
+  }
+
+  .service-obsidian-card.border-gold-glow {
+    border-color: rgba(212, 175, 55, 0.55);
+    box-shadow: 0 10px 28px -6px rgba(0, 0, 0, 0.7), 0 0 18px rgba(212, 175, 55, 0.2);
+  }
+
+  .card-top-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .category-chip {
+    font-size: 0.725rem;
+    font-weight: 700;
+    color: var(--gold-light);
+    background: rgba(212, 175, 55, 0.1);
+    padding: 3px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(212, 175, 55, 0.2);
+  }
+
+  .duration-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.725rem;
+    color: #a8a29e;
+    background: rgba(255, 255, 255, 0.04);
+    padding: 3px 10px;
+    border-radius: 999px;
+  }
+
+  .service-card-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin: 0 0 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .service-card-title a {
+    color: #ffffff;
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .service-card-title a:hover {
+    color: var(--gold-light);
+  }
+
+  .promo-tag-mini {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: linear-gradient(90deg, #d4af37, #f5d77f);
+    color: #0a0b0d;
+    font-size: 0.675rem;
+    font-weight: 800;
+    padding: 2px 7px;
+    border-radius: 999px;
+  }
+
+  .service-card-desc {
+    font-size: 0.825rem;
+    color: #9ca3af;
+    line-height: 1.7;
+    margin: 0 0 14px;
+    min-height: 38px;
+  }
+
+  .card-wavelength-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(59, 130, 246, 0.1);
+    color: #93c5fd;
+    border: 1px solid rgba(59, 130, 246, 0.25);
+    border-radius: 8px;
+    padding: 4px 10px;
+    font-size: 0.725rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .card-wavelength-tag :global(svg) {
+    color: #60a5fa;
+  }
+
+  .card-sessions-hint {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    color: #b3aa9c;
+    margin-bottom: 16px;
+  }
+
+  .service-card-pricing {
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    padding-top: 12px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+
+  .price-title {
+    font-size: 0.775rem;
+    color: #8c857b;
+  }
+
+  .price-value-box {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+
+  .strikethrough-price {
+    font-size: 0.8rem;
+    color: #78716c;
+    text-decoration: line-through;
+  }
+
+  .bold-price {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--gold-light);
+  }
+
+  .price-currency {
+    font-size: 0.75rem;
+    color: #9ca3af;
+  }
+
+  .service-card-footer {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+  }
+
+  .btn-3d-primary-sm {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: linear-gradient(180deg, #f0cf75 0%, #cba24f 40%, #997224 100%);
+    color: #0a0b0d;
+    font-size: 0.825rem;
+    font-weight: 700;
+    padding: 8px 14px;
+    border-radius: 10px;
+    text-decoration: none;
+    box-shadow: 0 2px 10px rgba(212, 175, 55, 0.3);
+    transition: all 0.2s ease;
+  }
+
+  .btn-3d-primary-sm:hover {
+    filter: brightness(1.1);
+    color: #0a0b0d;
+  }
+
+  .btn-3d-outline-sm {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    background: rgba(255, 255, 255, 0.04);
+    color: #d1c8bd;
+    font-size: 0.825rem;
+    font-weight: 600;
+    padding: 8px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+
+  .btn-3d-outline-sm:hover {
+    color: var(--gold-light);
+    border-color: rgba(212, 175, 55, 0.35);
+  }
+
+  /* Responsive Obsidian Table */
+  .table-responsive-wrapper {
+    background: #0f131a;
+    border: 1px solid rgba(212, 175, 55, 0.25);
+    border-radius: 18px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  }
+
+  .table-obsidian-pricing {
+    width: 100%;
+    min-width: 760px;
+    border-collapse: collapse;
+    text-align: right;
+  }
+
+  .table-obsidian-pricing th {
+    background: #141923;
+    color: #e5e0d8;
+    padding: 14px 16px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+    white-space: nowrap;
+  }
+
+  .table-obsidian-pricing td {
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    font-size: 0.875rem;
+    color: #d1c8bd;
+    vertical-align: middle;
+  }
+
+  .table-obsidian-pricing tr:hover td {
+    background: rgba(212, 175, 55, 0.04);
+  }
+
+  .table-obsidian-pricing tr.highlight-row td {
+    background: rgba(212, 175, 55, 0.08);
+  }
+
+  .service-table-link {
+    color: #ffffff;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .service-table-link:hover {
+    color: var(--gold-light);
+  }
+
+  .badge-promo-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: linear-gradient(90deg, #d4af37, #f5d77f);
+    color: #0a0b0d;
+    font-size: 0.675rem;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 999px;
+    margin-right: 6px;
+  }
+
+  .service-subtext {
+    font-size: 0.75rem;
+    color: #8c857b;
+    margin-top: 3px;
+  }
+
+  .badge-wavelength-cell {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.75rem;
+    color: #93c5fd;
+    background: rgba(59, 130, 246, 0.1);
+    padding: 3px 8px;
+    border-radius: 6px;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    white-space: nowrap;
+  }
+
+  .duration-badge-table {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.775rem;
+    color: #a8a29e;
+    background: rgba(255, 255, 255, 0.04);
+    padding: 3px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+  }
+
+  .price-highlight {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: var(--gold-light);
+  }
+
+  .strikethrough-mini {
+    display: block;
+    font-size: 0.75rem;
+    color: #78716c;
+    text-decoration: line-through;
+  }
+
+  .male-note-cell {
+    font-size: 0.8rem;
+    color: #a8a29e;
+  }
+
+  .btn-table-book {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: linear-gradient(180deg, #f0cf75 0%, #cba24f 40%, #997224 100%);
+    color: #0a0b0d;
+    font-size: 0.775rem;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 8px;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  /* Clinical Guidance Cards */
+  .clinical-guidance-card,
+  .mens-advice-card {
+    background: linear-gradient(145deg, #131720 0%, #0c0e14 100%);
+    border: 1px solid rgba(212, 175, 55, 0.25);
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  }
+
+  .guidance-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .icon-circle-gold {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: rgba(212, 175, 55, 0.15);
+    border: 1px solid rgba(212, 175, 55, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gold-light);
+    flex-shrink: 0;
+  }
+
+  .guidance-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0 0 6px;
+  }
+
+  .guidance-subtitle {
+    font-size: 0.875rem;
+    color: #a8a29e;
+    margin: 0;
+    line-height: 1.6;
+  }
+
+  .guidance-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 18px;
+  }
+
+  .guidance-box {
+    background: rgba(18, 22, 30, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 14px;
+    padding: 18px;
+    height: 100%;
+    box-sizing: border-box;
+  }
+
+  .box-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.925rem;
+    font-weight: 700;
+    color: var(--gold-light);
+    margin-bottom: 10px;
+  }
+
+  .guidance-box p {
+    font-size: 0.85rem;
+    color: #c9c3b8;
+    line-height: 1.8;
+    margin: 0;
+  }
+
+  .guidance-box strong {
+    color: #ffffff;
+  }
+
+  /* Men's Banner Card */
+  .mens-banner-card {
+    background: linear-gradient(145deg, #151a24 0%, #0e1219 100%);
+    border: 1px solid rgba(212, 175, 55, 0.35);
+    border-radius: 22px;
+    padding: 32px;
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 32px;
+    box-shadow: 0 14px 36px -8px rgba(0, 0, 0, 0.7);
+  }
+
+  .mens-banner-title {
+    font-size: clamp(1.3rem, 2.5vw, 1.7rem);
+    font-weight: 800;
+    color: #ffffff;
+    margin: 10px 0 12px;
+    line-height: 1.4;
+  }
+
+  .mens-banner-desc {
+    font-size: 0.9rem;
+    color: #c9c3b8;
+    line-height: 1.9;
+    margin: 0 0 20px;
+  }
+
+  .mens-banner-desc strong {
+    color: var(--gold-light);
+  }
+
+  .mens-features-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 10px;
+  }
+
+  .m-feat {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.825rem;
+    color: #e5e0d8;
+  }
+
+  .m-feat :global(svg) {
+    color: #4ade80;
+    flex-shrink: 0;
+  }
+
+  .mens-banner-cta-box {
+    background: rgba(10, 12, 17, 0.7);
+    border: 1px solid rgba(212, 175, 55, 0.25);
+    border-radius: 18px;
+    padding: 22px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .cta-box-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 6px;
+  }
+
+  .cta-box-text {
+    font-size: 0.8rem;
+    color: #a8a29e;
+    line-height: 1.6;
+    margin: 0 0 16px;
+  }
+
+  .gold-link {
+    color: var(--gold-light);
+    font-weight: 700;
+    text-decoration: underline;
+  }
+
+  .hidden {
+    display: none !important;
+  }
+
+  /* ─────────────────────────────────────────────────────────────
+     Responsive Breakpoint Enhancements (320px, 390px, 768px, 1440px)
+     ───────────────────────────────────────────────────────────── */
+  @media (max-width: 992px) {
+    .mens-banner-card {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .services-hero {
+      padding: 32px 14px 28px;
+    }
+
+    .category-toggle-pills {
+      width: 100%;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .toggle-pill {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .catalog-controls-bar {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .view-switch-btns {
+      display: none; /* Mobile defaults to clean cards */
+    }
+
+    .services-3d-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .packages-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .clinical-guidance-card,
+    .mens-advice-card {
+      padding: 20px 16px;
+    }
+
+    .guidance-header {
+      flex-direction: column;
+      gap: 12px;
+    }
+  }
+
+  @media (max-width: 390px) {
+    .hero-title {
+      font-size: 1.45rem;
+    }
+
+    .final-amount {
+      font-size: 1.55rem;
+    }
+
+    .package-card {
+      padding: 20px 16px;
+    }
+
+    .service-obsidian-card {
+      padding: 16px 14px;
+    }
+  }
+
+  @media (max-width: 320px) {
+    .tech-badge {
+      font-size: 0.75rem;
+      padding: 6px 10px;
+    }
+
+    .hero-badge {
+      font-size: 0.775rem;
+      padding: 4px 10px;
+    }
+
+    .btn-3d-gold,
+    .btn-3d-primary-sm {
+      font-size: 0.8rem;
+      padding: 8px 10px;
+    }
+  }
+</style>

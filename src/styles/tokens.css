@@ -1,11 +1,13 @@
+@import './components-3d.css';
+
 /* ─────────────────────────────────────────────────────────────
-   Tehran Laser — design tokens
-   Luxury beauty × modern clinical × editorial spacing.
-   Every color/space/radius/motion value in the app comes from here.
+   TEHRAN LASER — GLOBAL DESIGN TOKENS & 3D SYSTEM
+   Luxury Persian Beauty Clinic × Obsidian-Gold 3D Architecture.
+   Every color, space, radius, elevation & motion value comes here.
    ───────────────────────────────────────────────────────────── */
 
 :root {
-  color-scheme: light;
+  color-scheme: dark light;
 
   /* Surfaces & ink (warm neutral family) */
   --color-bg: #faf8f5;
@@ -30,15 +32,126 @@
   --color-on-ink: #f7f3ec;
   --color-on-ink-muted: #b3aa9c;
 
-  /* Status */
-  --color-success: #2f6b4f;
-  --color-success-soft: #e6f1eb;
-  --color-warning: #9a6b12;
-  --color-warning-soft: #faf1de;
-  --color-danger: #a8322b;
-  --color-danger-soft: #fbeae8;
-  --color-info: #35566e;
-  --color-info-soft: #e9f0f5;
+  /* ── DARK 3D OBSIDIAN SCALE (#0a0b0d / #121417) ─────────── */
+  --obsidian-950: #050608; /* Deepest void backdrop */
+  --obsidian-900: #0a0b0d; /* Primary dark canvas */
+  --obsidian-850: #0e1117; /* Layout base layer */
+  --obsidian-800: #121417; /* Card & panel surfaces */
+  --obsidian-750: #161a22; /* Elevated cards */
+  --obsidian-700: #1c2230; /* Interactive surfaces & dropdowns */
+  --obsidian-600: #252d40; /* Elevated borders & subtle highlights */
+  --obsidian-500: #333d54; /* Subdued divider lines */
+
+  /* ── IMPERIAL GOLD LUMINESCENCE SCALE (#d4af37 / #f5d77f) ── */
+  --gold-50: #fffdf5;
+  --gold-100: #fff9e6;
+  --gold-200: #fef0c3;
+  --gold-300: #fde08b;
+  --gold-400: #f5d77f; /* Champagne highlight (gold-light) */
+  --gold-500: #d4af37; /* Pure imperial gold (gold-base) */
+  --gold-600: #b38e22; /* Antique gold */
+  --gold-700: #8c6d17; /* Deep bronze gold */
+  --gold-800: #6b5112; /* Bevel shadow gold */
+  --gold-900: #42320b; /* Deepest bevel shadow */
+
+  /* Gold Radiance & Luminescence */
+  --gold-glow-xs: 0 0 8px rgba(212, 175, 55, 0.2);
+  --gold-glow-sm: 0 0 16px rgba(212, 175, 55, 0.28);
+  --gold-glow-md: 0 0 26px rgba(212, 175, 55, 0.38);
+  --gold-glow-lg: 0 0 42px rgba(245, 215, 127, 0.45);
+
+  /* Gold Borders */
+  --gold-border-subtle: 1px solid rgba(212, 175, 55, 0.15);
+  --gold-border: 1px solid rgba(212, 175, 55, 0.28);
+  --gold-border-bright: 1px solid rgba(212, 175, 55, 0.55);
+  --gold-border-active: 1px solid rgba(245, 215, 127, 0.8);
+
+  /* ── STATUS PALETTES (WCAG AA/AAA CALIBRATED) ────────────── */
+  --color-success: #10b981;
+  --color-success-soft: #064e3b;
+  --emerald-400: #34d399;
+  --emerald-500: #10b981;
+  --emerald-600: #059669;
+  --emerald-700: #047857;
+  --emerald-900: #022c22;
+  --emerald-glow: 0 0 20px rgba(16, 185, 129, 0.35);
+
+  --color-danger: #ef4444;
+  --color-danger-soft: #450a0a;
+  --ruby-400: #f87171;
+  --ruby-500: #ef4444;
+  --ruby-600: #dc2626;
+  --ruby-700: #b91c1c;
+  --ruby-900: #7f1d1d;
+  --ruby-glow: 0 0 20px rgba(239, 68, 68, 0.35);
+
+  --color-info: #0ea5e9;
+  --color-info-soft: #082f49;
+  --sky-400: #38bdf8;
+  --sky-500: #0ea5e9;
+  --sky-600: #0284c7;
+  --sky-700: #0369a1;
+  --sky-900: #075985;
+  --sky-glow: 0 0 20px rgba(56, 189, 248, 0.35);
+
+  --color-warning: #f59e0b;
+  --color-warning-soft: #451a03;
+  --amber-400: #fbbf24;
+  --amber-500: #f59e0b;
+  --amber-600: #d97706;
+  --amber-900: #78350f;
+
+  /* ── MULTI-LAYER 3D ELEVATION LEVELS ─────────────────────── */
+  --elevation-3d-0: 0 0 0 transparent;
+  --elevation-3d-1: 0 3px 10px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.08);
+  --elevation-3d-2: 0 10px 24px rgba(0, 0, 0, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  --elevation-3d-3: 0 18px 45px rgba(0, 0, 0, 0.65), 0 0 20px rgba(212, 175, 55, 0.14), inset 0 1px 1.5px rgba(255, 255, 255, 0.12);
+  --elevation-3d-4: 0 28px 65px rgba(0, 0, 0, 0.75), 0 0 32px rgba(212, 175, 55, 0.22), inset 0 1px 1.5px rgba(255, 255, 255, 0.15);
+  --elevation-3d-modal: 0 40px 95px rgba(0, 0, 0, 0.9), 0 0 45px rgba(212, 175, 55, 0.24), inset 0 1px 2px rgba(255, 255, 255, 0.18);
+
+  /* ── MULTI-LAYER OBSIDIAN & METALLIC GRADIENTS ───────────── */
+  --gradient-obsidian-surface: linear-gradient(160deg, #141824 0%, #0a0c12 100%);
+  --gradient-obsidian-card: linear-gradient(165deg, rgba(22, 28, 42, 0.95) 0%, rgba(10, 13, 20, 0.98) 100%);
+  --gradient-obsidian-card-hover: linear-gradient(165deg, rgba(28, 35, 52, 0.96) 0%, rgba(13, 17, 26, 0.98) 100%);
+  --gradient-obsidian-section: linear-gradient(165deg, rgba(18, 23, 35, 0.94) 0%, rgba(9, 12, 18, 0.97) 100%);
+  --gradient-obsidian-sunken: linear-gradient(180deg, rgba(8, 10, 15, 0.9) 0%, rgba(14, 18, 26, 0.8) 100%);
+  --gradient-gold-metallic: linear-gradient(135deg, #fff2cc 0%, #f5d77f 30%, #d4af37 60%, #997520 100%);
+  --gradient-gold-radial: radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.18) 0%, transparent 70%);
+
+  /* Button Gradients */
+  --gradient-gold-btn: linear-gradient(180deg, #f5d77f 0%, #d4af37 45%, #9e7822 100%);
+  --gradient-gold-btn-hover: linear-gradient(180deg, #ffea9f 0%, #e5c14e 45%, #b58925 100%);
+  --gradient-accept-btn: linear-gradient(180deg, #10b981 0%, #059669 45%, #047857 100%);
+  --gradient-accept-btn-hover: linear-gradient(180deg, #34d399 0%, #10b981 45%, #059669 100%);
+  --gradient-danger-btn: linear-gradient(180deg, #dc2626 0%, #b91c1c 45%, #991b1b 100%);
+  --gradient-danger-btn-hover: linear-gradient(180deg, #ef4444 0%, #dc2626 45%, #b91c1c 100%);
+  --gradient-ghost-hover: linear-gradient(180deg, rgba(212, 175, 55, 0.15) 0%, rgba(212, 175, 55, 0.05) 100%);
+
+  /* ── TACTILE 3D MICRO-INTERACTION PHYSICS ────────────────── */
+  --btn-3d-bevel-gold: 0 4px 0 #7a5d1a;
+  --btn-3d-bevel-gold-hover: 0 6px 0 #7a5d1a;
+  --btn-3d-bevel-gold-active: 0 1px 0 #7a5d1a;
+  --btn-3d-bevel-accept: 0 4px 0 #022c22;
+  --btn-3d-bevel-accept-hover: 0 6px 0 #022c22;
+  --btn-3d-bevel-accept-active: 0 1px 0 #022c22;
+  --btn-3d-bevel-danger: 0 4px 0 #7f1d1d;
+  --btn-3d-bevel-danger-hover: 0 6px 0 #7f1d1d;
+  --btn-3d-bevel-danger-active: 0 1px 0 #7f1d1d;
+  --btn-3d-lift: translateY(-2px);
+  --btn-3d-press: translateY(2px);
+  --btn-3d-spring: cubic-bezier(0.34, 1.45, 0.64, 1);
+
+  /* ── WCAG AAA CONTRAST TEXT TOKENS ──────────────────────── */
+  --color-text-obsidian-high: #f8fafc; /* 18.4:1 CR against dark obsidian */
+  --color-text-obsidian-med: #cbd5e1;  /* 12.4:1 CR against dark obsidian */
+  --color-text-obsidian-muted: #94a3b8;/* 7.2:1 CR against dark obsidian */
+  --color-text-gold: #d4af37;          /* 9.4:1 CR against dark obsidian */
+  --color-text-gold-light: #f5d77f;    /* 14.0:1 CR against dark obsidian */
+  --color-text-on-gold: #0d0a02;       /* 9.4:1 CR against gold-500, 14:1 on gold-400 */
+  --color-text-emerald: #34d399;       /* 10.5:1 CR against dark obsidian */
+  --color-text-rose: #f87171;          /* 7.6:1 CR against dark obsidian */
+  --color-text-sky: #38bdf8;           /* 11.8:1 CR against dark obsidian */
+  --color-text-amber: #fbbf24;         /* 11.2:1 CR against dark obsidian */
 
   /* Radii */
   --radius-sm: 8px;
@@ -92,6 +205,25 @@
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
   --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+
+  /* ── 16. BACKWARD COMPATIBILITY ALIASES (ADMIN CONSOLE) ───── */
+  --admin-gold: var(--gold-500);
+  --admin-gold-light: var(--gold-400);
+  --admin-gold-dark: var(--gold-700);
+  --admin-gold-glow: var(--gold-glow-sm);
+  --admin-gold-gradient: var(--gradient-gold-metallic);
+  --admin-btn-gold: var(--gradient-gold-btn);
+  --admin-obsidian-900: var(--obsidian-900);
+  --admin-obsidian-800: var(--obsidian-850);
+  --admin-obsidian-700: var(--obsidian-800);
+  --admin-obsidian-600: var(--obsidian-750);
+  --admin-card-bg: var(--gradient-obsidian-card);
+  --admin-card-border: var(--gold-border);
+  --admin-emerald: var(--emerald-500);
+  --admin-amber: var(--amber-500);
+  --admin-rose: var(--ruby-500);
+  --admin-cyan: var(--sky-500);
+  --font-vazir: var(--font-sans);
 }
 
 @media (prefers-reduced-motion: reduce) {

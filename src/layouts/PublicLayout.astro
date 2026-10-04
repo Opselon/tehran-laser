@@ -5,57 +5,89 @@ import '../styles/utilities.css';
 import '../styles/base.css';
 import '../styles/components.css';
 import '../styles/public.css';
+import {
+  buildCanonicalUrl,
+  createMedicalClinicSchema,
+  DEFAULT_SEO_TITLE,
+  DEFAULT_SEO_DESCRIPTION,
+  PRIMARY_KEYWORDS,
+  CLINIC_GEO_LOCATION,
+} from '../lib/seo';
 
 interface Props {
   title?: string;
   description?: string;
   canonicalUrl?: string;
+  ogType?: 'website' | 'article' | 'profile';
   ogImage?: string;
+  keywords?: string[];
   noindex?: boolean;
+  nofollow?: boolean;
   jsonLd?: Record<string, unknown> | Array<Record<string, unknown>>;
+  theme?: 'dark' | 'light';
+  bodyClass?: string;
 }
 
 const {
-  title = 'کلینیک تهران لیزر — خدمات تخصصی لیزر موهای زائد در پاسداران',
-  description = 'کلینیک تخصصی تهران لیزر در پاسداران، ارائه دهنده خدمات مدرن لیزر موهای زائد بانوان و آقایان با جدیدترین دستگاه‌ها، تعرفه شفاف و رزرو آنلاین نوبت.',
-  canonicalUrl = Astro.url.href,
+  title = DEFAULT_SEO_TITLE,
+  description = DEFAULT_SEO_DESCRIPTION,
+  canonicalUrl,
+  ogType = 'website',
   ogImage = '/images/og-share.jpg',
+  keywords,
   noindex = false,
+  nofollow = false,
   jsonLd,
+  theme = 'light',
+  bodyClass = '',
 } = Astro.props;
 
+const siteOrigin = 'https://tehranlaser.ir';
 const currentPath = Astro.url.pathname;
 
-const clinicJsonLd = {
+// Dynamic canonical URL: protocol/domain normalization + marketing-param stripping (§133)
+const resolvedCanonical = buildCanonicalUrl(Astro.url, canonicalUrl, siteOrigin);
+
+// Social crawlers require absolute image URLs
+const absoluteOgImage = ogImage.startsWith('http')
+  ? ogImage
+  : `${siteOrigin}${ogImage.startsWith('/') ? ogImage : `/${ogImage}`}`;
+
+// Fine-grained noindex / nofollow controls (§133)
+const robotsContent = [noindex ? 'noindex' : 'index', nofollow ? 'nofollow' : 'follow'].join(', ');
+
+// Keywords: explicit page-level override wins over the clinic's primary set
+const resolvedKeywords = keywords && keywords.length > 0 ? keywords : PRIMARY_KEYWORDS;
+
+// MedicalClinic + MedicalBusiness structured data for every public page (§31, §135)
+const clinicJsonLd = createMedicalClinicSchema(siteOrigin);
+
+// WebSite entity (sitelinks search box + publisher linkage)
+const websiteJsonLd = {
   '@context': 'https://schema.org',
-  '@type': 'MedicalClinic',
+  '@type': 'WebSite',
+  '@id': `${siteOrigin}/#website`,
+  url: siteOrigin,
   name: 'کلینیک تخصصی تهران لیزر',
   alternateName: 'Tehran Laser Clinic',
-  url: 'https://tehranlaser.ir',
-  telephone: '+989035555090',
-  address: {
-    '@type': 'PostalAddress',
-    streetAddress: 'خیابان پایدارفرد، نبش بوستان هفتم',
-    addressLocality: 'تهران',
-    addressRegion: 'پاسداران',
-    addressCountry: 'IR',
-  },
-  openingHoursSpecification: [
-    {
-      '@type': 'OpeningHoursSpecification',
-      dayOfWeek: ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'],
-      opens: '09:00',
-      closes: '20:00',
+  description: DEFAULT_SEO_DESCRIPTION,
+  inLanguage: 'fa-IR',
+  publisher: { '@id': `${siteOrigin}/#clinic` },
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: {
+      '@type': 'EntryPoint',
+      urlTemplate: `${siteOrigin}/services?q={search_term_string}`,
     },
-  ],
-  priceRange: 'IRR',
+    'query-input': 'required name=search_term_string',
+  },
 };
 
 const structuredData = jsonLd
   ? Array.isArray(jsonLd)
-    ? [clinicJsonLd, ...jsonLd]
-    : [clinicJsonLd, jsonLd]
-  : clinicJsonLd;
+    ? [clinicJsonLd, websiteJsonLd, ...jsonLd]
+    : [clinicJsonLd, websiteJsonLd, jsonLd]
+  : [clinicJsonLd, websiteJsonLd];
 ---
 
 <!doctype html>
@@ -63,30 +95,65 @@ const structuredData = jsonLd
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="format-detection" content="telephone=no" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <link rel="canonical" href={canonicalUrl} />
-    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    <meta name="keywords" content={resolvedKeywords.join('، ')} />
+    <meta name="author" content="کلینیک تخصصی تهران لیزر" />
+    <meta name="robots" content={robotsContent} />
+    <meta name="googlebot" content={robotsContent} />
+    <link rel="canonical" href={resolvedCanonical} />
 
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content={canonicalUrl} />
+    <!-- Geo-targeting for local Pasdaran / Tehran SEO (§133) -->
+    <meta name="geo.region" content={CLINIC_GEO_LOCATION.region} />
+    <meta name="geo.placename" content={CLINIC_GEO_LOCATION.placename} />
+    <meta name="geo.position" content={CLINIC_GEO_LOCATION.position} />
+    <meta name="ICBM" content={CLINIC_GEO_LOCATION.icbm} />
+
+    <!-- Open Graph / Facebook (§134) -->
+    <meta property="og:type" content={ogType} />
+    <meta property="og:url" content={resolvedCanonical} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:image" content={ogImage} />
+    <meta property="og:image" content={absoluteOgImage} />
+    <meta property="og:image:secure_url" content={absoluteOgImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="کلینیک تخصصی تهران لیزر — مرکز لیزر موهای زائد پاسداران" />
     <meta property="og:locale" content="fa_IR" />
+    <meta property="og:locale:alternate" content="en_US" />
     <meta property="og:site_name" content="تهران لیزر" />
 
-    <!-- Twitter -->
+    <!-- Twitter Card (§134) -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image" content={absoluteOgImage} />
+    <meta name="twitter:image:alt" content="کلینیک تخصصی تهران لیزر — مرکز لیزر موهای زائد پاسداران" />
 
     <!-- PWA metadata -->
     <meta name="theme-color" content="#d4af37" />
+    <meta name="application-name" content="کلینیک تهران لیزر" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="تهران لیزر" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+
+    <!-- Favicons -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512.png" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+
+    <!-- Sitemap & hreflang discovery -->
+    <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml" />
+    <link rel="alternate" hreflang="fa-IR" href={resolvedCanonical} />
+    <link rel="alternate" hreflang="x-default" href={resolvedCanonical} />
+
+    <!-- Resource hints for Core Web Vitals (§136) -->
+    <link rel="preconnect" href="https://images.unsplash.com" crossorigin />
+    <link rel="dns-prefetch" href="https://images.unsplash.com" />
 
     <!-- JSON-LD Structured Data (§31, §135) -->
     <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
@@ -100,7 +167,7 @@ const structuredData = jsonLd
       }
     </script>
   </head>
-  <body>
+  <body class:list={[theme === 'dark' ? 'theme-dark-obsidian' : '', bodyClass]}>
     <!-- Top announcement / trust strip -->
     <div class="announcement-strip">
       <div class="container announcement-inner">

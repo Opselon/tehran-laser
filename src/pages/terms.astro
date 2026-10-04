@@ -1,36 +1,931 @@
 ---
 import PublicLayout from '../layouts/PublicLayout.astro';
+import Icon from '../components/ui/Icon.astro';
 ---
 
 <PublicLayout
-  title="قوانین و مقررات نوبت‌دهی — کلینیک تهران لیزر"
-  description="شرایط و قوانین حضور در کلینیک، لغو و تغییر زمان نوبت و تعهدات مراجعین و کلینیک تهران لیزر پاسداران."
+  title="قوانین و مقررات نوبت‌دهی و رضایت‌نامه پزشکی — کلینیک تهران لیزر"
+  description="شرایط و قوانین حضور در کلینیک، ضوابط لغو و جابجایی نوبت، منشور بهداشتی و رضایت‌نامه آگاهانه خدمات لیزر موهای زائد تهران لیزر پاسداران."
+  theme="dark"
 >
-  <div class="page-header-strip">
-    <div class="container container-sm text-center">
-      <h1 class="page-title">قوانین و ضوابط نوبت‌دهی</h1>
-      <p class="page-subtitle">ضوابط حضور در کلینیک و فرآیند لغو و جابجایی نوبت‌ها</p>
-    </div>
-  </div>
-
-  <section class="section">
-    <div class="container container-sm">
-      <div class="legal-content-card">
-        <h3 class="font-bold mb-3">۱. زمان حضور در کلینیک</h3>
-        <p class="leading-relaxed mb-4">
-          خواهشمند است حداقل ۱۰ دقیقه پیش از ساعت رزرو در کلینیک حضور به هم رسانید تا فرآیند تشکیل پرونده و آماده‌سازی بدون تعجیل و تأخیر انجام گیرد. در صورت تأخیر بیش از ۱۵ دقیقه، ممکن است جهت حفظ نوبت سایر مراجعین، زمان شما با هماهنگی به ساعت دیگری موکول گردد.
+  <div class="legal-page-wrapper">
+    <!-- Hero / Header Strip -->
+    <header class="legal-hero">
+      <div class="container container-sm text-center">
+        <div class="legal-badge">
+          <Icon name="shield" size={16} />
+          <span>سند رسمی ضوابط و منشور بالینی</span>
+        </div>
+        <h1 class="legal-hero-title">قوانین و مقررات نوبت‌دهی و رضایت‌نامه پزشکی</h1>
+        <p class="legal-hero-subtitle">
+          منشور شفاف تعهدات متقابل مراجعین گرامی و کادر درمانی کلینیک تخصصی تهران لیزر (پاسداران)
         </p>
+        
+        <!-- Metadata bar & Action Toolbar -->
+        <div class="legal-meta-strip">
+          <div class="meta-item">
+            <Icon name="document" size={14} />
+            <span>نسخه مصوب: ۲.۴ (مهر ۱۴۰۵)</span>
+          </div>
+          <div class="meta-item">
+            <Icon name="checkCircle" size={14} />
+            <span>منطبق با ضوابط سازمان نظام پزشکی</span>
+          </div>
+          <div class="meta-item">
+            <Icon name="clock" size={14} />
+            <span>مدت زمان مطالعه: ۴ دقیقه</span>
+          </div>
+        </div>
 
-        <h3 class="font-bold mb-3">۲. شرایط لغو و تغییر زمان (Reschedule)</h3>
-        <p class="leading-relaxed mb-4">
-          در صورت بروز هرگونه پیشامد غیرمنتظره و نیاز به لغو یا جابجایی نوبت، خواهشمند است حداقل ۲۴ ساعت پیش از موعد مقرر، از طریق تماس تلفنی با پذیرش به شماره <a href="tel:+989035555090" dir="ltr">+98 903 555 5090</a> هماهنگی لازم را به عمل آورید.
-        </p>
-
-        <h3 class="font-bold mb-3">۳. تعهدات بهداشتی مراجعین</h3>
-        <p class="leading-relaxed">
-          مراجعین محترم موظف به رعایت نکات آمادگی اعلام‌شده (شیو ۲۴ ساعت قبل با ژیلت، عدم مصرف لوسیون و عطر روی موضع) هستند. در صورت وجود سوختگی، زخم باز یا مصرف داروهای خاص، اپراتور حق تعویق جلسه را تا رفع منع پزشکی محفوظ می‌دارد.
-        </p>
+        <div class="legal-actions-bar">
+          <button type="button" class="btn-print" onclick="window.print()" aria-label="چاپ یا ذخیره نسخه چاپی قوانین">
+            <Icon name="document" size={16} />
+            <span>نسخه قابل چاپ (Print-Ready)</span>
+          </button>
+          <a href="tel:+989035555090" class="btn-contact-quick" dir="ltr" aria-label="تماس با پذیرش کلینیک">
+            <Icon name="phone" size={15} />
+            <span>۰۹۰۳ ۵۵۵ ۵۰۹۰</span>
+          </a>
+        </div>
       </div>
-    </div>
-  </section>
+    </header>
+
+    <!-- Main Content Section -->
+    <main class="legal-main-section">
+      <div class="container container-sm">
+
+        <!-- Critical Medical Notice Callout (Obsidian-Gold 3D Card) -->
+        <section class="medical-consent-alert" aria-label="نکات حیاتی و منع پزشکی لیزر">
+          <div class="alert-glow"></div>
+          <div class="alert-header">
+            <div class="alert-icon-box">
+              <Icon name="warning" size={24} />
+            </div>
+            <div>
+              <h2 class="alert-title">نکات حیاتی پیش از درمان (چک‌لیست منع پزشکی)</h2>
+              <p class="alert-desc">مراجعه‌کننده محترم، شروع فرآیند لیزر منوط به عدم وجود موارد زیر در پرونده بالینی شماست:</p>
+            </div>
+          </div>
+
+          <div class="alert-grid">
+            <div class="alert-item">
+              <div class="alert-item-bullet">
+                <Icon name="shield" size={16} />
+              </div>
+              <div class="alert-item-content">
+                <strong>داروهای حساس‌کننده (راکوتان / ایزوترتینوئین):</strong>
+                <span>حداقل ۶ ماه باید از آخرین مصرف قرص راکوتان سپری شده باشد. در صورت مصرف، جلسه لیزر به تعویق می‌افتد.</span>
+              </div>
+            </div>
+
+            <div class="alert-item">
+              <div class="alert-item-bullet">
+                <Icon name="shield" size={16} />
+              </div>
+              <div class="alert-item-content">
+                <strong>برنزه‌سازی (سولاریوم، حمام آفتاب و لوسیون):</strong>
+                <span>پوست باید کاملاً به رنگ پایه بازگشته باشد (حداقل ۴ تا ۶ هفته فاصله). انجام لیزر روی پوست برنزه ممنوع و خطرناک است.</span>
+              </div>
+            </div>
+
+            <div class="alert-item">
+              <div class="alert-item-bullet">
+                <Icon name="shield" size={16} />
+              </div>
+              <div class="alert-item-content">
+                <strong>دوران بارداری و شیردهی:</strong>
+                <span>انجام لیزر در دوران بارداری به صورت کامل منع شده است. در دوران شیردهی نیازمند تاییدیه کتبی پزشک متخصص است.</span>
+              </div>
+            </div>
+
+            <div class="alert-item">
+              <div class="alert-item-bullet">
+                <Icon name="shield" size={16} />
+              </div>
+              <div class="alert-item-content">
+                <strong>اصلاح صحیح موضع (شیو با ژیلت):</strong>
+                <span>حداقل ۴ هفته از آخرین اپیلاسیون، وکس، بند یا موچین گذشته باشد و تنها ۲۴ ساعت قبل از جلسه با تیغ ژیلت اصلاح شود.</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Structured Legal Accordions Group -->
+        <section class="legal-accordions-container" aria-label="فهرست کامل مقررات">
+          
+          <!-- Accordion 1 -->
+          <details class="legal-accordion" open>
+            <summary class="accordion-summary">
+              <div class="summary-left">
+                <span class="accordion-number">۰۱</span>
+                <span class="accordion-title">زمان‌بندی حضور، پذیرش و سیاست تأخیر</span>
+              </div>
+              <span class="accordion-chevron">
+                <Icon name="chevronDown" size={18} />
+              </span>
+            </summary>
+            <div class="accordion-body">
+              <p>
+                جهت حفظ انضباط اتاق‌های لیزر، کالیبراسیون دستگاه الکساندرایت پیش از ورود شما، و تکمیل معاینات بالینی پوست، ضوابط زیر برقرار است:
+              </p>
+              <ul class="legal-list">
+                <li>
+                  <strong>حضور به‌موقع:</strong> مراجعین گرامی موظفند حداقل <strong>۱۰ دقیقه پیش از ساعت رزرو</strong> در لابی کلینیک حضور به هم رسانند تا فرآیند پذیرش، سنجش دما و آماده‌سازی موضع بدون استرس انجام پذیرد.
+                </li>
+                <li>
+                  <strong>سیاست تأخیر بیش از ۱۵ دقیقه:</strong> با توجه به زمان‌بندی دقیق نوبت‌های متوالی مراجعین بعدی، در صورت تأخیر بیش از ۱۵ دقیقه، جلسه لغو شده یا با صلاحدید سرپرست کلینیک به انتهای روز موکول خواهد گردید.
+                </li>
+                <li>
+                  <strong>تست شات رایگان:</strong> برای اولین جلسه و تایپ‌های پوستی حساس، انجام تست شات ۲۴ ساعت قبل الزامی است تا حساسیت ملانین سنجیده شود.
+                </li>
+              </ul>
+            </div>
+          </details>
+
+          <!-- Accordion 2 -->
+          <details class="legal-accordion" open>
+            <summary class="accordion-summary">
+              <div class="summary-left">
+                <span class="accordion-number">۰۲</span>
+                <span class="accordion-title">شرایط لغو نوبت، تغییر زمان (Reschedule) و ودیعه</span>
+              </div>
+              <span class="accordion-chevron">
+                <Icon name="chevronDown" size={18} />
+              </span>
+            </summary>
+            <div class="accordion-body">
+              <p>
+                رزرو نوبت در کلینیک تهران لیزر به معنای تخصیص قطعی اتاق درمانی، کادر اپراتور مجرب و انرژی دستگاه است:
+              </p>
+              <ul class="legal-list">
+                <li>
+                  <strong>تغییر یا لغو رایگان (تا ۲۴ ساعت قبل):</strong> مراجعین می‌توانند تا ۲۴ ساعت قبل از موعد مقرر، از طریق سامانه رزرو یا تماس با شماره <a href="tel:+989035555090" class="gold-link" dir="ltr">+98 903 555 5090</a> نوبت خود را بدون هیچ‌گونه جریمه جابجا نمایند.
+                </li>
+                <li>
+                  <strong>لغو کمتر از ۲۴ ساعت یا عدم حضور (No-Show):</strong> در صورت لغو در فاصله کمتر از ۲۴ ساعت یا عدم حضور، ۵۰٪ از مبلغ بیعانه واریزی به عنوان هزینه رزرو اتاق کسر خواهد شد.
+                </li>
+                <li>
+                  <strong>استرداد وجه:</strong> کلیه وجوه قابل استرداد، ظرف ۲۴ الی ۴۸ ساعت اداری به شماره شبای ثبت‌شده به نام همان مراجع واریز خواهد گردید.
+                </li>
+              </ul>
+            </div>
+          </details>
+
+          <!-- Accordion 3 -->
+          <details class="legal-accordion">
+            <summary class="accordion-summary">
+              <div class="summary-left">
+                <span class="accordion-number">۰۳</span>
+                <span class="accordion-title">پروتکل‌های بهداشتی، آمادگی قبل و مراقبت‌های بعد</span>
+              </div>
+              <span class="accordion-chevron">
+                <Icon name="chevronDown" size={18} />
+              </span>
+            </summary>
+            <div class="accordion-body">
+              <p>
+                اثربخشی پرتوی لیزر و ایمنی بافت پوست وابستگی مستقیمی به رعایت دقیق اصول زیر توسط مراجع محترم دارد:
+              </p>
+              <ul class="legal-list">
+                <li>
+                  <strong>پاکیزگی موضع:</strong> پوست ناحیه درمان باید عاری از هرگونه کرم‌پودر، لوسیون، مام، بادی‌اسپلش، عطر و ضدتعریق باشد. وجود مواد آرایشی ممکن است منجر به سوختگی سطحی ناشی از جذب ناهمگن نور گردد.
+                </li>
+                <li>
+                  <strong>شیو اصولی ۲۴ ساعت قبل:</strong> سطح موضع باید کاملاً صاف تراشیده شود تا انرژی نور مستقیماً به ریشه فولیکول اصابت کند و ساقه مو روی سطح نسوزد.
+                </li>
+                <li>
+                  <strong>مراقبت‌های پس از جلسه:</strong> پرهیز از دوش آب گرم، استخر، سونا و تعریق شدید به مدت ۲۴ ساعت. استفاده مستمر از کرم ترمیم‌کننده زینک اکساید و ضدآفتاب بدون رنگ با فاکتور حفاظتی بالا (SPF 50+).
+                </li>
+              </ul>
+            </div>
+          </details>
+
+          <!-- Accordion 4 -->
+          <details class="legal-accordion">
+            <summary class="accordion-summary">
+              <div class="summary-left">
+                <span class="accordion-number">۰۴</span>
+                <span class="accordion-title">موارد منع پزشکی و ارزیابی سلامت فردی</span>
+              </div>
+              <span class="accordion-chevron">
+                <Icon name="chevronDown" size={18} />
+              </span>
+            </summary>
+            <div class="accordion-body">
+              <p>
+                سلامت مراجعین اولویت مطلق کلینیک تهران لیزر است. انجام خدمات لیزر در صورت احراز هر یک از شرایط زیر موقتاً یا دائم ممنوع خواهد بود:
+              </p>
+              <ul class="legal-list">
+                <li>
+                  <strong>منع قطعی:</strong> بارداری، بیماری‌های پوستی واگیر، تبخال فعال، وجود ضایعات مشکوک یا بدخیمی در موضع، سابقه کلوئیدسازی شدید (گوشت اضافه)، و وجود باتری قلبی (Pacemaker).
+                </li>
+                <li>
+                  <strong>منع موقت و نیازمند مشاوره:</strong> سابقه تشنج بر اثر تحریک نور، مصرف آنتی‌بیوتیک‌های فوتوسنسیتیو (نظیر داکسی‌سایکلین و سیپروفلوکساسین)، و تزریق ژل یا بوتاکس در موضع ظرف ۲ هفته گذشته.
+                </li>
+                <li>
+                  <strong>اختلالات هورمونی:</strong> افراد مبتلا به سندرم تخمدان پلی‌کیستیک (PCOS) یا اختلالات تیروئید باید تحت نظر پزشک غدد باشند؛ اثربخشی بدون کنترل هورمونی محدودتر خواهد بود.
+                </li>
+              </ul>
+            </div>
+          </details>
+
+          <!-- Accordion 5 -->
+          <details class="legal-accordion">
+            <summary class="accordion-summary">
+              <div class="summary-left">
+                <span class="accordion-number">۰۵</span>
+                <span class="accordion-title">عوارض طبیعی گذرای لیزر و تعهدات کلینیک</span>
+              </div>
+              <span class="accordion-chevron">
+                <Icon name="chevronDown" size={18} />
+              </span>
+            </summary>
+            <div class="accordion-body">
+              <p>
+                کلینیک تهران لیزر با بهره‌گیری از به‌روزترین دستگاه‌های الکساندرایت نوبلکس و کاندلا ۲۰۲۴ مجهز به سیستم کولینگ قوی (DCD) خطرات را به حداقل رسانده است:
+              </p>
+              <ul class="legal-list">
+                <li>
+                  <strong>واکنش‌های طبیعی:</strong> اریتم (قرمزی خفیف) و تورم دور فولیکولی (Perifollicular Edema) واکنش طبیعی پوست به تخریب فولیکول بوده و طی ۲ الی ۱۲ ساعت برطرف می‌گردد.
+                </li>
+                <li>
+                  <strong>سَری‌های شخصی و بهداشت استریل:</strong> برای هر مراجعه‌کننده از سَری (اسپات‌سایز) ضدعفونی‌شده و سلفون‌کشی یک‌بار مصرف استفاده می‌شود.
+                </li>
+                <li>
+                  <strong>حضور پزشک و پشتیبانی بالینی:</strong> در صورت بروز هرگونه حساسیت پوستی، معاینه رایگان توسط پزشک مقیم کلینیک انجام و نسخه دارویی مناسب تجویز می‌گردد.
+                </li>
+              </ul>
+            </div>
+          </details>
+
+          <!-- Accordion 6 -->
+          <details class="legal-accordion">
+            <summary class="accordion-summary">
+              <div class="summary-left">
+                <span class="accordion-number">۰۶</span>
+                <span class="accordion-title">رضایت‌نامه آگاهانه، محرمانگی و رسیدگی به شکایات</span>
+              </div>
+              <span class="accordion-chevron">
+                <Icon name="chevronDown" size={18} />
+              </span>
+            </summary>
+            <div class="accordion-body">
+              <p>
+                ثبت رزرو در سامانه تهران لیزر به منزله مطالعه دقیق، درک کامل و امضای دیجیتال این توافق‌نامه است:
+              </p>
+              <ul class="legal-list">
+                <li>
+                  <strong>صحت اطلاعات:</strong> مراجع متعهد است سوابق درمانی، دارویی و تغییرات فیزیولوژیک خود را در هر جلسه به طور صادقانه به اپراتور و پزشک اعلام فرماید.
+                </li>
+                <li>
+                  <strong>محرمانگی اسناد:</strong> کلیه پرونده‌ها و سوابق تنظیمی دستگاه‌ها تحت کدینگ امنیتی نظام پزشکی نگهداری و در اختیار هیچ شخص ثالثی قرار نمی‌گیرد.
+                </li>
+                <li>
+                  <strong>انتقادات و پیشنهادات:</strong> واحد نظارت بر حقوق مراجعین کلینیک تهران لیزر به صورت روزانه از طریق شماره تماس ۰۹۰۳ ۵۵۵ ۵۰۹۰ آماده دریافت نظرات و رسیدگی فوری به موضوعات است.
+                </li>
+              </ul>
+            </div>
+          </details>
+
+        </section>
+
+        <!-- Bottom Assistance Card -->
+        <div class="legal-support-card">
+          <div class="support-card-content">
+            <div class="support-icon">
+              <Icon name="calendar" size={28} />
+            </div>
+            <div>
+              <h3 class="support-title">نیاز به راهنمایی یا مشاوره با پزشک دارید؟</h3>
+              <p class="support-desc">کارشناسان پذیرش و پزشکان کلینیک آماده پاسخگویی به ابهامات بالینی و تنظیم وقت مشاوره رایگان هستند.</p>
+            </div>
+          </div>
+          <div class="support-actions">
+            <a href="/booking" class="btn-gold-primary">
+              <Icon name="sparkles" size={16} />
+              <span>رزرو آنلاین نوبت</span>
+            </a>
+            <a href="/contact" class="btn-obsidian-secondary">
+              <Icon name="phone" size={16} />
+              <span>تماس و نشانی کلینیک</span>
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
 </PublicLayout>
+
+<style>
+  /* ─────────────────────────────────────────────────────────────
+     Dark 3D Obsidian-Gold Design System for Legal Pages
+     ───────────────────────────────────────────────────────────── */
+  .legal-page-wrapper {
+    background-color: #0a0b0d;
+    color: #e4e7eb;
+    min-height: 100vh;
+    padding-bottom: 80px;
+    font-family: inherit;
+    overflow-x: hidden;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Hero Section */
+  .legal-hero {
+    background: radial-gradient(circle at 50% -20%, rgba(212, 175, 55, 0.15) 0%, rgba(10, 11, 13, 0.95) 70%);
+    border-bottom: 1px solid rgba(212, 175, 55, 0.18);
+    padding: 64px 20px 48px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .legal-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.5), transparent);
+  }
+
+  .legal-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(212, 175, 55, 0.1);
+    color: #f5d77f;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    padding: 6px 16px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.1);
+  }
+
+  .legal-hero-title {
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    font-weight: 900;
+    color: #ffffff;
+    line-height: 1.35;
+    margin: 0 0 16px;
+    letter-spacing: -0.02em;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+  }
+
+  .legal-hero-subtitle {
+    font-size: clamp(0.95rem, 2vw, 1.1rem);
+    color: #a4abb6;
+    line-height: 1.8;
+    max-width: 640px;
+    margin: 0 auto 28px;
+  }
+
+  /* Metadata Strip */
+  .legal-meta-strip {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 18px;
+    margin-bottom: 28px;
+  }
+
+  .meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.825rem;
+    color: #8c939f;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 6px 14px;
+    border-radius: 8px;
+  }
+
+  .meta-item svg {
+    color: #d4af37;
+  }
+
+  /* Action Toolbar */
+  .legal-actions-bar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+
+  .btn-print {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(212, 175, 55, 0.05));
+    border: 1px solid rgba(212, 175, 55, 0.4);
+    color: #f5d77f;
+    padding: 10px 22px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  }
+
+  .btn-print:hover {
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.25), rgba(212, 175, 55, 0.1));
+    border-color: rgba(212, 175, 55, 0.7);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.2);
+  }
+
+  .btn-contact-quick {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #d1d5db;
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.25s ease;
+  }
+
+  .btn-contact-quick:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(212, 175, 55, 0.4);
+    color: #f5d77f;
+  }
+
+  /* Main Section */
+  .legal-main-section {
+    padding: 48px 20px 0;
+  }
+
+  .container-sm {
+    max-width: 820px;
+    margin: 0 auto;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* 3D Obsidian-Gold Medical Consent Alert Card */
+  .medical-consent-alert {
+    background: linear-gradient(145deg, #14171d, #0d0e12);
+    border: 1px solid rgba(212, 175, 55, 0.35);
+    border-radius: 20px;
+    padding: 28px;
+    margin-bottom: 40px;
+    position: relative;
+    box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.8), 0 0 25px -10px rgba(212, 175, 55, 0.15);
+    overflow: hidden;
+  }
+
+  .alert-glow {
+    position: absolute;
+    top: -40px;
+    right: -40px;
+    width: 160px;
+    height: 160px;
+    background: radial-gradient(circle, rgba(212, 175, 55, 0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .alert-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-bottom: 18px;
+  }
+
+  .alert-icon-box {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(212, 175, 55, 0.05));
+    border: 1px solid rgba(212, 175, 55, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #f5d77f;
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
+  }
+
+  .alert-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0 0 6px;
+  }
+
+  .alert-desc {
+    font-size: 0.925rem;
+    color: #b0b7c3;
+    line-height: 1.7;
+    margin: 0;
+  }
+
+  .alert-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  @media (min-width: 640px) {
+    .alert-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .alert-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    padding: 14px;
+    transition: border-color 0.2s ease;
+  }
+
+  .alert-item:hover {
+    border-color: rgba(212, 175, 55, 0.3);
+  }
+
+  .alert-item-bullet {
+    flex-shrink: 0;
+    color: #d4af37;
+    margin-top: 2px;
+  }
+
+  .alert-item-content strong {
+    display: block;
+    font-size: 0.9rem;
+    color: #f5d77f;
+    margin-bottom: 4px;
+  }
+
+  .alert-item-content span {
+    font-size: 0.825rem;
+    color: #9ba3af;
+    line-height: 1.65;
+  }
+
+  /* 3D Obsidian Structured Accordions */
+  .legal-accordions-container {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    margin-bottom: 48px;
+  }
+
+  .legal-accordion {
+    background: #111419;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: all 0.25s ease;
+    box-shadow: 0 8px 24px -10px rgba(0, 0, 0, 0.6);
+  }
+
+  .legal-accordion[open] {
+    border-color: rgba(212, 175, 55, 0.35);
+    background: linear-gradient(180deg, #13171e 0%, #101217 100%);
+    box-shadow: 0 12px 32px -12px rgba(0, 0, 0, 0.8), 0 0 20px -8px rgba(212, 175, 55, 0.12);
+  }
+
+  .accordion-summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
+    transition: background 0.2s ease;
+  }
+
+  .accordion-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .accordion-summary:hover {
+    background: rgba(212, 175, 55, 0.04);
+  }
+
+  .summary-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .accordion-number {
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: #d4af37;
+    background: rgba(212, 175, 55, 0.12);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-family: monospace;
+  }
+
+  .accordion-title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -0.01em;
+  }
+
+  .accordion-chevron {
+    color: #8c939f;
+    transition: transform 0.3s cubic-bezier(0.2, 0, 0, 1), color 0.2s ease;
+    display: flex;
+    align-items: center;
+  }
+
+  .legal-accordion[open] .accordion-chevron {
+    transform: rotate(180deg);
+    color: #f5d77f;
+  }
+
+  .accordion-body {
+    padding: 0 24px 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    margin-top: 4px;
+    padding-top: 18px;
+    font-size: 0.95rem;
+    line-height: 1.9;
+    color: #bcc3cf;
+  }
+
+  .legal-list {
+    margin: 14px 0 0;
+    padding-right: 20px;
+    list-style-type: none;
+  }
+
+  .legal-list li {
+    position: relative;
+    margin-bottom: 12px;
+    padding-right: 18px;
+  }
+
+  .legal-list li::before {
+    content: '◆';
+    position: absolute;
+    right: 0;
+    top: 2px;
+    color: #d4af37;
+    font-size: 0.65rem;
+  }
+
+  .legal-list strong {
+    color: #ffffff;
+    font-weight: 700;
+  }
+
+  .gold-link {
+    color: #f5d77f;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  /* Bottom Support Card */
+  .legal-support-card {
+    background: linear-gradient(135deg, #161a22 0%, #101217 100%);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    border-radius: 20px;
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    box-shadow: 0 16px 36px -12px rgba(0, 0, 0, 0.8);
+  }
+
+  @media (min-width: 640px) {
+    .legal-support-card {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+    }
+  }
+
+  .support-card-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 18px;
+  }
+
+  .support-icon {
+    flex-shrink: 0;
+    width: 52px;
+    height: 52px;
+    background: rgba(212, 175, 55, 0.12);
+    border: 1px solid rgba(212, 175, 55, 0.4);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #f5d77f;
+  }
+
+  .support-title {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0 0 6px;
+  }
+
+  .support-desc {
+    font-size: 0.9rem;
+    color: #9ba3af;
+    line-height: 1.7;
+    margin: 0;
+    max-width: 420px;
+  }
+
+  .support-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  @media (min-width: 480px) {
+    .support-actions {
+      flex-direction: row;
+    }
+  }
+
+  .btn-gold-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #d4af37, #aa8624);
+    color: #0d0f12;
+    font-weight: 800;
+    font-size: 0.925rem;
+    padding: 12px 22px;
+    border-radius: 12px;
+    text-decoration: none;
+    box-shadow: 0 6px 18px rgba(212, 175, 55, 0.25);
+    transition: all 0.25s ease;
+  }
+
+  .btn-gold-primary:hover {
+    background: linear-gradient(135deg, #e6c555, #bd962b);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(212, 175, 55, 0.4);
+  }
+
+  .btn-obsidian-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #e4e7eb;
+    font-weight: 700;
+    font-size: 0.925rem;
+    padding: 12px 20px;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: all 0.25s ease;
+  }
+
+  .btn-obsidian-secondary:hover {
+    background: rgba(255, 255, 255, 0.09);
+    border-color: rgba(212, 175, 55, 0.5);
+    color: #f5d77f;
+  }
+
+  /* ─────────────────────────────────────────────────────────────
+     Print-Ready Readability Rules (§3, §135)
+     ───────────────────────────────────────────────────────────── */
+  @media print {
+    :global(body) {
+      background: #ffffff !important;
+      color: #111111 !important;
+    }
+
+    .legal-page-wrapper {
+      background: #ffffff !important;
+      color: #111111 !important;
+      padding: 0 !important;
+    }
+
+    .legal-hero {
+      background: none !important;
+      border-bottom: 2px solid #000000 !important;
+      padding: 20px 0 !important;
+    }
+
+    .legal-hero-title {
+      color: #000000 !important;
+      font-size: 1.8rem !important;
+      text-shadow: none !important;
+    }
+
+    .legal-hero-subtitle {
+      color: #444444 !important;
+    }
+
+    .legal-actions-bar,
+    .legal-support-card,
+    :global(.site-header),
+    :global(.announcement-strip),
+    :global(.site-footer),
+    :global(.mobile-sticky-bar) {
+      display: none !important;
+    }
+
+    .medical-consent-alert {
+      background: #fdfdfd !important;
+      border: 2px solid #990000 !important;
+      color: #000000 !important;
+      box-shadow: none !important;
+      page-break-inside: avoid;
+    }
+
+    .alert-title {
+      color: #990000 !important;
+    }
+
+    .alert-desc,
+    .alert-item-content span {
+      color: #222222 !important;
+    }
+
+    .alert-item-content strong {
+      color: #000000 !important;
+    }
+
+    /* Force all accordions open in print */
+    .legal-accordion {
+      background: #ffffff !important;
+      border: 1px solid #cccccc !important;
+      color: #000000 !important;
+      box-shadow: none !important;
+      page-break-inside: avoid;
+      margin-bottom: 16px;
+    }
+
+    .legal-accordion summary {
+      cursor: default !important;
+      background: #f5f5f5 !important;
+      border-bottom: 1px solid #dddddd !important;
+    }
+
+    .accordion-title {
+      color: #000000 !important;
+    }
+
+    .accordion-chevron {
+      display: none !important;
+    }
+
+    .accordion-body {
+      display: block !important;
+      color: #111111 !important;
+      padding: 16px !important;
+    }
+
+    .legal-list strong {
+      color: #000000 !important;
+    }
+  }
+
+  /* 0px Horizontal Overflow Protections across all widths */
+  @media (max-width: 480px) {
+    .legal-hero {
+      padding: 40px 16px 32px;
+    }
+
+    .medical-consent-alert {
+      padding: 20px 16px;
+    }
+
+    .accordion-summary {
+      padding: 16px;
+    }
+
+    .accordion-body {
+      padding: 0 16px 20px;
+    }
+
+    .legal-support-card {
+      padding: 24px 16px;
+    }
+  }
+</style>

@@ -1,27 +1,522 @@
 ---
 import PublicLayout from '../layouts/PublicLayout.astro';
+import Icon from '../components/ui/Icon.astro';
 ---
 
 <PublicLayout
-  title="خطای موقت سرور — کلینیک تهران لیزر"
-  description="متأسفانه در پردازش درخواست شما خطایی رخ داده است. لطفاً لحظاتی دیگر تلاش فرمایید."
+  title="خطای موقت سرور (کد ۵۰۰) — کلینیک تهران لیزر"
+  description="متأسفانه در پردازش درخواست شما خطای موقت سیستمی رخ داده است. اطلاعات و تراکنش‌های بانکی شما محفوظ بوده و همکاران فنی در حال رفع اختلال هستند."
+  noindex={true}
+  theme="dark"
 >
-  <section class="section py-5 text-center">
-    <div class="container container-sm">
-      <div class="error-page-card py-5">
-        <div class="error-badge mb-3">خطای سرور</div>
-        <h1 class="error-title text-2xl font-bold mb-3">بروز اختلال موقت در ارتباط با سامانه</h1>
-        <p class="error-desc text-muted mb-4">
-          در حال حاضر سرور قادر به پردازش درخواست شما نیست. همکاران فنی ما در حال رفع اختلال هستند.
-        </p>
-        <div class="error-actions-group">
-          <button type="button" class="btn btn-primary ml-2" onclick="window.location.reload()">
-            تلاش مجدد
-          </button>
-          <a href="/" class="btn btn-outline ml-2">بازگشت به صفحه اصلی</a>
-          <a href="tel:+989035555090" class="btn btn-outline" dir="ltr">تماس تلفنی با پذیرش</a>
+  <div class="error-page-wrapper">
+    <main class="error-main-container">
+      <div class="container container-sm text-center">
+
+        <!-- 3D Obsidian-Gold Server / Calibrating Core Illustration -->
+        <div class="illustration-wrapper" aria-hidden="true">
+          <div class="glow-orb"></div>
+          <svg class="svg-3d-500" viewBox="0 0 480 260" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="goldGrad500" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#fff5cc" />
+                <stop offset="30%" stop-color="#d4af37" />
+                <stop offset="70%" stop-color="#a67c1e" />
+                <stop offset="100%" stop-color="#6e5010" />
+              </linearGradient>
+              <linearGradient id="obsidianServer" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#222834" />
+                <stop offset="50%" stop-color="#14171f" />
+                <stop offset="100%" stop-color="#0a0c10" />
+              </linearGradient>
+              <linearGradient id="circuitGold" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#d4af37" stop-opacity="0.1" />
+                <stop offset="50%" stop-color="#f5d77f" stop-opacity="0.9" />
+                <stop offset="100%" stop-color="#d4af37" stop-opacity="0.1" />
+              </linearGradient>
+              <filter id="serverGlow" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="7" result="blur" />
+                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+              </filter>
+            </defs>
+
+            <!-- Base platform reflection -->
+            <ellipse cx="240" cy="225" rx="170" ry="22" fill="#000000" opacity="0.65" />
+            <ellipse cx="240" cy="220" rx="140" ry="15" stroke="url(#goldGrad500)" stroke-width="1.5" stroke-dasharray="5 7" opacity="0.4" />
+
+            <!-- Isometric 3D Obsidian Server Rack / Calibrating Laser Engine -->
+            <polygon points="240,55 310,95 310,185 240,225 170,185 170,95" fill="url(#obsidianServer)" stroke="url(#goldGrad500)" stroke-width="1.5" />
+            
+            <!-- Side shadow facets -->
+            <polygon points="240,55 240,225 310,185 310,95" fill="#11141a" opacity="0.8" />
+            <polygon points="240,55 240,225 170,185 170,95" fill="#252c39" opacity="0.5" />
+
+            <!-- Horizontal Server Tray Slots -->
+            <line x1="185" y1="120" x2="235" y2="148" stroke="#d4af37" stroke-width="1.5" opacity="0.6" />
+            <line x1="245" y1="148" x2="295" y2="120" stroke="#d4af37" stroke-width="1.5" opacity="0.4" />
+            <line x1="185" y1="145" x2="235" y2="173" stroke="#d4af37" stroke-width="1.5" opacity="0.6" />
+            <line x1="245" y1="173" x2="295" y2="145" stroke="#d4af37" stroke-width="1.5" opacity="0.4" />
+
+            <!-- Pulsing Status Diodes -->
+            <circle cx="200" cy="112" r="3" fill="#f5d77f" filter="url(#serverGlow)" />
+            <circle cx="212" cy="119" r="2" fill="#d4af37" />
+            <circle cx="200" cy="137" r="3" fill="#ff6b6b" filter="url(#serverGlow)" />
+            <circle cx="212" cy="144" r="2" fill="#f5d77f" />
+
+            <!-- Floating Laser Calibration Ring -->
+            <ellipse cx="240" cy="85" rx="55" ry="16" stroke="url(#circuitGold)" stroke-width="2" filter="url(#serverGlow)" />
+            <ellipse cx="240" cy="85" rx="80" ry="24" stroke="rgba(212,175,55,0.3)" stroke-width="1" stroke-dasharray="4 6" />
+
+            <!-- Stylized 3D Metallic "500" numerals -->
+            <!-- Number 5 (Left) -->
+            <g transform="translate(60, 75)">
+              <text x="0" y="70" font-family="sans-serif" font-weight="900" font-size="74" fill="#000000" opacity="0.5" dx="4" dy="6">۵</text>
+              <text x="0" y="70" font-family="sans-serif" font-weight="900" font-size="74" fill="url(#goldGrad500)" filter="url(#serverGlow)">۵</text>
+            </g>
+
+            <!-- Zero 1 (Center Right) -->
+            <g transform="translate(340, 75)">
+              <text x="0" y="70" font-family="sans-serif" font-weight="900" font-size="74" fill="#000000" opacity="0.5" dx="4" dy="6">۰</text>
+              <text x="0" y="70" font-family="sans-serif" font-weight="900" font-size="74" fill="url(#goldGrad500)" filter="url(#serverGlow)">۰</text>
+            </g>
+
+            <!-- Zero 2 (Far Right) -->
+            <g transform="translate(390, 75)">
+              <text x="0" y="70" font-family="sans-serif" font-weight="900" font-size="74" fill="#000000" opacity="0.5" dx="4" dy="6">۰</text>
+              <text x="0" y="70" font-family="sans-serif" font-weight="900" font-size="74" fill="url(#goldGrad500)" filter="url(#serverGlow)">۰</text>
+            </g>
+
+            <!-- Ambient sparkles -->
+            <circle cx="120" cy="45" r="2.5" fill="#f5d77f" opacity="0.8" />
+            <circle cx="360" cy="35" r="2" fill="#ffffff" opacity="0.9" />
+          </svg>
         </div>
+
+        <!-- Error Badge -->
+        <div class="error-badge">
+          <Icon name="refresh" size={15} />
+          <span>کد خطا: ۵۰۰ | کالیبراسیون و همگام‌سازی موقت سرور</span>
+        </div>
+
+        <h1 class="error-title">اختلال موقت در ارتباط با سرورهای پردازش</h1>
+        
+        <p class="error-subtitle">
+          سامانه در حال به‌روزرسانی امنیتی یا پردازش متمرکز است. اطلاعات پرونده و نوبت‌های شما در امنیت کامل محفوظ می‌باشد.
+        </p>
+
+        <!-- Reassurance & Diagnostic Card -->
+        <div class="reassurance-card">
+          <div class="reassurance-header">
+            <div class="header-icon">
+              <Icon name="shield" size={20} />
+            </div>
+            <div>
+              <h2 class="card-heading">ضمانت پایداری نوبت‌ها و امنیت تراکنش بانکی</h2>
+              <p class="card-caption">اطلاعات کلیدی برای آسودگی خاطر شما در زمان اختلال شبکه:</p>
+            </div>
+          </div>
+
+          <div class="reassurance-grid">
+            <div class="reassurance-item">
+              <div class="item-icon">
+                <Icon name="card" size={18} />
+              </div>
+              <div class="item-text">
+                <strong>تضمین استرداد درگاه بانکی:</strong>
+                <span>چنانچه در حال پرداخت بیعانه بوده‌اید و وجهی کسر گردیده، طبق قوانین شاپرک مبلغ ظرف ۷۲ ساعت کاری به حساب مبدأ بازمی‌گردد.</span>
+              </div>
+            </div>
+
+            <div class="reassurance-item">
+              <div class="item-icon">
+                <Icon name="database" size={18} />
+              </div>
+              <div class="item-text">
+                <strong>حفظ نوبت‌های از پیش ثبت‌شده:</strong>
+                <span>پایگاه داده کلینیک بر بستر ابری رمزنگاری‌شده فعال است؛ تاریخ و ساعت نوبت‌های تاییدشده قبلی کاملاً قطعی و بدون تغییر است.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Trace ID & Live Status Bar -->
+          <div class="trace-status-bar">
+            <div class="trace-code">
+              <Icon name="document" size={14} />
+              <span>کد پیگیری رخداد: <code dir="ltr" id="traceId">TL-SRV-9082</code></span>
+            </div>
+            <div class="system-status-indicator">
+              <span class="status-dot"></span>
+              <span>پشتیبانی تلفنی فعال و پاسخگو</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Group -->
+        <div class="error-actions-group">
+          <button type="button" class="btn-primary-3d" onclick="window.location.reload()">
+            <Icon name="refresh" size={18} />
+            <span>تلاش مجدد و بارگذاری صفحه</span>
+          </button>
+          
+          <a href="tel:+989035555090" class="btn-secondary-3d" dir="ltr" aria-label="تماس با پذیرش کلینیک">
+            <Icon name="phone" size={18} />
+            <span>۰۹۰۳ ۵۵۵ ۵۰۹۰</span>
+          </a>
+
+          <a href="/" class="btn-obsidian-3d">
+            <Icon name="arrowRight" size={18} />
+            <span>بازگشت به صفحه اصلی</span>
+          </a>
+        </div>
+
       </div>
-    </div>
-  </section>
+    </main>
+  </div>
 </PublicLayout>
+
+<script is:inline>
+  // Generate random incident trace ID on load for support reference
+  try {
+    const traceEl = document.getElementById('traceId');
+    if (traceEl) {
+      const randCode = Math.floor(1000 + Math.random() * 9000);
+      traceEl.textContent = `TL-ERR-${randCode}`;
+    }
+  } catch (e) {}
+</script>
+
+<style>
+  /* ─────────────────────────────────────────────────────────────
+     Dark 3D Obsidian-Gold Design System for 500 Error Experience
+     ───────────────────────────────────────────────────────────── */
+  .error-page-wrapper {
+    background-color: #0a0b0d;
+    color: #e4e7eb;
+    min-height: calc(100vh - 140px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 16px 80px;
+    font-family: inherit;
+    overflow-x: hidden;
+    width: 100%;
+    box-sizing: border-box;
+    position: relative;
+  }
+
+  .error-main-container {
+    width: 100%;
+    max-width: 740px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+  }
+
+  .container-sm {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* 3D Illustration Container */
+  .illustration-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 440px;
+    margin: 0 auto 20px;
+  }
+
+  .glow-orb {
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 200px;
+    height: 120px;
+    background: radial-gradient(circle, rgba(212, 175, 55, 0.2) 0%, transparent 70%);
+    filter: blur(20px);
+    pointer-events: none;
+  }
+
+  .svg-3d-500 {
+    width: 100%;
+    height: auto;
+    display: block;
+    filter: drop-shadow(0 15px 25px rgba(0, 0, 0, 0.75));
+  }
+
+  /* Error Badge & Header */
+  .error-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(212, 175, 55, 0.1);
+    color: #f5d77f;
+    border: 1px solid rgba(212, 175, 55, 0.35);
+    padding: 6px 18px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.12);
+  }
+
+  .error-title {
+    font-size: clamp(1.4rem, 4vw, 2.1rem);
+    font-weight: 900;
+    color: #ffffff;
+    line-height: 1.35;
+    margin: 0 0 12px;
+    letter-spacing: -0.02em;
+    text-shadow: 0 3px 12px rgba(0, 0, 0, 0.8);
+  }
+
+  .error-subtitle {
+    font-size: clamp(0.925rem, 2vw, 1.05rem);
+    color: #9ba3af;
+    line-height: 1.75;
+    max-width: 580px;
+    margin: 0 auto 32px;
+  }
+
+  /* Reassurance & Diagnostic Card */
+  .reassurance-card {
+    background: linear-gradient(145deg, #13161c, #0e1014);
+    border: 1px solid rgba(212, 175, 55, 0.28);
+    border-radius: 20px;
+    padding: 26px;
+    margin-bottom: 36px;
+    text-align: right;
+    box-shadow: 0 16px 36px -12px rgba(0, 0, 0, 0.8), 0 0 20px -8px rgba(212, 175, 55, 0.12);
+    position: relative;
+  }
+
+  .reassurance-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-bottom: 16px;
+  }
+
+  .header-icon {
+    width: 42px;
+    height: 42px;
+    background: rgba(212, 175, 55, 0.12);
+    border: 1px solid rgba(212, 175, 55, 0.35);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #f5d77f;
+    flex-shrink: 0;
+  }
+
+  .card-heading {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0 0 4px;
+  }
+
+  .card-caption {
+    font-size: 0.85rem;
+    color: #8c939f;
+    margin: 0;
+  }
+
+  .reassurance-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+
+  @media (min-width: 600px) {
+    .reassurance-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .reassurance-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    padding: 14px;
+  }
+
+  .item-icon {
+    color: #d4af37;
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+
+  .item-text strong {
+    display: block;
+    font-size: 0.875rem;
+    color: #f5d77f;
+    margin-bottom: 4px;
+  }
+
+  .item-text span {
+    font-size: 0.8rem;
+    color: #9ba3af;
+    line-height: 1.65;
+  }
+
+  /* Trace & Status Bar */
+  .trace-status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 0.8rem;
+  }
+
+  .trace-code {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #8c939f;
+  }
+
+  .trace-code code {
+    color: #f5d77f;
+    font-family: monospace;
+    font-weight: 700;
+  }
+
+  .system-status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #10b981;
+    font-weight: 600;
+  }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    background: #10b981;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #10b981;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0% { transform: scale(0.95); opacity: 0.8; }
+    50% { transform: scale(1.2); opacity: 1; }
+    100% { transform: scale(0.95); opacity: 0.8; }
+  }
+
+  /* Action Buttons Group */
+  .error-actions-group {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+
+  .btn-primary-3d {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #d4af37, #aa8624);
+    color: #0b0d10;
+    font-weight: 800;
+    font-size: 0.95rem;
+    padding: 13px 26px;
+    border-radius: 14px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.3);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .btn-primary-3d:hover {
+    background: linear-gradient(135deg, #e6c555, #bd962b);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 26px rgba(212, 175, 55, 0.45);
+  }
+
+  .btn-secondary-3d {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(212, 175, 55, 0.4);
+    color: #f5d77f;
+    font-weight: 700;
+    font-size: 0.95rem;
+    padding: 13px 24px;
+    border-radius: 14px;
+    text-decoration: none;
+    transition: all 0.25s ease;
+  }
+
+  .btn-secondary-3d:hover {
+    background: rgba(212, 175, 55, 0.12);
+    border-color: rgba(212, 175, 55, 0.8);
+    transform: translateY(-2px);
+  }
+
+  .btn-obsidian-3d {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #d1d5db;
+    font-weight: 700;
+    font-size: 0.9rem;
+    padding: 13px 20px;
+    border-radius: 14px;
+    text-decoration: none;
+    transition: all 0.25s ease;
+  }
+
+  .btn-obsidian-3d:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(212, 175, 55, 0.4);
+    color: #f5d77f;
+  }
+
+  /* 0px Horizontal Overflow Protections across all widths */
+  @media (max-width: 480px) {
+    .error-page-wrapper {
+      padding: 30px 14px 60px;
+    }
+
+    .reassurance-card {
+      padding: 20px 16px;
+    }
+
+    .trace-status-bar {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .error-actions-group {
+      flex-direction: column;
+      width: 100%;
+    }
+
+    .btn-primary-3d,
+    .btn-secondary-3d,
+    .btn-obsidian-3d {
+      width: 100%;
+    }
+  }
+</style>

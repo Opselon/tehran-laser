@@ -1,25 +1,485 @@
 ---
 import PublicLayout from '../layouts/PublicLayout.astro';
+import Icon from '../components/ui/Icon.astro';
 ---
 
 <PublicLayout
-  title="صفحه پیدا نشد — کلینیک تهران لیزر"
-  description="متأسفانه صفحه مورد نظر شما در سایت کلینیک تهران لیزر یافت نشد."
+  title="صفحه پیدا نشد (خطای ۴۰۴) — کلینیک تهران لیزر"
+  description="متأسفانه صفحه مورد نظر شما در سایت کلینیک تهران لیزر یافت نشد. می‌توانید از طریق بخش‌های زیر به رزرو نوبت یا صفحه اصلی مراجعه فرمایید."
+  noindex={true}
+  theme="dark"
 >
-  <section class="section py-5 text-center">
-    <div class="container container-sm">
-      <div class="error-page-card py-5">
-        <div class="error-badge mb-3">خطای ۴۰۴</div>
-        <h1 class="error-title text-2xl font-bold mb-3">صفحه مورد نظر پیدا نشد</h1>
-        <p class="error-desc text-muted mb-4">
-          آدرسی که وارد نموده‌اید تغییر یافته یا موقتاً در دسترس نیست. می‌توانید از بخش‌های زیر استفاده فرمایید:
-        </p>
-        <div class="error-actions-group">
-          <a href="/" class="btn btn-primary ml-2">بازگشت به صفحه اصلی</a>
-          <a href="/services" class="btn btn-outline ml-2">مشاهده تعرفه خدمات</a>
-          <a href="/booking" class="btn btn-outline">رزرو آنلاین نوبت</a>
+  <div class="error-page-wrapper">
+    <main class="error-main-container">
+      <div class="container container-sm text-center">
+
+        <!-- 3D Obsidian-Gold Illustration Component -->
+        <div class="illustration-wrapper" aria-hidden="true">
+          <div class="glow-orb"></div>
+          <svg class="svg-3d-404" viewBox="0 0 480 260" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <!-- Gold metallic gradients -->
+              <linearGradient id="goldGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#fff0be" />
+                <stop offset="35%" stop-color="#d4af37" />
+                <stop offset="70%" stop-color="#aa8624" />
+                <stop offset="100%" stop-color="#6e5414" />
+              </linearGradient>
+              <linearGradient id="obsidianGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#1f242d" />
+                <stop offset="50%" stop-color="#12151b" />
+                <stop offset="100%" stop-color="#0a0b0e" />
+              </linearGradient>
+              <linearGradient id="laserBeamGrad" x1="0%" y1="50%" x2="100%" y2="50%">
+                <stop offset="0%" stop-color="#d4af37" stop-opacity="0" />
+                <stop offset="50%" stop-color="#f5d77f" stop-opacity="0.8" />
+                <stop offset="100%" stop-color="#aa8624" stop-opacity="0" />
+              </linearGradient>
+              <filter id="goldGlow" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="8" result="blur" />
+                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+              </filter>
+            </defs>
+
+            <!-- Ground shadow & platform ring -->
+            <ellipse cx="240" cy="225" rx="180" ry="24" fill="#000000" opacity="0.6" />
+            <ellipse cx="240" cy="220" rx="160" ry="18" stroke="url(#goldGrad1)" stroke-width="1.5" stroke-dasharray="6 8" opacity="0.4" />
+            <ellipse cx="240" cy="220" rx="120" ry="12" fill="url(#obsidianGrad)" stroke="rgba(212,175,55,0.3)" stroke-width="1" />
+
+            <!-- Isometric Obsidian Monolith / Broken Laser Focal Emitter -->
+            <polygon points="240,45 300,80 300,165 240,200 180,165 180,80" fill="url(#obsidianGrad)" stroke="url(#goldGrad1)" stroke-width="2" />
+            <!-- Crystal facets -->
+            <polygon points="240,45 240,200 300,165 300,80" fill="#151820" opacity="0.7" />
+            <polygon points="240,45 240,200 180,165 180,80" fill="#242b38" opacity="0.5" />
+            <line x1="240" y1="45" x2="240" y2="200" stroke="#f5d77f" stroke-width="1.5" opacity="0.7" />
+
+            <!-- Laser refraction rings -->
+            <ellipse cx="240" cy="120" rx="45" ry="14" stroke="#f5d77f" stroke-width="2" opacity="0.8" filter="url(#goldGlow)" />
+            <ellipse cx="240" cy="120" rx="70" ry="22" stroke="rgba(212,175,55,0.4)" stroke-width="1" stroke-dasharray="4 4" />
+
+            <!-- Laser beam horizontal slice -->
+            <path d="M 60 120 L 420 120" stroke="url(#laserBeamGrad)" stroke-width="3" filter="url(#goldGlow)" />
+
+            <!-- Stylized 3D Metallic "404" numbers hovering -->
+            <!-- Number 4 (Left) -->
+            <g transform="translate(65, 75)">
+              <text x="0" y="70" font-family="sans-serif" font-weight="900" font-size="74" fill="#000000" opacity="0.5" dx="4" dy="6">۴</text>
+              <text x="0" y="70" font-family="sans-serif" font-weight="900" font-size="74" fill="url(#goldGrad1)" filter="url(#goldGlow)">۴</text>
+            </g>
+
+            <!-- Center Target Null Indicator (0) -->
+            <g transform="translate(240, 120)">
+              <circle cx="0" cy="0" r="18" fill="none" stroke="url(#goldGrad1)" stroke-width="2.5" />
+              <line x1="-12" y1="-12" x2="12" y2="12" stroke="#f5d77f" stroke-width="2" />
+            </g>
+
+            <!-- Number 4 (Right) -->
+            <g transform="translate(355, 75)">
+              <text x="0" y="70" font-family="sans-serif" font-weight="900" font-size="74" fill="#000000" opacity="0.5" dx="4" dy="6">۴</text>
+              <text x="0" y="70" font-family="sans-serif" font-weight="900" font-size="74" fill="url(#goldGrad1)" filter="url(#goldGlow)">۴</text>
+            </g>
+
+            <!-- Sparkle nodes -->
+            <circle cx="100" cy="40" r="2" fill="#fff" opacity="0.8" />
+            <circle cx="380" cy="50" r="2.5" fill="#f5d77f" opacity="0.9" />
+            <circle cx="240" cy="20" r="3" fill="#fff0be" filter="url(#goldGlow)" />
+          </svg>
         </div>
+
+        <!-- Error Identification Header -->
+        <div class="error-badge">
+          <Icon name="warning" size={15} />
+          <span>کد خطا: ۴۰۴ | صفحه یافت نشد</span>
+        </div>
+
+        <h1 class="error-title">صفحه مورد نظر در مدار کلینیک قرار ندارد</h1>
+        
+        <p class="error-subtitle">
+          آدرس اینترنتی که وارد نموده‌اید تغییر یافته، حذف شده یا در نشانی آن خطای تایپی وجود دارد.
+        </p>
+
+        <!-- Diagnostic Note Card -->
+        <div class="diagnostic-card">
+          <div class="diagnostic-header">
+            <div class="diagnostic-icon">
+              <Icon name="info" size={18} />
+            </div>
+            <div class="diagnostic-title">راهنمای بازگردانی و هدایت بالینی</div>
+          </div>
+          <p class="diagnostic-text">
+            نگران نباشید! هیچ اختلالی در روند رزرو وقت و تعرفه خدمات به وجود نیامده است. جهت دسترسی سریع به بخش مورد نظر خود از میانبرهای زیر استفاده فرمایید:
+          </p>
+
+          <!-- Quick Navigation Hub -->
+          <div class="quick-nav-grid">
+            <a href="/" class="quick-nav-item">
+              <span class="nav-item-icon">
+                <Icon name="dashboard" size={18} />
+              </span>
+              <div class="nav-item-info">
+                <strong>صفحه اصلی</strong>
+                <span>معرفی کلینیک و تجهیزات</span>
+              </div>
+            </a>
+
+            <a href="/booking" class="quick-nav-item highlighted">
+              <span class="nav-item-icon gold">
+                <Icon name="calendar" size={18} />
+              </span>
+              <div class="nav-item-info">
+                <strong>رزرو آنلاین نوبت</strong>
+                <span>تخفیف ویژه جشنواره پاییزه</span>
+              </div>
+            </a>
+
+            <a href="/services" class="quick-nav-item">
+              <span class="nav-item-icon">
+                <Icon name="services" size={18} />
+              </span>
+              <div class="nav-item-info">
+                <strong>تعرفه‌ها و خدمات</strong>
+                <span>لیست قیمت الکساندرایت</span>
+              </div>
+            </a>
+
+            <a href="/contact" class="quick-nav-item">
+              <span class="nav-item-icon">
+                <Icon name="phone" size={18} />
+              </span>
+              <div class="nav-item-info">
+                <strong>تماس و آدرس</strong>
+                <span>لوکیشن پاسداران و تلفن</span>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        <!-- Primary Action Buttons -->
+        <div class="error-actions-group">
+          <a href="/" class="btn-primary-3d">
+            <Icon name="arrowRight" size={18} />
+            <span>بازگشت به صفحه اصلی</span>
+          </a>
+          <a href="/booking" class="btn-secondary-3d">
+            <Icon name="calendar" size={18} />
+            <span>رزرو آنلاین نوبت لیزر</span>
+          </a>
+          <a href="tel:+989035555090" class="btn-phone-quick" dir="ltr" aria-label="تماس با پذیرش کلینیک">
+            <Icon name="phone" size={16} />
+            <span>۰۹۰۳ ۵۵۵ ۵۰۹۰</span>
+          </a>
+        </div>
+
       </div>
-    </div>
-  </section>
+    </main>
+  </div>
 </PublicLayout>
+
+<style>
+  /* ─────────────────────────────────────────────────────────────
+     Dark 3D Obsidian-Gold Design System for 404 Recovery Experience
+     ───────────────────────────────────────────────────────────── */
+  .error-page-wrapper {
+    background-color: #0a0b0d;
+    color: #e4e7eb;
+    min-height: calc(100vh - 140px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 16px 80px;
+    font-family: inherit;
+    overflow-x: hidden;
+    width: 100%;
+    box-sizing: border-box;
+    position: relative;
+  }
+
+  .error-main-container {
+    width: 100%;
+    max-width: 720px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+  }
+
+  .container-sm {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* 3D Illustration Container */
+  .illustration-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 440px;
+    margin: 0 auto 20px;
+  }
+
+  .glow-orb {
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 200px;
+    height: 120px;
+    background: radial-gradient(circle, rgba(212, 175, 55, 0.22) 0%, transparent 70%);
+    filter: blur(20px);
+    pointer-events: none;
+  }
+
+  .svg-3d-404 {
+    width: 100%;
+    height: auto;
+    display: block;
+    filter: drop-shadow(0 15px 25px rgba(0, 0, 0, 0.7));
+  }
+
+  /* Error Header & Typography */
+  .error-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(212, 175, 55, 0.1);
+    color: #f5d77f;
+    border: 1px solid rgba(212, 175, 55, 0.35);
+    padding: 6px 18px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.12);
+  }
+
+  .error-title {
+    font-size: clamp(1.4rem, 4vw, 2.1rem);
+    font-weight: 900;
+    color: #ffffff;
+    line-height: 1.35;
+    margin: 0 0 12px;
+    letter-spacing: -0.02em;
+    text-shadow: 0 3px 12px rgba(0, 0, 0, 0.8);
+  }
+
+  .error-subtitle {
+    font-size: clamp(0.925rem, 2vw, 1.05rem);
+    color: #9ba3af;
+    line-height: 1.75;
+    max-width: 580px;
+    margin: 0 auto 32px;
+  }
+
+  /* Diagnostic Card */
+  .diagnostic-card {
+    background: linear-gradient(145deg, #13161c, #0e1014);
+    border: 1px solid rgba(212, 175, 55, 0.25);
+    border-radius: 20px;
+    padding: 24px;
+    margin-bottom: 36px;
+    text-align: right;
+    box-shadow: 0 16px 36px -12px rgba(0, 0, 0, 0.8), 0 0 20px -8px rgba(212, 175, 55, 0.1);
+    position: relative;
+  }
+
+  .diagnostic-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .diagnostic-icon {
+    width: 32px;
+    height: 32px;
+    background: rgba(212, 175, 55, 0.12);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #f5d77f;
+    flex-shrink: 0;
+  }
+
+  .diagnostic-title {
+    font-size: 1rem;
+    font-weight: 800;
+    color: #ffffff;
+  }
+
+  .diagnostic-text {
+    font-size: 0.875rem;
+    color: #9ba3af;
+    line-height: 1.75;
+    margin: 0 0 20px;
+  }
+
+  /* Quick Navigation Grid */
+  .quick-nav-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  @media (min-width: 560px) {
+    .quick-nav-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .quick-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 12px;
+    padding: 12px 14px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+
+  .quick-nav-item:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(212, 175, 55, 0.4);
+    transform: translateY(-2px);
+  }
+
+  .quick-nav-item.highlighted {
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.12), rgba(212, 175, 55, 0.03));
+    border-color: rgba(212, 175, 55, 0.35);
+  }
+
+  .quick-nav-item.highlighted:hover {
+    border-color: rgba(212, 175, 55, 0.7);
+  }
+
+  .nav-item-icon {
+    width: 36px;
+    height: 36px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #d1d5db;
+    flex-shrink: 0;
+  }
+
+  .nav-item-icon.gold {
+    background: rgba(212, 175, 55, 0.2);
+    color: #f5d77f;
+  }
+
+  .nav-item-info {
+    display: flex;
+    flex-direction: column;
+    text-align: right;
+  }
+
+  .nav-item-info strong {
+    font-size: 0.875rem;
+    color: #ffffff;
+  }
+
+  .nav-item-info span {
+    font-size: 0.75rem;
+    color: #8c939f;
+  }
+
+  /* Action Buttons Group */
+  .error-actions-group {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+
+  .btn-primary-3d {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #d4af37, #aa8624);
+    color: #0b0d10;
+    font-weight: 800;
+    font-size: 0.95rem;
+    padding: 13px 26px;
+    border-radius: 14px;
+    text-decoration: none;
+    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.3);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .btn-primary-3d:hover {
+    background: linear-gradient(135deg, #e6c555, #bd962b);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 26px rgba(212, 175, 55, 0.45);
+  }
+
+  .btn-secondary-3d {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(212, 175, 55, 0.4);
+    color: #f5d77f;
+    font-weight: 700;
+    font-size: 0.95rem;
+    padding: 13px 24px;
+    border-radius: 14px;
+    text-decoration: none;
+    transition: all 0.25s ease;
+  }
+
+  .btn-secondary-3d:hover {
+    background: rgba(212, 175, 55, 0.12);
+    border-color: rgba(212, 175, 55, 0.8);
+    transform: translateY(-2px);
+  }
+
+  .btn-phone-quick {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #d1d5db;
+    font-weight: 700;
+    font-size: 0.9rem;
+    padding: 13px 20px;
+    border-radius: 14px;
+    text-decoration: none;
+    transition: all 0.25s ease;
+  }
+
+  .btn-phone-quick:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(212, 175, 55, 0.4);
+    color: #f5d77f;
+  }
+
+  /* 0px Horizontal Overflow Protections across all widths */
+  @media (max-width: 480px) {
+    .error-page-wrapper {
+      padding: 30px 14px 60px;
+    }
+
+    .diagnostic-card {
+      padding: 20px 16px;
+    }
+
+    .error-actions-group {
+      flex-direction: column;
+      width: 100%;
+    }
+
+    .btn-primary-3d,
+    .btn-secondary-3d,
+    .btn-phone-quick {
+      width: 100%;
+    }
+  }
+</style>

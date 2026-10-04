@@ -1,36 +1,922 @@
 ---
 import PublicLayout from '../layouts/PublicLayout.astro';
+import Icon from '../components/ui/Icon.astro';
 ---
 
 <PublicLayout
-  title="حریم خصوصی و حفاظت از داده‌ها — کلینیک تهران لیزر"
-  description="سیاست‌های حفاظت از حریم خصوصی، اطلاعات فردی و پرونده‌های مراجعه‌کنندگان در کلینیک تخصصی تهران لیزر."
+  title="حریم خصوصی و محرمانگی داده‌های بالینی — کلینیک تهران لیزر"
+  description="سیاست‌های حفاظت از حریم خصوصی، امنیت پرونده‌های پزشکی و محرمانگی داده‌های بالینی مراجعین در کلینیک تخصصی تهران لیزر پاسداران."
+  theme="dark"
 >
-  <div class="page-header-strip">
-    <div class="container container-sm text-center">
-      <h1 class="page-title">سیاست حفظ حریم خصوصی مراجعین</h1>
-      <p class="page-subtitle">حفظ محرمانگی اطلاعات و سوابق پزشکی شما خط مشی اساسی ماست</p>
-    </div>
-  </div>
-
-  <section class="section">
-    <div class="container container-sm">
-      <div class="legal-content-card">
-        <h3 class="font-bold mb-3">۱. جمع‌آوری و نگهداری اطلاعات</h3>
-        <p class="leading-relaxed mb-4">
-          کلینیک تهران لیزر تنها اطلاعاتی را دریافت می‌کند که برای فرآیند نوبت‌دهی، تشکیل پرونده بهداشتی و هماهنگی‌های درمانی ضروری است (شامل نام، شماره تلفن همراه و یادداشت‌های درمانی مربوط به پوست و مو). این داده‌ها به هیچ عنوان در اختیار هیچ شخص ثالث یا نهاد تجاری دیگری قرار نخواهد گرفت.
+  <div class="legal-page-wrapper">
+    <!-- Hero / Header Strip -->
+    <header class="legal-hero">
+      <div class="container container-sm text-center">
+        <div class="legal-badge">
+          <Icon name="lock" size={16} />
+          <span>منشور رسمی محرمانگی و امانت‌داری پزشکی</span>
+        </div>
+        <h1 class="legal-hero-title">سیاست حفظ حریم خصوصی و امنیت پرونده‌های پزشکی</h1>
+        <p class="legal-hero-subtitle">
+          تعهد بنیادین کلینیک تخصصی تهران لیزر به رازداری بالینی، حفاظت سایبری و پاسداری از حریم خصوصی مراجعین گرامی
         </p>
 
-        <h3 class="font-bold mb-3">۲. امنیت سوابق و سیستم‌ها</h3>
-        <p class="leading-relaxed mb-4">
-          کلیه ارتباطات سامانه از طریق پروتکل‌های امن و رمزنگاری‌شده صورت می‌پذیرد و دسترسی به اطلاعات پرونده‌ها تنها برای پرسنل مجاز و اپراتور مسئول نوبت امکان‌پذیر است.
-        </p>
+        <!-- Metadata bar & Action Toolbar -->
+        <div class="legal-meta-strip">
+          <div class="meta-item">
+            <Icon name="shield" size={14} />
+            <span>منطبق با ضوابط محرمانگی سوگند پزشکی</span>
+          </div>
+          <div class="meta-item">
+            <Icon name="checkCircle" size={14} />
+            <span>رمزنگاری سرتاسری TLS 1.3 در لایه لبه</span>
+          </div>
+          <div class="meta-item">
+            <Icon name="clock" size={14} />
+            <span>مدت زمان مطالعه: ۳ دقیقه</span>
+          </div>
+        </div>
 
-        <h3 class="font-bold mb-3">۳. ارتباط با پشتیبانی</h3>
-        <p class="leading-relaxed">
-          در صورت تمایل به اصلاح، به‌روزرسانی یا حذف شماره تماس خود از سامانه پیام‌رسانی کلینیک، می‌توانید در هر زمان با پشتیبانی کلینیک به شماره <a href="tel:+989035555090" dir="ltr">+98 903 555 5090</a> تماس حاصل فرمایید.
-        </p>
+        <div class="legal-actions-bar">
+          <button type="button" class="btn-print" onclick="window.print()" aria-label="چاپ یا ذخیره نسخه چاپی منشور حریم خصوصی">
+            <Icon name="document" size={16} />
+            <span>نسخه قابل چاپ (Print-Ready)</span>
+          </button>
+          <a href="tel:+989035555090" class="btn-contact-quick" dir="ltr" aria-label="تماس با واحد حفاظت اطلاعات کلینیک">
+            <Icon name="phone" size={15} />
+            <span>۰۹۰۳ ۵۵۵ ۵۰۹۰</span>
+          </a>
+        </div>
       </div>
-    </div>
-  </section>
+    </header>
+
+    <!-- Main Content Section -->
+    <main class="legal-main-section">
+      <div class="container container-sm">
+
+        <!-- Critical Medical Confidentiality Callout (Obsidian-Gold 3D Card) -->
+        <section class="privacy-guarantee-alert" aria-label="ضمانت‌نامه رازداری پزشکی">
+          <div class="alert-glow"></div>
+          <div class="alert-header">
+            <div class="alert-icon-box">
+              <Icon name="shield" size={24} />
+            </div>
+            <div>
+              <h2 class="alert-title">سوگند رازداری بالینی و منشور پاسداری از داده‌ها</h2>
+              <p class="alert-desc">کلینیک تهران لیزر محرمانگی سوابق درمان و مشخصات هویتی شما را با بالاترین استانداردهای اخلاق پزشکی تضمین می‌نماید:</p>
+            </div>
+          </div>
+
+          <div class="guarantee-grid">
+            <div class="guarantee-item">
+              <div class="guarantee-icon">
+                <Icon name="lock" size={16} />
+              </div>
+              <div class="guarantee-content">
+                <strong>رازداری حرفه‌ای بالینی:</strong>
+                <span>اطلاعات پرونده پزشکی، یادداشت‌های اپراتور و تاریخچه جلسات جزء اسرار پزشکی بوده و بدون رضایت شخص یا حکم قضایی صریح افشا نخواهد شد.</span>
+              </div>
+            </div>
+
+            <div class="guarantee-item">
+              <div class="guarantee-icon">
+                <Icon name="shield" size={16} />
+              </div>
+              <div class="guarantee-content">
+                <strong>عدم فروش یا واگذاری تجاری:</strong>
+                <span>شماره تماس و داده‌های فردی مراجعین به هیچ عنوان در اختیار هیچ آژانس تبلیغاتی، بازاریاب شخص ثالث یا سامانه خارجی قرار نمی‌گیرد.</span>
+              </div>
+            </div>
+
+            <div class="guarantee-item">
+              <div class="guarantee-icon">
+                <Icon name="database" size={16} />
+              </div>
+              <div class="guarantee-content">
+                <strong>رمزنگاری دیتابیس در لبه ابری:</strong>
+                <span>کلیه اطلاعات بر روی زیرساخت محافظت‌شده کلودفلر با استاندارد امنیتی پیشرفته و دسترسی‌های لایه‌بندی‌شده ذخیره‌سازی می‌گردند.</span>
+              </div>
+            </div>
+
+            <div class="guarantee-item">
+              <div class="guarantee-icon">
+                <Icon name="checkCircle" size={16} />
+              </div>
+              <div class="guarantee-content">
+                <strong>حق ویرایش و لغو پیامک‌ها:</strong>
+                <span>هر مراجعه‌کننده اختیار تام دارد در هر زمان با ارسال پیامک یا تماس با کلینیک، دریافت اعلان‌های یادآوری را متوقف یا اطلاعات خود را اصلاح کند.</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Structured Legal Accordions Group -->
+        <section class="legal-accordions-container" aria-label="فهرست اصول حریم خصوصی">
+
+          <!-- Accordion 1 -->
+          <details class="legal-accordion" open>
+            <summary class="accordion-summary">
+              <div class="summary-left">
+                <span class="accordion-number">۰۱</span>
+                <span class="accordion-title">اطلاعاتی که از مراجعین جمع‌آوری و نگهداری می‌شود</span>
+              </div>
+              <span class="accordion-chevron">
+                <Icon name="chevronDown" size={18} />
+              </span>
+            </summary>
+            <div class="accordion-body">
+              <p>
+                کلینیک تخصصی تهران لیزر به اصل «کمینه‌سازی داده‌ها» (Data Minimization) پایبند است؛ ما تنها داده‌هایی را ثبت می‌کنیم که برای فرآیند نوبت‌دهی، محاسبات بالینی و سلامت فردی شما حیاتی هستند:
+              </p>
+              <ul class="legal-list">
+                <li>
+                  <strong>اطلاعات تماس و هویت:</strong> نام، نام خانوادگی و شماره تلفن همراه فعال جهت تشکیل پرونده بالینی و ارسال پیامک‌های سیستمی تأیید نوبت.
+                </li>
+                <li>
+                  <strong>اطلاعات بالینی پوست و مو:</strong> تعیین تیپ پوستی فیتزپاتریک (Fitzpatrick Skin Type I-VI)، ضخامت و تراکم تار مو، سابقه سوختگی، حساسیت‌های پوستی و سوابق مصرف راکوتان.
+                </li>
+                <li>
+                  <strong>سوابق تنظیمی جلسات (Laser Parameters):</strong> ژول بر سانتی‌متر مربع (Fluence)، عرض پالس (Pulse Duration)، اندازه سَری (Spot Size) و میزان خنک‌کنندگی دی‌سی‌دی (DCD) در هر جلسه جهت کالیبراسیون دقیق جلسات بعد.
+                </li>
+              </ul>
+            </div>
+          </details>
+
+          <!-- Accordion 2 -->
+          <details class="legal-accordion" open>
+            <summary class="accordion-summary">
+              <div class="summary-left">
+                <span class="accordion-number">۰۲</span>
+                <span class="accordion-title">اهداف و موارد استفاده از داده‌ها در فرآیند درمان</span>
+              </div>
+              <span class="accordion-chevron">
+                <Icon name="chevronDown" size={18} />
+              </span>
+            </summary>
+            <div class="accordion-body">
+              <p>
+                داده‌های بالینی ذخیره‌شده صرفاً در چرخه مراقبت و ارتقای ایمنی درمانی شما استفاده می‌شوند:
+              </p>
+              <ul class="legal-list">
+                <li>
+                  <strong>کالیبراسیون ایمن دستگاه:</strong> مقایسه پاسخ پوست در جلسه پیشین با جلسه جاری و تنظیم دقیق توان لیزر برای دستیابی به حداکثر ریزش مو بدون آسیب به ملانین پوست.
+                </li>
+                <li>
+                  <strong>یادآوری‌های ضروری:</strong> ارسال پیامک خودکار ۲۴ ساعت پیش از جلسه شامل یادآوری ساعت نوبت و نکات الزامی شیو موضع.
+                </li>
+                <li>
+                  <strong>پیگیری بعد از درمان (Follow-up):</strong> ارتباط با مراجع جهت سنجش وضعیت پوست و پاسخگویی به هرگونه ابهام دارویی یا مراقبتی پس از لیزر.
+                </li>
+              </ul>
+            </div>
+          </details>
+
+          <!-- Accordion 3 -->
+          <details class="legal-accordion">
+            <summary class="accordion-summary">
+              <div class="summary-left">
+                <span class="accordion-number">۰۳</span>
+                <span class="accordion-title">تدابیر فنی، سایبری و امنیت سوابق</span>
+              </div>
+              <span class="accordion-chevron">
+                <Icon name="chevronDown" size={18} />
+              </span>
+            </summary>
+            <div class="accordion-body">
+              <p>
+                حفاظت از اطلاعات مراجعین از طریق چند لایه امنیتی فیزیکی و نرم‌افزاری اجرا می‌شود:
+              </p>
+              <ul class="legal-list">
+                <li>
+                  <strong>کنترل دسترسی نقش‌محور (RBAC):</strong> پرسنل پذیرش تنها به اطلاعات تماس و زمان‌بندی دسترسی دارند؛ پرونده‌های فیزیولوژیک فقط در اختیار اپراتور مسئول و پزشک ناظر قرار دارد.
+                </li>
+                <li>
+                  <strong>رمزنگاری سراسری:</strong> کلیه تبادلات شبکه با گواهینامه SSL معتبر و پروتکل امنیتی TLS 1.3 انجام و دیتابیس در برابر حملات تزریق و نفوذ ایزوله شده است.
+                </li>
+                <li>
+                  <strong>تفکیک پایگاه داده مالی از پرونده پزشکی:</strong> سوابق تراکنش‌ها و کارت‌خوان بانکی در لایه‌ای کاملاً مستقل از تاریخچه درمانی مراجعین ذخیره می‌گردد.
+                </li>
+              </ul>
+            </div>
+          </details>
+
+          <!-- Accordion 4 -->
+          <details class="legal-accordion">
+            <summary class="accordion-summary">
+              <div class="summary-left">
+                <span class="accordion-number">۰۴</span>
+                <span class="accordion-title">سیاست پیامک‌ها و حریم ارتباطات مراجعین</span>
+              </div>
+              <span class="accordion-chevron">
+                <Icon name="chevronDown" size={18} />
+              </span>
+            </summary>
+            <div class="accordion-body">
+              <p>
+                ما برای آرامش خاطر مراجعین احترام کامل قائل هستیم و ضوابط سفت و سختی برای ارتباطات متنی وضع نموده‌ایم:
+              </p>
+              <ul class="legal-list">
+                <li>
+                  <strong>عدم ارسال پیام در ساعات استراحت:</strong> هیچ پیامکی از خطوط اختصاصی کلینیک قبل از ساعت ۹ صبح و بعد از ساعت ۲۰ عصر ارسال نخواهد شد.
+                </li>
+                <li>
+                  <strong>لغو عضویت فوری:</strong> در صورتی که مایل به دریافت اطلاعیه‌های جشنواره‌های فصلی نیستید، کافی است با شماره کلینیک تماس گرفته یا واژه «لغو» را به سامانه پیامکی ما ارسال فرمایید.
+                </li>
+                <li>
+                  <strong>پیام‌های حیاتی نوبت:</strong> پیام‌های مربوط به کد تایید رزرو، تاخیر احتمالی کادر یا لغو وقت حتی در صورت مسدودی پیامک‌های تبلیغاتی توسط خط شما، از طریق سرشماره خدماتی ارسال می‌گردد.
+                </li>
+              </ul>
+            </div>
+          </details>
+
+          <!-- Accordion 5 -->
+          <details class="legal-accordion">
+            <summary class="accordion-summary">
+              <div class="summary-left">
+                <span class="accordion-number">۰۵</span>
+                <span class="accordion-title">حقوق مراجعین و شیوه اصلاح اطلاعات</span>
+              </div>
+              <span class="accordion-chevron">
+                <Icon name="chevronDown" size={18} />
+              </span>
+            </summary>
+            <div class="accordion-body">
+              <p>
+                هر مراجعه‌کننده کلینیک تهران لیزر طبق قانون حقوق بیمار و ضوابط نظام پزشکی از حقوق زیر برخوردار است:
+              </p>
+              <ul class="legal-list">
+                <li>
+                  <strong>حق دسترسی به خلاصه سوابق:</strong> هر مراجع می‌تواند با ارائه کارت شناسایی معتبر، خلاصه پرونده و پارامترهای جلسات گذشته خود را دریافت نماید.
+                </li>
+                <li>
+                  <strong>حق تصحیح اطلاعات:</strong> در صورت تغییر شماره تماس یا بروز بیماری جدید، پرونده در کمتر از چند دقیقه توسط پذیرش به‌روزرسانی خواهد شد.
+                </li>
+                <li>
+                  <strong>امحای پرونده پس از اتمام دوره:</strong> در صورت درخواست رسمی مراجع و پس از سپری شدن دوره قانونی نگهداری اسناد، اطلاعات هویتی از سامانه فعال خارج و بایگانی امن می‌گردد.
+                </li>
+              </ul>
+            </div>
+          </details>
+
+          <!-- Accordion 6 -->
+          <details class="legal-accordion">
+            <summary class="accordion-summary">
+              <div class="summary-left">
+                <span class="accordion-number">۰۶</span>
+                <span class="accordion-title">کوکی‌ها و فایل‌های موقت وب‌سایت</span>
+              </div>
+              <span class="accordion-chevron">
+                <Icon name="chevronDown" size={18} />
+              </span>
+            </summary>
+            <div class="accordion-body">
+              <p>
+                سایت تهران لیزر از حداقل کوکی‌های ممکن فقط برای بهبود تجربه کاربری استفاده می‌کند:
+              </p>
+              <ul class="legal-list">
+                <li>
+                  <strong>کوکی‌های ضروری و عملکردی:</strong> جهت حفظ وضعیت فرآیند رزرو نوبت و سبد خدمات انتخابی در طی یک نشست کاری (Session).
+                </li>
+                <li>
+                  <strong>عدم استفاده از ردیاب‌های جاسوسی:</strong> ما از هیچ اسکریپت ردیابی رفتار کاربر برای فروش آمار به شبکه‌های تبلیغاتی استفاده نمی‌کنیم.
+                </li>
+              </ul>
+            </div>
+          </details>
+
+        </section>
+
+        <!-- Bottom Assistance Card -->
+        <div class="legal-support-card">
+          <div class="support-card-content">
+            <div class="support-icon">
+              <Icon name="lock" size={28} />
+            </div>
+            <div>
+              <h3 class="support-title">پرسشی درباره حریم خصوصی و امنیت داده‌ها دارید؟</h3>
+              <p class="support-desc">تیم مدیریت و حراست کلینیک تهران لیزر در ساعات کاری آماده پاسخگویی به ابهامات شما عزیزان است.</p>
+            </div>
+          </div>
+          <div class="support-actions">
+            <a href="tel:+989035555090" class="btn-gold-primary">
+              <Icon name="phone" size={16} />
+              <span>تماس با مسئول حریم خصوصی</span>
+            </a>
+            <a href="/booking" class="btn-obsidian-secondary">
+              <Icon name="calendar" size={16} />
+              <span>رزرو آنلاین نوبت</span>
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
 </PublicLayout>
+
+<style>
+  /* ─────────────────────────────────────────────────────────────
+     Dark 3D Obsidian-Gold Design System for Privacy Page
+     ───────────────────────────────────────────────────────────── */
+  .legal-page-wrapper {
+    background-color: #0a0b0d;
+    color: #e4e7eb;
+    min-height: 100vh;
+    padding-bottom: 80px;
+    font-family: inherit;
+    overflow-x: hidden;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Hero Section */
+  .legal-hero {
+    background: radial-gradient(circle at 50% -20%, rgba(212, 175, 55, 0.15) 0%, rgba(10, 11, 13, 0.95) 70%);
+    border-bottom: 1px solid rgba(212, 175, 55, 0.18);
+    padding: 64px 20px 48px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .legal-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.5), transparent);
+  }
+
+  .legal-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(212, 175, 55, 0.1);
+    color: #f5d77f;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    padding: 6px 16px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.1);
+  }
+
+  .legal-hero-title {
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    font-weight: 900;
+    color: #ffffff;
+    line-height: 1.35;
+    margin: 0 0 16px;
+    letter-spacing: -0.02em;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+  }
+
+  .legal-hero-subtitle {
+    font-size: clamp(0.95rem, 2vw, 1.1rem);
+    color: #a4abb6;
+    line-height: 1.8;
+    max-width: 640px;
+    margin: 0 auto 28px;
+  }
+
+  /* Metadata Strip */
+  .legal-meta-strip {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 18px;
+    margin-bottom: 28px;
+  }
+
+  .meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.825rem;
+    color: #8c939f;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 6px 14px;
+    border-radius: 8px;
+  }
+
+  .meta-item svg {
+    color: #d4af37;
+  }
+
+  /* Action Toolbar */
+  .legal-actions-bar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+
+  .btn-print {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(212, 175, 55, 0.05));
+    border: 1px solid rgba(212, 175, 55, 0.4);
+    color: #f5d77f;
+    padding: 10px 22px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  }
+
+  .btn-print:hover {
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.25), rgba(212, 175, 55, 0.1));
+    border-color: rgba(212, 175, 55, 0.7);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.2);
+  }
+
+  .btn-contact-quick {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #d1d5db;
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.25s ease;
+  }
+
+  .btn-contact-quick:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(212, 175, 55, 0.4);
+    color: #f5d77f;
+  }
+
+  /* Main Section */
+  .legal-main-section {
+    padding: 48px 20px 0;
+  }
+
+  .container-sm {
+    max-width: 820px;
+    margin: 0 auto;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* 3D Obsidian-Gold Privacy Guarantee Card */
+  .privacy-guarantee-alert {
+    background: linear-gradient(145deg, #14171d, #0d0e12);
+    border: 1px solid rgba(212, 175, 55, 0.35);
+    border-radius: 20px;
+    padding: 28px;
+    margin-bottom: 40px;
+    position: relative;
+    box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.8), 0 0 25px -10px rgba(212, 175, 55, 0.15);
+    overflow: hidden;
+  }
+
+  .alert-glow {
+    position: absolute;
+    top: -40px;
+    right: -40px;
+    width: 160px;
+    height: 160px;
+    background: radial-gradient(circle, rgba(212, 175, 55, 0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .alert-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-bottom: 18px;
+  }
+
+  .alert-icon-box {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(212, 175, 55, 0.05));
+    border: 1px solid rgba(212, 175, 55, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #f5d77f;
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
+  }
+
+  .alert-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0 0 6px;
+  }
+
+  .alert-desc {
+    font-size: 0.925rem;
+    color: #b0b7c3;
+    line-height: 1.7;
+    margin: 0;
+  }
+
+  .guarantee-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  @media (min-width: 640px) {
+    .guarantee-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .guarantee-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    padding: 14px;
+    transition: border-color 0.2s ease;
+  }
+
+  .guarantee-item:hover {
+    border-color: rgba(212, 175, 55, 0.3);
+  }
+
+  .guarantee-icon {
+    flex-shrink: 0;
+    color: #d4af37;
+    margin-top: 2px;
+  }
+
+  .guarantee-content strong {
+    display: block;
+    font-size: 0.9rem;
+    color: #f5d77f;
+    margin-bottom: 4px;
+  }
+
+  .guarantee-content span {
+    font-size: 0.825rem;
+    color: #9ba3af;
+    line-height: 1.65;
+  }
+
+  /* 3D Obsidian Structured Accordions */
+  .legal-accordions-container {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    margin-bottom: 48px;
+  }
+
+  .legal-accordion {
+    background: #111419;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: all 0.25s ease;
+    box-shadow: 0 8px 24px -10px rgba(0, 0, 0, 0.6);
+  }
+
+  .legal-accordion[open] {
+    border-color: rgba(212, 175, 55, 0.35);
+    background: linear-gradient(180deg, #13171e 0%, #101217 100%);
+    box-shadow: 0 12px 32px -12px rgba(0, 0, 0, 0.8), 0 0 20px -8px rgba(212, 175, 55, 0.12);
+  }
+
+  .accordion-summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
+    transition: background 0.2s ease;
+  }
+
+  .accordion-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .accordion-summary:hover {
+    background: rgba(212, 175, 55, 0.04);
+  }
+
+  .summary-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .accordion-number {
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: #d4af37;
+    background: rgba(212, 175, 55, 0.12);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-family: monospace;
+  }
+
+  .accordion-title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -0.01em;
+  }
+
+  .accordion-chevron {
+    color: #8c939f;
+    transition: transform 0.3s cubic-bezier(0.2, 0, 0, 1), color 0.2s ease;
+    display: flex;
+    align-items: center;
+  }
+
+  .legal-accordion[open] .accordion-chevron {
+    transform: rotate(180deg);
+    color: #f5d77f;
+  }
+
+  .accordion-body {
+    padding: 0 24px 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    margin-top: 4px;
+    padding-top: 18px;
+    font-size: 0.95rem;
+    line-height: 1.9;
+    color: #bcc3cf;
+  }
+
+  .legal-list {
+    margin: 14px 0 0;
+    padding-right: 20px;
+    list-style-type: none;
+  }
+
+  .legal-list li {
+    position: relative;
+    margin-bottom: 12px;
+    padding-right: 18px;
+  }
+
+  .legal-list li::before {
+    content: '◆';
+    position: absolute;
+    right: 0;
+    top: 2px;
+    color: #d4af37;
+    font-size: 0.65rem;
+  }
+
+  .legal-list strong {
+    color: #ffffff;
+    font-weight: 700;
+  }
+
+  /* Bottom Support Card */
+  .legal-support-card {
+    background: linear-gradient(135deg, #161a22 0%, #101217 100%);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    border-radius: 20px;
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    box-shadow: 0 16px 36px -12px rgba(0, 0, 0, 0.8);
+  }
+
+  @media (min-width: 640px) {
+    .legal-support-card {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+    }
+  }
+
+  .support-card-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 18px;
+  }
+
+  .support-icon {
+    flex-shrink: 0;
+    width: 52px;
+    height: 52px;
+    background: rgba(212, 175, 55, 0.12);
+    border: 1px solid rgba(212, 175, 55, 0.4);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #f5d77f;
+  }
+
+  .support-title {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0 0 6px;
+  }
+
+  .support-desc {
+    font-size: 0.9rem;
+    color: #9ba3af;
+    line-height: 1.7;
+    margin: 0;
+    max-width: 420px;
+  }
+
+  .support-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  @media (min-width: 480px) {
+    .support-actions {
+      flex-direction: row;
+    }
+  }
+
+  .btn-gold-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #d4af37, #aa8624);
+    color: #0d0f12;
+    font-weight: 800;
+    font-size: 0.925rem;
+    padding: 12px 22px;
+    border-radius: 12px;
+    text-decoration: none;
+    box-shadow: 0 6px 18px rgba(212, 175, 55, 0.25);
+    transition: all 0.25s ease;
+  }
+
+  .btn-gold-primary:hover {
+    background: linear-gradient(135deg, #e6c555, #bd962b);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(212, 175, 55, 0.4);
+  }
+
+  .btn-obsidian-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #e4e7eb;
+    font-weight: 700;
+    font-size: 0.925rem;
+    padding: 12px 20px;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: all 0.25s ease;
+  }
+
+  .btn-obsidian-secondary:hover {
+    background: rgba(255, 255, 255, 0.09);
+    border-color: rgba(212, 175, 55, 0.5);
+    color: #f5d77f;
+  }
+
+  /* ─────────────────────────────────────────────────────────────
+     Print-Ready Readability Rules (§3, §135)
+     ───────────────────────────────────────────────────────────── */
+  @media print {
+    :global(body) {
+      background: #ffffff !important;
+      color: #111111 !important;
+    }
+
+    .legal-page-wrapper {
+      background: #ffffff !important;
+      color: #111111 !important;
+      padding: 0 !important;
+    }
+
+    .legal-hero {
+      background: none !important;
+      border-bottom: 2px solid #000000 !important;
+      padding: 20px 0 !important;
+    }
+
+    .legal-hero-title {
+      color: #000000 !important;
+      font-size: 1.8rem !important;
+      text-shadow: none !important;
+    }
+
+    .legal-hero-subtitle {
+      color: #444444 !important;
+    }
+
+    .legal-actions-bar,
+    .legal-support-card,
+    :global(.site-header),
+    :global(.announcement-strip),
+    :global(.site-footer),
+    :global(.mobile-sticky-bar) {
+      display: none !important;
+    }
+
+    .privacy-guarantee-alert {
+      background: #fdfdfd !important;
+      border: 2px solid #111111 !important;
+      color: #000000 !important;
+      box-shadow: none !important;
+      page-break-inside: avoid;
+    }
+
+    .alert-title {
+      color: #111111 !important;
+    }
+
+    .alert-desc,
+    .guarantee-content span {
+      color: #222222 !important;
+    }
+
+    .guarantee-content strong {
+      color: #000000 !important;
+    }
+
+    /* Force all accordions open in print */
+    .legal-accordion {
+      background: #ffffff !important;
+      border: 1px solid #cccccc !important;
+      color: #000000 !important;
+      box-shadow: none !important;
+      page-break-inside: avoid;
+      margin-bottom: 16px;
+    }
+
+    .legal-accordion summary {
+      cursor: default !important;
+      background: #f5f5f5 !important;
+      border-bottom: 1px solid #dddddd !important;
+    }
+
+    .accordion-title {
+      color: #000000 !important;
+    }
+
+    .accordion-chevron {
+      display: none !important;
+    }
+
+    .accordion-body {
+      display: block !important;
+      color: #111111 !important;
+      padding: 16px !important;
+    }
+
+    .legal-list strong {
+      color: #000000 !important;
+    }
+  }
+
+  /* 0px Horizontal Overflow Protections across all widths */
+  @media (max-width: 480px) {
+    .legal-hero {
+      padding: 40px 16px 32px;
+    }
+
+    .privacy-guarantee-alert {
+      padding: 20px 16px;
+    }
+
+    .accordion-summary {
+      padding: 16px;
+    }
+
+    .accordion-body {
+      padding: 0 16px 20px;
+    }
+
+    .legal-support-card {
+      padding: 24px 16px;
+    }
+  }
+</style>

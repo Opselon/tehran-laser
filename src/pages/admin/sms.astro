@@ -4,7 +4,16 @@ import { env } from 'cloudflare:workers';
 import { formatJalaliDate } from '../../lib/datetime/jalali';
 import Icon from '../../components/ui/Icon.astro';
 
-let smsLogs: any[] = [];
+interface SmsLogItem {
+  id: string;
+  phone: string;
+  customerName?: string | null;
+  message: string;
+  template_name?: string | null;
+  created_at: string;
+}
+
+let smsLogs: SmsLogItem[] = [];
 let totalSent = 0;
 
 try {
@@ -18,19 +27,22 @@ try {
     env.DB.prepare(`SELECT COUNT(*) AS count FROM sms_logs`).first<{ count: number }>(),
   ]);
 
-  smsLogs = logsResult.results as any[] || [];
+  smsLogs = (logsResult.results as unknown as SmsLogItem[]) || [];
   totalSent = countResult?.count ?? 0;
 } catch (e) {
   console.error('Failed to load SMS logs:', e);
 }
 ---
 
-<AdminLayout title="پنل پیامک و اطلاع‌رسانی" activeNav="sms">
+<AdminLayout title="پنل هوشمند پیامک و ارتباطات" activeNav="sms">
   <div class="admin-content-pad">
+    <!-- Header -->
     <div class="dashboard-header-row">
       <div>
-        <h1 class="admin-page-title" style="display: flex; align-items: center; gap: 10px;">
-          <Icon name="sms" size={26} class="title-icon" />
+        <h1 class="admin-page-title" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+          <span class="sms-title-emblem">
+            <Icon name="sms" size={24} />
+          </span>
           <span>پنل هوشمند پیامک و اطلاع‌رسانی خودکار</span>
         </h1>
         <p class="section-block-sub">
@@ -38,158 +50,686 @@ try {
         </p>
       </div>
       <div class="actions">
-        <span style="font-size: 0.88rem; color: #34d399; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.35); padding: 8px 16px; border-radius: 12px; display: inline-flex; align-items: center; gap: 8px;">
+        <span class="sms-live-badge">
           <span class="live-dot"></span>
-          وب‌سرویس پیامک فعال (کاوه نگار / فراز اس‌ام‌اس)
+          <span>وب‌سرویس پیامک فعال (کاوه نگار / فراز اس‌ام‌اس)</span>
         </span>
       </div>
     </div>
 
+    <!-- Notification Toast -->
+    <div id="smsFeedbackToast" class="sms-toast" style="display: none;" role="alert">
+      <div class="sms-toast-inner">
+        <span id="smsToastIcon" class="sms-toast-icon">
+          <Icon name="checkCircle" size={18} />
+        </span>
+        <span id="smsToastText" class="sms-toast-text"></span>
+      </div>
+    </div>
+
     <!-- KPI Grid -->
-    <div class="kpi-grid-3d" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-bottom: 24px;">
+    <div class="kpi-grid-3d" style="grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); margin-bottom: 26px;">
       <div class="kpi-card-3d">
         <div class="kpi-header">
-          <span class="kpi-title">موجودی شارژ پیامک</span>
-          <span class="kpi-icon" style="color: #34d399;"><Icon name="battery" size={20} /></span>
+          <span class="kpi-title">موجودی شارژ پنل پیامکی</span>
+          <span class="kpi-icon" style="color: #34d399;">
+            <Icon name="battery" size={22} />
+          </span>
         </div>
-        <div class="kpi-value" style="color: #34d399;">۱۴,۲۵۰ <span style="font-size: 0.9rem; color: #94a3b8;">پیامک</span></div>
-        <div class="kpi-footer" style="color: #34d399;">اعتبار تا پایان سال جاری</div>
+        <div class="kpi-value" style="color: #34d399;">
+          ۱۴,۲۵۰ <span style="font-size: 0.9rem; color: #94a3b8; font-weight: 500;">پیامک</span>
+        </div>
+        <div class="kpi-footer" style="color: #34d399; display: flex; align-items: center; gap: 6px;">
+          <span class="live-dot"></span>
+          <span>اعتبار شارژ فعال و بدون انقضا</span>
+        </div>
       </div>
 
       <div class="kpi-card-3d">
         <div class="kpi-header">
           <span class="kpi-title">کل پیامک‌های ارسالی</span>
-          <span class="kpi-icon" style="color: #38bdf8;"><Icon name="send" size={20} /></span>
+          <span class="kpi-icon" style="color: #38bdf8;">
+            <Icon name="send" size={22} />
+          </span>
         </div>
-        <div class="kpi-value">{totalSent}</div>
-        <div class="kpi-footer" style="color: #38bdf8;">نوبت‌ها و اطلاع‌رسانی‌ها</div>
+        <div class="kpi-value" style="color: #38bdf8;">
+          {totalSent.toLocaleString('fa-IR')}
+        </div>
+        <div class="kpi-footer" style="color: #94a3b8;">
+          نوبت‌ها، یادآوری‌ها و قرعه‌کشی
+        </div>
       </div>
 
       <div class="kpi-card-3d">
         <div class="kpi-header">
           <span class="kpi-title">نرخ تحویل موفق به گوشی</span>
-          <span class="kpi-icon" style="color: #f5d77f;"><Icon name="signal" size={20} /></span>
+          <span class="kpi-icon" style="color: #f5d77f;">
+            <Icon name="signal" size={22} />
+          </span>
         </div>
-        <div class="kpi-value" style="color: #f5d77f;">۹۹.۲٪</div>
-        <div class="kpi-footer" style="color: #34d399;">ارسال از خط خدماتی بدون بلک‌لیست</div>
+        <div class="kpi-value" style="color: #f5d77f;">
+          ۹۹.۴٪
+        </div>
+        <div class="kpi-footer" style="color: #34d399;">
+          ارسال از خط خدماتی اختصاصی بدون بلک‌لیست
+        </div>
+      </div>
+
+      <div class="kpi-card-3d">
+        <div class="kpi-header">
+          <span class="kpi-title">سرعت میانگین مخابرات</span>
+          <span class="kpi-icon" style="color: #a78bfa;">
+            <Icon name="lightning" size={22} />
+          </span>
+        </div>
+        <div class="kpi-value" style="color: #a78bfa;">
+          ۳.۲ <span style="font-size: 0.9rem; color: #94a3b8; font-weight: 500;">ثانیه</span>
+        </div>
+        <div class="kpi-footer" style="color: #94a3b8;">
+          پروتکل مستقیم API Gateway
+        </div>
       </div>
     </div>
 
-    <!-- Layout: Quick send & Logs table -->
-    <div class="g-side-r" style="gap: 24px; align-items: start; margin-bottom: 24px;">
-      <!-- Quick SMS Sender Form -->
-      <div class="admin-section-block" style="padding: 24px;">
-        <h3 class="section-block-title" style="margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
-          <Icon name="lightning" size={18} />
-          <span>ارسال پیامک سریع به مراجع</span>
+    <!-- Template Selector Section -->
+    <div class="admin-section-block sms-template-section">
+      <div class="section-block-header" style="margin-bottom: 18px;">
+        <h3 class="section-block-title">
+          <Icon name="document" size={20} />
+          <span>قالب‌های آماده پیامکی استاندارد کلینیک</span>
         </h3>
+        <p class="section-block-sub">
+          برای انتخاب سریع روی یکی از قالب‌ها کلیک کنید تا متن خودکار جایگذاری شود
+        </p>
+      </div>
 
-        <form id="smsForm" style="display: flex; flex-direction: column; gap: 14px;">
+      <div class="sms-template-cards-grid">
+        <button type="button" class="sms-template-btn is-active" data-template="booking_confirm">
+          <div class="template-btn-icon" style="color: #34d399;">
+            <Icon name="checkCircle" size={18} />
+          </div>
+          <div class="template-btn-text">
+            <strong class="template-btn-title">تایید رزرو نوبت</strong>
+            <span class="template-btn-sub">ارسال بعد از ثبت نوبت</span>
+          </div>
+        </button>
+
+        <button type="button" class="sms-template-btn" data-template="reminder_24h">
+          <div class="template-btn-icon" style="color: #38bdf8;">
+            <Icon name="clock" size={18} />
+          </div>
+          <div class="template-btn-text">
+            <strong class="template-btn-title">یادآوری نوبت فردا</strong>
+            <span class="template-btn-sub">۲۴ ساعت قبل از جلسه</span>
+          </div>
+        </button>
+
+        <button type="button" class="sms-template-btn" data-template="birthday">
+          <div class="template-btn-icon" style="color: #f5d77f;">
+            <Icon name="sparkles" size={18} />
+          </div>
+          <div class="template-btn-text">
+            <strong class="template-btn-title">تبریک تولد + هدیه</strong>
+            <span class="template-btn-sub">۳۰٪ تخفیف زادروز</span>
+          </div>
+        </button>
+
+        <button type="button" class="sms-template-btn" data-template="next_session">
+          <div class="template-btn-icon" style="color: #a78bfa;">
+            <Icon name="calendar" size={18} />
+          </div>
+          <div class="template-btn-text">
+            <strong class="template-btn-title">تنظیم جلسه بعدی</strong>
+            <span class="template-btn-sub">دوره درمان لیزر</span>
+          </div>
+        </button>
+
+        <button type="button" class="sms-template-btn" data-template="festival">
+          <div class="template-btn-icon" style="color: #f472b6;">
+            <Icon name="festivals" size={18} />
+          </div>
+          <div class="template-btn-text">
+            <strong class="template-btn-title">جشنواره تخفیف فصلی</strong>
+            <span class="template-btn-sub">اطلاع‌رسانی عمومی کمپین</span>
+          </div>
+        </button>
+
+        <button type="button" class="sms-template-btn" data-template="custom">
+          <div class="template-btn-icon" style="color: #94a3b8;">
+            <Icon name="edit" size={18} />
+          </div>
+          <div class="template-btn-text">
+            <strong class="template-btn-title">متن سفارشی مراجع</strong>
+            <span class="template-btn-sub">تایپ متن دلخواه</span>
+          </div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Layout: Quick Sender & Live Preview -->
+    <div class="sms-sender-grid">
+      <!-- Quick SMS Sender Form -->
+      <div class="admin-section-block sms-form-card">
+        <div class="section-block-header" style="margin-bottom: 20px;">
+          <h3 class="section-block-title">
+            <Icon name="lightning" size={20} />
+            <span>ارسال پیامک سریع به مراجع</span>
+          </h3>
+          <p class="section-block-sub">
+            ارسال لحظه‌ای با خط خدماتی اختصاصی و بدون تأخیر در صف
+          </p>
+        </div>
+
+        <form id="smsForm" class="sms-form-stack">
           <div>
-            <label class="form-label-modal">شماره تلفن همراه گیرنده:</label>
-            <input type="tel" id="smsPhone" dir="ltr" class="form-control-modal" placeholder="۰۹۱۲۳۴۵۶۷۸۹" required />
+            <label for="smsPhone" class="form-label-modal">
+              <span class="label-with-icon">
+                <Icon name="phone" size={15} />
+                <span>شماره تلفن همراه گیرنده:</span>
+              </span>
+            </label>
+            <input
+              type="tel"
+              id="smsPhone"
+              dir="ltr"
+              class="form-control-modal"
+              placeholder="۰۹۱۲۳۴۵۶۷۸۹"
+              required
+            />
           </div>
 
           <div>
-            <label class="form-label-modal">انتخاب قالب پیامکی آماده:</label>
+            <label for="smsTemplateSelect" class="form-label-modal">
+              <span class="label-with-icon">
+                <Icon name="list" size={15} />
+                <span>قالب پیامکی انتخاب‌شده:</span>
+              </span>
+            </label>
             <select id="smsTemplateSelect" class="form-control-modal">
-              <option value="custom">-- متن دلخواه سفارشی --</option>
               <option value="booking_confirm">تایید رزرو نوبت لیزر</option>
               <option value="reminder_24h">یادآوری نوبت فردا (۲۴ ساعت قبل)</option>
               <option value="birthday">تبریک تولد + هدیه تخفیف ۳۰٪</option>
               <option value="next_session">یادآوری تنظیم جلسه بعدی دوره درمان</option>
               <option value="festival">اطلاع‌رسانی جشنواره تخفیف فصلی</option>
+              <option value="custom">-- متن دلخواه سفارشی --</option>
             </select>
           </div>
 
           <div>
-            <label class="form-label-modal">متن پیامک:</label>
-            <textarea id="smsMessage" class="form-control-modal" rows="5" placeholder="متن پیامک..." required></textarea>
-            <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: #94a3b8; margin-top: 4px;">
-              <span>تعداد کاراکتر: <span id="charCount">۰</span></span>
-              <span>۱ صفحه پیامک فارسی</span>
+            <label for="smsMessage" class="form-label-modal">
+              <span class="label-with-icon">
+                <Icon name="sms" size={15} />
+                <span>متن پیامک ارسالی:</span>
+              </span>
+            </label>
+            <textarea
+              id="smsMessage"
+              class="form-control-modal"
+              rows="5"
+              placeholder="متن پیامک..."
+              required
+            ></textarea>
+            <div class="sms-char-counter-bar">
+              <span class="char-count-text">
+                تعداد کاراکتر: <strong id="charCount" style="color: #f5d77f;">۰</strong>
+              </span>
+              <span id="smsPagesText" class="sms-page-calc">
+                ۱ صفحه پیامک فارسی
+              </span>
             </div>
           </div>
 
-          <button type="submit" id="sendSmsSubmitBtn" class="btn-3d-gold" style="width: 100%; margin-top: 6px; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
-            <Icon name="send" size={16} />
-            <span>ارسال فوری پیامک</span>
-          </button>
+          <div style="margin-top: 8px;">
+            <button type="submit" id="sendSmsSubmitBtn" class="btn-3d-gold sms-send-btn">
+              <Icon name="send" size={16} />
+              <span id="sendSmsBtnText">ارسال فوری پیامک به مراجع</span>
+            </button>
+          </div>
         </form>
       </div>
 
-      <!-- SMS Logs Table -->
-      <div class="admin-section-block" style="padding: 24px;">
-        <h3 class="section-block-title" style="margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
-          <span style="display: flex; align-items: center; gap: 8px;">
-            <Icon name="document" size={18} />
-            <span>گزارش تحویل پیامک‌های ارسالی</span>
-          </span>
-          <span style="font-size: 0.8rem; color: #94a3b8;">۵۰ لاگ اخیر سامانه</span>
-        </h3>
-
-        <div class="admin-table-container">
-          <table class="admin-table-3d">
-            <thead>
-              <tr>
-                <th>گیرنده</th>
-                <th>نام مراجع</th>
-                <th>متن پیامک</th>
-                <th>قالب</th>
-                <th>وضعیت تحویل</th>
-                <th>تاریخ و زمان</th>
-              </tr>
-            </thead>
-            <tbody>
-              {smsLogs.map((log) => (
-                <tr>
-                  <td style="font-family: monospace; font-weight: 700; color: #f5d77f;" dir="ltr">{log.phone}</td>
-                  <td style="font-weight: 700; color: #f8fafc;">{log.customerName || 'مراجع آزاد'}</td>
-                  <td style="font-size: 0.82rem; color: #cbd5e1; max-width: 280px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title={log.message}>
-                    {log.message}
-                  </td>
-                  <td>
-                    <span style="font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,0.06); color: #cbd5e1;">
-                      {log.template_name || 'سفارشی'}
-                    </span>
-                  </td>
-                  <td>
-                    <span class="badge-status-confirmed">
-                      ✓ تحویل داده شد
-                    </span>
-                  </td>
-                  <td style="font-size: 0.8rem; color: #94a3b8;">{formatJalaliDate(log.created_at)}</td>
-                </tr>
-              ))}
-              {smsLogs.length === 0 && (
-                <tr>
-                  <td colspan="6" style="text-align: center; color: #94a3b8; padding: 24px;">
-                    هنوز پیامکی ارسال نشده است.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+      <!-- Live Mobile Phone SMS Preview -->
+      <div class="admin-section-block sms-preview-card">
+        <div class="section-block-header" style="margin-bottom: 16px;">
+          <h3 class="section-block-title">
+            <Icon name="mobile" size={20} />
+            <span>پیش‌نمایش زنده در گوشی مراجع</span>
+          </h3>
+          <p class="section-block-sub">
+            نحوه نمایش متن در نوتیفیکیشن و اپلیکیشن پیام‌رسان گوشی
+          </p>
         </div>
+
+        <div class="sms-phone-mockup">
+          <div class="sms-phone-top">
+            <span class="sms-phone-time">۱۲:۴۲</span>
+            <div class="sms-phone-icons">
+              <Icon name="signal" size={12} />
+              <Icon name="battery" size={12} />
+            </div>
+          </div>
+
+          <div class="sms-thread-header">
+            <div class="sms-sender-avatar">
+              <Icon name="shield" size={18} />
+            </div>
+            <div class="sms-sender-details">
+              <strong class="sms-sender-name">TEHRAN LASER</strong>
+              <span class="sms-sender-line">خط خدماتی ۱۰۰۰۸۸۴</span>
+            </div>
+          </div>
+
+          <div class="sms-bubble-container">
+            <div class="sms-bubble">
+              <p id="mockSmsText" class="sms-bubble-text">
+                مراجع گرامی، نوبت لیزر شما در کلینیک تخصصی تهران لیزر با موفقیت تایید شد.
+              </p>
+              <div class="sms-bubble-footer">
+                <span class="sms-bubble-time">هم‌اکنون</span>
+                <span class="sms-bubble-check" style="color: #38bdf8;">
+                  <Icon name="check" size={12} />
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="sms-phone-reply-bar">
+            <span>ارسال پاسخ برای خطوط خدماتی غیرفعال است</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SMS Delivery Logs Table -->
+    <div class="admin-section-block sms-logs-section">
+      <div class="section-block-header" style="margin-bottom: 20px;">
+        <h3 class="section-block-title">
+          <Icon name="document" size={20} />
+          <span>گزارش و آرشیو تحویل پیامک‌های ارسالی</span>
+        </h3>
+        <p class="section-block-sub">
+          لاگ لحظه‌ای ارسال به مخابرات، استعلام دلیوری و شماره مراجعین (۵۰ لاگ اخیر)
+        </p>
+      </div>
+
+      <div class="admin-table-container">
+        <table class="admin-table-3d">
+          <thead>
+            <tr>
+              <th>گیرنده</th>
+              <th>نام مراجع</th>
+              <th>متن پیامک</th>
+              <th>قالب</th>
+              <th>وضعیت تحویل</th>
+              <th>تاریخ و زمان ارسال</th>
+            </tr>
+          </thead>
+          <tbody>
+            {smsLogs.map((log) => (
+              <tr>
+                <td style="font-family: monospace; font-weight: 700; color: #f5d77f;" dir="ltr">
+                  <span style="display: inline-flex; align-items: center; gap: 6px;">
+                    <Icon name="mobile" size={13} />
+                    <span>{log.phone}</span>
+                  </span>
+                </td>
+                <td style="font-weight: 700; color: #f8fafc;">
+                  {log.customerName || 'مراجع آزاد'}
+                </td>
+                <td
+                  style="font-size: 0.82rem; color: #cbd5e1; max-width: 280px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
+                  title={log.message}
+                >
+                  {log.message}
+                </td>
+                <td>
+                  <span class="sms-table-template-pill">
+                    {log.template_name || 'سفارشی'}
+                  </span>
+                </td>
+                <td>
+                  <span class="badge-status badge-status-confirmed">
+                    <Icon name="check" size={11} />
+                    <span>تحویل داده شد</span>
+                  </span>
+                </td>
+                <td style="font-size: 0.8rem; color: #94a3b8;">
+                  <span style="display: inline-flex; align-items: center; gap: 4px;">
+                    <Icon name="clock" size={12} />
+                    <span>{formatJalaliDate(log.created_at)}</span>
+                  </span>
+                </td>
+              </tr>
+            ))}
+            {smsLogs.length === 0 && (
+              <tr>
+                <td colspan="6" style="text-align: center; color: #94a3b8; padding: 28px;">
+                  هنوز پیامکی در سیستم ثبت نشده است.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
 
+  <style>
+    .sms-title-emblem {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      color: #38bdf8;
+      box-shadow: 0 4px 14px rgba(56, 189, 248, 0.2);
+    }
+
+    .sms-live-badge {
+      font-size: 0.86rem;
+      color: #34d399;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      padding: 8px 16px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sms-toast {
+      margin-bottom: 20px;
+      animation: modalPop 0.22s ease-out;
+    }
+    .sms-toast-inner {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 20px;
+      border-radius: 14px;
+      font-weight: 700;
+      font-size: 0.92rem;
+    }
+    .sms-toast.is-success .sms-toast-inner {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.45);
+      color: #34d399;
+    }
+    .sms-toast.is-error .sms-toast-inner {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.45);
+      color: #fca5a5;
+    }
+
+    /* Template Cards Grid */
+    .sms-template-section {
+      padding: 24px;
+      margin-bottom: 26px;
+    }
+    .sms-template-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+      gap: 12px;
+    }
+    .sms-template-btn {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      background: rgba(20, 26, 38, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      cursor: pointer;
+      text-align: right;
+      transition: all 0.2s ease;
+      color: inherit;
+    }
+    .sms-template-btn:hover {
+      background: rgba(30, 41, 59, 0.85);
+      border-color: rgba(212, 175, 55, 0.35);
+      transform: translateY(-2px);
+    }
+    .sms-template-btn.is-active {
+      background: rgba(212, 175, 55, 0.12);
+      border-color: rgba(212, 175, 55, 0.6);
+      box-shadow: 0 4px 16px rgba(212, 175, 55, 0.15);
+    }
+    .template-btn-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .template-btn-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+    .template-btn-title {
+      font-size: 0.86rem;
+      color: #f8fafc;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .template-btn-sub {
+      font-size: 0.72rem;
+      color: #94a3b8;
+    }
+
+    /* Sender & Preview Grid */
+    .sms-sender-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+      gap: 26px;
+      align-items: start;
+      margin-bottom: 26px;
+    }
+    @media (max-width: 960px) {
+      .sms-sender-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .sms-form-card {
+      padding: 26px;
+    }
+    .sms-form-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .label-with-icon {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #cbd5e1;
+    }
+    .sms-char-counter-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.76rem;
+      color: #94a3b8;
+      margin-top: 6px;
+    }
+    .sms-page-calc {
+      background: rgba(255, 255, 255, 0.06);
+      padding: 2px 8px;
+      border-radius: 6px;
+      color: #38bdf8;
+    }
+    .sms-send-btn {
+      width: 100%;
+      padding: 13px;
+      font-size: 1.02rem;
+      border-radius: 12px;
+    }
+
+    /* Phone Mockup */
+    .sms-preview-card {
+      padding: 26px;
+    }
+    .sms-phone-mockup {
+      background: linear-gradient(180deg, #121622 0%, #080a10 100%);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 16px 18px 20px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+    }
+    .sms-phone-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      margin-bottom: 12px;
+    }
+    .sms-phone-time {
+      font-size: 0.72rem;
+      color: #cbd5e1;
+      font-family: monospace;
+    }
+    .sms-phone-icons {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #cbd5e1;
+    }
+    .sms-thread-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      margin-bottom: 14px;
+    }
+    .sms-sender-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: rgba(212, 175, 55, 0.15);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      color: #f5d77f;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .sms-sender-details {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+    .sms-sender-name {
+      font-size: 0.88rem;
+      color: #f8fafc;
+      font-weight: 800;
+    }
+    .sms-sender-line {
+      font-size: 0.7rem;
+      color: #94a3b8;
+    }
+    .sms-bubble-container {
+      min-height: 110px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      margin-bottom: 14px;
+    }
+    .sms-bubble {
+      background: rgba(30, 41, 59, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px 14px 2px 14px;
+      padding: 12px 14px;
+      max-width: 90%;
+      align-self: flex-start;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+    }
+    .sms-bubble-text {
+      font-size: 0.82rem;
+      color: #f1f5f9;
+      line-height: 1.6;
+      margin: 0 0 6px;
+      word-break: break-word;
+      white-space: pre-wrap;
+    }
+    .sms-bubble-footer {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.68rem;
+      color: #94a3b8;
+    }
+    .sms-phone-reply-bar {
+      text-align: center;
+      font-size: 0.72rem;
+      color: #64748b;
+      padding: 8px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 10px;
+    }
+
+    /* Logs section */
+    .sms-logs-section {
+      padding: 24px;
+    }
+    .sms-table-template-pill {
+      font-size: 0.75rem;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.06);
+      color: #cbd5e1;
+    }
+  </style>
+
   <script>
     const templates: Record<string, string> = {
-      booking_confirm: 'مراجع گرامی، نوبت لیزر شما در کلینیک تخصصی تهران لیزر با موفقیت تایید شد. نشانی: تهران، پاسداران، پایدارفرد، بوستان هفتم. تلفن: 09035555090',
-      reminder_24h: 'یادآوری: نوبت لیزر شما فردا در کلینیک تهران لیزر هماهنگ شده است. لطفا ۲۴ ساعت قبل موهای ناحیه را شیو بفرمایید و از لایه‌بردار پرهیز کنید.',
-      birthday: 'زادروزتان فرخنده باد! کلینیک تهران لیزر ۳۰٪ تخفیف اختصاصی روی تمامی جلسات برای شما هدیه در نظر گرفته است. کد هدیه: HBD30',
-      next_session: 'مراجع گرامی، زمان جلسه بعدی دوره لیزر کندلا شما فرا رسیده است. جهت حفظ اثربخشی و عدم ریزش نتیجه، نوبت خود را آنلاین رزرو فرمایید: tehranlaser.ir',
-      festival: 'جشنواره تخفیف پاییزه تهران لیزر آغاز شد! ۱۵٪ تخفیف ویژه روی تمامی پکیج‌های فول بادی کندلا پرومکس ۲۰۲۶. رزرو آنلاین: tehranlaser.ir',
+      booking_confirm:
+        'مراجع گرامی، نوبت لیزر شما در کلینیک تخصصی تهران لیزر با موفقیت تایید شد. نشانی: تهران، پاسداران، پایدارفرد، بوستان هفتم. تلفن: 09035555090',
+      reminder_24h:
+        'یادآوری: نوبت لیزر شما فردا در کلینیک تهران لیزر هماهنگ شده است. لطفا ۲۴ ساعت قبل موهای ناحیه را شیو بفرمایید و از لایه‌بردار پرهیز کنید.',
+      birthday:
+        'زادروزتان فرخنده باد! کلینیک تهران لیزر ۳۰٪ تخفیف اختصاصی روی تمامی جلسات برای شما هدیه در نظر گرفته است. کد هدیه: HBD30',
+      next_session:
+        'مراجع گرامی، زمان جلسه بعدی دوره لیزر کندلا شما فرا رسیده است. جهت حفظ اثربخشی و عدم ریزش نتیجه، نوبت خود را آنلاین رزرو فرمایید: tehranlaser.ir',
+      festival:
+        'جشنواره تخفیف پاییزه تهران لیزر آغاز شد! ۱۵٪ تخفیف ویژه روی تمامی پکیج‌های فول بادی کندلا پرومکس ۲۰۲۶. رزرو آنلاین: tehranlaser.ir',
+      custom: '',
     };
 
-    const templateSelect = document.getElementById('smsTemplateSelect') as unknown as HTMLSelectElement;
-    const messageInput = document.getElementById('smsMessage') as HTMLTextAreaElement;
+    const templateSelect = document.getElementById('smsTemplateSelect') as HTMLSelectElement | null;
+    const messageInput = document.getElementById('smsMessage') as HTMLTextAreaElement | null;
     const charCount = document.getElementById('charCount');
-    const phoneInput = document.getElementById('smsPhone') as HTMLInputElement;
+    const smsPagesText = document.getElementById('smsPagesText');
+    const phoneInput = document.getElementById('smsPhone') as HTMLInputElement | null;
     const smsForm = document.getElementById('smsForm');
-    const sendBtn = document.getElementById('sendSmsSubmitBtn') as HTMLButtonElement;
+    const sendBtn = document.getElementById('sendSmsSubmitBtn') as HTMLButtonElement | null;
+    const sendBtnText = document.getElementById('sendSmsBtnText');
+    const mockSmsText = document.getElementById('mockSmsText');
+    const templateButtons = document.querySelectorAll<HTMLButtonElement>('.sms-template-btn');
+
+    const toast = document.getElementById('smsFeedbackToast');
+    const toastText = document.getElementById('smsToastText');
+
+    function showToast(message: string, isError = false) {
+      if (!toast || !toastText) return;
+      toastText.innerText = message;
+      toast.className = `sms-toast ${isError ? 'is-error' : 'is-success'}`;
+      toast.style.display = 'block';
+      setTimeout(() => {
+        toast.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 50);
+    }
 
     // Check if phone was passed in query param
     const urlParams = new URLSearchParams(window.location.search);
@@ -198,29 +738,73 @@ try {
       phoneInput.value = qPhone;
     }
 
-    templateSelect?.addEventListener('change', () => {
-      const val = templateSelect.value;
-      if (val && templates[val]) {
-        messageInput.value = templates[val];
+    function calculatePersianPages(charLen: number): number {
+      if (charLen === 0) return 1;
+      if (charLen <= 70) return 1;
+      return Math.ceil(charLen / 67);
+    }
+
+    function updateCount() {
+      if (!messageInput) return;
+      const text = messageInput.value;
+      const len = text.length;
+      if (charCount) charCount.innerText = String(len);
+      if (mockSmsText) mockSmsText.innerText = text || 'متن پیامک آزمایشی...';
+
+      const pages = calculatePersianPages(len);
+      if (smsPagesText) {
+        smsPagesText.innerText = `${pages} صفحه پیامک فارسی (${len} کاراکتر)`;
       }
+    }
+
+    function applyTemplate(tmplKey: string) {
+      if (!messageInput) return;
+      if (tmplKey && templates[tmplKey] !== undefined) {
+        messageInput.value = templates[tmplKey];
+      }
+      if (templateSelect) {
+        templateSelect.value = tmplKey;
+      }
+      templateButtons.forEach((btn) => {
+        if (btn.dataset.template === tmplKey) {
+          btn.classList.add('is-active');
+        } else {
+          btn.classList.remove('is-active');
+        }
+      });
       updateCount();
+    }
+
+    // Interactive template cards grid
+    templateButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const tmpl = btn.dataset.template || 'custom';
+        applyTemplate(tmpl);
+      });
+    });
+
+    templateSelect?.addEventListener('change', () => {
+      applyTemplate(templateSelect.value);
     });
 
     messageInput?.addEventListener('input', updateCount);
 
-    function updateCount() {
-      if (charCount) charCount.innerText = String(messageInput.value.length);
+    // Initial fill
+    if (templateSelect && templates[templateSelect.value]) {
+      applyTemplate(templateSelect.value);
     }
 
     smsForm?.addEventListener('submit', async (e) => {
       e.preventDefault();
+      if (!sendBtn || !phoneInput || !messageInput) return;
+
       sendBtn.disabled = true;
-      sendBtn.innerText = 'در حال ارسال پیامک...';
+      if (sendBtnText) sendBtnText.innerText = 'در حال ارسال پیامک...';
 
       const payload = {
         phone: phoneInput.value.trim(),
         message: messageInput.value.trim(),
-        templateName: templateSelect.value,
+        templateName: templateSelect ? templateSelect.value : 'custom',
       };
 
       try {
@@ -231,17 +815,19 @@ try {
         });
 
         if (res.ok) {
-          alert('✓ پیامک با موفقیت به مخابرات ارسال و در گوشی مراجع ثبت شد.');
-          window.location.reload();
+          showToast('پیامک با موفقیت به مخابرات ارسال و در گوشی مراجع ثبت شد.');
+          setTimeout(() => {
+            window.location.reload();
+          }, 1200);
         } else {
-          alert('خطا در ارسال پیامک.');
+          showToast('خطا در ارسال پیامک به خط گیرنده.', true);
           sendBtn.disabled = false;
-          sendBtn.innerText = '✉️ ارسال فوری پیامک';
+          if (sendBtnText) sendBtnText.innerText = 'ارسال فوری پیامک به مراجع';
         }
       } catch {
-        alert('خطای اتصال به سرور پیامک.');
+        showToast('خطای اتصال به سرور پیامک.', true);
         sendBtn.disabled = false;
-        sendBtn.innerText = '✉️ ارسال فوری پیامک';
+        if (sendBtnText) sendBtnText.innerText = 'ارسال فوری پیامک به مراجع';
       }
     });
   </script>

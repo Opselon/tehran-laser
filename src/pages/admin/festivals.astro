@@ -2,99 +2,327 @@
 import AdminLayout from '../../layouts/AdminLayout.astro';
 import { env } from 'cloudflare:workers';
 import { formatJalaliDate } from '../../lib/datetime/jalali';
+import Icon from '../../components/ui/Icon.astro';
 
-let festivals: any[] = [];
+interface Festival {
+  id: string;
+  title: string;
+  slug: string;
+  discount_percent: number;
+  description: string | null;
+  banner_image: string | null;
+  starts_at: string;
+  ends_at: string;
+  active: number | boolean;
+  created_at?: string;
+}
+
+let festivals: Festival[] = [];
 
 try {
   const result = await env.DB.prepare(`SELECT * FROM discount_festivals ORDER BY starts_at DESC`).all();
-  festivals = result.results as any[] || [];
+  festivals = (result.results as unknown as Festival[]) || [];
 } catch (e) {
   console.error('Failed to load festivals:', e);
 }
+
+const activeFestivals = festivals.filter((f) => Boolean(f.active));
+const activeCount = activeFestivals.length;
+const maxDiscount = activeFestivals.reduce(
+  (max, f) => (f.discount_percent > max ? f.discount_percent : max),
+  0
+);
+const totalCampaigns = festivals.length;
+
+const seasonalTimeline = [
+  {
+    id: 'spring',
+    season: 'بهار (نوروزی)',
+    date: '۱ تا ۲۰ فروردین',
+    disc: '۲۵٪',
+    iconName: 'sparkles',
+    status: 'گذشته',
+    statusClass: 'badge-status-completed',
+  },
+  {
+    id: 'summer',
+    season: 'تابستانه (آفتاب)',
+    date: '۱ تا ۱۵ تیر',
+    disc: '۱۵٪',
+    iconName: 'lightning',
+    status: 'گذشته',
+    statusClass: 'badge-status-completed',
+  },
+  {
+    id: 'autumn',
+    season: 'پاییزه طلایی',
+    date: 'مهر تا آبان',
+    disc: '۲۰٪',
+    iconName: 'gem',
+    status: 'در حال اجرا',
+    statusClass: 'badge-status-confirmed',
+  },
+  {
+    id: 'yalda',
+    season: 'جشنواره شب یلدا',
+    date: '۲۵ تا ۳۰ آذر',
+    disc: '۳۰٪',
+    iconName: 'star',
+    status: 'به‌زودی',
+    statusClass: 'badge-status-pending',
+  },
+];
 ---
 
 <AdminLayout title="جشنواره‌ها و تخفیف‌ها" activeNav="festivals">
   <div class="admin-content-pad">
+    <!-- Header -->
     <div class="dashboard-header-row">
       <div>
-        <h1 class="admin-page-title">🎪 جشنواره‌های تخفیف و تایم‌لاین کمپین‌های فروش</h1>
+        <h1 class="admin-page-title" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+          <span class="fest-title-emblem">
+            <Icon name="festivals" size={24} />
+          </span>
+          <span>جشنواره‌های تخفیف و تایم‌لاین کمپین‌های فروش</span>
+        </h1>
         <p class="section-block-sub">
           مدیریت تخفیف‌های مناسبتی، کمپین‌های تبلیغاتی و تایم‌لاین فصلی کلینیک تهران لیزر (API First)
         </p>
       </div>
       <div class="actions">
-        <button id="openNewFestModalBtn" class="btn-3d-gold">
-          <span>+ ایجاد جشنواره تخفیف جدید</span>
+        <button id="openNewFestModalBtn" class="btn-3d-gold" type="button">
+          <Icon name="plus" size={16} />
+          <span>ایجاد جشنواره تخفیف جدید</span>
         </button>
       </div>
     </div>
 
+    <!-- Feedback Notification Banner -->
+    <div id="festFeedbackToast" class="fest-toast" style="display: none;" role="alert">
+      <div class="fest-toast-inner">
+        <span id="festToastIcon" class="fest-toast-icon">
+          <Icon name="checkCircle" size={18} />
+        </span>
+        <span id="festToastText" class="fest-toast-text"></span>
+      </div>
+    </div>
+
+    <!-- 3D KPI Metrics Cards -->
+    <div class="kpi-grid-3d" style="grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); margin-bottom: 28px;">
+      <div class="kpi-card-3d">
+        <div class="kpi-header">
+          <span class="kpi-title">کمپین‌های فعال روی سایت</span>
+          <span class="kpi-icon" style="color: #34d399;">
+            <Icon name="festivals" size={22} />
+          </span>
+        </div>
+        <div class="kpi-value" style="color: #34d399;">
+          {activeCount} <span style="font-size: 0.9rem; color: #94a3b8; font-weight: 500;">کمپین لایو</span>
+        </div>
+        <div class="kpi-footer" style="color: #34d399; display: flex; align-items: center; gap: 6px;">
+          <span class="live-dot"></span>
+          <span>اعمال خودکار روی نوبت‌های آنلاین</span>
+        </div>
+      </div>
+
+      <div class="kpi-card-3d">
+        <div class="kpi-header">
+          <span class="kpi-title">بیشترین درصد تخفیف فعال</span>
+          <span class="kpi-icon" style="color: #f5d77f;">
+            <Icon name="percent" size={22} />
+          </span>
+        </div>
+        <div class="kpi-value" style="color: #f5d77f;">
+          {maxDiscount}٪
+        </div>
+        <div class="kpi-footer" style="color: #cbd5e1;">
+          روی پکیج‌های برگزیده کندلا پرومکس
+        </div>
+      </div>
+
+      <div class="kpi-card-3d">
+        <div class="kpi-header">
+          <span class="kpi-title">کل کمپین‌های تعریف‌شده</span>
+          <span class="kpi-icon" style="color: #38bdf8;">
+            <Icon name="tag" size={22} />
+          </span>
+        </div>
+        <div class="kpi-value" style="color: #38bdf8;">
+          {totalCampaigns}
+        </div>
+        <div class="kpi-footer" style="color: #94a3b8;">
+          آرشیو فصلی و دوره‌ای کلینیک
+        </div>
+      </div>
+
+      <div class="kpi-card-3d">
+        <div class="kpi-header">
+          <span class="kpi-title">یکپارچه‌سازی با پایگاه D1</span>
+          <span class="kpi-icon" style="color: #a78bfa;">
+            <Icon name="lightning" size={22} />
+          </span>
+        </div>
+        <div class="kpi-value" style="color: #a78bfa; font-size: 1.5rem;">
+          همگام لایو
+        </div>
+        <div class="kpi-footer" style="color: #34d399;">
+          اتصال Cloudflare Workers پایدار
+        </div>
+      </div>
+    </div>
+
     <!-- Active Festivals Grid & Countdown -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; margin-bottom: 32px;">
-      {festivals.map((f) => (
-        <div class="admin-section-block" style="padding: 24px; border-color: f.active ? 'rgba(212, 175, 55, 0.4)' : 'rgba(255,255,255,0.06)'; position: relative; overflow: hidden;">
-          {f.active ? (
-            <div style="position: absolute; top: 12px; left: 12px; background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); color: #34d399; font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 8px;">
-              🟢 فعال روی سایت
+    <div class="admin-section-block" style="padding: 24px; margin-bottom: 32px;">
+      <div class="section-block-header" style="margin-bottom: 20px;">
+        <h3 class="section-block-title">
+          <Icon name="tag" size={20} />
+          <span>فهرست جشنواره‌های جاری و برنامه‌ریزی‌شده</span>
+        </h3>
+        <p class="section-block-sub">
+          لیست تخفیف‌های ویژه، کدهای سیستمی، میزان درصد کسر بها و روزشمار پایان مهلت
+        </p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 20px;">
+        {festivals.map((f) => {
+          const isActive = Boolean(f.active);
+          return (
+            <div class={`fest-card-3d ${isActive ? 'is-active' : 'is-inactive'}`}>
+              <div class="fest-card-top-bar">
+                <div class="fest-badge-slot">
+                  {isActive ? (
+                    <span class="badge-status badge-status-confirmed">
+                      <Icon name="checkCircle" size={12} />
+                      <span>فعال روی سایت</span>
+                    </span>
+                  ) : (
+                    <span class="badge-status badge-status-no_show">
+                      <Icon name="clock" size={12} />
+                      <span>غیرفعال</span>
+                    </span>
+                  )}
+                </div>
+                <span class="fest-slug-code" dir="ltr">
+                  #{f.slug}
+                </span>
+              </div>
+
+              <div class="fest-card-header">
+                <div class="fest-icon-emblem">
+                  <Icon name="festivals" size={24} />
+                </div>
+                <div class="fest-title-wrap">
+                  <h3 class="fest-card-title">{f.title}</h3>
+                  <span class="fest-card-sub">تخفیف ویژه مراجعین کلینیک</span>
+                </div>
+              </div>
+
+              <div class="fest-discount-strip">
+                <span class="fest-discount-label">
+                  <Icon name="percent" size={15} />
+                  <span>میزان تخفیف اعمالی:</span>
+                </span>
+                <span class="fest-discount-val">{f.discount_percent}٪ تخفیف</span>
+              </div>
+
+              <p class="fest-card-desc">
+                {f.description || 'تخفیف ویژه تمامی خدمات لیزر کندلا به مدت محدود روی وب‌سایت تهران لیزر.'}
+              </p>
+
+              <!-- Dynamic 3D Countdown Box -->
+              <div class="fest-countdown-container" data-ends-at={f.ends_at} data-active={isActive ? '1' : '0'}>
+                <div class="fest-countdown-header">
+                  <span class="fest-countdown-title">
+                    <Icon name="clock" size={13} />
+                    <span>مهلت باقی‌مانده کمپین:</span>
+                  </span>
+                  <span class="fest-countdown-status">در حال محاسبه...</span>
+                </div>
+                <div class="fest-countdown-grid">
+                  <div class="fest-countdown-unit">
+                    <span class="fest-unit-num fest-days">--</span>
+                    <span class="fest-unit-label">روز</span>
+                  </div>
+                  <div class="fest-countdown-sep">:</div>
+                  <div class="fest-countdown-unit">
+                    <span class="fest-unit-num fest-hours">--</span>
+                    <span class="fest-unit-label">ساعت</span>
+                  </div>
+                  <div class="fest-countdown-sep">:</div>
+                  <div class="fest-countdown-unit">
+                    <span class="fest-unit-num fest-minutes">--</span>
+                    <span class="fest-unit-label">دقیقه</span>
+                  </div>
+                  <div class="fest-countdown-sep">:</div>
+                  <div class="fest-countdown-unit">
+                    <span class="fest-unit-num fest-seconds">--</span>
+                    <span class="fest-unit-label">ثانیه</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="fest-card-footer">
+                <span class="fest-date-col">
+                  <Icon name="calendar" size={13} />
+                  <span>شروع: {formatJalaliDate(f.starts_at)}</span>
+                </span>
+                <span class="fest-date-col">
+                  <Icon name="clock" size={13} />
+                  <span>پایان: {formatJalaliDate(f.ends_at)}</span>
+                </span>
+              </div>
             </div>
-          ) : (
-            <div style="position: absolute; top: 12px; left: 12px; background: rgba(255, 255, 255, 0.05); color: #94a3b8; font-size: 0.75rem; padding: 4px 10px; border-radius: 8px;">
-              ⚪ غیرفعال
+          );
+        })}
+
+        {festivals.length === 0 && (
+          <div class="fest-empty-box" style="grid-column: 1 / -1;">
+            <div class="fest-empty-icon">
+              <Icon name="festivals" size={40} />
             </div>
-          )}
-
-          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 14px;">
-            <div style="font-size: 2.2rem;">🎪</div>
-            <div>
-              <h3 style="font-size: 1.2rem; font-weight: 800; color: #f5d77f; margin: 0;">{f.title}</h3>
-              <span style="font-size: 0.8rem; color: #94a3b8;">کد سیستمی: {f.slug}</span>
-            </div>
+            <h4 style="font-size: 1.1rem; color: #f8fafc; margin-bottom: 6px;">هنوز هیچ جشنواره‌ای تعریف نشده است</h4>
+            <p style="font-size: 0.85rem; color: #94a3b8; margin: 0 0 16px;">
+              برای شروع کمپین‌های تبلیغاتی و ارائه تخفیف‌های فصلی، از دکمه زیر استفاده نمایید.
+            </p>
+            <button class="btn-3d-gold open-modal-trigger-btn" type="button">
+              <Icon name="plus" size={15} />
+              <span>ایجاد اولین جشنواره</span>
+            </button>
           </div>
-
-          <div style="background: rgba(212, 175, 55, 0.08); border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 12px; padding: 14px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-size: 0.85rem; color: #cbd5e1;">میزان تخفیف اعمالی:</span>
-            <span style="font-size: 1.4rem; font-weight: 900; color: #f5d77f;">{f.discount_percent}٪ تخفیف</span>
-          </div>
-
-          <p style="font-size: 0.85rem; color: #cbd5e1; line-height: 1.6; margin-bottom: 16px;">
-            {f.description || 'تخفیف ویژه تمامی خدمات لیزر کندلا به مدت محدود.'}
-          </p>
-
-          <div style="border-top: 1px solid rgba(255,255,255,0.06); padding-top: 12px; display: flex; justify-content: space-between; font-size: 0.78rem; color: #94a3b8;">
-            <span>شروع: {formatJalaliDate(f.starts_at)}</span>
-            <span>پایان: {formatJalaliDate(f.ends_at)}</span>
-          </div>
-        </div>
-      ))}
-      {festivals.length === 0 && (
-        <div class="admin-section-block" style="padding: 32px; text-align: center; color: #94a3b8; grid-column: 1 / -1;">
-          هنوز هیچ جشنواره‌ای تعریف نشده است.
-        </div>
-      )}
+        )}
+      </div>
     </div>
 
     <!-- Visual Yearly Timeline -->
     <div class="admin-section-block" style="padding: 28px;">
-      <h3 class="section-block-title" style="margin-bottom: 24px;">
-        📅 تایم‌لاین کمپین‌های سالانه کلینیک تهران لیزر
-      </h3>
+      <div class="section-block-header">
+        <h3 class="section-block-title">
+          <Icon name="calendar" size={20} />
+          <span>تایم‌لاین کمپین‌های سالانه کلینیک تهران لیزر</span>
+        </h3>
+        <p class="section-block-sub">
+          تقویم راهبردی کمپین‌های فصلی و تخفیف‌های مناسبتی در طول سال کاری کلینیک
+        </p>
+      </div>
 
-      <div style="position: relative; padding: 20px 0;">
-        <div style="position: absolute; top: 50%; right: 0; left: 0; height: 3px; background: linear-gradient(90deg, #d4af37, #38bdf8, #818cf8); transform: translateY(-50%); z-index: 1;"></div>
+      <div class="timeline-wrapper">
+        <div class="timeline-track-line" aria-hidden="true"></div>
 
-        <div class="g-4" style="display: grid; gap: 16px; position: relative; z-index: 2">
-          {[
-            { season: 'بهار (نوروزی)', date: '۱ تا ۲۰ فروردین', disc: '۲۵٪', icon: '🌸', status: 'گذشته' },
-            { season: 'تابستانه (آفتاب)', date: '۱ تا ۱۵ تیر', disc: '۱۵٪', icon: '☀️', status: 'گذشته' },
-            { season: 'پاییزه طلایی', date: 'مهر تا آبان', disc: '۲۰٪', icon: '🍂', status: 'در حال اجرا' },
-            { season: 'جشنواره شب یلدا', date: '۲۵ تا ۳۰ آذر', disc: '۳۰٪', icon: '🍉', status: 'به‌زودی' },
-          ].map((item) => (
-            <div style="background: #0f172a; border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 18px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.5);">
-              <div style="font-size: 2rem; margin-bottom: 8px;">{item.icon}</div>
-              <h4 style="color: #f8fafc; font-size: 1rem; font-weight: 700; margin-bottom: 4px;">{item.season}</h4>
-              <div style="font-size: 0.78rem; color: #94a3b8; margin-bottom: 8px;">{item.date}</div>
-              <div style="font-size: 1.1rem; font-weight: 800; color: #f5d77f; margin-bottom: 6px;">{item.disc} تخفیف</div>
-              <span class={item.status === 'در حال اجرا' ? 'badge-status-confirmed' : 'badge-status-completed'} style="font-size: 0.72rem;">
+        <div class="timeline-grid">
+          {seasonalTimeline.map((item) => (
+            <div class="timeline-season-card">
+              <div class="timeline-season-emblem">
+                <Icon name={item.iconName} size={24} />
+              </div>
+              <h4 class="timeline-season-title">{item.season}</h4>
+              <div class="timeline-season-date">
+                <Icon name="calendar" size={12} />
+                <span>{item.date}</span>
+              </div>
+              <div class="timeline-season-disc">
+                <span>{item.disc} تخفیف</span>
+              </div>
+              <span class={`badge-status ${item.statusClass}`} style="font-size: 0.72rem;">
                 {item.status}
               </span>
             </div>
@@ -106,64 +334,421 @@ try {
 
   <!-- Modal: New Festival -->
   <div id="newFestModal" class="modal-3d-backdrop" style="display: none;">
-    <div class="modal-3d-card" style="max-width: 520px;">
+    <div class="modal-3d-card" style="max-width: 540px;">
       <div class="modal-3d-header">
-        <h3 class="modal-3d-title">🎪 تعریف جشنواره تخفیف جدید</h3>
-        <button id="closeFestModalBtn" class="modal-close-btn">&times;</button>
+        <h3 class="modal-3d-title" style="display: flex; align-items: center; gap: 10px;">
+          <Icon name="festivals" size={22} />
+          <span>تعریف جشنواره تخفیف جدید</span>
+        </h3>
+        <button id="closeFestModalBtn" class="modal-close-btn" type="button" aria-label="بستن پنجره">
+          <Icon name="close" size={18} />
+        </button>
       </div>
 
       <form id="festForm" style="display: flex; flex-direction: column; gap: 16px;">
         <div>
-          <label class="form-label-modal">عنوان جشنواره:</label>
-          <input type="text" id="festTitle" class="form-control-modal" placeholder="مثال: جشنواره پاییزه طلایی تهران لیزر" required />
+          <label for="festTitle" class="form-label-modal">عنوان جشنواره:</label>
+          <input
+            type="text"
+            id="festTitle"
+            class="form-control-modal"
+            placeholder="مثال: جشنواره پاییزه طلایی تهران لیزر"
+            required
+          />
         </div>
 
-        <div class="g-2" style="display: grid; gap: 14px">
+        <div class="g-2" style="display: grid; gap: 14px;">
           <div>
-            <label class="form-label-modal">درصد تخفیف (%):</label>
-            <input type="number" id="festPercent" class="form-control-modal" value="20" min="1" max="100" required />
+            <label for="festPercent" class="form-label-modal">درصد تخفیف (%):</label>
+            <input
+              type="number"
+              id="festPercent"
+              class="form-control-modal"
+              value="20"
+              min="1"
+              max="100"
+              required
+            />
           </div>
           <div>
-            <label class="form-label-modal">نامک انگلیسی (Slug):</label>
-            <input type="text" id="festSlug" dir="ltr" class="form-control-modal" placeholder="golden-autumn" required />
+            <label for="festSlug" class="form-label-modal">نامک انگلیسی (Slug):</label>
+            <input
+              type="text"
+              id="festSlug"
+              dir="ltr"
+              class="form-control-modal"
+              placeholder="golden-autumn"
+              required
+            />
           </div>
         </div>
 
         <div>
-          <label class="form-label-modal">توضیحات و متن کمپین:</label>
-          <textarea id="festDesc" class="form-control-modal" rows="3" placeholder="توضیحاتی برای نمایش به مراجعین..."></textarea>
+          <label for="festDesc" class="form-label-modal">توضیحات و متن کمپین:</label>
+          <textarea
+            id="festDesc"
+            class="form-control-modal"
+            rows="3"
+            placeholder="توضیحات و شرایط تخفیف برای نمایش به مراجعین..."
+          ></textarea>
         </div>
 
-        <div class="g-2" style="display: grid; gap: 14px">
+        <div class="g-2" style="display: grid; gap: 14px;">
           <div>
-            <label class="form-label-modal">تاریخ شروع:</label>
+            <label for="festStarts" class="form-label-modal">تاریخ شروع:</label>
             <input type="date" id="festStarts" class="form-control-modal" required />
           </div>
           <div>
-            <label class="form-label-modal">تاریخ پایان:</label>
+            <label for="festEnds" class="form-label-modal">تاریخ پایان:</label>
             <input type="date" id="festEnds" class="form-control-modal" required />
           </div>
         </div>
 
-        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
-          <button type="button" id="cancelFestBtn" class="btn-3d-secondary">انصراف</button>
-          <button type="submit" id="saveFestSubmitBtn" class="btn-3d-accept">ثبت و انتشار جشنواره</button>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px; flex-wrap: wrap;">
+          <button type="button" id="cancelFestBtn" class="btn-3d-secondary">
+            انصراف
+          </button>
+          <button type="submit" id="saveFestSubmitBtn" class="btn-3d-accept">
+            <Icon name="check" size={16} />
+            <span>ثبت و انتشار جشنواره</span>
+          </button>
         </div>
       </form>
     </div>
   </div>
 
+  <style>
+    .fest-title-emblem {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: rgba(212, 175, 55, 0.14);
+      border: 1px solid rgba(212, 175, 55, 0.35);
+      color: #f5d77f;
+      box-shadow: 0 4px 14px rgba(212, 175, 55, 0.18);
+    }
+
+    .fest-toast {
+      margin-bottom: 20px;
+      animation: modalPop 0.22s ease-out;
+    }
+    .fest-toast-inner {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 20px;
+      border-radius: 14px;
+      font-weight: 700;
+      font-size: 0.92rem;
+    }
+    .fest-toast.is-success .fest-toast-inner {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.45);
+      color: #34d399;
+    }
+    .fest-toast.is-error .fest-toast-inner {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.45);
+      color: #fca5a5;
+    }
+
+    /* 3D Festival Cards */
+    .fest-card-3d {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(160deg, rgba(21, 27, 41, 0.96) 0%, rgba(11, 14, 22, 0.96) 100%);
+      border: 1px solid rgba(212, 175, 55, 0.22);
+      border-radius: 20px;
+      padding: 22px;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .fest-card-3d.is-active {
+      border-color: rgba(212, 175, 55, 0.5);
+      box-shadow: 0 18px 42px rgba(0, 0, 0, 0.65), 0 0 24px rgba(212, 175, 55, 0.16);
+    }
+    .fest-card-3d:hover {
+      transform: translateY(-4px);
+    }
+
+    .fest-card-top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .fest-slug-code {
+      font-family: monospace;
+      font-size: 0.76rem;
+      color: #94a3b8;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 3px 8px;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .fest-card-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .fest-icon-emblem {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: rgba(212, 175, 55, 0.12);
+      border: 1px solid rgba(212, 175, 55, 0.32);
+      color: #f5d77f;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+    }
+    .fest-title-wrap {
+      min-width: 0;
+    }
+    .fest-card-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #f8fafc;
+      margin: 0 0 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .fest-card-sub {
+      font-size: 0.78rem;
+      color: #94a3b8;
+    }
+
+    .fest-discount-strip {
+      background: rgba(212, 175, 55, 0.08);
+      border: 1px solid rgba(212, 175, 55, 0.22);
+      border-radius: 12px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .fest-discount-label {
+      font-size: 0.82rem;
+      color: #cbd5e1;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .fest-discount-val {
+      font-size: 1.25rem;
+      font-weight: 900;
+      color: #f5d77f;
+      letter-spacing: -0.01em;
+    }
+
+    .fest-card-desc {
+      font-size: 0.85rem;
+      color: #cbd5e1;
+      line-height: 1.6;
+      margin: 0;
+      min-height: 40px;
+    }
+
+    /* 3D Countdown Box */
+    .fest-countdown-container {
+      background: rgba(6, 8, 13, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 10px 12px;
+      margin-top: auto;
+    }
+    .fest-countdown-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.74rem;
+      color: #94a3b8;
+      margin-bottom: 8px;
+    }
+    .fest-countdown-title {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .fest-countdown-status {
+      color: #38bdf8;
+      font-weight: 700;
+    }
+    .fest-countdown-grid {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      direction: ltr;
+    }
+    .fest-countdown-unit {
+      background: rgba(20, 26, 38, 0.9);
+      border: 1px solid rgba(212, 175, 55, 0.2);
+      border-radius: 8px;
+      padding: 4px 8px;
+      min-width: 44px;
+      text-align: center;
+    }
+    .fest-unit-num {
+      display: block;
+      font-family: monospace;
+      font-size: 1rem;
+      font-weight: 900;
+      color: #f5d77f;
+      line-height: 1.2;
+    }
+    .fest-unit-label {
+      display: block;
+      font-size: 0.65rem;
+      color: #94a3b8;
+    }
+    .fest-countdown-sep {
+      color: rgba(212, 175, 55, 0.5);
+      font-weight: 800;
+      font-family: monospace;
+    }
+
+    .fest-card-footer {
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      padding-top: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 0.78rem;
+      color: #94a3b8;
+      flex-wrap: wrap;
+    }
+    .fest-date-col {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* Empty state */
+    .fest-empty-box {
+      background: rgba(15, 20, 31, 0.5);
+      border: 1.5px dashed rgba(212, 175, 55, 0.25);
+      border-radius: 20px;
+      padding: 40px 24px;
+      text-align: center;
+    }
+    .fest-empty-icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 16px;
+      border-radius: 50%;
+      background: rgba(212, 175, 55, 0.1);
+      color: #f5d77f;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Timeline Section */
+    .timeline-wrapper {
+      position: relative;
+      padding: 12px 0 6px;
+    }
+    .timeline-track-line {
+      display: none;
+    }
+    @media (min-width: 900px) {
+      .timeline-track-line {
+        display: block;
+        position: absolute;
+        top: 50%;
+        right: 40px;
+        left: 40px;
+        height: 3px;
+        background: linear-gradient(90deg, #d4af37, #38bdf8, #818cf8, #a78bfa);
+        transform: translateY(-50%);
+        z-index: 1;
+        border-radius: 2px;
+        box-shadow: 0 0 12px rgba(212, 175, 55, 0.4);
+      }
+    }
+    .timeline-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+      gap: 16px;
+      position: relative;
+      z-index: 2;
+    }
+    .timeline-season-card {
+      background: linear-gradient(160deg, rgba(20, 26, 38, 0.95) 0%, rgba(12, 15, 24, 0.95) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 20px 16px;
+      text-align: center;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.06);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .timeline-season-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(212, 175, 55, 0.4);
+    }
+    .timeline-season-emblem {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 10px;
+      border-radius: 14px;
+      background: rgba(212, 175, 55, 0.12);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      color: #f5d77f;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+    }
+    .timeline-season-title {
+      color: #f8fafc;
+      font-size: 1rem;
+      font-weight: 800;
+      margin: 0 0 6px;
+    }
+    .timeline-season-date {
+      font-size: 0.78rem;
+      color: #94a3b8;
+      margin-bottom: 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .timeline-season-disc {
+      font-size: 1.15rem;
+      font-weight: 900;
+      color: #f5d77f;
+      margin-bottom: 10px;
+    }
+  </style>
+
   <script>
+    // Modal controls
     const modal = document.getElementById('newFestModal');
     const openBtn = document.getElementById('openNewFestModalBtn');
+    const emptyOpenBtns = document.querySelectorAll('.open-modal-trigger-btn');
     const closeBtn = document.getElementById('closeFestModalBtn');
     const cancelBtn = document.getElementById('cancelFestBtn');
     const form = document.getElementById('festForm');
-    const saveBtn = document.getElementById('saveFestSubmitBtn') as HTMLButtonElement;
+    const saveBtn = document.getElementById('saveFestSubmitBtn') as HTMLButtonElement | null;
+    const toast = document.getElementById('festFeedbackToast');
+    const toastText = document.getElementById('festToastText');
 
-    // Set default dates
-    const startInput = document.getElementById('festStarts') as HTMLInputElement;
-    const endInput = document.getElementById('festEnds') as HTMLInputElement;
+    // Default dates (today and +14 days)
+    const startInput = document.getElementById('festStarts') as HTMLInputElement | null;
+    const endInput = document.getElementById('festEnds') as HTMLInputElement | null;
     if (startInput) startInput.value = new Date().toISOString().slice(0, 10);
     if (endInput) {
       const d = new Date();
@@ -172,18 +757,50 @@ try {
     }
 
     function openModal() {
-      if (modal) modal.style.display = 'flex';
+      if (modal) {
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+      }
     }
+
     function closeModal() {
-      if (modal) modal.style.display = 'none';
+      if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+      }
     }
 
     openBtn?.addEventListener('click', openModal);
+    emptyOpenBtns.forEach((btn) => btn.addEventListener('click', openModal));
     closeBtn?.addEventListener('click', closeModal);
     cancelBtn?.addEventListener('click', closeModal);
 
+    // Close on backdrop click
+    modal?.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    // Close on ESC
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modal && modal.style.display === 'flex') {
+        closeModal();
+      }
+    });
+
+    function showToast(message: string, isError = false) {
+      if (!toast || !toastText) return;
+      toastText.innerText = message;
+      toast.className = `fest-toast ${isError ? 'is-error' : 'is-success'}`;
+      toast.style.display = 'block';
+      setTimeout(() => {
+        toast.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 50);
+    }
+
     form?.addEventListener('submit', async (e) => {
       e.preventDefault();
+      if (!saveBtn || !startInput || !endInput) return;
+
       saveBtn.disabled = true;
       saveBtn.innerText = 'در حال ثبت...';
 
@@ -205,18 +822,80 @@ try {
         });
 
         if (res.ok) {
-          alert('✓ جشنواره با موفقیت ثبت و روی وب‌سایت فعال گردید.');
-          window.location.reload();
+          closeModal();
+          showToast('جشنواره با موفقیت ثبت و روی وب‌سایت فعال گردید.');
+          setTimeout(() => {
+            window.location.reload();
+          }, 1000);
         } else {
-          alert('خطا در ثبت جشنواره.');
+          showToast('خطا در ثبت جشنواره. لطفاً داده‌ها را بررسی کنید.', true);
           saveBtn.disabled = false;
           saveBtn.innerText = 'ثبت و انتشار جشنواره';
         }
       } catch {
-        alert('خطای اتصال به سرور.');
+        showToast('خطای اتصال به سرور پایگاه داده.', true);
         saveBtn.disabled = false;
         saveBtn.innerText = 'ثبت و انتشار جشنواره';
       }
     });
+
+    // Live Countdown Timers
+    function updateCountdowns() {
+      const containers = document.querySelectorAll<HTMLElement>('.fest-countdown-container');
+      const now = Date.now();
+
+      containers.forEach((box) => {
+        const endsAtStr = box.dataset.endsAt;
+        const isActive = box.dataset.active === '1';
+        const statusEl = box.querySelector<HTMLElement>('.fest-countdown-status');
+        const daysEl = box.querySelector<HTMLElement>('.fest-days');
+        const hoursEl = box.querySelector<HTMLElement>('.fest-hours');
+        const minutesEl = box.querySelector<HTMLElement>('.fest-minutes');
+        const secondsEl = box.querySelector<HTMLElement>('.fest-seconds');
+
+        if (!endsAtStr) return;
+        const target = new Date(endsAtStr).getTime();
+        const diff = target - now;
+
+        if (!isActive) {
+          if (statusEl) statusEl.innerText = 'غیرفعال';
+          if (daysEl) daysEl.innerText = '۰۰';
+          if (hoursEl) hoursEl.innerText = '۰۰';
+          if (minutesEl) minutesEl.innerText = '۰۰';
+          if (secondsEl) secondsEl.innerText = '۰۰';
+          return;
+        }
+
+        if (diff <= 0) {
+          if (statusEl) {
+            statusEl.innerText = 'پایان یافته';
+            statusEl.style.color = '#f87171';
+          }
+          if (daysEl) daysEl.innerText = '۰۰';
+          if (hoursEl) hoursEl.innerText = '۰۰';
+          if (minutesEl) minutesEl.innerText = '۰۰';
+          if (secondsEl) secondsEl.innerText = '۰۰';
+          return;
+        }
+
+        if (statusEl) {
+          statusEl.innerText = 'فعال و جاری';
+          statusEl.style.color = '#34d399';
+        }
+
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+        if (daysEl) daysEl.innerText = String(days).padStart(2, '0');
+        if (hoursEl) hoursEl.innerText = String(hours).padStart(2, '0');
+        if (minutesEl) minutesEl.innerText = String(minutes).padStart(2, '0');
+        if (secondsEl) secondsEl.innerText = String(seconds).padStart(2, '0');
+      });
+    }
+
+    updateCountdowns();
+    setInterval(updateCountdowns, 1000);
   </script>
 </AdminLayout>

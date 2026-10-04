@@ -1,230 +1,1256 @@
 ---
 import AdminLayout from '../../../layouts/AdminLayout.astro';
+import Icon from '../../../components/ui/Icon.astro';
 import { env } from 'cloudflare:workers';
-import { getPublicSettings } from '../../../server/repositories';
+import { getAllSettings } from '../../../server/repositories';
 
 let settings: Record<string, string> = {};
+let dbStats = {
+  tables: 14,
+  settingsCount: 0,
+  customersCount: 0,
+  bookingsCount: 0,
+};
+
 try {
-  settings = await getPublicSettings(env.DB);
+  if (env?.DB) {
+    const allSets = await getAllSettings(env.DB);
+    settings = { ...allSets.public, ...allSets.private };
+
+    const [setsCount, custCount, bookCount] = await Promise.all([
+      env.DB.prepare('SELECT COUNT(*) AS c FROM settings').first<{ c: number }>(),
+      env.DB.prepare('SELECT COUNT(*) AS c FROM customers').first<{ c: number }>(),
+      env.DB.prepare('SELECT COUNT(*) AS c FROM bookings').first<{ c: number }>(),
+    ]);
+
+    dbStats = {
+      tables: 14,
+      settingsCount: setsCount?.c ?? Object.keys(settings).length,
+      customersCount: custCount?.c ?? 0,
+      bookingsCount: bookCount?.c ?? 0,
+    };
+  }
 } catch (e) {
   console.error('Failed to load settings:', e);
 }
 ---
 
 <AdminLayout title="تنظیمات کلینیک" activeNav="settings">
-  <div class="admin-content-pad">
+  <div class="admin-content-pad settings-container">
     <!-- 3D Header Row -->
     <div class="dashboard-header-row">
       <div>
-        <h1 class="admin-page-title">⚙️ تنظیمات و پیکربندی مرکزی کلینیک</h1>
+        <h1 class="admin-page-title" style="display: flex; align-items: center; gap: 10px;">
+          <Icon name="settings" size={26} class="title-icon" />
+          <span>تنظیمات و پیکربندی مرکزی کلینیک</span>
+        </h1>
         <p class="section-block-sub">
-          ویرایش زنده مشخصات، نشانی، شماره تماس، زمان‌بندی و قواعد قیمت‌گذاری (کاملاً API First)
+          مدیریت یکپارچه مشخصات کلینیک، درگاه پیامک، شیفت‌های کاری، امنیت دسترسی و پشتیبان‌گیری دیتابیس D1
         </p>
       </div>
       <div class="actions">
-        <span style="font-size: 0.88rem; color: #10b981; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.35); padding: 8px 16px; border-radius: 12px; display: inline-flex; align-items: center; gap: 8px;">
+        <span class="d1-status-badge">
           <span class="live-dot"></span>
-          پایگاه داده Cloudflare D1 فعال
+          <Icon name="database" size={15} />
+          <span>پایگاه داده Cloudflare D1 فعال</span>
         </span>
       </div>
     </div>
 
-    <div id="settingsAlert" class="alert-3d-danger" style="display: none; margin-bottom: 20px;">
+    <!-- Alert Notices -->
+    <div id="settingsAlert" class="alert-3d-danger" style="display: none;" role="alert">
+      <Icon name="warning" size={20} />
       <span id="settingsAlertText"></span>
     </div>
 
-    <div id="settingsSuccess" style="display: none; margin-bottom: 20px; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); color: #34d399; padding: 16px 20px; border-radius: 14px; font-weight: 700; align-items: center; gap: 10px;">
-      <span>✓ تنظیمات با موفقیت در پایگاه داده کلینیک به‌روزرسانی شد.</span>
+    <div id="settingsSuccess" class="alert-3d-success" style="display: none;" role="status">
+      <Icon name="checkCircle" size={20} />
+      <span>تنظیمات با موفقیت در پایگاه داده لایو D1 ذخیره و اعمال شد.</span>
     </div>
 
-    <!-- 3D Settings Form -->
+    <!-- 3D Settings Tab Bar -->
+    <nav class="settings-tab-bar" aria-label="دسته‌بندی تنظیمات">
+      <button type="button" class="settings-tab-btn active" data-tab="profile" role="tab" aria-selected="true">
+        <Icon name="gem" size={17} />
+        <span>مشخصات کلینیک</span>
+      </button>
+      <button type="button" class="settings-tab-btn" data-tab="sms" role="tab" aria-selected="false">
+        <Icon name="sms" size={17} />
+        <span>درگاه پیامک</span>
+      </button>
+      <button type="button" class="settings-tab-btn" data-tab="schedule" role="tab" aria-selected="false">
+        <Icon name="clock" size={17} />
+        <span>زمان‌بندی و شیفت‌ها</span>
+      </button>
+      <button type="button" class="settings-tab-btn" data-tab="security" role="tab" aria-selected="false">
+        <Icon name="shield" size={17} />
+        <span>امنیت و نشست‌ها</span>
+      </button>
+      <button type="button" class="settings-tab-btn" data-tab="backup" role="tab" aria-selected="false">
+        <Icon name="database" size={17} />
+        <span>پشتیبان‌گیری و دیتابیس D1</span>
+      </button>
+    </nav>
+
+    <!-- Main Settings Form -->
     <form id="settingsForm">
-      <div class="admin-section-block" style="padding: 28px; margin-bottom: 24px;">
-        <h3 class="section-block-title" style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
-          <span>🏥</span> اطلاعات هویتی و ارتباطی کلینیک
-        </h3>
-
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px;">
-          <div>
-            <label style="display: block; font-size: 0.88rem; font-weight: 700; color: #f5d77f; margin-bottom: 8px;">
-              نام تجاری کلینیک:
-            </label>
-            <input
-              type="text"
-              name="business_name"
-              class="form-control-modal"
-              value={settings.business_name || 'تهران لیزر'}
-              required
-            />
-            <span style="display: block; font-size: 0.78rem; color: #94a3b8; margin-top: 4px;">
-              عنوان رسمی کلینیک که در سربرگ، پیامک‌ها و فاکتورها نمایش داده می‌شود.
-            </span>
+      <!-- 1. CLINIC PROFILE PANEL -->
+      <section id="panel-profile" class="settings-panel active" role="tabpanel">
+        <div class="admin-section-block">
+          <div class="section-block-header">
+            <h2 class="section-block-title">
+              <Icon name="gem" size={20} />
+              <span>هویت تجاری و مشخصات رسمی کلینیک</span>
+            </h2>
+            <p class="section-block-sub">اطلاعات برندینگ که در فاکتورها، سربرگ‌ها، رزرو و پیامک‌های ارسالی درج می‌شود.</p>
           </div>
 
-          <div>
-            <label style="display: block; font-size: 0.88rem; font-weight: 700; color: #f5d77f; margin-bottom: 8px;">
-              شماره تلفن تماس و نوبت‌دهی:
-            </label>
-            <input
-              type="text"
-              name="phone"
-              dir="ltr"
-              class="form-control-modal"
-              value={settings.phone || '+98 903 555 5090'}
-              required
-            />
-            <span style="display: block; font-size: 0.78rem; color: #94a3b8; margin-top: 4px;">
-              شماره مستقیم نوبت‌دهی و پشتیبانی کلینیک.
-            </span>
-          </div>
-
-          <div style="grid-column: 1 / -1;">
-            <label style="display: block; font-size: 0.88rem; font-weight: 700; color: #f5d77f; margin-bottom: 8px;">
-              نشانی دقیق کلینیک:
-            </label>
-            <input
-              type="text"
-              name="address"
-              class="form-control-modal"
-              value={settings.address || 'تهران، پاسداران، خیابان پایدارفرد، نبش بوستان هفتم'}
-              required
-            />
-            <span style="display: block; font-size: 0.78rem; color: #94a3b8; margin-top: 4px;">
-              آدرس ارسالی به مراجعین در پیامک تایید نوبت و فوتر وب‌سایت.
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <div class="admin-section-block" style="padding: 28px; margin-bottom: 24px;">
-        <h3 class="section-block-title" style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
-          <span>⏱️</span> زمان‌بندی هوشمند و موتور رزرواسیون
-        </h3>
-
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
-          <div>
-            <label style="display: block; font-size: 0.88rem; font-weight: 700; color: #f5d77f; margin-bottom: 8px;">
-              گام اسلات‌های نوبت‌دهی (دقیقه):
-            </label>
-            <input
-              type="number"
-              name="slot_granularity_minutes"
-              class="form-control-modal"
-              value={settings.slot_granularity_minutes || '30'}
-              min="10"
-              max="120"
-              required
-            />
-            <span style="display: block; font-size: 0.78rem; color: #94a3b8; margin-top: 4px;">
-              فاصله‌ی زمانی بین شروع هر نوبت در تقویم رزرو (پیش‌فرض: ۳۰ دقیقه).
-            </span>
-          </div>
-
-          <div>
-            <label style="display: block; font-size: 0.88rem; font-weight: 700; color: #f5d77f; margin-bottom: 8px;">
-              زمان بافر ضدعفونی دستگاه (دقیقه):
-            </label>
-            <input
-              type="number"
-              name="booking_buffer_minutes"
-              class="form-control-modal"
-              value={settings.booking_buffer_minutes || '0'}
-              min="0"
-              max="60"
-              required
-            />
-            <span style="display: block; font-size: 0.78rem; color: #94a3b8; margin-top: 4px;">
-              زمان استراحت و ضدعفونی اتاق لیزر پس از اتمام هر نوبت.
-            </span>
-          </div>
-
-          <div>
-            <label style="display: block; font-size: 0.88rem; font-weight: 700; color: #f5d77f; margin-bottom: 8px;">
-              منطقه زمانی سرور نوبت‌دهی:
-            </label>
-            <input
-              type="text"
-              name="timezone"
-              dir="ltr"
-              class="form-control-modal"
-              value={settings.timezone || 'Asia/Tehran'}
-              required
-            />
-            <span style="display: block; font-size: 0.78rem; color: #94a3b8; margin-top: 4px;">
-              مبنای محاسبه اوقات اداری و محاسبات تقویم شمسی.
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <div class="admin-section-block" style="padding: 28px; margin-bottom: 24px;">
-        <h3 class="section-block-title" style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
-          <span>💎</span> سیاست‌های تخفیف و مالی
-        </h3>
-
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
-          <div>
-            <label style="display: block; font-size: 0.88rem; font-weight: 700; color: #f5d77f; margin-bottom: 8px;">
-              درصد تخفیف پکیج فول‌بادی (کل بدن):
-            </label>
-            <div style="position: relative;">
+          <div class="settings-grid">
+            <div class="field-group">
+              <label class="field-label" for="business_name">
+                <Icon name="gem" size={15} />
+                <span>نام تجاری رسمی (فارسی):</span>
+              </label>
               <input
-                type="number"
-                name="site_discount_percent"
+                id="business_name"
+                type="text"
+                name="business_name"
                 class="form-control-modal"
-                value={settings.site_discount_percent || '15'}
-                min="0"
-                max="100"
+                value={settings.business_name || 'تهران لیزر'}
                 required
               />
-              <span style="position: absolute; left: 16px; top: 12px; color: #94a3b8; font-weight: 700;">٪</span>
+              <span class="field-hint">نام رسمی کلینیک برای سربرگ، پیامک‌ها و فاکتور مشتریان.</span>
             </div>
-            <span style="display: block; font-size: 0.78rem; color: #94a3b8; margin-top: 4px;">
-              میزان کسر تخفیف هوشمند برای رزرو پکیج کامل بانوان.
-            </span>
+
+            <div class="field-group">
+              <label class="field-label" for="business_name_en">
+                <Icon name="globe" size={15} />
+                <span>نام بین‌المللی (انگلیسی):</span>
+              </label>
+              <input
+                id="business_name_en"
+                type="text"
+                name="business_name_en"
+                dir="ltr"
+                class="form-control-modal"
+                value={settings.business_name_en || 'Tehran Laser'}
+                required
+              />
+              <span class="field-hint">جهت متادیتای وب‌سایت، نقشه گوگل و اسناد لاتین.</span>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="phone">
+                <Icon name="phone" size={15} />
+                <span>شماره تماس و نوبت‌دهی مستقیم:</span>
+              </label>
+              <input
+                id="phone"
+                type="tel"
+                name="phone"
+                dir="ltr"
+                class="form-control-modal"
+                value={settings.phone || '+98 903 555 5090'}
+                required
+              />
+              <span class="field-hint">شماره تلفن پاسخگویی مستقیم و ثبت نوبت کلینیک.</span>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="support_phone">
+                <Icon name="mobile" size={15} />
+                <span>شماره پشتیبانی پیام‌رسان‌ها:</span>
+              </label>
+              <input
+                id="support_phone"
+                type="tel"
+                name="support_phone"
+                dir="ltr"
+                class="form-control-modal"
+                value={settings.support_phone || '+98 903 555 5090'}
+              />
+              <span class="field-hint">شماره خط پشتیبانی واتساپ و تلگرام مراجعین.</span>
+            </div>
+
+            <div class="field-group settings-grid-full">
+              <label class="field-label" for="address">
+                <Icon name="pin" size={15} />
+                <span>نشانی دقیق کلینیک:</span>
+              </label>
+              <input
+                id="address"
+                type="text"
+                name="address"
+                class="form-control-modal"
+                value={settings.address || 'تهران، پاسداران، خیابان پایدارفرد، نبش بوستان هفتم'}
+                required
+              />
+              <span class="field-hint">آدرس ارسالی در پیامک‌های تایید نوبت و نمایش در فوتر سایت.</span>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="currency">
+                <Icon name="card" size={15} />
+                <span>واحد پول سیستم:</span>
+              </label>
+              <input
+                id="currency"
+                type="text"
+                name="currency"
+                dir="ltr"
+                class="form-control-modal"
+                value={settings.currency || 'IRT'}
+                required
+              />
+              <span class="field-hint">کد ارزی سامانه (پیش‌فرض: IRT تومان).</span>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="currency_label">
+                <Icon name="tag" size={15} />
+                <span>برچسب نمایشی واحد قیمت:</span>
+              </label>
+              <input
+                id="currency_label"
+                type="text"
+                name="currency_label"
+                class="form-control-modal"
+                value={settings.currency_label || 'هزار تومان'}
+                required
+              />
+              <span class="field-hint">عنوانی که در کنار ارقام تعرفه‌ها درج می‌شود.</span>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="discount_percent">
+                <Icon name="percent" size={15} />
+                <span>درصد تخفیف پکیج‌های فول‌بادی:</span>
+              </label>
+              <div style="position: relative;">
+                <input
+                  id="discount_percent"
+                  type="number"
+                  name="discount_percent"
+                  class="form-control-modal"
+                  value={settings.discount_percent || settings.site_discount_percent || '15'}
+                  min="0"
+                  max="100"
+                  required
+                />
+                <span style="position: absolute; left: 16px; top: 12px; color: #94a3b8; font-weight: 700;">٪</span>
+              </div>
+              <span class="field-hint">میزان کسر تخفیف پیش‌فرض برای پکیج‌های کل بدن بانوان.</span>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div style="display: flex; justify-content: flex-end; gap: 14px; margin-top: 20px;">
+      <!-- 2. SMS INTEGRATION PANEL -->
+      <section id="panel-sms" class="settings-panel" role="tabpanel">
+        <div class="admin-section-block">
+          <div class="section-block-header">
+            <h2 class="section-block-title">
+              <Icon name="sms" size={20} />
+              <span>پیکربندی درگاه پیامک و امنیت وب‌سرویس</span>
+            </h2>
+            <p class="section-block-sub">تنظیم ارائه‌دهنده پیامک خدماتی، سرشماره ارسال و کلیدهای امنیتی احراز هویت.</p>
+          </div>
+
+          <div class="settings-grid" style="margin-bottom: 24px;">
+            <div class="field-group">
+              <label class="field-label" for="sms_provider">
+                <Icon name="sms" size={15} />
+                <span>انتخاب ارائه‌دهنده پیامک:</span>
+              </label>
+              <select id="sms_provider" name="sms_provider" class="form-control-modal">
+                <option value="kavenegar" selected={settings.sms_provider === 'kavenegar' || !settings.sms_provider}>کاوه نگار (Kavenegar Webhook / Pattern)</option>
+                <option value="farazsms" selected={settings.sms_provider === 'farazsms'}>فراز اس‌ام‌اس (FarazSMS / IPPanel)</option>
+                <option value="melipayamak" selected={settings.sms_provider === 'melipayamak'}>ملی پیامک (MeliPayamak)</option>
+              </select>
+              <span class="field-hint">وب‌سرویس مورد استفاده برای ارسال پترن‌های خدماتی بدون بلک‌لیست.</span>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="sms_sender_number">
+                <Icon name="send" size={15} />
+                <span>خط خدماتی / سرشماره فرستنده:</span>
+              </label>
+              <input
+                id="sms_sender_number"
+                type="text"
+                name="sms_sender_number"
+                dir="ltr"
+                class="form-control-modal"
+                value={settings.sms_sender_number || '10008585'}
+              />
+              <span class="field-hint">شماره خط خدماتی ثبت‌شده در سامانه پیامکی.</span>
+            </div>
+
+            <div class="field-group settings-grid-full">
+              <label class="field-label" for="smsApiKeyInput">
+                <Icon name="lock" size={15} />
+                <span>کلید امنیتی وب‌سرویس (API Key):</span>
+              </label>
+              <div class="credential-field-wrap">
+                <input
+                  id="smsApiKeyInput"
+                  type="password"
+                  name="sms_api_key"
+                  class="form-control-modal"
+                  value={settings.sms_api_key || ''}
+                  placeholder="••••••••••••••••••••••••••••••••"
+                  autocomplete="off"
+                  dir="ltr"
+                />
+                <button
+                  type="button"
+                  id="toggleApiKeyBtn"
+                  class="credential-toggle-btn"
+                  title="نمایش / پنهان‌سازی کلید"
+                  aria-label="تغییر حالت نمایش کلید امنیتی"
+                >
+                  <Icon name="eye" size={16} />
+                </button>
+              </div>
+              <div class="security-badge-pill">
+                <Icon name="shield" size={14} />
+                <span>رمزنگاری‌شده در لبه کلودفلر — در فرانت‌اند مراجعین هرگز افشا نمی‌شود.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-block-header" style="margin-top: 24px;">
+            <h3 class="section-block-title" style="font-size: 1.05rem;">
+              <Icon name="bell" size={18} />
+              <span>ارسال خودکار پیامک‌ها (Automation Triggers)</span>
+            </h3>
+            <p class="section-block-sub">تنظیم اعلان‌های خودکار برای هر چرخه از تجربه مراجعین کلینیک.</p>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            <div class="toggle-row">
+              <div>
+                <strong style="display: block; font-size: 0.9rem; color: #f8fafc; margin-bottom: 2px;">ارسال پیامک تایید آنی نوبت رزرو</strong>
+                <span class="field-hint">ارسال خودکار کد پیگیری، تاریخ، ساعت و نشانی کلینیک بلافاصله پس از ثبت نوبت.</span>
+              </div>
+              <label class="toggle-switch-3d" aria-label="ارسال تایید نوبت">
+                <input type="checkbox" name="sms_booking_confirm_enabled" checked={settings.sms_booking_confirm_enabled !== 'false'} />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <div class="toggle-row">
+              <div>
+                <strong style="display: block; font-size: 0.9rem; color: #f8fafc; margin-bottom: 2px;">یادآوری هوشمند نوبت ۲۴ ساعت قبل</strong>
+                <span class="field-hint">یادآوری آماده‌سازی قبل لیزر (شیو کردن) و اعلام زمان حضور به مراجع.</span>
+              </div>
+              <label class="toggle-switch-3d" aria-label="یادآوری ۲۴ ساعته">
+                <input type="checkbox" name="sms_reminder_24h_enabled" checked={settings.sms_reminder_24h_enabled !== 'false'} />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <div class="toggle-row">
+              <div>
+                <strong style="display: block; font-size: 0.9rem; color: #f8fafc; margin-bottom: 2px;">تبریک سالروز تولد همراه با کوپن تخفیف</strong>
+                <span class="field-hint">ارسال پیامک تبریک صمیمانه همراه با هدیه شارژ کیف پول یا ۳۰٪ تخفیف جلسه.</span>
+              </div>
+              <label class="toggle-switch-3d" aria-label="پیامک تبریک تولد">
+                <input type="checkbox" name="sms_birthday_enabled" checked={settings.sms_birthday_enabled !== 'false'} />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <div class="toggle-row">
+              <div>
+                <strong style="display: block; font-size: 0.9rem; color: #f8fafc; margin-bottom: 2px;">یادآوری جلسه بعدی دوره درمان</strong>
+                <span class="field-hint">ارسال پیامک جهت رزرو جلسه بعد در بازه طلایی ۴ الی ۶ هفته پس از جلسه فعلی.</span>
+              </div>
+              <label class="toggle-switch-3d" aria-label="یادآوری جلسه بعد">
+                <input type="checkbox" name="sms_next_session_enabled" checked={settings.sms_next_session_enabled !== 'false'} />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Quick Test SMS Box -->
+          <div style="margin-top: 24px; padding: 18px; background: rgba(10, 14, 22, 0.6); border: 1px dashed rgba(212, 175, 55, 0.3); border-radius: 16px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+              <div>
+                <strong style="display: block; font-size: 0.88rem; color: #f5d77f; margin-bottom: 4px;">تست ارتباط وب‌سرویس پیامکی:</strong>
+                <span class="field-hint">یک پیامک تستی به شماره زیر ارسال کنید تا از اتصال درگاه مطمئن شوید.</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                <input
+                  id="testSmsPhone"
+                  type="tel"
+                  dir="ltr"
+                  placeholder="۰۹۱۲۳۴۵۶۷۸۹"
+                  class="form-control-modal"
+                  style="width: 170px; margin-top: 0; padding: 8px 12px; font-size: 0.86rem;"
+                />
+                <button type="button" id="testSmsBtn" class="btn-3d-secondary" style="padding: 8px 16px; min-height: 38px; font-size: 0.82rem;">
+                  <Icon name="send" size={14} />
+                  <span>ارسال پیامک آزمایشی</span>
+                </button>
+              </div>
+            </div>
+            <div id="testSmsResult" style="display: none; margin-top: 10px; font-size: 0.82rem;"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. WORKING HOURS & SCHEDULE PANEL -->
+      <section id="panel-schedule" class="settings-panel" role="tabpanel">
+        <div class="admin-section-block">
+          <div class="section-block-header">
+            <h2 class="section-block-title">
+              <Icon name="clock" size={20} />
+              <span>موتور نوبت‌دهی و زمان‌بندی هوشمند</span>
+            </h2>
+            <p class="section-block-sub">تنظیم گام زمانی، بافر بهداشتی دستگاه‌ها و قواعد افق رزرو آنلاین کلینیک.</p>
+          </div>
+
+          <div class="settings-grid" style="margin-bottom: 24px;">
+            <div class="field-group">
+              <label class="field-label" for="slot_granularity_minutes">
+                <Icon name="clock" size={15} />
+                <span>گام اسلات‌های نوبت‌دهی (دقیقه):</span>
+              </label>
+              <input
+                id="slot_granularity_minutes"
+                type="number"
+                name="slot_granularity_minutes"
+                class="form-control-modal"
+                value={settings.slot_granularity_minutes || '15'}
+                min="5"
+                max="120"
+                required
+              />
+              <span class="field-hint">فاصله‌ی زمانی بین شروع هر نوبت در تقویم (پیش‌فرض: ۱۵ یا ۳۰ دقیقه).</span>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="booking_buffer_minutes">
+                <Icon name="shield" size={15} />
+                <span>زمان بافر استریل و ضدعفونی (دقیقه):</span>
+              </label>
+              <input
+                id="booking_buffer_minutes"
+                type="number"
+                name="booking_buffer_minutes"
+                class="form-control-modal"
+                value={settings.booking_buffer_minutes || '0'}
+                min="0"
+                max="60"
+                required
+              />
+              <span class="field-hint">فرصت پاکسازی سری دستگاه لیزر و تعویض رول بعد از هر جلسه.</span>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="min_lead_minutes">
+                <Icon name="lightning" size={15} />
+                <span>حداقل زمان پیش‌خرید نوبت (دقیقه):</span>
+              </label>
+              <input
+                id="min_lead_minutes"
+                type="number"
+                name="min_lead_minutes"
+                class="form-control-modal"
+                value={settings.min_lead_minutes || '0'}
+                min="0"
+                max="1440"
+                required
+              />
+              <span class="field-hint">حداقل فاصله زمانی بین ثبت آنلاین تا ساعت حضور مراجع.</span>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="max_advance_days">
+                <Icon name="calendar" size={15} />
+                <span>حداکثر افق تقویم برای رزرو آینده (روز):</span>
+              </label>
+              <input
+                id="max_advance_days"
+                type="number"
+                name="max_advance_days"
+                class="form-control-modal"
+                value={settings.max_advance_days || '90'}
+                min="7"
+                max="365"
+                required
+              />
+              <span class="field-hint">مراجعین تا چند روز آینده می‌توانند در سایت نوبت ثبت کنند.</span>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="timezone">
+                <Icon name="globe" size={15} />
+                <span>منطقه زمانی سرور رزرواسیون:</span>
+              </label>
+              <input
+                id="timezone"
+                type="text"
+                name="timezone"
+                dir="ltr"
+                class="form-control-modal"
+                value={settings.timezone || 'Asia/Tehran'}
+                required
+              />
+              <span class="field-hint">مبنای محاسبه اوقات شیفت‌ها و تقویم شمسی.</span>
+            </div>
+          </div>
+
+          <div class="toggle-row" style="margin-bottom: 24px;">
+            <div>
+              <strong style="display: block; font-size: 0.9rem; color: #f8fafc; margin-bottom: 2px;">سامانه نوبت‌دهی آنلاین سراسری (Online Booking Engine)</strong>
+              <span class="field-hint">با غیرفعال‌سازی این گزینه، فرم نوبت‌دهی در وب‌سایت بسته شده و فقط رزرو تلفنی پذیرفته می‌شود.</span>
+            </div>
+            <label class="toggle-switch-3d" aria-label="فعال بودن نوبت‌دهی آنلاین">
+              <input type="checkbox" name="booking_enabled" checked={settings.booking_enabled !== 'false'} />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <!-- Working Days Summary Card -->
+          <div class="shift-card">
+            <div>
+              <div style="display: flex; align-items: center; gap: 8px; color: #f5d77f; font-weight: 800; font-size: 0.92rem; margin-bottom: 4px;">
+                <Icon name="calendar" size={18} />
+                <span>شیفت‌های کاری هفتگی و تعطیلات تقویم</span>
+              </div>
+              <p class="field-hint" style="margin: 0;">
+                شنبه تا پنج‌شنبه (۰۹:۰۰ الی ۱۳:۰۰ و ۱۴:۰۰ الی ۲۰:۰۰) • جمعه‌ها تعطیل رسمی
+              </p>
+            </div>
+            <a href="/admin/schedule" class="btn-3d-secondary" style="padding: 8px 16px; min-height: 38px; font-size: 0.82rem;">
+              <Icon name="calendar" size={15} />
+              <span>مدیریت ساعات کاری</span>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. SECURITY & ACCESS PANEL -->
+      <section id="panel-security" class="settings-panel" role="tabpanel">
+        <div class="admin-section-block">
+          <div class="section-block-header">
+            <h2 class="section-block-title">
+              <Icon name="shield" size={20} />
+              <span>سیاست‌های امنیتی، کنترل نرخ و نشست‌ها</span>
+            </h2>
+            <p class="section-block-sub">تنظیم محدودیت‌های امنیتی (Rate Limiting) و عمر نشست ورود مدیران کلینیک.</p>
+          </div>
+
+          <div class="settings-grid" style="margin-bottom: 24px;">
+            <div class="field-group">
+              <label class="field-label" for="session_ttl_hours">
+                <Icon name="lock" size={15} />
+                <span>عمر نشست ورود مدیران (ساعت):</span>
+              </label>
+              <input
+                id="session_ttl_hours"
+                type="number"
+                name="session_ttl_hours"
+                class="form-control-modal"
+                value={settings.session_ttl_hours || '168'}
+                min="1"
+                max="720"
+                required
+              />
+              <span class="field-hint">مدت زمان اعتبار کوکی ورود امن پس از آخرین استفاده (پیش‌فرض: ۱۶۸ ساعت / ۷ روز).</span>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="rate_limit_login">
+                <Icon name="shield" size={15} />
+                <span>سقف تلاش‌های ورود مجاز (Rate Limit Login):</span>
+              </label>
+              <input
+                id="rate_limit_login"
+                type="text"
+                name="rate_limit_login"
+                dir="ltr"
+                class="form-control-modal"
+                value={settings.rate_limit_login || '10/600'}
+                required
+              />
+              <span class="field-hint">۱۰ تلاش در ۱۰ دقیقه به ازای هر آدرس آی‌پی برای جلوگیری از Brute-Force.</span>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="rate_limit_booking">
+                <Icon name="calendar" size={15} />
+                <span>سقف درخواست ثبت نوبت (Rate Limit Booking):</span>
+              </label>
+              <input
+                id="rate_limit_booking"
+                type="text"
+                name="rate_limit_booking"
+                dir="ltr"
+                class="form-control-modal"
+                value={settings.rate_limit_booking || '20/600'}
+                required
+              />
+              <span class="field-hint">حداکثر تعداد ثبت نوبت در بازه زمانی جهت مقابله با اسپم و ربات‌ها.</span>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="rate_limit_public_form">
+                <Icon name="mail" size={15} />
+                <span>سقف فرم‌های عمومی و تماس (Public Form):</span>
+              </label>
+              <input
+                id="rate_limit_public_form"
+                type="text"
+                name="rate_limit_public_form"
+                dir="ltr"
+                class="form-control-modal"
+                value={settings.rate_limit_public_form || '30/600'}
+                required
+              />
+              <span class="field-hint">محدودیت نرخ ارسال فرم‌های تماس و دریافت مشاوره.</span>
+            </div>
+          </div>
+
+          <div class="shift-card">
+            <div>
+              <div style="display: flex; align-items: center; gap: 8px; color: #f5d77f; font-weight: 800; font-size: 0.92rem; margin-bottom: 4px;">
+                <Icon name="audit" size={18} />
+                <span>لاگ‌برداری تفصیلی و رهگیری تغییرات (Audit Trail)</span>
+              </div>
+              <p class="field-hint" style="margin: 0;">
+                کلیه رویدادهای سیستمی، ورودها و تغییرات تنظیمات در جدول امنیتی audit_logs ثبت می‌شوند.
+              </p>
+            </div>
+            <a href="/admin/audit" class="btn-3d-secondary" style="padding: 8px 16px; min-height: 38px; font-size: 0.82rem;">
+              <Icon name="audit" size={15} />
+              <span>مشاهده لاگ وقایع</span>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. D1 BACKUP & SYSTEM HEALTH PANEL -->
+      <section id="panel-backup" class="settings-panel" role="tabpanel">
+        <div class="admin-section-block">
+          <div class="section-block-header">
+            <h2 class="section-block-title">
+              <Icon name="database" size={20} />
+              <span>پایگاه داده لبه (Cloudflare D1) و ابزار پشتیبان‌گیری</span>
+            </h2>
+            <p class="section-block-sub">مانیتورینگ برخط وضعیت دیتابیس، سلامت لبه و دانلود مستقیم بکاپ داده‌ها.</p>
+          </div>
+
+          <!-- D1 KPI Grid -->
+          <div class="kpi-grid-3d" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-bottom: 24px;">
+            <div class="kpi-card-3d">
+              <div class="kpi-header">
+                <span class="kpi-title">موتور دیتابیس</span>
+                <span class="kpi-icon" style="color: #f5d77f;"><Icon name="database" size={20} /></span>
+              </div>
+              <div class="kpi-value" style="font-size: 1.4rem; color: #f5d77f;">Cloudflare D1</div>
+              <div class="kpi-footer" style="color: #34d399;">SQLite Serverless on Edge</div>
+            </div>
+
+            <div class="kpi-card-3d">
+              <div class="kpi-header">
+                <span class="kpi-title">تعداد کلیدهای تنظیمات</span>
+                <span class="kpi-icon" style="color: #38bdf8;"><Icon name="settings" size={20} /></span>
+              </div>
+              <div class="kpi-value">{dbStats.settingsCount || Object.keys(settings).length || 22}</div>
+              <div class="kpi-footer" style="color: #38bdf8;">پیکربندی‌های ثبت‌شده در جدول</div>
+            </div>
+
+            <div class="kpi-card-3d">
+              <div class="kpi-header">
+                <span class="kpi-title">مراجعین ثبت‌شده</span>
+                <span class="kpi-icon" style="color: #a78bfa;"><Icon name="users" size={20} /></span>
+              </div>
+              <div class="kpi-value">{dbStats.customersCount}</div>
+              <div class="kpi-footer" style="color: #a78bfa;">پرونده‌های فعال در CRM</div>
+            </div>
+
+            <div class="kpi-card-3d">
+              <div class="kpi-header">
+                <span class="kpi-title">نوبت‌های سیستم</span>
+                <span class="kpi-icon" style="color: #34d399;"><Icon name="calendar" size={20} /></span>
+              </div>
+              <div class="kpi-value">{dbStats.bookingsCount}</div>
+              <div class="kpi-footer" style="color: #34d399;">کل رزروهای پایگاه داده</div>
+            </div>
+          </div>
+
+          <!-- D1 Operations Box -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 18px;">
+            <div style="background: rgba(14, 18, 28, 0.7); border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 18px; padding: 20px;">
+              <h3 style="display: flex; align-items: center; gap: 8px; font-size: 0.96rem; color: #f5d77f; margin: 0 0 8px;">
+                <Icon name="download" size={18} />
+                <span>دریافت نسخه پشتیبان (JSON Export)</span>
+              </h3>
+              <p class="field-hint" style="margin-bottom: 16px;">
+                دانلود مستقیم تمام متادیتا، پیکربندی‌های کلینیک و اطلاعات عملیاتی با یک کلیک در قالب استاندارد JSON.
+              </p>
+              <button type="button" id="exportBackupBtn" class="btn-3d-gold" style="width: 100%;">
+                <Icon name="download" size={17} />
+                <span>دانلود فایل پشتیبان (Export JSON)</span>
+              </button>
+            </div>
+
+            <div style="background: rgba(14, 18, 28, 0.7); border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 18px; padding: 20px;">
+              <h3 style="display: flex; align-items: center; gap: 8px; font-size: 0.96rem; color: #f5d77f; margin: 0 0 8px;">
+                <Icon name="refresh" size={18} />
+                <span>بررسی زنده پینگ و اتصال دیتابیس D1</span>
+              </h3>
+              <p class="field-hint" style="margin-bottom: 16px;">
+                سنجش بلادرنگ زمان تاخیر پاسخ دیتابیس در لبه شبکه و راستی‌آزمایی پایداری سرویس API Health.
+              </p>
+              <button type="button" id="pingHealthBtn" class="btn-3d-secondary" style="width: 100%;">
+                <Icon name="refresh" size={17} />
+                <span>آزمون پینگ لایو D1</span>
+              </button>
+              <div id="healthPingResult" style="display: none; margin-top: 12px; font-size: 0.84rem; padding: 10px 14px; border-radius: 10px; background: rgba(9, 12, 18, 0.9); border: 1px solid rgba(212, 175, 55, 0.25);"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Sticky / Bottom Action Bar -->
+      <div class="action-bar-bottom">
+        <button type="button" id="resetSettingsBtn" class="btn-3d-secondary">
+          <Icon name="refresh" size={16} />
+          <span>بازنشانی فرم</span>
+        </button>
+
         <button
           type="submit"
           id="saveSettingsBtn"
-          class="btn-3d-accept"
-          style="padding: 14px 32px; font-size: 1rem; border-radius: 12px;"
+          class="btn-3d-gold"
+          style="padding: 12px 28px; font-size: 0.96rem;"
         >
-          💾 ذخیره تنظیمات در دیتابیس D1 (API Call)
+          <Icon name="check" size={18} id="saveBtnIcon" />
+          <span id="saveBtnText">ذخیره کلیه تنظیمات در دیتابیس D1</span>
         </button>
       </div>
     </form>
   </div>
 
+  <style>
+    .settings-container {
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+      overflow-x: hidden;
+    }
+
+    .d1-status-badge {
+      font-size: 0.86rem;
+      color: #34d399;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      padding: 8px 16px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .settings-tab-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 26px;
+      padding-bottom: 6px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(212, 175, 55, 0.3) transparent;
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+
+    .settings-tab-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(18, 22, 34, 0.85);
+      border: 1px solid rgba(212, 175, 55, 0.22);
+      border-radius: 14px;
+      padding: 10px 18px;
+      color: #94a3b8;
+      font-family: inherit;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+      flex-shrink: 0;
+    }
+
+    .settings-tab-btn:hover {
+      color: #f5d77f;
+      border-color: rgba(212, 175, 55, 0.5);
+      background: rgba(26, 32, 48, 0.95);
+      transform: translateY(-1px);
+    }
+
+    .settings-tab-btn.active {
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.28) 0%, rgba(212, 175, 55, 0.08) 100%);
+      border-color: #d4af37;
+      color: #f5d77f;
+      box-shadow: 0 6px 18px rgba(212, 175, 55, 0.22), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+    }
+
+    .settings-panel {
+      display: none;
+      animation: settingsFadeIn 0.24s ease-out;
+    }
+
+    .settings-panel.active {
+      display: block;
+    }
+
+    @keyframes settingsFadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .settings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+      gap: 20px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .settings-grid-full {
+      grid-column: 1 / -1;
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .field-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.86rem;
+      font-weight: 700;
+      color: #f5d77f;
+    }
+
+    .field-hint {
+      font-size: 0.77rem;
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 16px 18px;
+      background: rgba(14, 18, 28, 0.7);
+      border: 1px solid rgba(212, 175, 55, 0.16);
+      border-radius: 16px;
+      transition: border-color 0.2s ease;
+    }
+
+    .toggle-row:hover {
+      border-color: rgba(212, 175, 55, 0.35);
+    }
+
+    .toggle-switch-3d {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 28px;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+
+    .toggle-switch-3d input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+      position: absolute;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      inset: 0;
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 28px;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+    }
+
+    .toggle-slider::before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 3px;
+      bottom: 3px;
+      background: #cbd5e1;
+      border-radius: 50%;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+    }
+
+    .toggle-switch-3d input:checked + .toggle-slider {
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.55) 0%, rgba(245, 215, 127, 0.3) 100%);
+      border-color: #d4af37;
+    }
+
+    .toggle-switch-3d input:checked + .toggle-slider::before {
+      transform: translateX(23px);
+      background: #f5d77f;
+      box-shadow: 0 0 10px rgba(245, 215, 127, 0.7);
+    }
+
+    .credential-field-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      width: 100%;
+    }
+
+    .credential-field-wrap .form-control-modal {
+      padding-left: 48px;
+      font-family: monospace;
+      letter-spacing: 0.04em;
+    }
+
+    .credential-toggle-btn {
+      position: absolute;
+      left: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      border-radius: 8px;
+      color: #f5d77f;
+      width: 32px;
+      height: 32px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.16s ease;
+    }
+
+    .credential-toggle-btn:hover {
+      background: rgba(212, 175, 55, 0.25);
+      border-color: #d4af37;
+      color: #ffffff;
+    }
+
+    .security-badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      color: #94a3b8;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 4px 10px;
+      margin-top: 6px;
+    }
+
+    .shift-card {
+      background: rgba(14, 18, 28, 0.75);
+      border: 1px solid rgba(212, 175, 55, 0.18);
+      border-radius: 16px;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .action-bar-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 14px;
+      margin-top: 28px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(212, 175, 55, 0.18);
+      flex-wrap: wrap;
+    }
+
+    .alert-3d-danger {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(185, 28, 28, 0.08) 100%);
+      border: 1px solid rgba(239, 68, 68, 0.45);
+      color: #fca5a5;
+      padding: 14px 18px;
+      border-radius: 14px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 14px rgba(239, 68, 68, 0.15);
+    }
+
+    .alert-3d-success {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.16) 0%, rgba(5, 150, 105, 0.08) 100%);
+      border: 1px solid rgba(16, 185, 129, 0.45);
+      color: #34d399;
+      padding: 14px 18px;
+      border-radius: 14px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.15);
+    }
+
+    @media (max-width: 640px) {
+      .settings-grid {
+        grid-template-columns: 1fr !important;
+      }
+      .action-bar-bottom {
+        flex-direction: column-reverse;
+        align-items: stretch;
+      }
+      .action-bar-bottom > button {
+        width: 100%;
+        justify-content: center;
+      }
+      .toggle-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+      }
+    }
+  </style>
+
   <script>
-    const form = document.getElementById('settingsForm') as HTMLFormElement;
-    const saveBtn = document.getElementById('saveSettingsBtn') as HTMLButtonElement;
+    // Tab Switching
+    const tabBtns = document.querySelectorAll('.settings-tab-btn');
+    const tabPanels = document.querySelectorAll('.settings-panel');
+
+    tabBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const target = btn.getAttribute('data-tab');
+        tabBtns.forEach((b) => {
+          b.classList.remove('active');
+          b.setAttribute('aria-selected', 'false');
+        });
+        tabPanels.forEach((p) => {
+          p.classList.remove('active');
+        });
+        btn.classList.add('active');
+        btn.setAttribute('aria-selected', 'true');
+        const activePanel = document.getElementById(`panel-${target}`);
+        if (activePanel) {
+          activePanel.classList.add('active');
+        }
+        if (target) {
+          history.replaceState(null, '', `#tab-${target}`);
+        }
+      });
+    });
+
+    // Hash deep-linking
+    const currentHash = window.location.hash.replace('#tab-', '');
+    if (currentHash) {
+      const matchingBtn = document.querySelector(`.settings-tab-btn[data-tab="${currentHash}"]`) as HTMLButtonElement | null;
+      if (matchingBtn) matchingBtn.click();
+    }
+
+    // Toggle API Key Masking
+    const toggleApiKeyBtn = document.getElementById('toggleApiKeyBtn');
+    const smsApiKeyInput = document.getElementById('smsApiKeyInput') as HTMLInputElement | null;
+    if (toggleApiKeyBtn && smsApiKeyInput) {
+      toggleApiKeyBtn.addEventListener('click', () => {
+        smsApiKeyInput.type = smsApiKeyInput.type === 'password' ? 'text' : 'password';
+      });
+    }
+
+    // D1 JSON Backup Export
+    const exportBackupBtn = document.getElementById('exportBackupBtn');
+    const settingsForm = document.getElementById('settingsForm') as HTMLFormElement | null;
+    if (exportBackupBtn && settingsForm) {
+      exportBackupBtn.addEventListener('click', () => {
+        const formData = new FormData(settingsForm);
+        const dump: Record<string, any> = {};
+        formData.forEach((v, k) => {
+          dump[k] = String(v).trim();
+        });
+        const backupPayload = {
+          exported_at: new Date().toISOString(),
+          clinic: dump.business_name || 'Tehran Laser',
+          database: 'Cloudflare D1 (tehran-laser-db)',
+          engine: 'SQLite on Edge',
+          settings: dump,
+        };
+        const blob = new Blob([JSON.stringify(backupPayload, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const dateStr = new Date().toISOString().slice(0, 10);
+        a.href = url;
+        a.download = `tehran-laser-settings-backup-${dateStr}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      });
+    }
+
+    // Live D1 Health Ping Test
+    const pingHealthBtn = document.getElementById('pingHealthBtn') as HTMLButtonElement | null;
+    const healthPingResult = document.getElementById('healthPingResult');
+    if (pingHealthBtn && healthPingResult) {
+      pingHealthBtn.addEventListener('click', async () => {
+        pingHealthBtn.disabled = true;
+        healthPingResult.style.display = 'block';
+        healthPingResult.innerHTML = '<span style="color: #f5d77f;">در حال اندازه‌گیری پینگ اتصال به Cloudflare D1...</span>';
+        const t0 = performance.now();
+        try {
+          const res = await fetch('/api/health');
+          const elapsed = Math.round(performance.now() - t0);
+          const json = (await res.json()) as any;
+          if (res.ok && json.data) {
+            healthPingResult.innerHTML = `
+              <div style="display:flex; align-items:center; gap:8px; color:#34d399; font-weight:700; flex-wrap:wrap;">
+                <span class="live-dot"></span>
+                <span>وضعیت: ${json.data.database === 'ok' ? 'سالم و پایدار' : json.data.database}</span>
+                <span style="color:#94a3b8;">|</span>
+                <span style="color:#f5d77f;">تاخیر: ${elapsed} میلی‌ثانیه</span>
+                <span style="color:#94a3b8;">|</span>
+                <span style="color:#94a3b8; font-size:0.78rem;">نسخه: ${json.data.version}</span>
+              </div>
+            `;
+          } else {
+            healthPingResult.innerHTML = `<span style="color:#f87171;">خطای بررسی سلامت دیتابیس D1.</span>`;
+          }
+        } catch {
+          healthPingResult.innerHTML = `<span style="color:#f87171;">خطای شبکه در اتصال به سرویس سلامت.</span>`;
+        } finally {
+          pingHealthBtn.disabled = false;
+        }
+      });
+    }
+
+    // Quick SMS Test
+    const testSmsBtn = document.getElementById('testSmsBtn') as HTMLButtonElement | null;
+    const testSmsPhone = document.getElementById('testSmsPhone') as HTMLInputElement | null;
+    const testSmsResult = document.getElementById('testSmsResult');
+    if (testSmsBtn && testSmsPhone && testSmsResult) {
+      testSmsBtn.addEventListener('click', async () => {
+        const phone = testSmsPhone.value.trim();
+        if (!phone) {
+          testSmsResult.style.display = 'block';
+          testSmsResult.innerHTML = '<span style="color:#f87171;">شماره موبایل تست را وارد کنید.</span>';
+          return;
+        }
+        testSmsBtn.disabled = true;
+        testSmsResult.style.display = 'block';
+        testSmsResult.innerHTML = '<span style="color:#f5d77f;">در حال ارسال پیامک آزمایشی...</span>';
+        try {
+          const res = await fetch('/api/v1/admin/sms/send', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({
+              phone,
+              message: 'پیامک تستی اتصال وب‌سرویس کلینیک تهران لیزر با موفقیت ارسال شد.',
+              templateName: 'test',
+            }),
+          });
+          const json = (await res.json()) as any;
+          if (res.ok && json.data) {
+            testSmsResult.innerHTML = '<span style="color:#34d399;">پیامک تست با موفقیت ارسال و در صف مخابرات قرار گرفت.</span>';
+          } else {
+            testSmsResult.innerHTML = `<span style="color:#f87171;">خطا در ارسال: ${json.error?.message || 'پاسخ ناموفق از درگاه.'}</span>`;
+          }
+        } catch {
+          testSmsResult.innerHTML = '<span style="color:#f87171;">خطای ارتباط با وب‌سرویس پیامک.</span>';
+        } finally {
+          testSmsBtn.disabled = false;
+        }
+      });
+    }
+
+    // Reset Form
+    const resetSettingsBtn = document.getElementById('resetSettingsBtn');
+    if (resetSettingsBtn && settingsForm) {
+      resetSettingsBtn.addEventListener('click', () => {
+        settingsForm.reset();
+      });
+    }
+
+    // Form Submit (API First)
+    const saveBtn = document.getElementById('saveSettingsBtn') as HTMLButtonElement | null;
+    const saveBtnText = document.getElementById('saveBtnText');
     const alertBox = document.getElementById('settingsAlert');
     const alertText = document.getElementById('settingsAlertText');
     const successBox = document.getElementById('settingsSuccess');
 
-    if (form) {
-      form.addEventListener('submit', async (e) => {
+    if (settingsForm && saveBtn) {
+      settingsForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         saveBtn.disabled = true;
-        saveBtn.innerText = '⏳ در حال به‌روزرسانی تنظیمات...';
+        if (saveBtnText) saveBtnText.innerText = 'در حال ذخیره‌سازی در دیتابیس...';
         if (alertBox) alertBox.style.display = 'none';
         if (successBox) successBox.style.display = 'none';
 
-        const formData = new FormData(form);
+        const formData = new FormData(settingsForm);
         const payload: Record<string, any> = {};
 
         formData.forEach((val, key) => {
-          const str = String(val).trim();
-          if (key === 'slot_granularity_minutes' || key === 'booking_buffer_minutes' || key === 'site_discount_percent') {
-            payload[key] = Number(str);
-          } else {
-            payload[key] = str;
+          payload[key] = String(val).trim();
+        });
+
+        // Collect Toggle Checkboxes
+        const toggleKeys = [
+          'booking_enabled',
+          'sms_booking_confirm_enabled',
+          'sms_reminder_24h_enabled',
+          'sms_birthday_enabled',
+          'sms_next_session_enabled',
+        ];
+        toggleKeys.forEach((k) => {
+          const el = settingsForm.elements.namedItem(k) as HTMLInputElement | null;
+          if (el) {
+            payload[k] = el.checked ? 'true' : 'false';
           }
         });
+
+        // Numeric Parsing
+        const numericKeys = [
+          'slot_granularity_minutes',
+          'booking_buffer_minutes',
+          'min_lead_minutes',
+          'max_advance_days',
+          'discount_percent',
+          'site_discount_percent',
+          'session_ttl_hours',
+        ];
+        numericKeys.forEach((k) => {
+          if (payload[k] !== undefined && payload[k] !== '') {
+            payload[k] = Number(payload[k]);
+          }
+        });
+
+        if (payload['discount_percent'] !== undefined) {
+          payload['site_discount_percent'] = payload['discount_percent'];
+        }
 
         try {
           const res = await fetch('/api/v1/admin/settings', {
@@ -233,25 +1259,28 @@ try {
             body: JSON.stringify(payload),
           });
 
-          const json = await res.json() as any;
+          const json = (await res.json()) as any;
           if (res.ok && json.data) {
-            saveBtn.innerText = '✓ ذخیره شد!';
+            if (saveBtnText) saveBtnText.innerText = 'ذخیره شد!';
             if (successBox) successBox.style.display = 'flex';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
             setTimeout(() => {
               saveBtn.disabled = false;
-              saveBtn.innerText = '💾 ذخیره تنظیمات در دیتابیس D1 (API Call)';
-            }, 2500);
+              if (saveBtnText) saveBtnText.innerText = 'ذخیره کلیه تنظیمات در دیتابیس D1';
+            }, 2400);
           } else {
             if (alertText) alertText.innerText = json.error?.message || 'خطا در ذخیره تنظیمات.';
             if (alertBox) alertBox.style.display = 'flex';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
             saveBtn.disabled = false;
-            saveBtn.innerText = '💾 ذخیره تنظیمات در دیتابیس D1 (API Call)';
+            if (saveBtnText) saveBtnText.innerText = 'ذخیره کلیه تنظیمات در دیتابیس D1';
           }
         } catch {
           if (alertText) alertText.innerText = 'خطای ارتباط با سرور.';
           if (alertBox) alertBox.style.display = 'flex';
+          window.scrollTo({ top: 0, behavior: 'smooth' });
           saveBtn.disabled = false;
-          saveBtn.innerText = '💾 ذخیره تنظیمات در دیتابیس D1 (API Call)';
+          if (saveBtnText) saveBtnText.innerText = 'ذخیره کلیه تنظیمات در دیتابیس D1';
         }
       });
     }

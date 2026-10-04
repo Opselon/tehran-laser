@@ -2,6 +2,7 @@
 import '@fontsource-variable/vazirmatn/index.css';
 import '../../styles/tokens.css';
 import '../../styles/admin/login-3d.css';
+import Icon from '../../components/ui/Icon.astro';
 
 const auth = Astro.locals.auth;
 if (auth) {
@@ -13,7 +14,7 @@ if (auth) {
 <html lang="fa" dir="rtl">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>ورود پرسنل به سامانه مدیریت | کلینیک تخصصی تهران لیزر</title>
     <meta name="robots" content="noindex, nofollow" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
@@ -22,71 +23,269 @@ if (auth) {
       :root {
         --gold-glow: rgba(212, 175, 55, 0.35);
         --gold-primary: #d4af37;
+        --gold-light: #f5d77f;
         --obsidian-bg: #07090e;
-        --obsidian-card: rgba(14, 18, 27, 0.88);
-        --obsidian-input: rgba(8, 11, 18, 0.9);
+        --obsidian-card: rgba(14, 18, 27, 0.92);
+        --obsidian-input: rgba(8, 11, 18, 0.95);
+      }
+      *, *::before, *::after {
+        box-sizing: border-box;
       }
       body {
         margin: 0;
+        padding: 0;
         background-color: #07090e !important;
         font-family: 'Vazirmatn Variable', 'Vazirmatn', system-ui, -apple-system, sans-serif;
         color: #f0f2f5;
         direction: rtl;
         overflow-x: hidden;
+        width: 100%;
+        max-width: 100vw;
+        min-height: 100vh;
+        min-height: 100dvh;
       }
       .admin-login-body-3d {
         min-height: 100vh;
         min-height: 100dvh;
+        width: 100%;
         display: flex;
         align-items: center;
         justify-content: center;
         position: relative;
-        background: radial-gradient(circle at 50% 20%, rgba(197, 160, 89, 0.12) 0%, transparent 60%), #07090e;
+        background: radial-gradient(circle at 50% 20%, rgba(197, 160, 89, 0.14) 0%, transparent 65%), #07090e;
+        overflow-x: hidden;
       }
       .login-3d-viewport {
         position: relative;
         z-index: 10;
         width: 100%;
-        max-width: 480px;
-        padding: 24px 16px;
+        max-width: min(480px, calc(100vw - 24px));
+        padding: 24px 12px;
         perspective: 1400px;
+        box-sizing: border-box;
       }
       .login-3d-card {
         background: var(--obsidian-card);
         backdrop-filter: blur(28px) saturate(190%);
         -webkit-backdrop-filter: blur(28px) saturate(190%);
-        border: 1.5px solid rgba(212, 175, 55, 0.4);
-        border-radius: 28px;
-        padding: 40px 36px;
-        box-shadow: 0 40px 90px -15px rgba(0, 0, 0, 0.9), 0 20px 45px -10px rgba(197, 160, 89, 0.25), inset 0 1px 1px 0 rgba(255, 255, 255, 0.25);
+        border: 1.5px solid rgba(212, 175, 55, 0.42);
+        border-radius: 26px;
+        padding: 38px 32px;
+        box-shadow:
+          0 40px 100px -15px rgba(0, 0, 0, 0.95),
+          0 20px 50px -10px rgba(197, 160, 89, 0.28),
+          inset 0 1px 1px 0 rgba(255, 255, 255, 0.22),
+          inset 0 -1px 2px 0 rgba(212, 175, 55, 0.15);
         transform-style: preserve-3d;
         transition: transform 0.12s ease-out;
+        box-sizing: border-box;
+        width: 100%;
       }
+      @media (max-width: 480px) {
+        .login-3d-viewport {
+          padding: 16px 8px;
+        }
+        .login-3d-card {
+          padding: 28px 18px;
+          border-radius: 20px;
+        }
+      }
+      @media (max-width: 360px) {
+        .login-3d-card {
+          padding: 22px 14px;
+          border-radius: 16px;
+        }
+      }
+
+      /* Input 3D styling */
       .input-3d {
         width: 100%;
         background: var(--obsidian-input);
         border: 1.5px solid rgba(212, 175, 55, 0.25);
         border-radius: 14px;
-        padding: 14px 18px 14px 44px;
+        padding: 13px 44px 13px 16px;
         font-family: inherit;
-        font-size: 0.98rem;
+        font-size: 0.96rem;
         color: #ffffff;
         outline: none;
         box-sizing: border-box;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
       }
+      .input-3d:focus {
+        border-color: rgba(212, 175, 55, 0.75);
+        box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.25);
+      }
+      .input-3d.has-error {
+        border-color: #ef4444;
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.25);
+      }
+      .input-3d-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+        width: 100%;
+      }
+      .input-prefix-icon {
+        position: absolute;
+        right: 14px;
+        color: #d4af37;
+        pointer-events: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2;
+      }
+      .password-toggle-btn {
+        position: absolute;
+        left: 12px;
+        background: none;
+        border: none;
+        color: #94a3b8;
+        cursor: pointer;
+        padding: 4px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: color 0.15s ease;
+        z-index: 2;
+      }
+      .password-toggle-btn:hover {
+        color: #f5d77f;
+      }
+
       .btn-3d-submit {
         width: 100%;
         background: linear-gradient(180deg, #f0cf75 0%, #cba24f 40%, #997224 100%);
         color: #1a1405;
         border: none;
         border-radius: 16px;
-        padding: 16px 24px;
+        padding: 15px 22px;
         font-family: inherit;
-        font-size: 1.05rem;
+        font-size: 1.02rem;
         font-weight: 800;
         cursor: pointer;
         box-shadow: 0 8px 0 #6e4e13, 0 16px 30px rgba(203, 162, 79, 0.45);
-        margin-top: 14px;
+        margin-top: 16px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease;
+      }
+      .btn-3d-submit:hover:not(:disabled) {
+        transform: translateY(-2px);
+        filter: brightness(1.06);
+        box-shadow: 0 10px 0 #6e4e13, 0 20px 36px rgba(203, 162, 79, 0.55);
+      }
+      .btn-3d-submit:active:not(:disabled) {
+        transform: translateY(2px);
+        box-shadow: 0 4px 0 #6e4e13;
+      }
+      .btn-3d-submit:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+      }
+
+      /* Alert Notifications */
+      .alert-3d-danger {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: rgba(239, 68, 68, 0.12);
+        border: 1px solid rgba(239, 68, 68, 0.38);
+        border-radius: 14px;
+        padding: 12px 16px;
+        margin-bottom: 20px;
+        color: #fca5a5;
+        font-size: 0.88rem;
+        line-height: 1.5;
+        animation: shakeError 0.35s ease;
+      }
+      .alert-3d-lockout {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        background: linear-gradient(160deg, rgba(239, 68, 68, 0.15) 0%, rgba(185, 28, 28, 0.25) 100%);
+        border: 1.5px solid rgba(248, 113, 113, 0.55);
+        border-radius: 16px;
+        padding: 16px;
+        margin-bottom: 20px;
+        color: #fecaca;
+        font-size: 0.86rem;
+        line-height: 1.6;
+        box-shadow: 0 0 24px rgba(239, 68, 68, 0.25);
+        animation: pulseLockout 2s infinite ease-in-out;
+      }
+      @keyframes pulseLockout {
+        0%, 100% { border-color: rgba(248, 113, 113, 0.55); }
+        50% { border-color: rgba(248, 113, 113, 0.95); box-shadow: 0 0 32px rgba(239, 68, 68, 0.4); }
+      }
+      @keyframes shakeError {
+        0%, 100% { transform: translateX(0); }
+        20%, 60% { transform: translateX(-6px); }
+        40%, 80% { transform: translateX(6px); }
+      }
+
+      .field-error-msg {
+        font-size: 0.78rem;
+        color: #f87171;
+        margin-top: 5px;
+        display: none;
+      }
+
+      /* Spin icon animation */
+      .spin-icon {
+        animation: spinAnim 1s linear infinite;
+      }
+      @keyframes spinAnim {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+
+      .btn-autofill-3d {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(212, 175, 55, 0.28);
+        border-radius: 12px;
+        color: #d4af37;
+        font-family: inherit;
+        font-size: 0.85rem;
+        font-weight: 700;
+        padding: 10px 14px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+      .btn-autofill-3d:hover {
+        background: rgba(212, 175, 55, 0.12);
+        border-color: rgba(212, 175, 55, 0.6);
+        color: #f5d77f;
+      }
+
+      .telemetry-status {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        font-size: 0.76rem;
+        color: #94a3b8;
+        flex-wrap: wrap;
+        text-align: center;
+      }
+      .status-dot-pulse {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #10b981;
+        box-shadow: 0 0 8px #10b981;
+        animation: dotPulse 1.6s infinite ease-in-out;
+      }
+      @keyframes dotPulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.4; transform: scale(0.8); }
       }
     </style>
   </head>
@@ -133,24 +332,44 @@ if (auth) {
             </svg>
           </div>
 
-          <div class="login-3d-badge">نسخه امن پرسنلی v3.2</div>
+          <div class="login-3d-badge">
+            <Icon name="shield" size={13} />
+            <span>نسخه امن پرسنلی v3.2</span>
+          </div>
           <h1 class="login-3d-title">ورود به پنل مدیریت کلینیک</h1>
           <p class="login-3d-subtitle">
             سامانه جامع مدیریت نوبت‌ها، مراجعین و خدمات تهران لیزر
           </p>
         </div>
 
-        <!-- Alert Notification -->
+        <!-- Rate-Limiting Lockout Alert (Initially Hidden) -->
+        <div id="rateLimitAlert" class="alert-3d-lockout" style="display: none;" role="alert">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="color: #f87171; display: inline-flex;"><Icon name="shield" size={22} /></span>
+            <strong style="color: #ffffff; font-size: 0.95rem;">قفل امنیتی نشست (Rate-Limit Lockout)</strong>
+          </div>
+          <div id="rateLimitAlertText">
+            تعداد تلاش‌های ناموفق ورود از سقف مجاز فراتر رفته است. جهت جلوگیری از حملات نفوذ، این آدرس IP موقتاً مسدود شده است.
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(248,113,113,0.3); padding-top: 8px; font-size: 0.8rem;">
+            <span>مدت زمان باقیمانده تا آزادسازی:</span>
+            <span id="lockoutTimer" dir="ltr" style="font-family: monospace; font-weight: 800; color: #fbbf24;">10:00</span>
+          </div>
+        </div>
+
+        <!-- Standard Alert Notification -->
         <div id="loginAlert" class="alert-3d-danger" style="display: none;" role="alert">
-          <span class="alert-icon">⚠️</span>
+          <span style="display: inline-flex; align-items: center; color: #f87171;">
+            <Icon name="warning" size={18} />
+          </span>
           <span id="loginAlertText"></span>
         </div>
 
         <!-- 3D Form -->
-        <form id="adminLoginForm" class="login-3d-form" autocomplete="on">
+        <form id="adminLoginForm" class="login-3d-form" autocomplete="on" novalidate>
           <div class="form-group-3d">
             <label for="adminEmail" class="label-3d">
-              <span class="label-icon">✉️</span>
+              <span class="label-icon"><Icon name="mail" size={15} /></span>
               <span>آدرس ایمیل پرسنل:</span>
             </label>
             <div class="input-3d-wrapper">
@@ -164,13 +383,14 @@ if (auth) {
                 required
                 autocomplete="username"
               />
-              <span class="input-prefix-icon">@</span>
+              <span class="input-prefix-icon"><Icon name="mail" size={16} /></span>
             </div>
+            <div id="emailError" class="field-error-msg">لطفاً آدرس ایمیل پرسنلی معتبر را وارد کنید.</div>
           </div>
 
           <div class="form-group-3d">
             <label for="adminPassword" class="label-3d">
-              <span class="label-icon">🔒</span>
+              <span class="label-icon"><Icon name="lock" size={15} /></span>
               <span>کلمه عبور امنیتی:</span>
             </label>
             <div class="input-3d-wrapper">
@@ -183,31 +403,37 @@ if (auth) {
                 required
                 autocomplete="current-password"
               />
+              <span class="input-prefix-icon"><Icon name="lock" size={16} /></span>
               <button
                 type="button"
                 id="togglePasswordBtn"
                 class="password-toggle-btn"
                 aria-label="نمایش / پنهان کردن رمز"
                 title="نمایش / پنهان کردن رمز"
+                aria-pressed="false"
               >
-                <svg id="eyeIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                  <circle cx="12" cy="12" r="3"></circle>
-                </svg>
+                <span id="eyeOpenIcon" style="display: inline-flex;"><Icon name="eye" size={18} /></span>
+                <span id="eyeClosedIcon" style="display: none;"><Icon name="lock" size={18} /></span>
               </button>
             </div>
+            <div id="passwordError" class="field-error-msg">کلمه عبور نمی‌تواند خالی باشد.</div>
           </div>
 
           <button type="submit" id="loginSubmitBtn" class="btn-3d-submit">
-            <span id="btnSpinner" style="display: none;">⏳</span>
+            <span id="btnSpinner" style="display: none;">
+              <Icon name="refresh" size={18} class="spin-icon" />
+            </span>
             <span id="btnText">ورود امن به سامانه مدیریت</span>
-            <span class="btn-arrow">←</span>
+            <span id="btnArrowIcon" style="display: inline-flex; align-items: center;">
+              <Icon name="arrowLeft" size={18} class="btn-arrow" />
+            </span>
           </button>
 
           <!-- Quick Autofill Demo Button -->
-          <div class="autofill-helper-row">
+          <div class="autofill-helper-row" style="margin-top: 14px;">
             <button type="button" id="quickFillBtn" class="btn-autofill-3d">
-              ⚡ ورود سریع آزمایشی مدیر ارشد (Admin)
+              <Icon name="lightning" size={15} />
+              <span id="quickFillBtnText">ورود سریع آزمایشی مدیر ارشد (Admin)</span>
             </button>
           </div>
         </form>
@@ -216,11 +442,15 @@ if (auth) {
         <div class="login-3d-footer">
           <div class="telemetry-status">
             <span class="status-dot-pulse"></span>
-            <span>سیستم آنلاین • رمزنگاری PBKDF2 • Cloudflare D1 ایزوله</span>
+            <span style="display: inline-flex; align-items: center; gap: 4px;">
+              <Icon name="shield" size={13} />
+              <span>رمزنگاری PBKDF2 • Cloudflare D1 ایزوله</span>
+            </span>
           </div>
           <div>
             <a href="/" class="back-to-site-link">
-              ← بازگشت به وب‌سایت عمومی تهران لیزر
+              <Icon name="arrowRight" size={14} />
+              <span>بازگشت به وب‌سایت عمومی تهران لیزر</span>
             </a>
           </div>
         </div>
@@ -277,7 +507,6 @@ if (auth) {
           if (!ctx) return;
           ctx.clearRect(0, 0, width, height);
 
-          // Draw particles
           for (let i = 0; i < count; i++) {
             const p = particles[i]!;
             p.x += p.vx;
@@ -288,7 +517,6 @@ if (auth) {
             if (p.y < 0) p.y = height;
             if (p.y > height) p.y = 0;
 
-            // Perspective factor
             const fov = 400;
             const scale = fov / (fov + p.z);
             const drawX = p.x + (mouseX - width / 2) * 0.03 * scale;
@@ -301,7 +529,6 @@ if (auth) {
             ctx.shadowColor = 'rgba(212, 175, 55, 0.4)';
             ctx.fill();
 
-            // Connect nearby points with golden laser lines
             for (let j = i + 1; j < count; j++) {
               const p2 = particles[j]!;
               const dx = p.x - p2.x;
@@ -347,19 +574,16 @@ if (auth) {
           const width = bounds.width;
           const height = bounds.height;
 
-          // Check if cursor is relatively close to card
           const centerX = left + width / 2;
           const centerY = top + height / 2;
           const deltaX = (mouseX - centerX) / (window.innerWidth / 2);
           const deltaY = (mouseY - centerY) / (window.innerHeight / 2);
 
-          // Calculate 3D rotation angles (smooth clamped)
-          const rotateY = deltaX * 14; // max 14 deg
-          const rotateX = -deltaY * 14;
+          const rotateY = deltaX * 12;
+          const rotateX = -deltaY * 12;
 
           card.style.transform = `perspective(1200px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) translateZ(10px)`;
 
-          // Glare reflection position
           if (glare) {
             const glareX = ((mouseX - left) / width) * 100;
             const glareY = ((mouseY - top) / height) * 100;
@@ -368,7 +592,6 @@ if (auth) {
           }
         });
 
-        // Reset gently on mouse leave
         document.addEventListener('mouseleave', () => {
           if (card) {
             card.style.transform = 'perspective(1200px) rotateX(0deg) rotateY(0deg) translateZ(0)';
@@ -376,84 +599,144 @@ if (auth) {
         });
       }
 
-      // 3. Password Visibility Toggle
+      // 3. Password Visibility Toggle (Clean Icon Switcher)
       const toggleBtn = document.getElementById('togglePasswordBtn');
       const passwordInput = document.getElementById('adminPassword') as HTMLInputElement;
-      if (toggleBtn && passwordInput) {
+      const eyeOpenIcon = document.getElementById('eyeOpenIcon');
+      const eyeClosedIcon = document.getElementById('eyeClosedIcon');
+
+      if (toggleBtn && passwordInput && eyeOpenIcon && eyeClosedIcon) {
         toggleBtn.addEventListener('click', () => {
-          if (passwordInput.type === 'password') {
-            passwordInput.type = 'text';
-            toggleBtn.innerHTML = `
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-                <line x1="1" y1="1" x2="23" y2="23"></line>
-              </svg>
-            `;
-          } else {
-            passwordInput.type = 'password';
-            toggleBtn.innerHTML = `
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                <circle cx="12" cy="12" r="3"></circle>
-              </svg>
-            `;
-          }
+          const isPassword = passwordInput.type === 'password';
+          passwordInput.type = isPassword ? 'text' : 'password';
+          eyeOpenIcon.style.display = isPassword ? 'none' : 'inline-flex';
+          eyeClosedIcon.style.display = isPassword ? 'inline-flex' : 'none';
+          toggleBtn.setAttribute('aria-pressed', isPassword ? 'true' : 'false');
         });
       }
 
       // 4. Quick Fill Admin Credentials
       const quickFillBtn = document.getElementById('quickFillBtn');
+      const quickFillBtnText = document.getElementById('quickFillBtnText');
       const emailInput = document.getElementById('adminEmail') as HTMLInputElement;
+      const emailError = document.getElementById('emailError');
+      const passwordError = document.getElementById('passwordError');
+
       if (quickFillBtn && emailInput && passwordInput) {
         quickFillBtn.addEventListener('click', () => {
           emailInput.value = 'admin@tehranlaser.ir';
           passwordInput.value = 'AdminPass123!';
-          quickFillBtn.innerText = '✓ مشخصات درج شد (کلیک برای ورود)';
+          emailInput.classList.remove('has-error');
+          passwordInput.classList.remove('has-error');
+          if (emailError) emailError.style.display = 'none';
+          if (passwordError) passwordError.style.display = 'none';
+
+          if (quickFillBtnText) quickFillBtnText.innerText = 'مشخصات درج شد (کلیک برای ورود)';
           quickFillBtn.style.borderColor = '#10b981';
           quickFillBtn.style.color = '#34d399';
         });
       }
 
-      // 5. Form Authentication Submission
+      // 5. Rate-Limit Lockout Countdown Timer
+      let lockoutInterval: ReturnType<typeof setInterval> | null = null;
+      function startLockoutCountdown(seconds = 600) {
+        const timerEl = document.getElementById('lockoutTimer');
+        let remaining = seconds;
+        if (lockoutInterval) clearInterval(lockoutInterval);
+
+        lockoutInterval = setInterval(() => {
+          remaining--;
+          if (remaining <= 0) {
+            if (lockoutInterval) clearInterval(lockoutInterval);
+            const rateLimitAlert = document.getElementById('rateLimitAlert');
+            if (rateLimitAlert) rateLimitAlert.style.display = 'none';
+            return;
+          }
+          const mins = Math.floor(remaining / 60).toString().padStart(2, '0');
+          const secs = (remaining % 60).toString().padStart(2, '0');
+          if (timerEl) timerEl.innerText = `${mins}:${secs}`;
+        }, 1000);
+      }
+
+      // 6. Form Authentication Submission & Real-Time Validation
       const form = document.getElementById('adminLoginForm') as HTMLFormElement;
       const submitBtn = document.getElementById('loginSubmitBtn') as HTMLButtonElement;
       const btnText = document.getElementById('btnText') as HTMLSpanElement;
       const btnSpinner = document.getElementById('btnSpinner') as HTMLSpanElement;
+      const btnArrowIcon = document.getElementById('btnArrowIcon') as HTMLSpanElement;
       const alertBox = document.getElementById('loginAlert') as HTMLDivElement;
       const alertText = document.getElementById('loginAlertText') as HTMLSpanElement;
+      const rateLimitBox = document.getElementById('rateLimitAlert') as HTMLDivElement;
 
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
         alertBox.style.display = 'none';
+        rateLimitBox.style.display = 'none';
+
+        // Client-side validations
+        const emailVal = emailInput.value.trim();
+        const passVal = passwordInput.value;
+        let hasValidationError = false;
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailVal || !emailRegex.test(emailVal)) {
+          emailInput.classList.add('has-error');
+          if (emailError) emailError.style.display = 'block';
+          hasValidationError = true;
+        } else {
+          emailInput.classList.remove('has-error');
+          if (emailError) emailError.style.display = 'none';
+        }
+
+        if (!passVal) {
+          passwordInput.classList.add('has-error');
+          if (passwordError) passwordError.style.display = 'block';
+          hasValidationError = true;
+        } else {
+          passwordInput.classList.remove('has-error');
+          if (passwordError) passwordError.style.display = 'none';
+        }
+
+        if (hasValidationError) return;
+
         submitBtn.disabled = true;
         btnText.innerText = 'در حال احراز هویت امنیتی...';
-        btnSpinner.style.display = 'inline-block';
+        btnSpinner.style.display = 'inline-flex';
+        btnArrowIcon.style.display = 'none';
 
         try {
           const res = await fetch('/api/v1/auth/login', {
             method: 'POST',
             headers: { 'content-type': 'application/json' },
             body: JSON.stringify({
-              email: emailInput.value.trim(),
-              password: passwordInput.value,
+              email: emailVal,
+              password: passVal,
             }),
           });
 
           const data = (await res.json()) as any;
           if (res.ok && data.data) {
             btnText.innerText = 'ورود موفق! در حال انتقال...';
+            submitBtn.style.background = 'linear-gradient(180deg, #34d399 0%, #059669 100%)';
             window.location.href = '/admin';
           } else {
-            alertText.innerText = data.error?.message || 'ایمیل یا کلمه عبور نادرست است.';
-            alertBox.style.display = 'flex';
+            // Check for RATE_LIMITED
+            if (res.status === 429 || data.error?.code === 'RATE_LIMITED') {
+              rateLimitBox.style.display = 'flex';
+              startLockoutCountdown(600);
+            } else {
+              alertText.innerText = data.error?.message || 'ایمیل یا کلمه عبور واردشده نادرست است.';
+              alertBox.style.display = 'flex';
+            }
           }
         } catch {
-          alertText.innerText = 'خطای ارتباط با سرور. لطفاً اتصال اینترنت را بررسی فرمایید.';
+          alertText.innerText = 'خطای ارتباط با سرور. لطفاً اتصال اینترنت خود را بررسی فرمایید.';
           alertBox.style.display = 'flex';
         } finally {
           submitBtn.disabled = false;
           btnText.innerText = 'ورود امن به سامانه مدیریت';
           btnSpinner.style.display = 'none';
+          btnArrowIcon.style.display = 'inline-flex';
         }
       });
     </script>

@@ -1,3 +1,5 @@
+@import '../components-3d.css';
+
 /* ─────────────────────────────────────────────────────────────
    TEHRAN LASER — ADMIN 3D COMPONENTS (KPI / TABLE / MODAL / BTN)
    Fills the component classes referenced by admin screens that
@@ -273,35 +275,58 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background: var(--admin-btn-gold, linear-gradient(180deg, #f0cf75 0%, #cba24f 40%, #997224 100%));
-  color: #1a1405;
-  border: none;
+  background: var(--gradient-gold-btn, linear-gradient(180deg, #f5d77f 0%, #d4af37 45%, #9e7822 100%));
+  color: var(--color-text-on-gold, #0d0a02);
+  border: 1px solid rgba(245, 215, 127, 0.5);
   border-radius: 13px;
   padding: 11px 20px;
   min-height: 44px;
+  min-width: 44px;
   font-family: inherit;
   font-size: 0.9rem;
-  font-weight: 900;
+  font-weight: 800;
   cursor: pointer;
   white-space: nowrap;
-  box-shadow: 0 4px 0 #7a5d1a, 0 10px 22px rgba(212, 175, 55, 0.32);
-  transition: all 0.15s ease;
+  box-shadow:
+    0 4px 0 #7a5d1a,
+    0 10px 24px rgba(212, 175, 55, 0.35),
+    inset 0 1px 1.5px rgba(255, 255, 255, 0.65);
+  transition:
+    transform 0.16s cubic-bezier(0.34, 1.45, 0.64, 1),
+    box-shadow 0.16s ease,
+    filter 0.16s ease;
 }
 
 .btn-3d-gold:hover:not(:disabled) {
   transform: translateY(-2px);
-  filter: brightness(1.07);
-  box-shadow: 0 6px 0 #7a5d1a, 0 14px 28px rgba(212, 175, 55, 0.45);
+  filter: brightness(1.06);
+  border-color: rgba(255, 240, 180, 0.85);
+  box-shadow:
+    0 6px 0 #7a5d1a,
+    0 16px 32px rgba(212, 175, 55, 0.5),
+    inset 0 1px 1.5px rgba(255, 255, 255, 0.75);
 }
 
 .btn-3d-gold:active:not(:disabled) {
   transform: translateY(2px);
-  box-shadow: 0 2px 0 #7a5d1a;
+  box-shadow:
+    0 1px 0 #7a5d1a,
+    0 4px 12px rgba(212, 175, 55, 0.25),
+    inset 0 2px 4px rgba(0, 0, 0, 0.2);
+  filter: brightness(0.97);
+}
+
+.btn-3d-gold:focus-visible {
+  outline: 2px solid #f5d77f;
+  outline-offset: 3px;
 }
 
 .btn-3d-gold:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: 0 2px 0 #7a5d1a;
+  filter: grayscale(0.5);
 }
 
 .btn-3d-secondary {

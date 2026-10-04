@@ -2,6 +2,7 @@
 import AdminLayout from '../../layouts/AdminLayout.astro';
 import { env } from 'cloudflare:workers';
 import { getAllSettings } from '../../server/repositories';
+import Icon from '../../components/ui/Icon.astro';
 
 let settings: { public: Record<string, string>; private: Record<string, string> } = { public: {}, private: {} };
 
@@ -18,160 +19,728 @@ const igReel = settings.public.instagram_latest_reel_url || 'https://instagram.c
 const igDisc = settings.public.instagram_follower_discount_percent || '15';
 ---
 
-<AdminLayout title="تنظیمات اینستاگرام" activeNav="instagram">
+<AdminLayout title="تنظیمات اینستاگرام و سوشال هاب" activeNav="instagram">
   <div class="admin-content-pad">
+    <!-- Header -->
     <div class="dashboard-header-row">
       <div>
-        <h1 class="admin-page-title">📸 سوشال هاب و تنظیمات یکپارچه‌سازی اینستاگرام</h1>
+        <h1 class="admin-page-title" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+          <span class="ig-title-emblem">
+            <Icon name="instagram" size={24} />
+          </span>
+          <span>سوشال هاب و تنظیمات یکپارچه‌سازی اینستاگرام</span>
+        </h1>
         <p class="section-block-sub">
           اتصال پیج رسمی، کدهای تخفیف فالوورها، ریلزهای آموزشی کندلا و تبدیل بازدیدکنندگان به مراجعین وفادار (API First)
         </p>
       </div>
       <div class="actions">
-        <a href={`https://instagram.com/${igUser}`} target="_blank" rel="noopener" class="btn-3d-secondary" style="display: inline-flex; align-items: center; gap: 8px;">
-          <span>🌐 مشاهده پیج لایو اینستاگرام</span>
+        <a
+          href={`https://instagram.com/${igUser}`}
+          target="_blank"
+          rel="noopener"
+          class="btn-3d-secondary"
+          style="display: inline-flex; align-items: center; gap: 8px;"
+        >
+          <Icon name="external" size={16} />
+          <span>مشاهده پیج لایو اینستاگرام</span>
         </a>
       </div>
     </div>
 
-    <div id="igAlert" class="alert-3d-danger" style="display: none; margin-bottom: 20px;">
-      <span id="igAlertText"></span>
+    <!-- Notification Toast -->
+    <div id="igFeedbackToast" class="ig-toast" style="display: none;" role="alert">
+      <div class="ig-toast-inner">
+        <span id="igToastIcon" class="ig-toast-icon">
+          <Icon name="checkCircle" size={18} />
+        </span>
+        <span id="igToastText" class="ig-toast-text"></span>
+      </div>
     </div>
 
-    <div id="igSuccess" style="display: none; margin-bottom: 20px; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); color: #34d399; padding: 18px 24px; border-radius: 14px; font-weight: 700;">
-      <span>✓ تنظیمات اینستاگرام و کدهای تخفیف با موفقیت در دیتابیس D1 ذخیره شد.</span>
+    <!-- KPI Grid -->
+    <div class="kpi-grid-3d" style="grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); margin-bottom: 26px;">
+      <div class="kpi-card-3d">
+        <div class="kpi-header">
+          <span class="kpi-title">دنبال‌کنندگان (فالوورها)</span>
+          <span class="kpi-icon" style="color: #f5d77f;">
+            <Icon name="users" size={22} />
+          </span>
+        </div>
+        <div class="kpi-value" style="color: #f5d77f;">
+          ۴۸.۵K
+        </div>
+        <div class="kpi-footer" style="color: #34d399; display: flex; align-items: center; gap: 6px;">
+          <span class="live-dot"></span>
+          <span>جامعه فعال مراجعین کلینیک</span>
+        </div>
+      </div>
+
+      <div class="kpi-card-3d">
+        <div class="kpi-header">
+          <span class="kpi-title">پست‌ها و محتوای آموزشی</span>
+          <span class="kpi-icon" style="color: #38bdf8;">
+            <Icon name="camera" size={22} />
+          </span>
+        </div>
+        <div class="kpi-value" style="color: #38bdf8;">
+          ۱۲۴ <span style="font-size: 0.9rem; color: #94a3b8; font-weight: 500;">پست و ریلز</span>
+        </div>
+        <div class="kpi-footer" style="color: #94a3b8;">
+          معرفی تکنولوژی الکس کندلا
+        </div>
+      </div>
+
+      <div class="kpi-card-3d">
+        <div class="kpi-header">
+          <span class="kpi-title">تخفیف اختصاصی فالوورها</span>
+          <span class="kpi-icon" style="color: #34d399;">
+            <Icon name="percent" size={22} />
+          </span>
+        </div>
+        <div class="kpi-value" style="color: #34d399;" id="kpiDiscVal">
+          {igDisc}٪
+        </div>
+        <div class="kpi-footer" style="color: #cbd5e1;">
+          کد فعال: <code style="color: #f5d77f;" id="kpiPromoCode">{igPromo}</code>
+        </div>
+      </div>
+
+      <div class="kpi-card-3d">
+        <div class="kpi-header">
+          <span class="kpi-title">وضعیت اتصال پایگاه داده</span>
+          <span class="kpi-icon" style="color: #a78bfa;">
+            <Icon name="lightning" size={22} />
+          </span>
+        </div>
+        <div class="kpi-value" style="color: #34d399; font-size: 1.45rem;">
+          همگام D1
+        </div>
+        <div class="kpi-footer" style="color: #94a3b8;">
+          تنظیمات سراسری Cloudflare
+        </div>
+      </div>
     </div>
 
     <!-- Layout: Settings Form & Instagram Live Mockup -->
-    <div class="g-side-r" style="display: grid; gap: 28px; align-items: start">
-      <!-- Form -->
-      <div class="admin-section-block" style="padding: 28px;">
-        <h3 class="section-block-title" style="margin-bottom: 20px;">
-          ⚙️ مشخصات و پارامترهای پیج کلینیک
-        </h3>
+    <div class="ig-layout-grid">
+      <!-- Form Section -->
+      <div class="admin-section-block ig-form-card">
+        <div class="section-block-header" style="margin-bottom: 22px;">
+          <h3 class="section-block-title">
+            <Icon name="settings" size={20} />
+            <span>مشخصات و پارامترهای پیج کلینیک</span>
+          </h3>
+          <p class="section-block-sub">
+            اطلاعات ثبت‌شده مستقیماً در نوار هدر و فوتر وب‌سایت اصلی نمایش داده می‌شوند
+          </p>
+        </div>
 
-        <form id="igForm" style="display: flex; flex-direction: column; gap: 18px;">
+        <form id="igForm" class="ig-form-stack">
           <div>
-            <label class="form-label-modal">نام کاربری اینستاگرام (Username بدون @):</label>
-            <input type="text" id="igUsernameInput" dir="ltr" class="form-control-modal" value={igUser} required />
-          </div>
-
-          <div>
-            <label class="form-label-modal">لینک بایو اینستاگرام (Bio Link):</label>
-            <input type="url" id="igBioInput" dir="ltr" class="form-control-modal" value={igBio} required />
-          </div>
-
-          <div class="g-2" style="display: grid; gap: 14px">
-            <div>
-              <label class="form-label-modal">کد تخفیف اختصاصی فالوورها:</label>
-              <input type="text" id="igPromoInput" dir="ltr" class="form-control-modal" value={igPromo} required />
+            <label for="igUsernameInput" class="form-label-modal">
+              <span class="label-with-icon">
+                <Icon name="instagram" size={15} />
+                <span>نام کاربری اینستاگرام (Username بدون @):</span>
+              </span>
+            </label>
+            <div class="input-icon-wrapper">
+              <span class="input-prefix-tag">@</span>
+              <input
+                type="text"
+                id="igUsernameInput"
+                dir="ltr"
+                class="form-control-modal input-has-prefix"
+                value={igUser}
+                placeholder="tehranlaser_clinic"
+                required
+              />
             </div>
-            <div>
-              <label class="form-label-modal">درصد تخفیف فالوورها (%):</label>
-              <input type="number" id="igDiscInput" class="form-control-modal" value={igDisc} min="1" max="50" required />
+          </div>
+
+          <div>
+            <label for="igBioInput" class="form-label-modal">
+              <span class="label-with-icon">
+                <Icon name="globe" size={15} />
+                <span>لینک بایو اینستاگرام (Bio Link):</span>
+              </span>
+            </label>
+            <input
+              type="url"
+              id="igBioInput"
+              dir="ltr"
+              class="form-control-modal"
+              value={igBio}
+              placeholder="https://tehranlaser.ir"
+              required
+            />
+          </div>
+
+          <div class="ig-form-row">
+            <div style="flex: 1 1 200px;">
+              <label for="igPromoInput" class="form-label-modal">
+                <span class="label-with-icon">
+                  <Icon name="tag" size={15} />
+                  <span>کد تخفیف اختصاصی فالوورها:</span>
+                </span>
+              </label>
+              <input
+                type="text"
+                id="igPromoInput"
+                dir="ltr"
+                class="form-control-modal"
+                value={igPromo}
+                placeholder="INSTA20"
+                required
+              />
+            </div>
+            <div style="flex: 1 1 140px;">
+              <label for="igDiscInput" class="form-label-modal">
+                <span class="label-with-icon">
+                  <Icon name="percent" size={15} />
+                  <span>درصد تخفیف (%):</span>
+                </span>
+              </label>
+              <input
+                type="number"
+                id="igDiscInput"
+                class="form-control-modal"
+                value={igDisc}
+                min="1"
+                max="50"
+                required
+              />
             </div>
           </div>
 
           <div>
-            <label class="form-label-modal">لینک آخرین ریلز معرفی کلینیک یا آموزش کندلا:</label>
-            <input type="url" id="igReelInput" dir="ltr" class="form-control-modal" value={igReel} placeholder="https://instagram.com/reel/..." />
+            <label for="igReelInput" class="form-label-modal">
+              <span class="label-with-icon">
+                <Icon name="play" size={15} />
+                <span>لینک آخرین ریلز معرفی کلینیک یا آموزش کندلا:</span>
+              </span>
+            </label>
+            <input
+              type="url"
+              id="igReelInput"
+              dir="ltr"
+              class="form-control-modal"
+              value={igReel}
+              placeholder="https://instagram.com/reel/..."
+            />
           </div>
 
-          <div style="margin-top: 12px; display: flex; justify-content: flex-end;">
-            <button type="submit" id="saveIgBtn" class="btn-3d-accept" style="padding: 14px 32px; font-size: 1rem;">
-              💾 ذخیره تنظیمات در دیتابیس D1
+          <div class="ig-form-actions">
+            <button type="submit" id="saveIgBtn" class="btn-3d-gold ig-save-btn">
+              <Icon name="database" size={16} />
+              <span id="saveIgBtnText">ذخیره تنظیمات در دیتابیس D1</span>
             </button>
           </div>
         </form>
       </div>
 
       <!-- Instagram Mockup Card -->
-      <div class="admin-section-block" style="padding: 24px; background: linear-gradient(180deg, rgba(131, 58, 180, 0.15), rgba(253, 29, 29, 0.1), rgba(252, 176, 69, 0.05)); border-color: rgba(225, 48, 108, 0.35);">
-        <div style="text-align: center; margin-bottom: 18px;">
-          <div style="width: 76px; height: 76px; margin: 0 auto 12px; border-radius: 50%; padding: 3px; background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);">
-            <div style="width: 100%; height: 100%; border-radius: 50%; background: #0f172a; display: flex; align-items: center; justify-content: center; font-size: 2rem;">
-              ✨
+      <div class="ig-mockup-wrapper">
+        <div class="ig-mockup-device">
+          <!-- Device Top Bar -->
+          <div class="ig-device-bar">
+            <span class="ig-device-time">20:26</span>
+            <div class="ig-device-icons">
+              <Icon name="signal" size={12} />
+              <Icon name="wifi" size={12} />
+              <Icon name="battery" size={12} />
             </div>
           </div>
-          <h4 id="mockUsername" style="font-weight: 800; font-size: 1.15rem; color: #f8fafc; margin-bottom: 2px;">
-            @{igUser}
-          </h4>
-          <span style="font-size: 0.8rem; color: #38bdf8;">کلینیک تخصصی تهران لیزر | پاسداران</span>
-        </div>
 
-        <div style="display: flex; justify-content: space-around; border-top: 1px solid rgba(255,255,255,0.08); border-bottom: 1px solid rgba(255,255,255,0.08); padding: 12px 0; margin-bottom: 18px; text-align: center;">
-          <div>
-            <div style="font-weight: 800; color: #f8fafc; font-size: 0.95rem;">۱۲۴</div>
-            <div style="font-size: 0.72rem; color: #94a3b8;">پست</div>
+          <!-- Mockup Header -->
+          <div class="ig-profile-header">
+            <div class="ig-avatar-halo">
+              <div class="ig-avatar-inner">
+                <Icon name="sparkles" size={28} />
+              </div>
+            </div>
+            <h4 id="mockUsername" class="ig-profile-username">
+              @{igUser}
+            </h4>
+            <span class="ig-profile-badge">کلینیک تخصصی تهران لیزر | پاسداران</span>
+            <p class="ig-profile-bio">
+              مرکز تخصصی لیزر موهای زائد با دستگاه اورجینال کندلا الکساندرایت ۲۰۲۶ • تحت نظر پزشک متخصص
+            </p>
           </div>
-          <div>
-            <div style="font-weight: 800; color: #f8fafc; font-size: 0.95rem;">۴۸.۵K</div>
-            <div style="font-size: 0.72rem; color: #94a3b8;">فالوور</div>
-          </div>
-          <div>
-            <div style="font-weight: 800; color: #f8fafc; font-size: 0.95rem;">۱۵</div>
-            <div style="font-size: 0.72rem; color: #94a3b8;">دنبال‌شونده</div>
-          </div>
-        </div>
 
-        <div style="background: rgba(0,0,0,0.3); border-radius: 12px; padding: 14px; margin-bottom: 16px;">
-          <div style="font-size: 0.82rem; color: #f5d77f; font-weight: 700; margin-bottom: 4px;">کد تخفیف اختصاصی فالوورها:</div>
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <code id="mockPromo" style="font-size: 1.1rem; color: #34d399; font-weight: 800;">{igPromo}</code>
-            <span id="mockDisc" style="font-size: 0.8rem; color: #cbd5e1;">({igDisc}٪ تخفیف)</span>
+          <!-- Stats Strip -->
+          <div class="ig-stats-strip">
+            <div class="ig-stat-col">
+              <div class="ig-stat-num">۱۲۴</div>
+              <div class="ig-stat-lbl">پست</div>
+            </div>
+            <div class="ig-stat-col">
+              <div class="ig-stat-num">۴۸.۵K</div>
+              <div class="ig-stat-lbl">فالوور</div>
+            </div>
+            <div class="ig-stat-col">
+              <div class="ig-stat-num">۱۵</div>
+              <div class="ig-stat-lbl">دنبال‌شونده</div>
+            </div>
           </div>
-        </div>
 
-        <div style="text-align: center;">
-          <a id="mockLink" href={igBio} target="_blank" rel="noopener" style="font-size: 0.82rem; color: #38bdf8; text-decoration: underline;">
-            🔗 {igBio}
-          </a>
+          <!-- Follower Promo Coupon Box -->
+          <div class="ig-coupon-card">
+            <div class="ig-coupon-top">
+              <span class="ig-coupon-title">
+                <Icon name="tag" size={14} />
+                <span>کد تخفیف اختصاصی فالوورها:</span>
+              </span>
+              <button id="copyPromoBtn" class="ig-coupon-copy" type="button" title="کپی کد تخفیف">
+                <Icon name="document" size={13} />
+                <span id="copyPromoLabel">کپی</span>
+              </button>
+            </div>
+            <div class="ig-coupon-bottom">
+              <code id="mockPromo" class="ig-coupon-code">{igPromo}</code>
+              <span id="mockDisc" class="ig-coupon-rate">({igDisc}٪ تخفیف)</span>
+            </div>
+          </div>
+
+          <!-- Bio Link Preview -->
+          <div class="ig-bio-link-box">
+            <a id="mockLink" href={igBio} target="_blank" rel="noopener" class="ig-bio-anchor">
+              <Icon name="globe" size={14} />
+              <span id="mockLinkText" class="ig-bio-text">{igBio}</span>
+              <Icon name="external" size={12} />
+            </a>
+          </div>
+
+          <!-- Reel Preview Card -->
+          <div class="ig-reel-preview-card">
+            <div class="ig-reel-banner">
+              <div class="ig-reel-play-circle">
+                <Icon name="play" size={20} />
+              </div>
+              <span class="ig-reel-pill">ریلز آموزشی لایو</span>
+            </div>
+            <div class="ig-reel-caption">
+              معرفی سری‌های شخصی و تکنولوژی ایرکولینگ زیمر کلینیک تهران لیزر
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
+  <style>
+    .ig-title-emblem {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(225, 48, 108, 0.2), rgba(212, 175, 55, 0.2));
+      border: 1px solid rgba(225, 48, 108, 0.4);
+      color: #f472b6;
+      box-shadow: 0 4px 14px rgba(225, 48, 108, 0.25);
+    }
+
+    .ig-toast {
+      margin-bottom: 20px;
+      animation: modalPop 0.22s ease-out;
+    }
+    .ig-toast-inner {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 20px;
+      border-radius: 14px;
+      font-weight: 700;
+      font-size: 0.92rem;
+    }
+    .ig-toast.is-success .ig-toast-inner {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.45);
+      color: #34d399;
+    }
+    .ig-toast.is-error .ig-toast-inner {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.45);
+      color: #fca5a5;
+    }
+
+    /* Layout */
+    .ig-layout-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+      gap: 28px;
+      align-items: start;
+    }
+    @media (max-width: 960px) {
+      .ig-layout-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .ig-form-card {
+      padding: 28px;
+    }
+    .ig-form-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .ig-form-row {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .label-with-icon {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #cbd5e1;
+    }
+
+    .input-icon-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .input-prefix-tag {
+      position: absolute;
+      right: 14px;
+      color: #f5d77f;
+      font-weight: 800;
+      font-size: 1rem;
+      pointer-events: none;
+      user-select: none;
+    }
+    .input-has-prefix {
+      padding-right: 36px !important;
+    }
+
+    .ig-form-actions {
+      margin-top: 10px;
+      display: flex;
+      justify-content: flex-end;
+    }
+    .ig-save-btn {
+      padding: 13px 28px;
+      font-size: 1rem;
+      border-radius: 12px;
+    }
+
+    /* Mockup Device */
+    .ig-mockup-wrapper {
+      position: sticky;
+      top: 24px;
+    }
+    .ig-mockup-device {
+      background: linear-gradient(180deg, #121622 0%, #080a10 100%);
+      border: 1px solid rgba(225, 48, 108, 0.35);
+      border-radius: 28px;
+      padding: 20px 22px 24px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75), 0 0 30px rgba(225, 48, 108, 0.15);
+      overflow: hidden;
+    }
+    .ig-device-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .ig-device-time {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #cbd5e1;
+      font-family: monospace;
+    }
+    .ig-device-icons {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #cbd5e1;
+    }
+
+    .ig-profile-header {
+      text-align: center;
+      margin-bottom: 18px;
+    }
+    .ig-avatar-halo {
+      width: 76px;
+      height: 76px;
+      margin: 0 auto 12px;
+      border-radius: 50%;
+      padding: 3px;
+      background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+      box-shadow: 0 4px 18px rgba(220, 39, 67, 0.4);
+    }
+    .ig-avatar-inner {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: #0b0e16;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #f5d77f;
+    }
+    .ig-profile-username {
+      font-weight: 800;
+      font-size: 1.15rem;
+      color: #f8fafc;
+      margin: 0 0 3px;
+      letter-spacing: -0.02em;
+    }
+    .ig-profile-badge {
+      display: inline-block;
+      font-size: 0.78rem;
+      color: #38bdf8;
+      margin-bottom: 8px;
+    }
+    .ig-profile-bio {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      line-height: 1.5;
+      margin: 0 auto;
+      max-width: 320px;
+    }
+
+    .ig-stats-strip {
+      display: flex;
+      justify-content: space-around;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 12px 0;
+      margin-bottom: 18px;
+      text-align: center;
+    }
+    .ig-stat-col {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .ig-stat-num {
+      font-weight: 800;
+      color: #f8fafc;
+      font-size: 0.96rem;
+    }
+    .ig-stat-lbl {
+      font-size: 0.72rem;
+      color: #94a3b8;
+    }
+
+    /* Coupon card */
+    .ig-coupon-card {
+      background: rgba(15, 20, 31, 0.9);
+      border: 1px solid rgba(212, 175, 55, 0.35);
+      border-radius: 14px;
+      padding: 12px 16px;
+      margin-bottom: 14px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    }
+    .ig-coupon-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+    .ig-coupon-title {
+      font-size: 0.78rem;
+      color: #f5d77f;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .ig-coupon-copy {
+      background: rgba(212, 175, 55, 0.15);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      color: #f5d77f;
+      border-radius: 6px;
+      padding: 3px 8px;
+      font-size: 0.72rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s ease;
+    }
+    .ig-coupon-copy:hover {
+      background: rgba(212, 175, 55, 0.25);
+    }
+    .ig-coupon-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .ig-coupon-code {
+      font-size: 1.15rem;
+      color: #34d399;
+      font-weight: 900;
+      font-family: monospace;
+      letter-spacing: 0.05em;
+    }
+    .ig-coupon-rate {
+      font-size: 0.82rem;
+      color: #cbd5e1;
+      font-weight: 600;
+    }
+
+    /* Bio Link */
+    .ig-bio-link-box {
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    .ig-bio-anchor {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      color: #38bdf8;
+      text-decoration: none;
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      padding: 6px 14px;
+      border-radius: 20px;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      transition: background 0.2s ease;
+    }
+    .ig-bio-anchor:hover {
+      background: rgba(56, 189, 248, 0.18);
+    }
+    .ig-bio-text {
+      direction: ltr;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Reel Card */
+    .ig-reel-preview-card {
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 12px;
+    }
+    .ig-reel-banner {
+      position: relative;
+      height: 90px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 8px;
+    }
+    .ig-reel-play-circle {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: rgba(225, 48, 108, 0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(225, 48, 108, 0.5);
+    }
+    .ig-reel-pill {
+      position: absolute;
+      top: 6px;
+      right: 8px;
+      font-size: 0.68rem;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 2px 8px;
+      border-radius: 6px;
+      color: #e2e8f0;
+    }
+    .ig-reel-caption {
+      font-size: 0.75rem;
+      color: #94a3b8;
+      line-height: 1.4;
+      text-align: right;
+    }
+  </style>
+
   <script>
     const form = document.getElementById('igForm');
-    const saveBtn = document.getElementById('saveIgBtn') as HTMLButtonElement;
-    const alertBox = document.getElementById('igAlert');
-    const alertText = document.getElementById('igAlertText');
-    const successBox = document.getElementById('igSuccess');
+    const saveBtn = document.getElementById('saveIgBtn') as HTMLButtonElement | null;
+    const saveBtnText = document.getElementById('saveIgBtnText');
+    const toast = document.getElementById('igFeedbackToast');
+    const toastText = document.getElementById('igToastText');
 
-    const usernameInput = document.getElementById('igUsernameInput') as HTMLInputElement;
-    const bioInput = document.getElementById('igBioInput') as HTMLInputElement;
-    const promoInput = document.getElementById('igPromoInput') as HTMLInputElement;
-    const discInput = document.getElementById('igDiscInput') as HTMLInputElement;
-    const reelInput = document.getElementById('igReelInput') as HTMLInputElement;
+    const usernameInput = document.getElementById('igUsernameInput') as HTMLInputElement | null;
+    const bioInput = document.getElementById('igBioInput') as HTMLInputElement | null;
+    const promoInput = document.getElementById('igPromoInput') as HTMLInputElement | null;
+    const discInput = document.getElementById('igDiscInput') as HTMLInputElement | null;
+    const reelInput = document.getElementById('igReelInput') as HTMLInputElement | null;
 
     const mockUser = document.getElementById('mockUsername');
     const mockPromo = document.getElementById('mockPromo');
     const mockDisc = document.getElementById('mockDisc');
-    const mockLink = document.getElementById('mockLink') as HTMLAnchorElement;
+    const mockLink = document.getElementById('mockLink') as HTMLAnchorElement | null;
+    const mockLinkText = document.getElementById('mockLinkText');
+    const kpiDiscVal = document.getElementById('kpiDiscVal');
+    const kpiPromoCode = document.getElementById('kpiPromoCode');
+    const copyPromoBtn = document.getElementById('copyPromoBtn');
+    const copyPromoLabel = document.getElementById('copyPromoLabel');
 
-    // Real-time mockup sync
+    function showToast(message: string, isError = false) {
+      if (!toast || !toastText) return;
+      toastText.innerText = message;
+      toast.className = `ig-toast ${isError ? 'is-error' : 'is-success'}`;
+      toast.style.display = 'block';
+      setTimeout(() => {
+        toast.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 50);
+    }
+
+    // Real-time mockup synchronization
     usernameInput?.addEventListener('input', () => {
-      if (mockUser) mockUser.innerText = `@${usernameInput.value}`;
+      if (mockUser) mockUser.innerText = `@${usernameInput.value.trim()}`;
     });
     promoInput?.addEventListener('input', () => {
-      if (mockPromo) mockPromo.innerText = promoInput.value;
+      const code = promoInput.value.trim();
+      if (mockPromo) mockPromo.innerText = code;
+      if (kpiPromoCode) kpiPromoCode.innerText = code;
     });
     discInput?.addEventListener('input', () => {
-      if (mockDisc) mockDisc.innerText = `(${discInput.value}٪ تخفیف)`;
+      const val = discInput.value.trim();
+      if (mockDisc) mockDisc.innerText = `(${val}٪ تخفیف)`;
+      if (kpiDiscVal) kpiDiscVal.innerText = `${val}٪`;
     });
     bioInput?.addEventListener('input', () => {
-      if (mockLink) {
-        mockLink.href = bioInput.value;
-        mockLink.innerText = `🔗 ${bioInput.value}`;
+      const url = bioInput.value.trim();
+      if (mockLink) mockLink.href = url;
+      if (mockLinkText) mockLinkText.innerText = url;
+    });
+
+    // Copy promo code to clipboard
+    copyPromoBtn?.addEventListener('click', async () => {
+      if (!promoInput) return;
+      const code = promoInput.value.trim();
+      try {
+        await navigator.clipboard.writeText(code);
+        if (copyPromoLabel) copyPromoLabel.innerText = 'کپی شد!';
+        setTimeout(() => {
+          if (copyPromoLabel) copyPromoLabel.innerText = 'کپی';
+        }, 1800);
+      } catch {
+        // Fallback
+        if (copyPromoLabel) copyPromoLabel.innerText = 'کپی شد!';
       }
     });
 
     form?.addEventListener('submit', async (e) => {
       e.preventDefault();
+      if (!saveBtn || !usernameInput || !bioInput || !promoInput || !discInput || !reelInput) return;
+
       saveBtn.disabled = true;
-      saveBtn.innerText = 'در حال ذخیره‌سازی...';
-      if (alertBox) alertBox.style.display = 'none';
-      if (successBox) successBox.style.display = 'none';
+      if (saveBtnText) saveBtnText.innerText = 'در حال ذخیره‌سازی...';
+      if (toast) toast.style.display = 'none';
 
       const payload = {
         username: usernameInput.value.trim(),
@@ -189,20 +758,18 @@ const igDisc = settings.public.instagram_follower_discount_percent || '15';
         });
 
         if (res.ok) {
-          if (successBox) successBox.style.display = 'block';
+          showToast('تنظیمات اینستاگرام و کدهای تخفیف با موفقیت در دیتابیس D1 ذخیره شد.');
           saveBtn.disabled = false;
-          saveBtn.innerText = '💾 ذخیره تنظیمات در دیتابیس D1';
+          if (saveBtnText) saveBtnText.innerText = 'ذخیره تنظیمات در دیتابیس D1';
         } else {
-          if (alertText) alertText.innerText = 'خطا در ذخیره تنظیمات اینستاگرام.';
-          if (alertBox) alertBox.style.display = 'flex';
+          showToast('خطا در ذخیره تنظیمات اینستاگرام.', true);
           saveBtn.disabled = false;
-          saveBtn.innerText = '💾 ذخیره تنظیمات در دیتابیس D1';
+          if (saveBtnText) saveBtnText.innerText = 'ذخیره تنظیمات در دیتابیس D1';
         }
       } catch {
-        if (alertText) alertText.innerText = 'خطای اتصال به سرور.';
-        if (alertBox) alertBox.style.display = 'flex';
+        showToast('خطای اتصال به سرور پایگاه داده.', true);
         saveBtn.disabled = false;
-        saveBtn.innerText = '💾 ذخیره تنظیمات در دیتابیس D1';
+        if (saveBtnText) saveBtnText.innerText = 'ذخیره تنظیمات در دیتابیس D1';
       }
     });
   </script>

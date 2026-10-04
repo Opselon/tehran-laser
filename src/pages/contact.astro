@@ -1,96 +1,1464 @@
 ---
 import PublicLayout from '../layouts/PublicLayout.astro';
+import Icon from '../components/ui/Icon.astro';
+
+const clinicJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'MedicalClinic',
+  name: 'کلینیک تخصصی تهران لیزر',
+  alternateName: 'Tehran Laser Clinic',
+  url: 'https://tehranlaser.ir/contact',
+  telephone: '+989035555090',
+  priceRange: 'IRR',
+  image: 'https://tehranlaser.ir/images/og-share.jpg',
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: 'خیابان پایدارفرد، نبش بوستان هفتم',
+    addressLocality: 'تهران',
+    addressRegion: 'پاسداران',
+    postalCode: '1666612345',
+    addressCountry: 'IR',
+  },
+  geo: {
+    '@type': 'GeoCoordinates',
+    latitude: 35.7645,
+    longitude: 51.4628,
+  },
+  openingHoursSpecification: [
+    {
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday'],
+      opens: '09:00',
+      closes: '20:00',
+    },
+    {
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: 'Thursday',
+      opens: '09:00',
+      closes: '18:00',
+    },
+  ],
+  sameAs: [
+    'https://t.me/tehranlaser_clinic',
+    'https://instagram.com/tehranlaser',
+  ],
+};
 ---
 
 <PublicLayout
-  title="تماس با کلینیک تهران لیزر — آدرس و شماره تلفن نوبت‌دهی"
-  description="راه‌های ارتباطی، آدرس دقیق در پاسداران خیابان پایدارفرد و شماره تماس کلینیک تهران لیزر. پشتیبانی تلفنی، واتساپ و تلگرام جهت مشاوره رایگان."
+  title="تماس و آدرس کلینیک تهران لیزر — پاسداران، خیابان پایدارفرد"
+  description="راه‌های ارتباطی، آدرس دقیق در پاسداران خیابان پایدارفرد، شماره تماس مستقیم پذیرش، مشاوره فوری در واتساپ و لوکیشن مسیریابی کلینیک تهران لیزر."
+  jsonLd={clinicJsonLd}
+  theme="dark"
 >
-  <div class="page-header-strip">
-    <div class="container text-center">
-      <span class="section-subtitle">ارتباط با کلینیک</span>
-      <h1 class="page-title">تماس با مرکز تهران لیزر</h1>
-      <p class="page-subtitle">
-        تیم پذیرش و مشاورین ما همه‌روزه در ساعات کاری آماده پاسخگویی و راهنمایی شما عزیزان هستند
-      </p>
-    </div>
-  </div>
-
-  <section class="section">
-    <div class="container container-sm">
-      <div class="contact-cards-grid">
-        <!-- Phone Card -->
-        <div class="contact-channel-card">
-          <div class="channel-icon">📞</div>
-          <h3 class="channel-title">تماس تلفنی مستقیم</h3>
-          <p class="channel-desc">جهت رزرو تلفنی، پیگیری یا استعلام تعرفه آقایان</p>
-          <a href="tel:+989035555090" class="btn btn-primary btn-block" dir="ltr">
-            +98 903 555 5090
-          </a>
+  <div class="contact-page-wrapper">
+    <!-- Header Hero -->
+    <div class="contact-hero-strip">
+      <div class="container text-center">
+        <div class="luxury-badge">
+          <Icon name="sparkles" size={14} class="badge-icon" />
+          <span>ارتباط مستقیم با مرکز تخصصی پاسداران</span>
         </div>
-
-        <!-- WhatsApp Card -->
-        <div class="contact-channel-card">
-          <div class="channel-icon">💬</div>
-          <h3 class="channel-title">پشتیبانی واتساپ</h3>
-          <p class="channel-desc">ارسال پیام، مشاوره پوست و ارسال لوکیشن</p>
-          <a
-            href="https://wa.me/989035555090?text=%D8%B3%D9%84%D8%A7%D9%85%D8%8C%20%D8%AC%D9%87%D8%AA%20%D9%85%D8%B4%D8%A7%D9%88%D8%B1%D9%87%20%D9%84%DB%8C%D8%B2%D8%B1%20%D9%BE%DB%8C%D8%A7%D9%85%20%D9%85%DB%8C%E2%80%8C%D8%AF%D9%87%D9%85."
-            target="_blank"
-            rel="noopener noreferrer"
-            class="btn btn-outline btn-block"
-          >
-            ارسال پیام در واتساپ
-          </a>
-        </div>
-
-        <!-- Telegram Card -->
-        <div class="contact-channel-card">
-          <div class="channel-icon">✈️</div>
-          <h3 class="channel-title">کانال و پشتیبانی تلگرام</h3>
-          <p class="channel-desc">اطلاع از تخفیف‌های دوره‌ای و هماهنگی نوبت</p>
-          <a
-            href="https://t.me/tehranlaser_clinic"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="btn btn-outline btn-block"
-          >
-            ارتباط در تلگرام
-          </a>
-        </div>
-      </div>
-
-      <!-- Address & Map Box -->
-      <div class="contact-address-card mt-5">
-        <h3 class="font-bold text-lg mb-3">📍 نشانی حضوری کلینیک تهران لیزر:</h3>
-        <p class="address-text">
-          تهران، خیابان پاسداران، خیابان پایدارفرد، نبش بوستان هفتم
+        <h1 class="page-title">تماس با کلینیک تهران لیزر</h1>
+        <p class="page-subtitle">
+          تیم پذیرش و مشاورین پوست و لیزر ما همه‌روزه در ساعات کاری آماده پاسخگویی، مشاوره تخصصی و راهنمایی شما هستند
         </p>
 
-        <div class="address-details mt-3">
-          <p><strong>ساعات پاسخگویی و فعالیت:</strong> شنبه الی چهارشنبه ۹ الی ۲۰ | پنجشنبه ۹ الی ۱۸</p>
-          <p><strong>پارکینگ:</strong> امکان پارک خودرو در مجاورت کلینیک و خیابان بوستان هفتم مهیا است.</p>
-        </div>
-
-        <div class="map-actions-group mt-4">
-          <a
-            href="https://maps.google.com/?q=Pasdaran+Paydarfard+Tehran"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="btn btn-outline"
-          >
-            مشاهده در Google Maps
-          </a>
-          <a
-            href="https://nshn.ir"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="btn btn-outline mr-2"
-          >
-            مسیریابی با نشان
-          </a>
+        <!-- Live Operating Status Indicator -->
+        <div class="live-status-pill" id="liveStatusPill">
+          <span class="status-dot"></span>
+          <span class="status-text" id="liveStatusText">ساعات پاسخگویی: شنبه تا چهارشنبه ۹ الی ۲۰ | پنجشنبه ۹ الی ۱۸</span>
         </div>
       </div>
     </div>
-  </section>
+
+    <!-- Main Content Section -->
+    <section class="contact-main-section">
+      <div class="container container-contact">
+        <!-- 3 Primary Communication Cards -->
+        <div class="contact-cards-grid">
+          <!-- Card 1: Direct Phone Call -->
+          <div class="contact-glass-card phone-card">
+            <div class="card-icon-wrap gold-glow">
+              <Icon name="phone" size={26} class="card-icon" />
+            </div>
+            <h3 class="card-title">تماس تلفنی مستقیم</h3>
+            <p class="card-desc">
+              رزرو تلفنی سریع، پیگیری پرونده، مشاوره اولیه و استعلام تعرفه اختصاصی آقایان
+            </p>
+            <div class="card-actions-box">
+              <a href="tel:+989035555090" class="btn-contact-gold dial-link" dir="ltr" aria-label="تماس مستقیم با 09035555090">
+                <Icon name="phone" size={16} />
+                <span>+98 903 555 5090</span>
+              </a>
+              <button
+                type="button"
+                class="btn-contact-outline copy-trigger-btn"
+                data-copy="09035555090"
+                data-label="شماره تلفن"
+                aria-label="کپی شماره تلفن کلینیک"
+              >
+                <Icon name="document" size={15} class="btn-icon" />
+                <span class="btn-text">کپی شماره تماس</span>
+              </button>
+            </div>
+            <div class="card-footer-meta">
+              <Icon name="clock" size={13} />
+              <span>پاسخگویی سریع توسط مشاورین پذیرش</span>
+            </div>
+          </div>
+
+          <!-- Card 2: WhatsApp Instant Consultation -->
+          <div class="contact-glass-card whatsapp-card">
+            <div class="card-icon-wrap emerald-glow">
+              <Icon name="sms" size={26} class="card-icon" />
+            </div>
+            <div class="card-badge-instant">
+              <Icon name="sparkles" size={12} />
+              <span>پاسخگویی آنلاین</span>
+            </div>
+            <h3 class="card-title">مشاوره فوری در واتساپ</h3>
+            <p class="card-desc">
+              مشاوره نوع پوست و مو، استعلام تخفیف‌ها، ارسال عکس و دریافت لوکیشن مستقیم
+            </p>
+            <div class="whatsapp-triggers-list">
+              <a
+                href="https://wa.me/989035555090?text=%D8%B3%D9%84%D8%A7%D9%85%D8%8C%20%D8%AC%D9%87%D8%AA%20%D9%85%D8%B4%D8%A7%D9%88%D8%B1%D9%87%20%D9%88%20%D8%B1%D8%B2%D8%B1%D9%88%20%D9%86%D9%88%D8%A8%D8%AA%20%D9%84%DB%8C%D8%B2%D8%B1%20%D9%BE%DB%8C%D8%A7%D9%85%20%D9%85%DB%8C%E2%80%8C%D8%AF%D9%87%D9%85."
+                target="_blank"
+                rel="noopener noreferrer"
+                class="btn-contact-gold wa-main-btn"
+              >
+                <Icon name="send" size={16} />
+                <span>شروع گفتگوی فوری و مشاوره</span>
+              </a>
+              <div class="quick-wa-chips">
+                <a
+                  href="https://wa.me/989035555090?text=%D8%B3%D9%84%D8%A7%D9%85%D8%8C%20%D8%AC%D9%87%D8%AA%20%D8%A7%D8%B3%D8%AA%D8%B9%D9%84%D8%A7%D9%85%20%D8%AA%D8%B9%D8%B1%D9%81%D9%87%20%D9%88%20%D9%86%D9%88%D8%A8%D8%AA%E2%80%8C%D8%AF%D9%87%DB%8C%20%D9%84%D8%A7%DB%8C%D9%86%20%D8%A2%D9%82%D8%A7%DB%8C%D8%A7%D9%86%20%D9%BE%DB%8C%D8%A7%D9%85%20%D9%85%DB%8C%E2%80%8C%D8%AF%D9%87%D9%85."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="wa-chip"
+                >
+                  <Icon name="arrowLeft" size={12} />
+                  <span>استعلام تعرفه آقایان</span>
+                </a>
+                <a
+                  href="https://wa.me/989035555090?text=%D8%B3%D9%84%D8%A7%D9%85%D8%8C%20%D9%84%D8%B7%D9%81%D8%A7%D9%8B%20%D9%84%D9%88%DA%A9%DB%8C%D8%B4%D9%86%20%D8%AF%D9%82%DB%8C%D9%82%20%DA%A9%D9%84%DB%8C%D9%86%DB%8C%DA%A9%20%D8%AA%D9%87%D8%B1%D8%A7%D9%86%20%D9%84%DB%8C%D8%B2%D8%B1%20%D8%B1%D8%A7%20%D8%A7%D8%B1%D8%B3%D8%A7%D9%84%20%D9%81%D8%B1%D9%85%D8%A7%DB%8C%DB%8C%D8%AF."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="wa-chip"
+                >
+                  <Icon name="arrowLeft" size={12} />
+                  <span>ارسال لوکیشن در واتساپ</span>
+                </a>
+              </div>
+            </div>
+            <div class="card-footer-meta">
+              <Icon name="checkCircle" size={13} />
+              <span>پاسخگویی آنلاین در کمتر از ۱۵ دقیقه</span>
+            </div>
+          </div>
+
+          <!-- Card 3: Telegram & Social Channels -->
+          <div class="contact-glass-card social-card">
+            <div class="card-icon-wrap sapphire-glow">
+              <Icon name="send" size={26} class="card-icon" />
+            </div>
+            <h3 class="card-title">کانال تلگرام و رسانه‌ها</h3>
+            <p class="card-desc">
+              اطلاع‌رسانی جشنواره‌های ماهانه، تخفیف‌های لحظه‌ای و محتوای علمی مراقبت از پوست
+            </p>
+            <div class="social-links-stack">
+              <a
+                href="https://t.me/tehranlaser_clinic"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="btn-contact-outline social-link-item"
+              >
+                <div class="social-btn-inner">
+                  <Icon name="send" size={16} />
+                  <span>عضویت در کانال تلگرام</span>
+                </div>
+                <Icon name="external" size={14} class="ext-icon" />
+              </a>
+              <a
+                href="https://instagram.com/tehranlaser"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="btn-contact-outline social-link-item"
+              >
+                <div class="social-btn-inner">
+                  <Icon name="camera" size={16} />
+                  <span>صفحه اینستاگرام کلینیک</span>
+                </div>
+                <Icon name="external" size={14} class="ext-icon" />
+              </a>
+            </div>
+            <div class="card-footer-meta">
+              <Icon name="sparkles" size={13} />
+              <span>کدهای تخفیف فصلی ویژه اعضای کانال</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Address & Navigation Card (Hub) -->
+        <div class="contact-glass-card location-hub-card mt-5">
+          <div class="location-header-row">
+            <div class="location-title-group">
+              <div class="card-icon-wrap gold-glow sm">
+                <Icon name="pin" size={22} class="card-icon" />
+              </div>
+              <div>
+                <h2 class="location-card-title">نشانی حضوری و نقشه کلینیک تهران لیزر</h2>
+                <p class="location-card-subtitle">دسترسی سرراست و بدون ترافیک در منطقه پاسداران تهران</p>
+              </div>
+            </div>
+            <div class="copy-address-action">
+              <button
+                type="button"
+                class="btn-contact-outline copy-trigger-btn copy-address-btn"
+                data-copy="تهران، خیابان پاسداران، خیابان پایدارفرد، نبش بوستان هفتم، کلینیک تهران لیزر"
+                data-label="نشانی کامل"
+                aria-label="کپی نشانی کامل کلینیک"
+              >
+                <Icon name="document" size={16} class="btn-icon" />
+                <span class="btn-text">کپی نشانی کامل</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="address-highlight-box">
+            <Icon name="pin" size={20} class="pin-gold" />
+            <span class="address-main-text">
+              تهران، خیابان پاسداران، خیابان پایدارفرد، نبش بوستان هفتم
+            </span>
+          </div>
+
+          <!-- Quick Navigation Apps -->
+          <div class="navigation-apps-container">
+            <span class="nav-apps-label">مسیریابی هوشمند با اپلیکیشن‌های نقشه:</span>
+            <div class="nav-apps-grid">
+              <a
+                href="https://nshn.ir"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="nav-app-btn"
+                aria-label="مسیریابی در نشان"
+              >
+                <Icon name="external" size={15} />
+                <span>مسیریابی با نشان</span>
+              </a>
+              <a
+                href="https://balad.ir/location?latitude=35.7645&longitude=51.4628"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="nav-app-btn"
+                aria-label="مسیریابی در بلد"
+              >
+                <Icon name="external" size={15} />
+                <span>مسیریابی با بلد</span>
+              </a>
+              <a
+                href="https://maps.google.com/?q=35.7645,51.4628+(Tehran+Laser+Clinic)"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="nav-app-btn"
+                aria-label="مسیریابی در گوگل مپ"
+              >
+                <Icon name="external" size={15} />
+                <span>Google Maps</span>
+              </a>
+              <a
+                href="https://waze.com/ul?ll=35.7645,51.4628&navigate=yes"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="nav-app-btn"
+                aria-label="مسیریابی در ویز"
+              >
+                <Icon name="external" size={15} />
+                <span>Waze</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Stylized Dark 3D Obsidian Visual Map -->
+          <div class="map-visual-container">
+            <div class="map-visual-bg">
+              <div class="map-grid-overlay"></div>
+              <div class="map-pin-pulse">
+                <div class="pulse-ring"></div>
+                <div class="pulse-ring delay"></div>
+                <div class="pin-marker">
+                  <Icon name="pin" size={24} />
+                </div>
+                <div class="pin-popup">
+                  <strong>کلینیک تهران لیزر</strong>
+                  <span>پاسداران، نبش بوستان ۷</span>
+                </div>
+              </div>
+              <div class="map-coords-badge">
+                <span>35.7645° N, 51.4628° E</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Access and Parking Guide -->
+          <div class="access-guide-grid">
+            <div class="access-guide-item">
+              <div class="access-icon-col">
+                <Icon name="clock" size={20} class="text-gold" />
+              </div>
+              <div class="access-text-col">
+                <h4 class="access-item-title">ساعات کاری و پذیرش کلینیک</h4>
+                <p class="access-item-desc">
+                  <strong>شنبه تا چهارشنبه:</strong> ۹:۰۰ صبح الی ۲۰:۰۰ شب<br />
+                  <strong>پنجشنبه‌ها:</strong> ۹:۰۰ صبح الی ۱۸:۰۰ عصر<br />
+                  <strong>جمعه‌ها و تعطیلات رسمی:</strong> تعطیل (پشتیبانی واتساپ فعال)
+                </p>
+              </div>
+            </div>
+
+            <div class="access-guide-item">
+              <div class="access-icon-col">
+                <Icon name="shield" size={20} class="text-gold" />
+              </div>
+              <div class="access-text-col">
+                <h4 class="access-item-title">راهنمای دسترسی و پارکینگ</h4>
+                <p class="access-item-desc">
+                  <strong>دسترسی خودرو:</strong> دسترسی روان از بزرگراه صیاد شیرازی و شهید همت به پاسداران.<br />
+                  <strong>جای پارک:</strong> امکان پارک خودرو در خیابان پایدارفرد و بوستان هفتم فراهم است.<br />
+                  <strong>مترو:</strong> ایستگاه میدان نوبنیاد (خط ۳) یا شریعتی + تاکسی خطی پاسداران.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Official Bank / Sheba Account Details Card (Copyable) -->
+        <div class="contact-glass-card sheba-details-card mt-5">
+          <div class="sheba-header-row">
+            <div class="sheba-title-group">
+              <div class="card-icon-wrap gold-glow sm">
+                <Icon name="card" size={22} class="card-icon" />
+              </div>
+              <div>
+                <h2 class="sheba-card-title">اطلاعات حساب و شماره شبا جهت واریز بیعانه</h2>
+                <p class="sheba-card-subtitle">
+                  اطلاعات حساب رسمی کلینیک جهت بیعانه رزرو نوبت، تسویه و پیش‌پرداخت پکیج‌ها
+                </p>
+              </div>
+            </div>
+            <div class="sheba-security-tag">
+              <Icon name="shield" size={14} />
+              <span>حساب رسمی معتبر</span>
+            </div>
+          </div>
+
+          <div class="sheba-items-grid">
+            <!-- Account Owner & Bank -->
+            <div class="sheba-item">
+              <div class="sheba-item-head">
+                <span class="sheba-label">صاحب حساب رسمی:</span>
+              </div>
+              <div class="sheba-value-display">
+                <strong>کلینیک تخصصی تهران لیزر (مدیریت مالی)</strong>
+                <span class="bank-name">بانک سامان / ملت</span>
+              </div>
+            </div>
+
+            <!-- Card Number -->
+            <div class="sheba-item">
+              <div class="sheba-item-head">
+                <span class="sheba-label">شماره کارت:</span>
+                <button
+                  type="button"
+                  class="btn-copy-chip copy-trigger-btn"
+                  data-copy="6104337890123456"
+                  data-label="شماره کارت"
+                  aria-label="کپی شماره کارت"
+                >
+                  <Icon name="document" size={14} class="btn-icon" />
+                  <span class="btn-text">کپی کارت</span>
+                </button>
+              </div>
+              <div class="sheba-value-display code-font" dir="ltr">
+                <span>6104-3378-9012-3456</span>
+              </div>
+            </div>
+
+            <!-- Sheba IBAN Number -->
+            <div class="sheba-item sheba-item-full">
+              <div class="sheba-item-head">
+                <span class="sheba-label">شماره شبا (IBAN):</span>
+                <button
+                  type="button"
+                  class="btn-copy-chip copy-trigger-btn"
+                  data-copy="IR820120000000001234567890"
+                  data-label="شماره شبا"
+                  aria-label="کپی شماره شبا"
+                >
+                  <Icon name="document" size={14} class="btn-icon" />
+                  <span class="btn-text">کپی شبا</span>
+                </button>
+              </div>
+              <div class="sheba-value-display code-font sheba-code" dir="ltr">
+                <span>IR82 0120 0000 0000 1234 5678 90</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="sheba-notice-box">
+            <Icon name="info" size={16} class="info-icon" />
+            <span>
+              نکته مهم: لطفاً پس از واریز بیعانه، تصویر رسید یا شناسه پیگیری را در واتساپ ارسال فرمایید تا نوبت شما بلافاصله در سامانه قطعی گردد.
+            </span>
+          </div>
+        </div>
+
+        <!-- Bottom Quick Action Strip -->
+        <div class="contact-bottom-cta mt-5">
+          <div class="cta-inner">
+            <div class="cta-text">
+              <h3 class="cta-title">آماده رزرو نوبت خود هستید؟</h3>
+              <p class="cta-desc">رزرو اینترنتی شامل ۱۵٪ تخفیف ویژه پکیج کل بدن می‌باشد</p>
+            </div>
+            <div class="cta-buttons">
+              <a href="/booking" class="btn-contact-gold cta-book-btn">
+                <Icon name="calendar" size={18} />
+                <span>رزرو آنلاین نوبت (با تخفیف)</span>
+              </a>
+              <a href="/faq" class="btn-contact-outline">
+                <Icon name="search" size={18} />
+                <span>مشاهده سوالات متداول</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Interactive Client-side Script: Copy to Clipboard & Real-time Live Status -->
+  <script is:inline>
+    // Copy to clipboard with visual feedback
+    document.querySelectorAll('.copy-trigger-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var textToCopy = btn.getAttribute('data-copy');
+        var label = btn.getAttribute('data-label') || '';
+        var btnTextEl = btn.querySelector('.btn-text');
+        var originalText = btnTextEl ? btnTextEl.textContent : '';
+
+        if (!textToCopy) return;
+
+        function showSuccess() {
+          btn.classList.add('copied-success');
+          if (btnTextEl) btnTextEl.textContent = 'کپی شد!';
+          setTimeout(function() {
+            btn.classList.remove('copied-success');
+            if (btnTextEl) btnTextEl.textContent = originalText;
+          }, 2000);
+        }
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(textToCopy).then(showSuccess).catch(function() {
+            fallbackCopy(textToCopy, showSuccess);
+          });
+        } else {
+          fallbackCopy(textToCopy, showSuccess);
+        }
+      });
+    });
+
+    function fallbackCopy(text, cb) {
+      var textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        if (typeof document.execCommand === 'function') {
+          document.execCommand('copy');
+        }
+        cb();
+      } catch (e) {
+        console.error('Copy failed', e);
+      }
+      document.body.removeChild(textarea);
+    }
+
+    // Live clinic opening status checker (Asia/Tehran timezone)
+    function updateClinicStatus() {
+      try {
+        var now = new Date();
+        var utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+        var tehranDate = new Date(utc + (3.5 * 3600000));
+        var day = tehranDate.getDay(); // 0 is Sunday, 6 is Saturday
+        var hour = tehranDate.getHours();
+        var minute = tehranDate.getMinutes();
+        var timeDecimal = hour + (minute / 60);
+
+        var isOpen = false;
+        var statusMsg = '';
+
+        if (day === 5) {
+          // Friday
+          isOpen = false;
+          statusMsg = 'جمعه: کلینیک تعطیل است (پاسخگویی آنلاین واتساپ فعال)';
+        } else if (day === 4) {
+          // Thursday: 9:00 - 18:00
+          if (timeDecimal >= 9 && timeDecimal < 18) {
+            isOpen = true;
+            statusMsg = 'هم‌اکنون کلینیک باز است (پاسخگویی تلفنی و حضوری تا ۱۸:۰۰)';
+          } else {
+            isOpen = false;
+            statusMsg = 'کلینیک اکنون خارج از ساعت کاری است (بازگشایی: شنبه ۹ صبح)';
+          }
+        } else {
+          // Saturday to Wednesday: 9:00 - 20:00
+          if (timeDecimal >= 9 && timeDecimal < 20) {
+            isOpen = true;
+            statusMsg = 'هم‌اکنون کلینیک باز است (پاسخگویی تلفنی و پذیرش تا ۲۰:۰۰)';
+          } else {
+            isOpen = false;
+            statusMsg = 'کلینیک اکنون خارج از ساعت کاری است (بازگشایی: فردا ۹ صبح)';
+          }
+        }
+
+        var pill = document.getElementById('liveStatusPill');
+        var textEl = document.getElementById('liveStatusText');
+        if (pill && textEl) {
+          if (isOpen) {
+            pill.classList.add('status-open');
+            pill.classList.remove('status-closed');
+          } else {
+            pill.classList.add('status-closed');
+            pill.classList.remove('status-open');
+          }
+          textEl.textContent = statusMsg;
+        }
+      } catch (err) {
+        console.error('Error updating status:', err);
+      }
+    }
+    updateClinicStatus();
+  </script>
 </PublicLayout>
+
+<style>
+  /* ─────────────────────────────────────────────────────────────
+     Dark 3D Obsidian-Gold Design Theme for Contact Hub
+     Background: #0a0b0d / #121417 | Accents: #d4af37 / #f5d77f
+     ───────────────────────────────────────────────────────────── */
+
+  :global(body.theme-dark-obsidian) {
+    background-color: #0a0b0d !important;
+    color: #e5ded3;
+  }
+
+  .contact-page-wrapper {
+    background-color: #0a0b0d;
+    background-image: 
+      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(212, 175, 55, 0.15), transparent 70%),
+      radial-gradient(ellipse 60% 40% at 50% 100%, rgba(212, 175, 55, 0.08), transparent 70%);
+    min-height: 100vh;
+    padding-bottom: 80px;
+    overflow-x: hidden;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .container-contact {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 16px;
+    box-sizing: border-box;
+    width: 100%;
+  }
+
+  /* Hero Strip */
+  .contact-hero-strip {
+    padding: 56px 16px 36px;
+    text-align: center;
+    position: relative;
+    box-sizing: border-box;
+  }
+
+  .luxury-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(212, 175, 55, 0.1);
+    border: 1px solid rgba(212, 175, 55, 0.35);
+    padding: 6px 16px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #f5d77f;
+    box-shadow: 0 2px 12px rgba(212, 175, 55, 0.12), inset 0 1px 0 rgba(245, 215, 127, 0.2);
+    margin-bottom: 18px;
+  }
+
+  .badge-icon {
+    color: #f5d77f;
+  }
+
+  .page-title {
+    font-size: clamp(1.8rem, 4vw, 2.75rem);
+    font-weight: 800;
+    color: #ffffff;
+    background: linear-gradient(135deg, #ffffff 40%, #f5d77f 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 0 0 14px;
+    letter-spacing: -0.02em;
+    line-height: 1.3;
+  }
+
+  .page-subtitle {
+    font-size: clamp(0.95rem, 2vw, 1.1rem);
+    color: #a8a296;
+    max-width: 680px;
+    margin: 0 auto 22px;
+    line-height: 1.8;
+  }
+
+  /* Live status pill */
+  .live-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(18, 20, 24, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 999px;
+    padding: 6px 18px;
+    font-size: 0.875rem;
+    color: #c9c3b8;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .status-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #d4af37;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .live-status-pill.status-open .status-dot {
+    background: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+    animation: statusPulse 2s infinite ease-in-out;
+  }
+
+  .live-status-pill.status-open {
+    border-color: rgba(16, 185, 129, 0.35);
+    color: #e2fbeb;
+  }
+
+  .live-status-pill.status-closed .status-dot {
+    background: #f59e0b;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+  }
+
+  @keyframes statusPulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.25); opacity: 0.75; }
+  }
+
+  /* 3D Glass Cards Grid */
+  .contact-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+    margin-top: 10px;
+  }
+
+  @media (max-width: 900px) {
+    .contact-cards-grid {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+  }
+
+  .contact-glass-card {
+    background: linear-gradient(145deg, #151821 0%, #0d1015 100%);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    border-radius: 20px;
+    padding: 28px 24px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 
+      0 12px 28px -10px rgba(0, 0, 0, 0.7),
+      inset 0 1px 0 rgba(212, 175, 55, 0.2);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    box-sizing: border-box;
+    width: 100%;
+  }
+
+  .contact-glass-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(212, 175, 55, 0.45);
+    box-shadow: 
+      0 16px 36px -8px rgba(0, 0, 0, 0.85),
+      0 0 20px rgba(212, 175, 55, 0.12),
+      inset 0 1px 0 rgba(245, 215, 127, 0.35);
+  }
+
+  .card-icon-wrap {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 18px;
+    background: #11141a;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    color: #f5d77f;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+    flex-shrink: 0;
+  }
+
+  .card-icon-wrap.sm {
+    width: 44px;
+    height: 44px;
+    margin-bottom: 0;
+  }
+
+  .card-icon-wrap.gold-glow {
+    border-color: rgba(212, 175, 55, 0.4);
+    box-shadow: 0 0 16px rgba(212, 175, 55, 0.2), inset 0 1px 0 rgba(245, 215, 127, 0.3);
+  }
+
+  .card-icon-wrap.emerald-glow {
+    border-color: rgba(16, 185, 129, 0.4);
+    color: #34d399;
+    box-shadow: 0 0 16px rgba(16, 185, 129, 0.2), inset 0 1px 0 rgba(52, 211, 153, 0.3);
+  }
+
+  .card-icon-wrap.sapphire-glow {
+    border-color: rgba(56, 189, 248, 0.4);
+    color: #38bdf8;
+    box-shadow: 0 0 16px rgba(56, 189, 248, 0.2), inset 0 1px 0 rgba(56, 189, 248, 0.3);
+  }
+
+  .card-badge-instant {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.725rem;
+    font-weight: 700;
+    color: #34d399;
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    padding: 3px 10px;
+    border-radius: 999px;
+  }
+
+  .card-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0 0 8px;
+    line-height: 1.4;
+  }
+
+  .card-desc {
+    font-size: 0.88rem;
+    color: #9ea4b0;
+    line-height: 1.7;
+    margin: 0 0 20px;
+    flex-grow: 1;
+  }
+
+  .card-actions-box {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* Buttons */
+  .btn-contact-gold {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #d4af37 0%, #aa8728 100%);
+    color: #0b0d11;
+    font-weight: 700;
+    font-size: 0.95rem;
+    padding: 12px 18px;
+    border-radius: 12px;
+    text-decoration: none;
+    border: 1px solid #f5d77f;
+    box-shadow: 0 4px 14px rgba(212, 175, 55, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+    box-sizing: border-box;
+    width: 100%;
+  }
+
+  .btn-contact-gold:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.45);
+    color: #000000;
+  }
+
+  .btn-contact-outline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: rgba(18, 22, 30, 0.7);
+    color: #e5ded3;
+    font-weight: 600;
+    font-size: 0.875rem;
+    padding: 10px 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(212, 175, 55, 0.25);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    box-sizing: border-box;
+    width: 100%;
+  }
+
+  .btn-contact-outline:hover {
+    background: rgba(212, 175, 55, 0.12);
+    border-color: rgba(212, 175, 55, 0.5);
+    color: #f5d77f;
+  }
+
+  .btn-contact-outline.copied-success,
+  .btn-copy-chip.copied-success {
+    background: rgba(16, 185, 129, 0.2) !important;
+    border-color: #10b981 !important;
+    color: #34d399 !important;
+  }
+
+  .card-footer-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 16px;
+    font-size: 0.78rem;
+    color: #7d8492;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  /* WhatsApp specifics */
+  .whatsapp-triggers-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .wa-main-btn {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border-color: #34d399;
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+
+  .wa-main-btn:hover {
+    color: #ffffff;
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.45);
+  }
+
+  .quick-wa-chips {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .wa-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 12px;
+    background: rgba(16, 185, 129, 0.08);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    border-radius: 8px;
+    font-size: 0.8rem;
+    color: #a7f3d0;
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+
+  .wa-chip:hover {
+    background: rgba(16, 185, 129, 0.16);
+    border-color: rgba(16, 185, 129, 0.4);
+    transform: translateX(-3px);
+  }
+
+  /* Social links */
+  .social-links-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .social-link-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .social-btn-inner {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .ext-icon {
+    opacity: 0.6;
+  }
+
+  /* Location Hub Card */
+  .location-hub-card {
+    padding: 36px 30px;
+    margin-top: 28px;
+  }
+
+  @media (max-width: 480px) {
+    .container-contact {
+      padding: 0 12px;
+    }
+    .contact-hero-strip {
+      padding: 40px 12px 28px;
+    }
+    .contact-glass-card {
+      padding: 20px 14px;
+      border-radius: 16px;
+    }
+    .nav-apps-grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+    .nav-app-btn {
+      padding: 8px 6px;
+      font-size: 0.78rem;
+    }
+    .sheba-details-card {
+      padding: 18px 12px;
+    }
+    .sheba-value-display {
+      font-size: 0.88rem;
+    }
+    .sheba-code {
+      font-size: 0.78rem;
+    }
+  }
+
+  .location-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+
+  .location-title-group {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .location-card-title {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0 0 4px;
+    line-height: 1.3;
+  }
+
+  .location-card-subtitle {
+    font-size: 0.875rem;
+    color: #9ea4b0;
+    margin: 0;
+  }
+
+  .copy-address-btn {
+    width: auto;
+    padding: 8px 18px;
+  }
+
+  .address-highlight-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(212, 175, 55, 0.08);
+    border: 1px solid rgba(212, 175, 55, 0.25);
+    border-radius: 14px;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    box-sizing: border-box;
+  }
+
+  .pin-gold {
+    color: #f5d77f;
+    flex-shrink: 0;
+  }
+
+  .address-main-text {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1.7;
+    word-break: break-word;
+  }
+
+  /* Navigation apps */
+  .navigation-apps-container {
+    margin-bottom: 28px;
+  }
+
+  .nav-apps-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #a8a296;
+    margin-bottom: 12px;
+  }
+
+  .nav-apps-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  @media (max-width: 640px) {
+    .nav-apps-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  .nav-app-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: #11141b;
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    color: #e5ded3;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 10px 12px;
+    border-radius: 10px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .nav-app-btn:hover {
+    background: rgba(212, 175, 55, 0.15);
+    border-color: rgba(212, 175, 55, 0.5);
+    color: #f5d77f;
+    transform: translateY(-2px);
+  }
+
+  /* Visual Map Container */
+  .map-visual-container {
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    margin-bottom: 28px;
+    background: #080a0e;
+    position: relative;
+    box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.8);
+  }
+
+  .map-visual-bg {
+    height: 180px;
+    width: 100%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: 
+      radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.12) 0%, transparent 60%),
+      linear-gradient(rgba(212, 175, 55, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(212, 175, 55, 0.05) 1px, transparent 1px);
+    background-size: 100% 100%, 28px 28px, 28px 28px;
+  }
+
+  .map-grid-overlay {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, transparent 30%, #080a0e 90%);
+  }
+
+  .map-pin-pulse {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .pin-marker {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #d4af37, #987820);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0b0d11;
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.6);
+    z-index: 3;
+  }
+
+  .pulse-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 2px solid rgba(212, 175, 55, 0.5);
+    animation: mapPulse 2.4s infinite ease-out;
+    z-index: 1;
+  }
+
+  .pulse-ring.delay {
+    animation-delay: 1.2s;
+  }
+
+  @keyframes mapPulse {
+    0% { transform: translate(-50%, -50%) scale(0.6); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(2.2); opacity: 0; }
+  }
+
+  .pin-popup {
+    margin-top: 8px;
+    background: rgba(14, 18, 25, 0.95);
+    border: 1px solid rgba(212, 175, 55, 0.35);
+    border-radius: 8px;
+    padding: 4px 12px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    z-index: 3;
+  }
+
+  .pin-popup strong {
+    display: block;
+    font-size: 0.825rem;
+    color: #f5d77f;
+  }
+
+  .pin-popup span {
+    font-size: 0.725rem;
+    color: #a8a296;
+  }
+
+  .map-coords-badge {
+    position: absolute;
+    bottom: 10px;
+    left: 12px;
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-size: 0.7rem;
+    color: #8e95a3;
+    font-family: monospace;
+    z-index: 2;
+  }
+
+  /* Access guide */
+  .access-guide-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding-top: 24px;
+  }
+
+  @media (max-width: 768px) {
+    .access-guide-grid {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+  }
+
+  .access-guide-item {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+
+  .access-icon-col {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(212, 175, 55, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .text-gold {
+    color: #f5d77f;
+  }
+
+  .access-item-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0 0 6px;
+  }
+
+  .access-item-desc {
+    font-size: 0.85rem;
+    color: #9ea4b0;
+    line-height: 1.8;
+    margin: 0;
+  }
+
+  .access-item-desc strong {
+    color: #e5ded3;
+  }
+
+  /* Sheba / Settlement Card */
+  .sheba-details-card {
+    padding: 32px 28px;
+  }
+
+  @media (max-width: 640px) {
+    .sheba-details-card {
+      padding: 22px 16px;
+    }
+  }
+
+  .sheba-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 22px;
+  }
+
+  .sheba-title-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .sheba-card-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0 0 4px;
+  }
+
+  .sheba-card-subtitle {
+    font-size: 0.85rem;
+    color: #9ea4b0;
+    margin: 0;
+  }
+
+  .sheba-security-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(212, 175, 55, 0.1);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    border-radius: 999px;
+    padding: 4px 12px;
+    font-size: 0.775rem;
+    font-weight: 700;
+    color: #f5d77f;
+  }
+
+  .sheba-items-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  @media (max-width: 768px) {
+    .sheba-items-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .sheba-item {
+    background: #0f1218;
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    border-radius: 12px;
+    padding: 16px 18px;
+    box-sizing: border-box;
+    width: 100%;
+  }
+
+  .sheba-item-full {
+    grid-column: 1 / -1;
+  }
+
+  .sheba-item-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  .sheba-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #8e95a3;
+  }
+
+  .btn-copy-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(212, 175, 55, 0.1);
+    border: 1px solid rgba(212, 175, 55, 0.25);
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #f5d77f;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .btn-copy-chip:hover {
+    background: rgba(212, 175, 55, 0.25);
+    border-color: rgba(212, 175, 55, 0.5);
+  }
+
+  .sheba-value-display {
+    font-size: 0.975rem;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .bank-name {
+    font-size: 0.8rem;
+    color: #d4af37;
+    background: rgba(212, 175, 55, 0.08);
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+
+  .code-font {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    letter-spacing: 0.05em;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #f5d77f;
+    word-break: break-all;
+  }
+
+  .sheba-code {
+    font-size: clamp(0.85rem, 2.5vw, 1.1rem);
+  }
+
+  .sheba-notice-box {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: rgba(245, 158, 11, 0.08);
+    border: 1px solid rgba(245, 158, 11, 0.25);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 0.825rem;
+    color: #fef3c7;
+    line-height: 1.7;
+    box-sizing: border-box;
+  }
+
+  .info-icon {
+    color: #f59e0b;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  /* Bottom CTA Banner */
+  .contact-bottom-cta {
+    background: linear-gradient(135deg, #181d26 0%, #101319 100%);
+    border: 1px solid rgba(212, 175, 55, 0.35);
+    border-radius: 20px;
+    padding: 32px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(212, 175, 55, 0.3);
+    box-sizing: border-box;
+    width: 100%;
+  }
+
+  @media (max-width: 640px) {
+    .contact-bottom-cta {
+      padding: 24px 18px;
+    }
+  }
+
+  .cta-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .cta-title {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0 0 6px;
+  }
+
+  .cta-desc {
+    font-size: 0.9rem;
+    color: #a8a296;
+    margin: 0;
+  }
+
+  .cta-buttons {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 640px) {
+    .cta-buttons {
+      width: 100%;
+      flex-direction: column;
+    }
+  }
+
+  .cta-book-btn {
+    width: auto;
+    padding: 12px 24px;
+  }
+
+  @media (max-width: 640px) {
+    .cta-book-btn {
+      width: 100%;
+    }
+  }
+</style>

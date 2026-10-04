@@ -13,6 +13,11 @@ try {
 } catch (e) {
   console.error('Failed to load customers:', e);
 }
+
+const categoryParam = url.searchParams.get('category') || undefined;
+const displayedItems = categoryParam
+  ? customers.items.filter((c) => c.pricingCategory === categoryParam)
+  : customers.items;
 ---
 
 <AdminLayout title="بانک مراجعین" activeNav="customers">
@@ -78,7 +83,7 @@ try {
               </tr>
             </thead>
             <tbody>
-              {customers.items.map((c) => (
+              {displayedItems.map((c) => (
                 <tr>
                   <td style={{ fontWeight: 800, color: '#ffffff' }}>{c.name}</td>
                   <td dir="ltr">

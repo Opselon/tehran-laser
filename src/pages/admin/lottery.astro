@@ -4,24 +4,42 @@ import { env } from 'cloudflare:workers';
 import { formatJalaliDate } from '../../lib/datetime/jalali';
 import Icon from '../../components/ui/Icon.astro';
 
-let campaigns: any[] = [];
-let activeCampaign: any = null;
+interface LotteryCampaign {
+  id: string;
+  title: string;
+  prize: string;
+  status: string;
+  min_spending: number;
+  winner_name?: string | null;
+  winner_phone?: string | null;
+  draw_date?: string | null;
+  created_at?: string;
+}
+
+let campaigns: LotteryCampaign[] = [];
+let activeCampaign: LotteryCampaign | null = null;
 
 try {
   const result = await env.DB.prepare(`SELECT * FROM lottery_campaigns ORDER BY created_at DESC`).all();
-  campaigns = result.results as any[] || [];
-  activeCampaign = campaigns.find(c => c.status === 'active') || campaigns[0] || null;
+  campaigns = (result.results as unknown as LotteryCampaign[]) || [];
+  activeCampaign = campaigns.find((c) => c.status === 'active') || campaigns[0] || null;
 } catch (e) {
   console.error('Failed to load lottery data:', e);
 }
+
+const totalWinners = campaigns.filter((c) => Boolean(c.winner_name)).length;
+const totalCampaigns = campaigns.length;
 ---
 
 <AdminLayout title="قرعه‌کشی و گردونه شانس" activeNav="lottery">
   <div class="admin-content-pad">
+    <!-- Header -->
     <div class="dashboard-header-row">
       <div>
-        <h1 class="admin-page-title" style="display: flex; align-items: center; gap: 10px;">
-          <Icon name="lottery" size={26} class="title-icon" />
+        <h1 class="admin-page-title" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+          <span class="lottery-title-emblem">
+            <Icon name="lottery" size={24} />
+          </span>
           <span>قرعه‌کشی هوشمند و گردونه شانس مراجعین</span>
         </h1>
         <p class="section-block-sub">
@@ -29,78 +47,233 @@ try {
         </p>
       </div>
       <div class="actions">
-        <button id="openNewLotteryModalBtn" class="btn-3d-gold">
-          <span>+ تعریف کمپین قرعه‌کشی جدید</span>
+        <button id="openNewLotteryModalBtn" class="btn-3d-gold" type="button">
+          <Icon name="plus" size={16} />
+          <span>تعریف کمپین قرعه‌کشی جدید</span>
         </button>
+      </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="lotteryFeedbackToast" class="lottery-toast" style="display: none;" role="alert">
+      <div class="lottery-toast-inner">
+        <span id="lotteryToastIcon" class="lottery-toast-icon">
+          <Icon name="checkCircle" size={18} />
+        </span>
+        <span id="lotteryToastText" class="lottery-toast-text"></span>
+      </div>
+    </div>
+
+    <!-- KPI Grid -->
+    <div class="kpi-grid-3d" style="grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); margin-bottom: 26px;">
+      <div class="kpi-card-3d">
+        <div class="kpi-header">
+          <span class="kpi-title">وضعیت دوره جاری</span>
+          <span class="kpi-icon" style="color: #34d399;">
+            <Icon name="lottery" size={22} />
+          </span>
+        </div>
+        <div class="kpi-value" style="color: #34d399; font-size: 1.55rem;">
+          {activeCampaign && activeCampaign.status === 'active' ? 'در حال ثبت‌نام' : 'آماده تعریف'}
+        </div>
+        <div class="kpi-footer" style="color: #34d399; display: flex; align-items: center; gap: 6px;">
+          <span class="live-dot"></span>
+          <span>انتخاب رمزنگاری‌شده D1</span>
+        </div>
+      </div>
+
+      <div class="kpi-card-3d">
+        <div class="kpi-header">
+          <span class="kpi-title">جایزه ویژه دوره جاری</span>
+          <span class="kpi-icon" style="color: #f5d77f;">
+            <Icon name="gem" size={22} />
+          </span>
+        </div>
+        <div class="kpi-value" style="color: #f5d77f; font-size: 1.25rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title={activeCampaign?.prize || 'تعریف نشده'}>
+          {activeCampaign?.prize || 'تعریف نشده'}
+        </div>
+        <div class="kpi-footer" style="color: #cbd5e1;">
+          جلسات رایگان لیزر کندلا
+        </div>
+      </div>
+
+      <div class="kpi-card-3d">
+        <div class="kpi-header">
+          <span class="kpi-title">حداقل فاکتور واجد شرایط</span>
+          <span class="kpi-icon" style="color: #38bdf8;">
+            <Icon name="cash" size={22} />
+          </span>
+        </div>
+        <div class="kpi-value" style="color: #38bdf8;">
+          {activeCampaign && activeCampaign.min_spending > 0
+            ? `${(activeCampaign.min_spending * 1000).toLocaleString('fa-IR')} ت`
+            : 'بدون شرط'}
+        </div>
+        <div class="kpi-footer" style="color: #94a3b8;">
+          محاسبه خودکار از ماژول حسابداری
+        </div>
+      </div>
+
+      <div class="kpi-card-3d">
+        <div class="kpi-header">
+          <span class="kpi-title">کل برندگان ثبت‌شده</span>
+          <span class="kpi-icon" style="color: #a78bfa;">
+            <Icon name="users" size={22} />
+          </span>
+        </div>
+        <div class="kpi-value" style="color: #a78bfa;">
+          {totalWinners} <span style="font-size: 0.9rem; color: #94a3b8; font-weight: 500;">نفر</span>
+        </div>
+        <div class="kpi-footer" style="color: #94a3b8;">
+          از مجموع {totalCampaigns} دوره برگزار شده
+        </div>
       </div>
     </div>
 
     <!-- Active Campaign Highlight Box -->
     {activeCampaign ? (
-      <div class="admin-section-block" style="padding: 28px; margin-bottom: 26px; border-color: rgba(212, 175, 55, 0.4); background: radial-gradient(circle at top right, rgba(212, 175, 55, 0.1), rgba(15, 23, 42, 0.95));">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
-          <div>
-            <span class="badge-status-confirmed" style="margin-bottom: 8px; display: inline-block;">
-              {activeCampaign.status === 'active' ? '🟢 دوره فعال در حال ثبت نام' : '✓ قرعه‌کشی انجام شده'}
-            </span>
-            <h2 style="font-size: 1.5rem; font-weight: 800; color: #f5d77f; margin-bottom: 6px;">
+      <div class="lottery-active-hero admin-section-block">
+        <div class="lottery-hero-top">
+          <div class="lottery-hero-info">
+            <div style="margin-bottom: 8px;">
+              {activeCampaign.status === 'active' ? (
+                <span class="badge-status badge-status-confirmed">
+                  <Icon name="checkCircle" size={12} />
+                  <span>دوره فعال در حال ثبت نام و واجدین شرایط</span>
+                </span>
+              ) : (
+                <span class="badge-status badge-status-completed">
+                  <Icon name="check" size={12} />
+                  <span>قرعه‌کشی با موفقیت انجام شده</span>
+                </span>
+              )}
+            </div>
+            <h2 class="lottery-hero-title">
               {activeCampaign.title}
             </h2>
-            <p style="color: #cbd5e1; font-size: 0.95rem;">
-              🎁 جایزه ویژه این دوره: <strong style="color: #38bdf8;">{activeCampaign.prize}</strong>
-            </p>
+            <div class="lottery-prize-strip">
+              <span class="lottery-prize-icon">
+                <Icon name="gem" size={18} />
+              </span>
+              <span class="lottery-prize-label">جایزه ویژه برنده:</span>
+              <strong class="lottery-prize-name">{activeCampaign.prize}</strong>
+            </div>
           </div>
 
-          <div style="text-align: left;">
-            <div style="font-size: 0.8rem; color: #94a3b8;">حداقل خرید جهت شرکت:</div>
-            <div style="font-size: 1.1rem; font-weight: 800; color: #34d399;">
-              {activeCampaign.min_spending > 0 ? `${(activeCampaign.min_spending * 1000).toLocaleString('fa-IR')} تومان` : 'بدون محدودیت'}
+          <div class="lottery-hero-spend">
+            <span class="lottery-spend-label">حداقل خرید جهت شرکت:</span>
+            <div class="lottery-spend-val">
+              {activeCampaign.min_spending > 0
+                ? `${(activeCampaign.min_spending * 1000).toLocaleString('fa-IR')} تومان`
+                : 'بدون محدودیت خرید'}
             </div>
+            <span class="lottery-spend-sub">ورود خودکار فاکتورهای واجد شرایط</span>
           </div>
         </div>
 
         <!-- Draw Stage / Wheel Interaction -->
-        <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 28px; text-align: center;">
-          <div id="drawVisualContainer" style="margin-bottom: 20px;">
-            <div id="winnerDisplayBox" style="display: none; padding: 20px; background: rgba(16, 185, 129, 0.15); border: 2px solid #34d399; border-radius: 14px; max-width: 480px; margin: 0 auto;">
-              <div style="font-size: 2.5rem; margin-bottom: 8px;">🎉</div>
-              <h3 style="color: #34d399; font-weight: 800; font-size: 1.3rem; margin-bottom: 4px;">برنده خوش‌شانس این دوره:</h3>
-              <div id="winnerNameText" style="font-size: 1.5rem; font-weight: 900; color: #f8fafc; margin-bottom: 4px;">--</div>
-              <div id="winnerPhoneText" dir="ltr" style="font-size: 1rem; color: #94a3b8; font-family: monospace;">--</div>
-              <p style="font-size: 0.85rem; color: #34d399; margin-top: 10px;">
-                ✓ پیامک تبریک به شماره برنده ارسال گردید.
-              </p>
+        <div class="lottery-stage-card">
+          <div id="drawVisualContainer">
+            <!-- Winner Celebration Display -->
+            <div id="winnerDisplayBox" class="winner-reveal-box" style="display: none;">
+              <div class="winner-sparkle-emblem">
+                <Icon name="sparkles" size={36} />
+              </div>
+              <h3 class="winner-reveal-heading">برنده خوش‌شانس این دوره تهران لیزر</h3>
+              <div id="winnerNameText" class="winner-name-display">--</div>
+              <div id="winnerPhoneText" dir="ltr" class="winner-phone-display">--</div>
+              <div class="winner-sms-badge">
+                <Icon name="checkCircle" size={15} />
+                <span>پیامک تبریک رسمی و کد جایزه به شماره برنده ارسال گردید.</span>
+              </div>
             </div>
 
-            <div id="wheelIdleBox">
-              <div style="font-size: 3.5rem; margin-bottom: 12px; animation: bounce 2s infinite;">🎰</div>
-              <h3 style="color: #f8fafc; font-size: 1.2rem; font-weight: 700; margin-bottom: 8px;">
-                {activeCampaign.status === 'active' ? 'آماده اجرای قرعه‌کشی بین مراجعین دوره' : `برنده دوره: ${activeCampaign.winner_name || 'ثبت شده'}`}
+            <!-- 3D Interactive Obsidian-Gold Wheel Stage -->
+            <div id="wheelIdleBox" class="wheel-stage-idle">
+              <div class="lottery-wheel-wrapper">
+                <div class="lottery-wheel-pointer">
+                  <span class="pointer-arrow"></span>
+                </div>
+                <div id="goldenWheelCanvas" class="lottery-wheel-disc">
+                  <svg viewBox="0 0 200 200" class="wheel-svg" aria-hidden="true">
+                    <circle cx="100" cy="100" r="96" fill="#0f172a" stroke="rgba(212, 175, 55, 0.6)" stroke-width="4" />
+                    <!-- Wheel Sectors -->
+                    <g opacity="0.85">
+                      <path d="M100 100 L100 4 A96 96 0 0 1 168 32 Z" fill="#d4af37" opacity="0.25" />
+                      <path d="M100 100 L168 32 A96 96 0 0 1 196 100 Z" fill="#1e293b" />
+                      <path d="M100 100 L196 100 A96 96 0 0 1 168 168 Z" fill="#d4af37" opacity="0.4" />
+                      <path d="M100 100 L168 168 A96 96 0 0 1 100 196 Z" fill="#0f172a" />
+                      <path d="M100 100 L100 196 A96 96 0 0 1 32 168 Z" fill="#d4af37" opacity="0.25" />
+                      <path d="M100 100 L32 168 A96 96 0 0 1 4 100 Z" fill="#1e293b" />
+                      <path d="M100 100 L4 100 A96 96 0 0 1 32 32 Z" fill="#d4af37" opacity="0.4" />
+                      <path d="M100 100 L32 32 A96 96 0 0 1 100 4 Z" fill="#0f172a" />
+                    </g>
+                    <!-- Gold studs -->
+                    <circle cx="100" cy="10" r="3" fill="#f5d77f" />
+                    <circle cx="164" cy="36" r="3" fill="#f5d77f" />
+                    <circle cx="190" cy="100" r="3" fill="#f5d77f" />
+                    <circle cx="164" cy="164" r="3" fill="#f5d77f" />
+                    <circle cx="100" cy="190" r="3" fill="#f5d77f" />
+                    <circle cx="36" cy="164" r="3" fill="#f5d77f" />
+                    <circle cx="10" cy="100" r="3" fill="#f5d77f" />
+                    <circle cx="36" cy="36" r="3" fill="#f5d77f" />
+                    <!-- Inner Hub -->
+                    <circle cx="100" cy="100" r="36" fill="#0b0e16" stroke="#d4af37" stroke-width="2.5" />
+                  </svg>
+                  <div class="wheel-center-emblem">
+                    <Icon name="lottery" size={26} />
+                  </div>
+                </div>
+              </div>
+
+              <h3 class="wheel-stage-title">
+                {activeCampaign.status === 'active'
+                  ? 'آماده اجرای قرعه‌کشی زنده بین مراجعین واجد شرایط'
+                  : `برنده دوره: ${activeCampaign.winner_name || 'ثبت شده در سامانه'}`}
               </h3>
-              <p style="color: #94a3b8; font-size: 0.88rem; max-width: 450px; margin: 0 auto;">
-                انتخاب کاملاً تصادفی و رمزنگاری‌شده از بین کل مراجعینی که در کلینیک نوبت داشته‌اند.
+              <p class="wheel-stage-sub">
+                انتخاب کاملاً تصادفی و رمزنگاری‌شده از بین کل مراجعین واجد شرایط که در بازه کمپین فاکتور ثبت‌شده داشته‌اند.
               </p>
             </div>
           </div>
 
           {activeCampaign.status === 'active' && (
-            <button id="triggerDrawBtn" data-id={activeCampaign.id} class="btn-3d-accept" style="padding: 14px 32px; font-size: 1.1rem; border-radius: 12px;">
-              🎲 شروع گردونه و انتخاب برنده تصادفی
-            </button>
+            <div class="wheel-action-wrap">
+              <button id="triggerDrawBtn" data-id={activeCampaign.id} class="btn-3d-gold lottery-draw-btn" type="button">
+                <Icon name="play" size={18} />
+                <span id="triggerDrawBtnText">شروع گردونه و انتخاب برنده تصادفی</span>
+              </button>
+            </div>
           )}
         </div>
       </div>
     ) : (
-      <div class="admin-section-block" style="padding: 32px; text-align: center; color: #94a3b8;">
-        هنوز هیچ دوره قرعه‌کشی تعریف نشده است. از دکمه بالا برای ساخت اولین کمپین استفاده کنید.
+      <div class="admin-section-block" style="padding: 40px 24px; text-align: center; color: #94a3b8;">
+        <div class="lottery-empty-emblem">
+          <Icon name="lottery" size={40} />
+        </div>
+        <h4 style="font-size: 1.15rem; color: #f8fafc; margin-bottom: 6px;">هنوز هیچ دوره قرعه‌کشی تعریف نشده است</h4>
+        <p style="font-size: 0.88rem; max-width: 440px; margin: 0 auto 18px;">
+          از دکمه بالا برای ساخت اولین کمپین قرعه‌کشی و اعطای جوایز ویژه به مراجعین وفادار استفاده کنید.
+        </p>
+        <button class="btn-3d-gold open-lottery-modal-trigger" type="button">
+          <Icon name="plus" size={16} />
+          <span>تعریف اولین دوره</span>
+        </button>
       </div>
     )}
 
     <!-- Past Campaigns Table -->
     <div class="admin-section-block" style="padding: 24px;">
-      <h3 class="section-block-title" style="margin-bottom: 16px;">
-        📜 تاریخچه دوره‌ها و برندگان قرعه‌کشی
-      </h3>
+      <div class="section-block-header" style="margin-bottom: 20px;">
+        <h3 class="section-block-title">
+          <Icon name="list" size={20} />
+          <span>تاریخچه دوره‌ها و برندگان قرعه‌کشی</span>
+        </h3>
+        <p class="section-block-sub">
+          آرشیو کمپین‌های اتمام‌یافته، مشخصات برندگان خوش‌شانس و زمان برگزاری
+        </p>
+      </div>
 
       <div class="admin-table-container">
         <table class="admin-table-3d">
@@ -118,9 +291,14 @@ try {
             {campaigns.map((c) => (
               <tr>
                 <td style="font-weight: 800; color: #f8fafc;">{c.title}</td>
-                <td style="color: #f5d77f; font-weight: 700;">{c.prize}</td>
+                <td style="color: #f5d77f; font-weight: 700;">
+                  <span style="display: inline-flex; align-items: center; gap: 6px;">
+                    <Icon name="gem" size={14} />
+                    <span>{c.prize}</span>
+                  </span>
+                </td>
                 <td>
-                  <span class={c.status === 'active' ? 'badge-status-confirmed' : 'badge-status-completed'}>
+                  <span class={`badge-status ${c.status === 'active' ? 'badge-status-confirmed' : 'badge-status-completed'}`}>
                     {c.status === 'active' ? 'دوره جاری' : 'پایان یافته'}
                   </span>
                 </td>
@@ -135,6 +313,13 @@ try {
                 </td>
               </tr>
             ))}
+            {campaigns.length === 0 && (
+              <tr>
+                <td colspan="6" style="text-align: center; color: #94a3b8; padding: 24px;">
+                  هیچ دوره‌ای در آرشیو ثبت نشده است.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
@@ -143,60 +328,385 @@ try {
 
   <!-- Modal: Create Lottery Campaign -->
   <div id="newLotteryModal" class="modal-3d-backdrop" style="display: none;">
-    <div class="modal-3d-card" style="max-width: 500px;">
+    <div class="modal-3d-card" style="max-width: 520px;">
       <div class="modal-3d-header">
-        <h3 class="modal-3d-title" style="display: flex; align-items: center; gap: 8px;">
-          <Icon name="lottery" size={20} />
+        <h3 class="modal-3d-title" style="display: flex; align-items: center; gap: 10px;">
+          <Icon name="lottery" size={22} />
           <span>تعریف دوره قرعه‌کشی جدید</span>
         </h3>
-        <button id="closeLotteryModalBtn" class="modal-close-btn">&times;</button>
+        <button id="closeLotteryModalBtn" class="modal-close-btn" type="button" aria-label="بستن پنجره">
+          <Icon name="close" size={18} />
+        </button>
       </div>
 
       <form id="lotteryForm" style="display: flex; flex-direction: column; gap: 16px;">
         <div>
-          <label class="form-label-modal">عنوان کمپین قرعه‌کشی:</label>
-          <input type="text" id="lotteryTitle" class="form-control-modal" placeholder="مثال: قرعه‌کشی بزرگ شب یلدا تهران لیزر" required />
+          <label for="lotteryTitle" class="form-label-modal">عنوان کمپین قرعه‌کشی:</label>
+          <input
+            type="text"
+            id="lotteryTitle"
+            class="form-control-modal"
+            placeholder="مثال: قرعه‌کشی بزرگ یلدا و زمستان طلایی تهران لیزر"
+            required
+          />
         </div>
 
         <div>
-          <label class="form-label-modal">جایزه ویژه برنده:</label>
-          <input type="text" id="lotteryPrize" class="form-control-modal" placeholder="مثال: یک دوره ۸ جلسه‌ای فول بادی رایگان الکس کندلا" required />
+          <label for="lotteryPrize" class="form-label-modal">جایزه ویژه برنده:</label>
+          <input
+            type="text"
+            id="lotteryPrize"
+            class="form-control-modal"
+            placeholder="مثال: یک دوره ۸ جلسه‌ای فول بادی رایگان الکس کندلا"
+            required
+          />
         </div>
 
         <div>
-          <label class="form-label-modal">حداقل مبلغ خرید جهت شرکت (هزار تومان):</label>
-          <input type="number" id="lotteryMinSpend" class="form-control-modal" value="500" placeholder="۰ برای همه مراجعین" />
+          <label for="lotteryMinSpend" class="form-label-modal">حداقل مبلغ خرید جهت شرکت (هزار تومان):</label>
+          <input
+            type="number"
+            id="lotteryMinSpend"
+            class="form-control-modal"
+            value="500"
+            placeholder="۰ برای تمام مراجعین بدون حداقل خرید"
+          />
         </div>
 
-        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
-          <button type="button" id="cancelLotteryBtn" class="btn-3d-secondary">انصراف</button>
-          <button type="submit" id="saveLotterySubmitBtn" class="btn-3d-accept">ثبت و آغاز دوره</button>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px; flex-wrap: wrap;">
+          <button type="button" id="cancelLotteryBtn" class="btn-3d-secondary">
+            انصراف
+          </button>
+          <button type="submit" id="saveLotterySubmitBtn" class="btn-3d-accept">
+            <Icon name="check" size={16} />
+            <span>ثبت و آغاز دوره</span>
+          </button>
         </div>
       </form>
     </div>
   </div>
 
+  <style>
+    .lottery-title-emblem {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: rgba(212, 175, 55, 0.14);
+      border: 1px solid rgba(212, 175, 55, 0.35);
+      color: #f5d77f;
+      box-shadow: 0 4px 14px rgba(212, 175, 55, 0.18);
+    }
+
+    .lottery-toast {
+      margin-bottom: 20px;
+      animation: modalPop 0.22s ease-out;
+    }
+    .lottery-toast-inner {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 20px;
+      border-radius: 14px;
+      font-weight: 700;
+      font-size: 0.92rem;
+    }
+    .lottery-toast.is-success .lottery-toast-inner {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.45);
+      color: #34d399;
+    }
+    .lottery-toast.is-error .lottery-toast-inner {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.45);
+      color: #fca5a5;
+    }
+
+    /* Active Hero */
+    .lottery-active-hero {
+      padding: 28px;
+      margin-bottom: 28px;
+      border-color: rgba(212, 175, 55, 0.35);
+      background: radial-gradient(circle at top right, rgba(212, 175, 55, 0.12), rgba(15, 23, 42, 0.96));
+    }
+    .lottery-hero-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 20px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    .lottery-hero-info {
+      flex: 1 1 300px;
+      min-width: 0;
+    }
+    .lottery-hero-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #f5d77f;
+      margin: 0 0 10px;
+      line-height: 1.4;
+    }
+    .lottery-prize-strip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 10px;
+      padding: 6px 14px;
+      color: #e2e8f0;
+      font-size: 0.92rem;
+      flex-wrap: wrap;
+    }
+    .lottery-prize-icon {
+      color: #38bdf8;
+      display: inline-flex;
+      align-items: center;
+    }
+    .lottery-prize-label {
+      color: #94a3b8;
+    }
+    .lottery-prize-name {
+      color: #38bdf8;
+    }
+
+    .lottery-hero-spend {
+      background: rgba(20, 26, 38, 0.85);
+      border: 1px solid rgba(212, 175, 55, 0.2);
+      border-radius: 14px;
+      padding: 14px 18px;
+      text-align: right;
+      min-width: 200px;
+    }
+    .lottery-spend-label {
+      display: block;
+      font-size: 0.78rem;
+      color: #94a3b8;
+      margin-bottom: 4px;
+    }
+    .lottery-spend-val {
+      font-size: 1.2rem;
+      font-weight: 900;
+      color: #34d399;
+      margin-bottom: 2px;
+    }
+    .lottery-spend-sub {
+      font-size: 0.72rem;
+      color: #cbd5e1;
+    }
+
+    /* Stage */
+    .lottery-stage-card {
+      background: rgba(6, 8, 13, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 30px 20px;
+      text-align: center;
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05);
+    }
+
+    /* Winner Display */
+    .winner-reveal-box {
+      padding: 24px;
+      background: linear-gradient(160deg, rgba(16, 185, 129, 0.18) 0%, rgba(6, 78, 59, 0.22) 100%);
+      border: 2px solid #34d399;
+      border-radius: 18px;
+      max-width: 500px;
+      margin: 0 auto;
+      box-shadow: 0 10px 30px rgba(16, 185, 129, 0.25);
+      animation: modalPop 0.3s ease-out;
+    }
+    .winner-sparkle-emblem {
+      color: #f5d77f;
+      margin-bottom: 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      filter: drop-shadow(0 0 12px rgba(245, 215, 127, 0.6));
+    }
+    .winner-reveal-heading {
+      color: #34d399;
+      font-weight: 800;
+      font-size: 1.3rem;
+      margin: 0 0 8px;
+    }
+    .winner-name-display {
+      font-size: 1.7rem;
+      font-weight: 900;
+      color: #f8fafc;
+      margin-bottom: 4px;
+    }
+    .winner-phone-display {
+      font-size: 1.05rem;
+      color: #f5d77f;
+      font-family: monospace;
+      margin-bottom: 12px;
+    }
+    .winner-sms-badge {
+      font-size: 0.84rem;
+      color: #34d399;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(16, 185, 129, 0.12);
+      padding: 6px 14px;
+      border-radius: 8px;
+    }
+
+    /* 3D Wheel */
+    .wheel-stage-idle {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+    .lottery-wheel-wrapper {
+      position: relative;
+      width: 160px;
+      height: 160px;
+      margin: 0 auto 8px;
+    }
+    .lottery-wheel-pointer {
+      position: absolute;
+      top: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+    }
+    .pointer-arrow {
+      display: block;
+      width: 0;
+      height: 0;
+      border-left: 10px solid transparent;
+      border-right: 10px solid transparent;
+      border-top: 18px solid #f5d77f;
+      filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.6));
+    }
+    .lottery-wheel-disc {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(212, 175, 55, 0.25);
+      position: relative;
+      transition: transform 3.5s cubic-bezier(0.15, 0.9, 0.2, 1);
+    }
+    .lottery-wheel-disc.is-spinning {
+      animation: spinWheelRapid 0.6s linear infinite;
+    }
+    @keyframes spinWheelRapid {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .wheel-svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    .wheel-center-emblem {
+      position: absolute;
+      inset: 0;
+      margin: auto;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #f5d77f;
+      background: radial-gradient(circle, #1a2234, #0b0e16);
+      box-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
+    }
+    .wheel-stage-title {
+      color: #f8fafc;
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin: 0;
+    }
+    .wheel-stage-sub {
+      color: #94a3b8;
+      font-size: 0.86rem;
+      max-width: 480px;
+      margin: 0;
+      line-height: 1.6;
+    }
+    .wheel-action-wrap {
+      margin-top: 20px;
+    }
+    .lottery-draw-btn {
+      padding: 13px 32px;
+      font-size: 1.05rem;
+      border-radius: 14px;
+    }
+
+    .lottery-empty-emblem {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 16px;
+      border-radius: 50%;
+      background: rgba(212, 175, 55, 0.1);
+      color: #f5d77f;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
+
   <script>
     const modal = document.getElementById('newLotteryModal');
     const openBtn = document.getElementById('openNewLotteryModalBtn');
+    const emptyOpenBtns = document.querySelectorAll('.open-lottery-modal-trigger');
     const closeBtn = document.getElementById('closeLotteryModalBtn');
     const cancelBtn = document.getElementById('cancelLotteryBtn');
     const form = document.getElementById('lotteryForm');
-    const saveBtn = document.getElementById('saveLotterySubmitBtn') as HTMLButtonElement;
+    const saveBtn = document.getElementById('saveLotterySubmitBtn') as HTMLButtonElement | null;
+    const toast = document.getElementById('lotteryFeedbackToast');
+    const toastText = document.getElementById('lotteryToastText');
 
     function openModal() {
-      if (modal) modal.style.display = 'flex';
+      if (modal) {
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+      }
     }
     function closeModal() {
-      if (modal) modal.style.display = 'none';
+      if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+      }
     }
 
     openBtn?.addEventListener('click', openModal);
+    emptyOpenBtns.forEach((btn) => btn.addEventListener('click', openModal));
     closeBtn?.addEventListener('click', closeModal);
     cancelBtn?.addEventListener('click', closeModal);
 
+    modal?.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modal && modal.style.display === 'flex') {
+        closeModal();
+      }
+    });
+
+    function showToast(message: string, isError = false) {
+      if (!toast || !toastText) return;
+      toastText.innerText = message;
+      toast.className = `lottery-toast ${isError ? 'is-error' : 'is-success'}`;
+      toast.style.display = 'block';
+      setTimeout(() => {
+        toast.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 50);
+    }
+
     form?.addEventListener('submit', async (e) => {
       e.preventDefault();
+      if (!saveBtn) return;
       saveBtn.disabled = true;
       saveBtn.innerText = 'در حال ثبت...';
 
@@ -214,35 +724,40 @@ try {
         });
 
         if (res.ok) {
-          alert('✓ دوره قرعه‌کشی جدید با موفقیت فعال شد.');
-          window.location.reload();
+          closeModal();
+          showToast('دوره قرعه‌کشی جدید با موفقیت فعال شد.');
+          setTimeout(() => {
+            window.location.reload();
+          }, 1000);
         } else {
-          alert('خطا در ثبت قرعه‌کشی.');
+          showToast('خطا در ثبت دوره قرعه‌کشی.', true);
           saveBtn.disabled = false;
           saveBtn.innerText = 'ثبت و آغاز دوره';
         }
       } catch {
-        alert('خطای اتصال به سرور.');
+        showToast('خطای اتصال به سرور.', true);
         saveBtn.disabled = false;
         saveBtn.innerText = 'ثبت و آغاز دوره';
       }
     });
 
     // Draw Execution
-    const triggerBtn = document.getElementById('triggerDrawBtn') as HTMLButtonElement;
+    const triggerBtn = document.getElementById('triggerDrawBtn') as HTMLButtonElement | null;
+    const triggerBtnText = document.getElementById('triggerDrawBtnText');
     const idleBox = document.getElementById('wheelIdleBox');
     const winnerBox = document.getElementById('winnerDisplayBox');
     const winnerName = document.getElementById('winnerNameText');
     const winnerPhone = document.getElementById('winnerPhoneText');
+    const wheelCanvas = document.getElementById('goldenWheelCanvas');
 
     triggerBtn?.addEventListener('click', async () => {
       const campaignId = triggerBtn.dataset.id;
       if (!confirm('آیا از اجرای زنده قرعه‌کشی و انتخاب قطعی برنده اطمینان دارید؟')) return;
 
       triggerBtn.disabled = true;
-      triggerBtn.innerText = '🎲 در حال گردش گردونه شانس و شبیه‌سازی انتخاب...';
+      if (triggerBtnText) triggerBtnText.innerText = 'در حال چرخش گردونه شانس و شبیه‌سازی انتخاب...';
+      if (wheelCanvas) wheelCanvas.classList.add('is-spinning');
 
-      // Simulation delay for thrill
       setTimeout(async () => {
         try {
           const res = await fetch('/api/v1/admin/lottery/draw', {
@@ -251,25 +766,29 @@ try {
             body: JSON.stringify({ campaignId }),
           });
 
-          const json = await res.json() as any;
+          const json = (await res.json()) as any;
           if (res.ok && json.data?.winner) {
             const w = json.data.winner;
+            if (wheelCanvas) wheelCanvas.classList.remove('is-spinning');
             if (idleBox) idleBox.style.display = 'none';
             if (winnerBox) winnerBox.style.display = 'block';
             if (winnerName) winnerName.innerText = w.name;
             if (winnerPhone) winnerPhone.innerText = w.phone;
             triggerBtn.style.display = 'none';
+            showToast(`برنده دوره انتخاب شد: ${w.name}`);
           } else {
-            alert(json.error?.message || 'خطا در اجرای قرعه‌کشی.');
+            if (wheelCanvas) wheelCanvas.classList.remove('is-spinning');
+            showToast(json.error?.message || 'خطا در اجرای قرعه‌کشی.', true);
             triggerBtn.disabled = false;
-            triggerBtn.innerText = '🎲 شروع گردونه و انتخاب برنده تصادفی';
+            if (triggerBtnText) triggerBtnText.innerText = 'شروع گردونه و انتخاب برنده تصادفی';
           }
         } catch {
-          alert('خطای اتصال به سرور.');
+          if (wheelCanvas) wheelCanvas.classList.remove('is-spinning');
+          showToast('خطای اتصال به سرور پایگاه داده.', true);
           triggerBtn.disabled = false;
-          triggerBtn.innerText = '🎲 شروع گردونه و انتخاب برنده تصادفی';
+          if (triggerBtnText) triggerBtnText.innerText = 'شروع گردونه و انتخاب برنده تصادفی';
         }
-      }, 1200);
+      }, 1500);
     });
   </script>
 </AdminLayout>

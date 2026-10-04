@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f5d77f" />
+      <stop offset="50%" stop-color="#d4af37" />
+      <stop offset="100%" stop-color="#aa8010" />
+    </linearGradient>
+    <radialGradient id="glowGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#d4af37" stop-opacity="0.35" />
+      <stop offset="100%" stop-color="#d4af37" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+
+  <!-- Background Base -->
+  <rect width="128" height="128" rx="28" fill="#0d111a" />
+  <rect width="124" height="124" x="2" y="2" rx="26" fill="none" stroke="url(#goldGrad)" stroke-width="2.5" />
+  <circle cx="64" cy="64" r="54" fill="url(#glowGrad)" />
+
+  <!-- Laser Beam Sparkle / Diamond -->
+  <path d="M64 22 L67 46 L76 37 L69 54 L92 48 L73 60 L102 64 L73 68 L92 80 L69 74 L76 91 L67 82 L64 106 L61 82 L52 91 L59 74 L36 80 L55 68 L26 64 L55 60 L36 48 L59 54 L52 37 L61 46 Z" fill="url(#goldGrad)" opacity="0.3" />
+
+  <!-- Stylized TL Laser Crest -->
+  <g fill="none" stroke="url(#goldGrad)" stroke-linecap="round" stroke-linejoin="round">
+    <!-- T horizontal & vertical -->
+    <path d="M42 42 L86 42" stroke-width="6" />
+    <path d="M64 42 L64 88" stroke-width="6" />
+    <!-- Pulse laser dot -->
+    <circle cx="64" cy="42" r="3.5" fill="#fff" />
+  </g>
+
+  <!-- Center Laser Diamond Glow -->
+  <polygon points="64,30 70,64 64,98 58,64" fill="url(#goldGrad)" opacity="0.9" />
+  <polygon points="30,64 64,70 98,64 64,58" fill="url(#goldGrad)" opacity="0.9" />
+  <circle cx="64" cy="64" r="4.5" fill="#ffffff" />
+</svg>

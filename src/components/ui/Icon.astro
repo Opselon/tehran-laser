@@ -17,13 +17,14 @@ export interface Props {
   name: string;
   size?: number | string;
   class?: string;
+  id?: string;
   /** aria-hidden by default; pass a label to expose it to screen readers */
   label?: string;
   /** stroke width override (default 1.75) */
   stroke?: number;
 }
 
-const { name, size, class: className, label, stroke = 1.75 } = Astro.props;
+const { name, size, class: className, id, label, stroke = 1.75 } = Astro.props;
 
 const sizeAttr = size !== undefined ? String(size) : '1em';
 const hasLabel = !!label;
@@ -132,6 +133,12 @@ const paths: Record<string, string> = {
   battery:
     'M4 7h13a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2Zm17 4v2',
   signal: 'M4 19h.01M8 15v4M12 11v8M16 7v12M20 3v16',
+  snowflake:
+    'M12 2.5v19M17 5.5l-5 4.5-5-4.5M17 18.5l-5-4.5-5 4.5M2.5 12h19M5.5 7l4.5 5-4.5 5M18.5 7l-4.5 5 4.5 5',
+  target: 'M12 3v3m0 12v3M3 12h3m12 0h3M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z',
+  award: 'M12 15a5.5 5.5 0 1 0 0-11 5.5 5.5 0 0 0 0 11Zm-3 1.2L6 22l6-3.2 6 3.2-3-5.8',
+  doctor: 'M16 11V3H8v8a4 4 0 0 0 8 0Zm0 0a6 6 0 0 1-8 0M3 19a9 9 0 0 1 18 0M12 5.5v3m-1.5-1.5h3',
+  clean: 'M9 3h6v3H9V3ZM5 9h14v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V9Zm5 4v4m4-4v4',
 };
 
 const d = paths[name];
@@ -144,6 +151,7 @@ if (!d) {
 ---
 
 <svg
+  id={id}
   class={className}
   width={sizeAttr}
   height={sizeAttr}
