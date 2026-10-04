@@ -282,7 +282,9 @@
    Repoint the ink/surface tokens to light values on dark surfaces.
    ──────────────────────────────────────────────────────────────────────────── */
 body.theme-dark-obsidian,
-body.theme-dark-obsidian .site-main {
+body.theme-dark-obsidian .site-main,
+body.clinic-obsidian-root,
+body.clinic-obsidian-root .site-main {
   --color-ink: #f1f5f9;
   --color-ink-soft: #cbd5e1;
   --color-text-secondary: #94a3b8;

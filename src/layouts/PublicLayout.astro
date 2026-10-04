@@ -40,7 +40,11 @@ const {
   noindex = false,
   nofollow = false,
   jsonLd,
-  theme = 'light',
+  // The public site is a dark obsidian design throughout. The old 'light'
+  // default left pages that forgot to pass theme="dark" rendering near-black
+  // text (#16130f --color-ink) on a near-black background — invisible.
+  // Dark is now the default; a page can still opt out with theme="light".
+  theme = 'dark',
   bodyClass = '',
 } = Astro.props;
 
