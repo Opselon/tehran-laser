@@ -103,18 +103,18 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
 
         <!-- Interactive Wavelength Explorer -->
         <div class="tech-explorer-card">
-          <div class="wavelength-tabs" role="tablist">
-            <button class="wl-tab active" data-target="alex" role="tab" aria-selected="true">
+          <div class="wavelength-tabs" role="tablist" aria-label="انتخاب طول موج دستگاه کندلا">
+            <button id="tab-alex" class="wl-tab active" data-target="alex" role="tab" aria-selected="true" aria-controls="panel-alex">
               <Icon name="lightning" size={18} />
               <span>الکساندرایت ۷۵۵ نانومتر (Alexandrite)</span>
             </button>
-            <button class="wl-tab" data-target="yag" role="tab" aria-selected="false">
+            <button id="tab-yag" class="wl-tab" data-target="yag" role="tab" aria-selected="false" aria-controls="panel-yag">
               <Icon name="target" size={18} />
               <span>ان‌دی‌یاگ ۱۰۶۴ نانومتر (Nd:YAG)</span>
             </button>
           </div>
 
-          <div class="wavelength-panel active" id="panel-alex">
+          <div class="wavelength-panel active" id="panel-alex" role="tabpanel" aria-labelledby="tab-alex" tabindex="0">
             <div class="wl-grid">
               <div class="wl-content">
                 <span class="wl-pill">پیک جذب ملانین فوق‌العاده بالا</span>
@@ -143,7 +143,7 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
             </div>
           </div>
 
-          <div class="wavelength-panel" id="panel-yag">
+          <div class="wavelength-panel" id="panel-yag" role="tabpanel" aria-labelledby="tab-yag" tabindex="0">
             <div class="wl-grid">
               <div class="wl-content">
                 <span class="wl-pill yag">نفوذ ایمن و عمیق به درمیس</span>
@@ -518,6 +518,14 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
         if (activePanel) {
           activePanel.classList.add('active');
         }
+      });
+
+      tab.addEventListener('keydown', (e) => {
+        if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+        e.preventDefault();
+        const i = Array.prototype.indexOf.call(tabs, tab);
+        const next = tabs[(i + 1) % tabs.length];
+        if (next) next.focus();
       });
     });
   }
