@@ -1,0 +1,1 @@
+This folder contains the built output assets for the worker "tehran-laser" generated at 2026-10-04T15:52:23.786Z.

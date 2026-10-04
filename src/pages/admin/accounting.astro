@@ -229,7 +229,7 @@ try {
                 </td>
                 <td>
                   <span style="font-size: 0.82rem; color: #cbd5e1;">
-                    {t.method === 'pos' ? '💳 کارت‌خوان' : t.method === 'card_to_card' ? '📱 کارت‌به‌کارت' : '💵 نقدی'}
+                    <Icon name={t.method === 'pos' ? 'card' : t.method === 'card_to_card' ? 'mobile' : 'cash'} size={15} aria-hidden />{' '}{t.method === 'pos' ? 'کارت‌خوان' : t.method === 'card_to_card' ? 'کارت‌به‌کارت' : 'نقدی'}
                   </span>
                 </td>
                 <td style="font-size: 0.82rem; color: #94a3b8;">
@@ -359,7 +359,7 @@ try {
         });
 
         if (res.ok) {
-          alert('✓ سند مالی با موفقیت ثبت شد.');
+          alert('سند مالی با موفقیت ثبت شد.');
           window.location.reload();
         } else {
           alert('خطا در ثبت سند مالی.');

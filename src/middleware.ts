@@ -2,7 +2,17 @@ import { defineMiddleware } from 'astro:middleware';
 import { env } from 'cloudflare:workers';
 import { loadAuthUser } from './server/auth/session';
 import { readSessionCookie } from './lib/security/session-cookie';
-import { PERMISSIONS } from './domain/rbac/rbac.types';
+import { fail } from './lib/api/respond';
+import type { AuthUser } from './domain/rbac/rbac.types';
+
+/** Routes that must never render or respond before authentication is established (§326).
+ *  `/admin/login` is the gate itself and stays public; everything else under `/admin`,
+ *  the whole admin API, and `/api/v1/me` require a live session. */
+function needsAuth(pathname: string): boolean {
+  if (pathname.startsWith('/api/v1/admin') || pathname.startsWith('/api/v1/me')) return true;
+  if (!pathname.startsWith('/admin')) return false;
+  return pathname !== '/admin/login';
+}
 
 /** CSP exceptions are documented in docs/SECURITY.md — keep them in sync. 'unsafe-inline'
  *  for scripts is required by Astro's inline hydration preamble and React island bootstrap;
@@ -50,17 +60,22 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const { pathname } = context.url;
   const token = readSessionCookie(context.request);
 
-  let auth = token ? await loadAuthUser(env.DB, token) : null;
+  const auth: AuthUser | null = token ? await loadAuthUser(env.DB, token) : null;
 
-  // Fallback admin user for direct CURL access, crawler inspection, and live preview without login gate
-  if (!auth && (pathname.startsWith('/admin') || pathname.startsWith('/api/v1/admin'))) {
-    auth = {
-      id: 'usr_admin_live',
-      email: 'admin@tehranlaser.ir',
-      displayName: 'مدیر ارشد کلینیک',
-      roles: ['SUPER_ADMIN'],
-      permissions: [...PERMISSIONS],
-    };
+  /* Authentication is a hard gate (§54, SECURITY.md): an anonymous caller must never reach
+     an admin handler. API callers get the 401 envelope, browsers are sent to the login
+     screen. Never substitute a synthetic admin user — that made every admin route (and
+     every customer record, booking and setting behind it) readable and writable by anyone
+     on the internet, and left `requirePermission` unreachable as a control. */
+  if (needsAuth(pathname) && !auth) {
+    const blocked = pathname.startsWith('/api/')
+      ? fail('AUTH_REQUIRED', 'ابتدا وارد حساب مدیریت شوید.')
+      : context.redirect(
+          `/admin/login?next=${encodeURIComponent(pathname + context.url.search)}`,
+          302,
+        );
+    applySecurityHeaders(blocked);
+    return blocked;
   }
 
   context.locals.auth = auth;
