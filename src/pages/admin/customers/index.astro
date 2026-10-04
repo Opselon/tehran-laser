@@ -3,6 +3,7 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
 import { env } from 'cloudflare:workers';
 import { listAdminCustomers } from '../../../server/repositories';
 import { formatJalaliDate } from '../../../lib/datetime/jalali';
+import Icon from '../../../components/ui/Icon.astro';
 
 const url = Astro.url;
 const search = url.searchParams.get('q') || undefined;
@@ -18,77 +19,94 @@ const categoryParam = url.searchParams.get('category') || undefined;
 const displayedItems = categoryParam
   ? customers.items.filter((c) => c.pricingCategory === categoryParam)
   : customers.items;
+const totalBookings = displayedItems.reduce((sum, c) => sum + (c.bookingsCount ?? 0), 0);
 ---
 
 <AdminLayout title="بانک مراجعین" activeNav="customers">
-  <div class="admin-content-pad">
-    <!-- 3D Header Row -->
+  <div class="admin-content-pad customers-page">
+    <!-- 3D Obsidian-Gold Header Row -->
     <div class="dashboard-header-row">
-      <div>
-        <h1 class="admin-page-title">بانک جامع اطلاعات مراجعین کلینیک</h1>
+      <div class="header-main-col">
+        <h1 class="admin-page-title">
+          <Icon name="customers" size={26} class="title-gold-icon" />
+          <span>بانک جامع اطلاعات مراجعین کلینیک</span>
+        </h1>
         <p class="section-block-sub">
           مشاهده، مدیریت، جستجو و ویرایش مستقیم مشخصات مراجعین (API First)
         </p>
       </div>
-      <div class="actions">
-        <span style="font-size: 0.88rem; color: #f5d77f; background: rgba(212, 175, 55, 0.15); border: 1px solid rgba(212, 175, 55, 0.35); padding: 8px 16px; border-radius: 12px;">
-          تعداد کل مراجعین: {customers.items.length.toLocaleString('fa-IR')} پرونده
+      <div class="actions customers-header-actions">
+        <span class="customers-count-pill">
+          <Icon name="users" size={16} />
+          <span>{customers.items.length.toLocaleString('fa-IR')} پرونده مراجع</span>
+        </span>
+        <span class="customers-count-pill customers-count-pill-alt">
+          <Icon name="calendar" size={16} />
+          <span>{totalBookings.toLocaleString('fa-IR')} نوبت ثبت‌شده</span>
         </span>
       </div>
     </div>
 
-    <!-- 3D Search & Filter -->
-    <div class="admin-section-block" style="padding: 22px; margin-bottom: 26px;">
-      <form method="GET" style="display: flex; gap: 14px; align-items: center; flex-wrap: wrap;">
-        <div style="flex: 1; min-width: 260px;">
+    <!-- 3D Search & Filter Card -->
+    <div class="admin-section-block customers-search-card">
+      <form method="GET" class="customers-search-form" aria-label="جستجوی مراجعین">
+        <div class="customers-search-input-wrap">
+          <Icon name="search" size={18} class="customers-search-icon" aria-hidden="true" />
           <input
             type="text"
             name="q"
-            class="form-control-modal"
-            style="margin-top: 0; padding: 12px 18px;"
+            class="form-control-modal customers-search-input"
             placeholder="جستجوی سریع با نام مراجع یا شماره تلفن (مثال: ۰۹۰۳)..."
             value={search || ''}
+            aria-label="عبارت جستجو"
           />
         </div>
-        <div style="display: flex; gap: 8px;">
-          <button type="submit" class="btn-3d-refresh" style="padding: 10px 22px;">
-            🔍 جستجوی مراجع
+        <div class="customers-search-actions">
+          <button type="submit" class="btn-3d-gold customers-search-btn">
+            <Icon name="search" size={17} />
+            <span>جستجوی مراجع</span>
           </button>
-          <a href="/admin/customers" class="btn-table-action" style="display: inline-flex; align-items: center; padding: 10px 16px;">
-            ✕ پاک کردن
+          <a href="/admin/customers" class="btn-3d-secondary customers-clear-btn">
+            <Icon name="close" size={16} />
+            <span>پاک کردن</span>
           </a>
         </div>
       </form>
     </div>
 
     <!-- 3D Customers Table -->
-    <div class="admin-section-block" style="padding: 0; overflow: hidden;">
-      {customers.items.length === 0 ? (
-        <div class="empty-state-card" style="border: none; margin: 20px;">
-          <span class="empty-icon">👥</span>
+    <div class="admin-section-block customers-table-card">
+      {displayedItems.length === 0 ? (
+        <div class="customers-empty-state">
+          <span class="empty-icon-3d"><Icon name="users" size={38} /></span>
           <p class="empty-text">مراجع مطابق با جستجوی شما یافت نشد.</p>
+          <p class="empty-sub">عبارت دیگری را امتحان کنید یا فیلتر را پاک نمایید.</p>
         </div>
       ) : (
-        <div class="today-table-wrapper" style="border: none; border-radius: 0;">
-          <table class="admin-table">
+        <div class="today-table-wrapper customers-table-wrap">
+          <table class="admin-table customers-table">
             <thead>
               <tr>
-                <th>نام و نام خانوادگی</th>
-                <th>شماره همراه</th>
-                <th>بخش پذیرش</th>
-                <th>تعداد نوبت‌ها</th>
-                <th>آخرین نوبت</th>
-                <th>تاریخ ثبت پرونده</th>
-                <th>عملیات ویرایش</th>
+                <th><Icon name="users" size={14} class="th-icon" /><span>نام و نام خانوادگی</span></th>
+                <th><Icon name="phone" size={14} class="th-icon" /><span>شماره همراه</span></th>
+                <th><Icon name="tag" size={14} class="th-icon" /><span>بخش پذیرش</span></th>
+                <th><Icon name="calendar" size={14} class="th-icon" /><span>تعداد نوبت‌ها</span></th>
+                <th><Icon name="clock" size={14} class="th-icon" /><span>آخرین نوبت</span></th>
+                <th><Icon name="document" size={14} class="th-icon" /><span>تاریخ ثبت پرونده</span></th>
+                <th><Icon name="edit" size={14} class="th-icon" /><span>عملیات ویرایش</span></th>
               </tr>
             </thead>
             <tbody>
               {displayedItems.map((c) => (
                 <tr>
-                  <td style={{ fontWeight: 800, color: '#ffffff' }}>{c.name}</td>
-                  <td dir="ltr">
-                    <a href={`tel:${c.phone}`} style={{ color: '#38bdf8', textDecoration: 'none', fontWeight: 700 }}>
-                      📞 {c.phone}
+                  <td class="cell-name">
+                    <span class="cust-avatar" aria-hidden="true">{c.name?.trim()?.charAt(0) || '؟'}</span>
+                    <span class="cust-name-text">{c.name}</span>
+                  </td>
+                  <td dir="ltr" class="cell-phone">
+                    <a href={`tel:${c.phone}`} class="cust-phone-link" dir="ltr">
+                      <Icon name="phone" size={14} class="phone-icon" />
+                      <span>{c.phone}</span>
                     </a>
                   </td>
                   <td>
@@ -96,24 +114,24 @@ const displayedItems = categoryParam
                       {c.pricingCategory === 'female' ? 'بانوان' : 'آقایان'}
                     </span>
                   </td>
-                  <td style={{ fontWeight: 700 }}>
-                    {(c.bookingsCount ?? 0).toLocaleString('fa-IR')} نوبت
+                  <td class="cell-count">
+                    <span class="count-pill">{(c.bookingsCount ?? 0).toLocaleString('fa-IR')}</span>
+                    <span class="count-unit">نوبت</span>
                   </td>
                   <td>
                     {c.lastBookingAt ? (
-                      <span style={{ color: '#f5d77f' }}>{formatJalaliDate(c.lastBookingAt.slice(0, 10))}</span>
+                      <span class="date-gold">{formatJalaliDate(c.lastBookingAt.slice(0, 10))}</span>
                     ) : (
-                      <span style={{ color: '#64748b' }}>—</span>
+                      <span class="date-dim">—</span>
                     )}
                   </td>
-                  <td style={{ color: '#cbd5e1', fontSize: '0.85rem' }}>
+                  <td class="cell-created">
                     {formatJalaliDate(c.createdAt.slice(0, 10))}
                   </td>
                   <td>
                     <button
                       type="button"
-                      class="btn-table-action edit-customer-btn"
-                      style="border-color: rgba(212, 175, 55, 0.45); color: #f5d77f;"
+                      class="btn-table-action edit-customer-btn customers-edit-btn"
                       data-id={c.id}
                       data-name={c.name}
                       data-phone={c.phone}
@@ -121,7 +139,8 @@ const displayedItems = categoryParam
                       data-email={c.email || ''}
                       data-note={c.note || ''}
                     >
-                      ✏️ ویرایش مشخصات
+                      <Icon name="edit" size={15} />
+                      <span>ویرایش مشخصات</span>
                     </button>
                   </td>
                 </tr>
@@ -132,24 +151,35 @@ const displayedItems = categoryParam
       )}
     </div>
 
-    <!-- 3D Edit Customer Modal -->
-    <div id="customerEditModal" class="modal-backdrop" style="display: none;">
-      <div class="modal-dialog">
-        <h3 class="modal-title">✏️ ویرایش پرونده مراجع</h3>
-        <p style="color: rgba(226, 232, 240, 0.7); font-size: 0.86rem; margin: 0 0 18px;">
+    <!-- 3D Obsidian-Gold Edit Customer Modal -->
+    <div id="customerEditModal" class="modal-3d-backdrop customers-modal" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="customerModalTitle">
+      <div class="modal-3d-card customers-modal-card">
+        <div class="modal-3d-header">
+          <h3 class="modal-3d-title" id="customerModalTitle">
+            <Icon name="edit" size={20} class="title-gold-icon" />
+            <span>ویرایش پرونده مراجع</span>
+          </h3>
+          <button type="button" id="closeEditModalBtn" class="modal-close-btn" aria-label="بستن پنجره">
+            <Icon name="close" size={18} />
+          </button>
+        </div>
+
+        <p class="modal-intro-note">
           تغییرات مستقیماً در دیتابیس D1 ذخیره و در تمامی بخش‌های پذیرش اعمال خواهد شد.
         </p>
 
-        <div id="editAlert" class="alert-3d-danger" style="display: none; margin-bottom: 16px;">
+        <div id="editAlert" class="alert-3d-danger customers-alert" style="display: none;">
+          <Icon name="warning" size={18} class="alert-icon" />
           <span id="editAlertText"></span>
         </div>
 
-        <form id="editCustomerForm">
+        <form id="editCustomerForm" class="customers-form-grid">
           <input type="hidden" id="editCustomerId" />
 
-          <div style="margin-bottom: 14px;">
-            <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #e2e8f0; margin-bottom: 6px;">
-              نام و نام خانوادگی مراجع:
+          <div class="customers-field">
+            <label for="editCustomerName" class="form-label-modal">
+              <Icon name="users" size={14} class="field-icon" />
+              <span>نام و نام خانوادگی مراجع:</span>
             </label>
             <input
               type="text"
@@ -159,9 +189,10 @@ const displayedItems = categoryParam
             />
           </div>
 
-          <div style="margin-bottom: 14px;">
-            <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #e2e8f0; margin-bottom: 6px;">
-              شماره تلفن همراه (جهت پیامک و تماس):
+          <div class="customers-field">
+            <label for="editCustomerPhone" class="form-label-modal">
+              <Icon name="phone" size={14} class="field-icon" />
+              <span>شماره تلفن همراه (جهت پیامک و تماس):</span>
             </label>
             <input
               type="tel"
@@ -172,10 +203,11 @@ const displayedItems = categoryParam
             />
           </div>
 
-          <div class="g-2" style="display: grid; gap: 14px; margin-bottom: 14px">
-            <div>
-              <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #e2e8f0; margin-bottom: 6px;">
-                بخش پذیرش:
+          <div class="g-2 customers-form-row">
+            <div class="customers-field">
+              <label for="editCustomerCategory" class="form-label-modal">
+                <Icon name="tag" size={14} class="field-icon" />
+                <span>بخش پذیرش:</span>
               </label>
               <select id="editCustomerCategory" class="form-control-modal">
                 <option value="female">بانوان</option>
@@ -183,9 +215,10 @@ const displayedItems = categoryParam
               </select>
             </div>
 
-            <div>
-              <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #e2e8f0; margin-bottom: 6px;">
-                آدرس ایمیل (اختیاری):
+            <div class="customers-field">
+              <label for="editCustomerEmail" class="form-label-modal">
+                <Icon name="mail" size={14} class="field-icon" />
+                <span>آدرس ایمیل (اختیاری):</span>
               </label>
               <input
                 type="email"
@@ -197,9 +230,10 @@ const displayedItems = categoryParam
             </div>
           </div>
 
-          <div style="margin-bottom: 18px;">
-            <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #e2e8f0; margin-bottom: 6px;">
-              یادداشت و پرونده بالینی (پوست، حساسیت، توضیحات):
+          <div class="customers-field">
+            <label for="editCustomerNote" class="form-label-modal">
+              <Icon name="document" size={14} class="field-icon" />
+              <span>یادداشت و پرونده بالینی (پوست، حساسیت، توضیحات):</span>
             </label>
             <textarea
               id="editCustomerNote"
@@ -209,12 +243,14 @@ const displayedItems = categoryParam
             ></textarea>
           </div>
 
-          <div class="modal-actions-row">
-            <button type="button" id="cancelEditBtn" class="btn-table-action">
-              انصراف
+          <div class="customers-modal-actions">
+            <button type="button" id="cancelEditBtn" class="btn-3d-secondary">
+              <Icon name="close" size={16} />
+              <span>انصراف</span>
             </button>
-            <button type="submit" id="saveCustomerBtn" class="btn-3d-accept" style="flex: none; padding: 12px 24px;">
-              ✓ ذخیره تغییرات مراجع
+            <button type="submit" id="saveCustomerBtn" class="btn-3d-gold customers-save-btn">
+              <Icon name="check" size={17} />
+              <span>ذخیره تغییرات مراجع</span>
             </button>
           </div>
         </form>
@@ -222,11 +258,415 @@ const displayedItems = categoryParam
     </div>
   </div>
 
+  <style>
+    /* ── Customers Page — 3D Obsidian-Gold layer ── */
+
+    .customers-page {
+      max-width: 100%;
+    }
+
+    .header-main-col {
+      min-width: 0;
+    }
+
+    .admin-page-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .title-gold-icon {
+      color: #f5d77f;
+      filter: drop-shadow(0 2px 6px rgba(212, 175, 55, 0.5));
+      flex: 0 0 auto;
+    }
+
+    /* ── Header count pills ── */
+
+    .customers-header-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .customers-count-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.86rem;
+      font-weight: 700;
+      color: #f5d77f;
+      background: linear-gradient(160deg, rgba(212, 175, 55, 0.18) 0%, rgba(212, 175, 55, 0.06) 100%);
+      border: 1px solid rgba(212, 175, 55, 0.38);
+      padding: 9px 15px;
+      border-radius: 13px;
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.12), 0 6px 18px rgba(0, 0, 0, 0.35);
+      white-space: nowrap;
+    }
+
+    .customers-count-pill svg {
+      color: #f5d77f;
+      flex: 0 0 auto;
+    }
+
+    .customers-count-pill-alt {
+      color: #cbd5e1;
+      background: linear-gradient(160deg, rgba(148, 163, 184, 0.14) 0%, rgba(148, 163, 184, 0.05) 100%);
+      border-color: rgba(148, 163, 184, 0.32);
+    }
+
+    .customers-count-pill-alt svg {
+      color: #cbd5e1;
+    }
+
+    /* ── Search & filter card ── */
+
+    .customers-search-card {
+      padding: 20px 22px !important;
+      margin-bottom: 24px;
+      background: linear-gradient(160deg, rgba(22, 27, 40, 0.96) 0%, rgba(11, 14, 22, 0.96) 100%) !important;
+      border: 1px solid rgba(212, 175, 55, 0.22) !important;
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.06), 0 14px 34px rgba(0, 0, 0, 0.4) !important;
+    }
+
+    .customers-search-form {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .customers-search-input-wrap {
+      position: relative;
+      flex: 1 1 280px;
+      min-width: 0;
+    }
+
+    .customers-search-icon {
+      position: absolute;
+      top: 50%;
+      right: 14px;
+      transform: translateY(-50%);
+      color: rgba(212, 175, 55, 0.75);
+      pointer-events: none;
+    }
+
+    .customers-search-input {
+      margin-top: 0 !important;
+      padding: 13px 44px 13px 16px !important;
+      font-size: 0.92rem !important;
+      width: 100%;
+    }
+
+    .customers-search-actions {
+      display: flex;
+      gap: 10px;
+      flex: 0 0 auto;
+      flex-wrap: wrap;
+    }
+
+    .customers-search-btn,
+    .customers-clear-btn {
+      min-height: 46px;
+      padding: 11px 20px;
+      white-space: nowrap;
+    }
+
+    /* ── Table card ── */
+
+    .customers-table-card {
+      padding: 0 !important;
+      overflow: hidden;
+      background: linear-gradient(160deg, rgba(22, 27, 40, 0.96) 0%, rgba(11, 14, 22, 0.96) 100%) !important;
+      border: 1px solid rgba(212, 175, 55, 0.22) !important;
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.06), 0 14px 34px rgba(0, 0, 0, 0.4) !important;
+    }
+
+    .customers-table-wrap {
+      border: none !important;
+      border-radius: 0 !important;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .customers-table thead th {
+      white-space: nowrap;
+    }
+
+    .customers-table th .th-icon {
+      color: rgba(212, 175, 55, 0.85);
+      vertical-align: -3px;
+      margin-left: 5px;
+      flex: 0 0 auto;
+    }
+
+    /* ── Rich customer cells ── */
+
+    .cell-name {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      min-width: 180px;
+    }
+
+    .cust-avatar {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      flex: 0 0 auto;
+      border-radius: 11px;
+      font-size: 0.92rem;
+      font-weight: 900;
+      color: #0d0a02;
+      background: linear-gradient(160deg, #f5d77f 0%, #d4af37 55%, #9e7822 100%);
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.6);
+    }
+
+    .cust-name-text {
+      font-weight: 800;
+      color: #ffffff;
+    }
+
+    .cust-phone-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: #38bdf8;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.9rem;
+      padding: 5px 9px;
+      border-radius: 8px;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+
+    .cust-phone-link:hover {
+      background: rgba(56, 189, 248, 0.12);
+      color: #7dd3fc;
+    }
+
+    .cust-phone-link .phone-icon {
+      flex: 0 0 auto;
+      opacity: 0.85;
+    }
+
+    .cell-count {
+      white-space: nowrap;
+    }
+
+    .count-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 34px;
+      padding: 3px 9px;
+      border-radius: 8px;
+      font-weight: 800;
+      font-size: 0.82rem;
+      color: #f5d77f;
+      background: rgba(212, 175, 55, 0.14);
+      border: 1px solid rgba(212, 175, 55, 0.35);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .count-unit {
+      color: #94a3b8;
+      font-size: 0.78rem;
+      margin-right: 5px;
+    }
+
+    .date-gold {
+      color: #f5d77f;
+      white-space: nowrap;
+    }
+
+    .date-dim {
+      color: #64748b;
+    }
+
+    .cell-created {
+      color: #cbd5e1;
+      font-size: 0.85rem;
+      white-space: nowrap;
+    }
+
+    .customers-edit-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      min-height: 38px;
+      border-color: rgba(212, 175, 55, 0.45);
+      color: #f5d77f;
+    }
+
+    .customers-edit-btn:hover {
+      background: rgba(212, 175, 55, 0.2);
+      border-color: #d4af37;
+      color: #ffffff;
+    }
+
+    /* ── Empty state ── */
+
+    .customers-empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 54px 24px;
+      text-align: center;
+    }
+
+    .customers-empty-state .empty-icon-3d {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 72px;
+      height: 72px;
+      border-radius: 20px;
+      margin-bottom: 8px;
+      color: rgba(212, 175, 55, 0.65);
+      background: rgba(212, 175, 55, 0.08);
+      border: 1px solid rgba(212, 175, 55, 0.25);
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.08), 0 12px 26px rgba(0, 0, 0, 0.4);
+    }
+
+    .customers-empty-state .empty-text {
+      color: #e2e8f0;
+      font-weight: 700;
+      font-size: 1rem;
+      margin: 0;
+    }
+
+    .customers-empty-state .empty-sub {
+      color: #94a3b8;
+      font-size: 0.85rem;
+      margin: 0;
+    }
+
+    /* ── Modal ── */
+
+    .customers-modal-card {
+      max-width: 560px;
+    }
+
+    .customers-modal-card .modal-3d-title {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .modal-intro-note {
+      color: rgba(226, 232, 240, 0.7);
+      font-size: 0.86rem;
+      margin: 0 0 18px;
+      line-height: 1.7;
+    }
+
+    .customers-alert {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-bottom: 16px;
+    }
+
+    .alert-icon {
+      flex: 0 0 auto;
+    }
+
+    .customers-form-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .customers-field {
+      min-width: 0;
+    }
+
+    .form-label-modal {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+
+    .field-icon {
+      color: rgba(212, 175, 55, 0.75);
+      flex: 0 0 auto;
+    }
+
+    .customers-form-row {
+      gap: 14px;
+    }
+
+    .customers-modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 6px;
+      flex-wrap: wrap;
+    }
+
+    .customers-save-btn {
+      padding: 12px 24px !important;
+    }
+
+    /* ── Responsive ── */
+
+    @media (max-width: 640px) {
+      .customers-search-form {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .customers-search-input-wrap {
+        flex: 1 1 auto;
+        width: 100%;
+      }
+
+      .customers-search-actions {
+        width: 100%;
+      }
+
+      .customers-search-btn,
+      .customers-clear-btn {
+        flex: 1 1 auto;
+        justify-content: center;
+      }
+
+      .customers-modal-actions {
+        flex-direction: column-reverse;
+        width: 100%;
+      }
+
+      .customers-modal-actions .btn-3d-gold,
+      .customers-modal-actions .btn-3d-secondary {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .cell-name {
+        min-width: 150px;
+      }
+    }
+
+    @media (max-width: 400px) {
+      .customers-count-pill {
+        white-space: normal;
+        font-size: 0.8rem;
+      }
+    }
+  </style>
+
   <!-- Client-side script for editing -->
   <script>
     const modal = document.getElementById('customerEditModal');
     const form = document.getElementById('editCustomerForm') as HTMLFormElement;
     const cancelBtn = document.getElementById('cancelEditBtn');
+    const closeBtn = document.getElementById('closeEditModalBtn');
     const saveBtn = document.getElementById('saveCustomerBtn') as HTMLButtonElement;
     const alertBox = document.getElementById('editAlert');
     const alertText = document.getElementById('editAlertText');
@@ -237,6 +677,10 @@ const displayedItems = categoryParam
     const categorySelect = document.getElementById('editCustomerCategory') as unknown as HTMLSelectElement;
     const emailInput = document.getElementById('editCustomerEmail') as HTMLInputElement;
     const noteInput = document.getElementById('editCustomerNote') as HTMLTextAreaElement;
+
+    function closeModal() {
+      if (modal) modal.style.display = 'none';
+    }
 
     // Attach click listeners to edit buttons
     document.querySelectorAll('.edit-customer-btn').forEach((btn) => {
@@ -256,11 +700,15 @@ const displayedItems = categoryParam
       });
     });
 
-    if (cancelBtn && modal) {
-      cancelBtn.addEventListener('click', () => {
-        modal.style.display = 'none';
-      });
-    }
+    cancelBtn?.addEventListener('click', closeModal);
+    closeBtn?.addEventListener('click', closeModal);
+    modal?.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modal?.style.display === 'flex') closeModal();
+    });
 
     if (form && modal) {
       form.addEventListener('submit', async (e) => {
@@ -269,7 +717,8 @@ const displayedItems = categoryParam
         if (!customerId) return;
 
         saveBtn.disabled = true;
-        saveBtn.innerText = 'در حال ذخیره در دیتابیس...';
+        const saveLabel = saveBtn.querySelector('span');
+        if (saveLabel) saveLabel.innerText = 'در حال ذخیره در دیتابیس...';
         if (alertBox) alertBox.style.display = 'none';
 
         try {
@@ -287,7 +736,7 @@ const displayedItems = categoryParam
 
           const json = await res.json() as any;
           if (res.ok && json.data) {
-            saveBtn.innerText = '✓ ذخیره شد!';
+            if (saveLabel) saveLabel.innerText = 'ذخیره شد';
             setTimeout(() => {
               window.location.reload();
             }, 500);
@@ -295,13 +744,13 @@ const displayedItems = categoryParam
             if (alertText) alertText.innerText = json.error?.message || 'خطا در ثبت تغییرات.';
             if (alertBox) alertBox.style.display = 'flex';
             saveBtn.disabled = false;
-            saveBtn.innerText = '✓ ذخیره تغییرات مراجع';
+            if (saveLabel) saveLabel.innerText = 'ذخیره تغییرات مراجع';
           }
         } catch {
           if (alertText) alertText.innerText = 'خطای ارتباط با سرور.';
           if (alertBox) alertBox.style.display = 'flex';
           saveBtn.disabled = false;
-          saveBtn.innerText = '✓ ذخیره تغییرات مراجع';
+          if (saveLabel) saveLabel.innerText = 'ذخیره تغییرات مراجع';
         }
       });
     }

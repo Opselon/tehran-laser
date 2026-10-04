@@ -353,6 +353,576 @@ const DEVICE_LABEL = 'الکساندرایت کندلا جنتل پرومکس ۲
     </div>
   </div>
 
+  <style>
+    /* ── CRM Page — 3D Obsidian-Gold layer ── */
+
+    .crm-page {
+      max-width: 100%;
+    }
+
+    .header-main-col {
+      min-width: 0;
+    }
+
+    .admin-page-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .title-gold-icon {
+      color: #f5d77f;
+      filter: drop-shadow(0 2px 6px rgba(212, 175, 55, 0.5));
+      flex: 0 0 auto;
+    }
+
+    .crm-kpi-grid {
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      margin-bottom: 24px;
+    }
+
+    .crm-kpi-icon-gold { color: #f5d77f; }
+    .crm-kpi-icon-blue { color: #38bdf8; }
+    .crm-kpi-icon-green { color: #34d399; }
+
+    .crm-kpi-progress-value {
+      color: #34d399;
+      display: inline-flex;
+      align-items: baseline;
+      gap: 4px;
+    }
+
+    .crm-kpi-unit {
+      font-size: 1rem;
+      color: #94a3b8;
+    }
+
+    /* ── Layout: sidebar + dossier ── */
+
+    .crm-layout {
+      gap: 24px;
+      align-items: start;
+    }
+
+    /* ── Sidebar card ── */
+
+    .crm-side-card {
+      padding: 18px !important;
+      background: linear-gradient(160deg, rgba(22, 27, 40, 0.96) 0%, rgba(11, 14, 22, 0.96) 100%) !important;
+      border: 1px solid rgba(212, 175, 55, 0.22) !important;
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.06), 0 14px 34px rgba(0, 0, 0, 0.4) !important;
+    }
+
+    .crm-side-title {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #f5d77f;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .crm-side-title-text {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .crm-side-count {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #94a3b8;
+      white-space: nowrap;
+    }
+
+    .crm-search-wrap {
+      position: relative;
+      margin-bottom: 14px;
+    }
+
+    .crm-search-icon {
+      position: absolute;
+      top: 50%;
+      right: 12px;
+      transform: translateY(-50%);
+      color: rgba(212, 175, 55, 0.75);
+      pointer-events: none;
+    }
+
+    .crm-search-input {
+      margin-bottom: 0 !important;
+      font-size: 0.85rem !important;
+      padding: 11px 38px 11px 12px !important;
+      width: 100%;
+    }
+
+    .crm-cust-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 600px;
+      overflow-y: auto;
+      padding-left: 4px;
+    }
+
+    .crm-cust-list::-webkit-scrollbar {
+      width: 7px;
+    }
+    .crm-cust-list::-webkit-scrollbar-thumb {
+      background: rgba(212, 175, 55, 0.28);
+      border-radius: 7px;
+    }
+
+    .crm-cust-item {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 11px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      cursor: pointer;
+      transition: all 0.18s ease;
+      text-align: right;
+      width: 100%;
+      font-family: inherit;
+    }
+
+    .crm-cust-item:hover {
+      background: rgba(212, 175, 55, 0.08);
+      border-color: rgba(212, 175, 55, 0.32);
+      transform: translateY(-1px);
+    }
+
+    .crm-cust-item.active {
+      background: linear-gradient(160deg, rgba(212, 175, 55, 0.18) 0%, rgba(212, 175, 55, 0.05) 100%);
+      border-color: rgba(212, 175, 55, 0.55);
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1), 0 6px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    .crm-cust-avatar {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      flex: 0 0 auto;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 900;
+      color: #0d0a02;
+      background: linear-gradient(160deg, #f5d77f 0%, #d4af37 55%, #9e7822 100%);
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.6);
+    }
+
+    .crm-cust-body {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 0;
+      flex: 1 1 auto;
+    }
+
+    .crm-cust-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .crm-cust-name {
+      font-weight: 700;
+      color: #f8fafc;
+      font-size: 0.9rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .crm-cust-cat {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 6px;
+      background: rgba(212, 175, 55, 0.15);
+      color: #f5d77f;
+      white-space: nowrap;
+      flex: 0 0 auto;
+    }
+
+    .crm-cust-meta {
+      font-size: 0.78rem;
+      color: #94a3b8;
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .crm-cust-count { white-space: nowrap; }
+
+    .crm-side-empty {
+      text-align: center;
+      color: #94a3b8;
+      font-size: 0.85rem;
+      padding: 20px 8px;
+      margin: 0;
+    }
+
+    /* ── Dossier card ── */
+
+    .crm-dossier-card {
+      padding: 24px !important;
+      background: linear-gradient(160deg, rgba(22, 27, 40, 0.96) 0%, rgba(11, 14, 22, 0.96) 100%) !important;
+      border: 1px solid rgba(212, 175, 55, 0.22) !important;
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.06), 0 14px 34px rgba(0, 0, 0, 0.4) !important;
+    }
+
+    .crm-dossier-head {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 16px;
+      margin-bottom: 20px;
+    }
+
+    .crm-dossier-id {
+      min-width: 0;
+    }
+
+    .crm-dossier-name {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #f8fafc;
+      margin-bottom: 5px;
+      word-break: break-word;
+    }
+
+    .crm-dossier-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      font-size: 0.85rem;
+      color: #94a3b8;
+    }
+
+    .crm-dossier-phone,
+    .crm-dossier-cat {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .meta-icon {
+      color: rgba(212, 175, 55, 0.7);
+      flex: 0 0 auto;
+    }
+
+    .crm-dossier-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .crm-dossier-btn {
+      font-size: 0.82rem !important;
+      padding: 9px 16px !important;
+      min-height: 42px;
+    }
+
+    /* ── Course progress panel ── */
+
+    .crm-course-panel {
+      background: linear-gradient(160deg, rgba(15, 23, 42, 0.65) 0%, rgba(9, 12, 20, 0.65) 100%);
+      border: 1px solid rgba(212, 175, 55, 0.18);
+      padding: 18px;
+      border-radius: 14px;
+      margin-bottom: 24px;
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05);
+    }
+
+    .crm-device-line {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      font-size: 0.82rem;
+      color: #cbd5e1;
+      margin-bottom: 16px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .crm-device-name { color: #94a3b8; }
+    .crm-device-value {
+      color: #f5d77f;
+      font-weight: 800;
+    }
+
+    .crm-progress-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+
+    .crm-progress-label { color: #cbd5e1; }
+
+    .crm-progress-value {
+      color: #38bdf8;
+      white-space: nowrap;
+    }
+
+    .crm-progress-track {
+      width: 100%;
+      height: 12px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 7px;
+      overflow: hidden;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
+    }
+
+    .crm-progress-fill {
+      width: 25%;
+      height: 100%;
+      background: linear-gradient(90deg, #38bdf8, #818cf8);
+      border-radius: 6px;
+      transition: width 0.3s ease;
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.55);
+    }
+
+    /* ── Records table ── */
+
+    .crm-records-title {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #f5d77f;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .crm-table th .th-icon {
+      color: rgba(212, 175, 55, 0.85);
+      vertical-align: -3px;
+      margin-left: 5px;
+      flex: 0 0 auto;
+    }
+
+    .crm-session-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: #34d399;
+      background: rgba(16, 185, 129, 0.14);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      white-space: nowrap;
+    }
+
+    .crm-date-cell {
+      white-space: nowrap;
+      color: #cbd5e1;
+      font-size: 0.84rem;
+    }
+
+    .crm-area-cell {
+      font-weight: 700;
+      color: #f8fafc;
+    }
+
+    .crm-joule-chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-weight: 800;
+      font-size: 0.82rem;
+      color: #fbbf24;
+      background: rgba(251, 191, 36, 0.12);
+      border: 1px solid rgba(251, 191, 36, 0.4);
+      white-space: nowrap;
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.08);
+    }
+
+    .crm-pulse-chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.82rem;
+      color: #38bdf8;
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      white-space: nowrap;
+    }
+
+    .crm-shot-chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-weight: 800;
+      font-size: 0.82rem;
+      font-variant-numeric: tabular-nums;
+      color: #f5d77f;
+      background: rgba(212, 175, 55, 0.12);
+      border: 1px solid rgba(212, 175, 55, 0.38);
+      white-space: nowrap;
+    }
+
+    .crm-reaction-cell {
+      font-size: 0.82rem;
+      color: #34d399;
+    }
+
+    .crm-operator-cell {
+      font-size: 0.82rem;
+      color: #cbd5e1;
+    }
+
+    .crm-empty-row {
+      text-align: center;
+      color: #94a3b8;
+      padding: 28px 16px !important;
+    }
+
+    .crm-empty-row .empty-icon-3d {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 10px;
+      width: 58px;
+      height: 58px;
+      border-radius: 16px;
+      color: rgba(212, 175, 55, 0.6);
+      background: rgba(212, 175, 55, 0.08);
+      border: 1px solid rgba(212, 175, 55, 0.22);
+    }
+
+    /* ── Modal form ── */
+
+    .crm-form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .crm-form-row {
+      gap: 14px;
+    }
+
+    .crm-dose-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .crm-dose-input {
+      font-variant-numeric: tabular-nums;
+    }
+
+    .crm-form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .customers-field {
+      min-width: 0;
+    }
+
+    .form-label-modal {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+
+    .field-icon {
+      color: rgba(212, 175, 55, 0.75);
+      flex: 0 0 auto;
+    }
+
+    /* ── Responsive ── */
+
+    @media (max-width: 860px) {
+      .crm-dose-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .crm-dossier-head {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .crm-dossier-actions {
+        width: 100%;
+      }
+
+      .crm-dossier-btn {
+        flex: 1 1 100%;
+      }
+
+      .crm-progress-head {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .crm-side-card,
+      .crm-dossier-card {
+        padding: 16px !important;
+      }
+
+      .crm-cust-list {
+        max-height: 420px;
+      }
+
+      .crm-form-actions {
+        flex-direction: column-reverse;
+        width: 100%;
+      }
+
+      .crm-form-actions .btn-3d-gold,
+      .crm-form-actions .btn-3d-secondary {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    @media (max-width: 400px) {
+      .crm-kpi-grid {
+        grid-template-columns: minmax(0, 1fr) !important;
+      }
+
+      .crm-dossier-name {
+        font-size: 1.08rem;
+      }
+
+      .crm-dossier-meta {
+        font-size: 0.8rem;
+        gap: 8px;
+      }
+    }
+  </style>
+
   <script>
     let activeCustId = (document.getElementById('recordCustId') as HTMLInputElement)?.value || '';
 
@@ -367,7 +937,7 @@ const DEVICE_LABEL = 'الکساندرایت کندلا جنتل پرومکس ۲
         const name = (item.dataset.name || '').toLowerCase();
         const phone = (item.dataset.phone || '').toLowerCase();
         if (name.includes(q) || phone.includes(q)) {
-          item.style.display = 'block';
+          item.style.display = 'flex';
         } else {
           item.style.display = 'none';
         }
@@ -392,6 +962,26 @@ const DEVICE_LABEL = 'الکساندرایت کندلا جنتل پرومکس ۲
         if (catEl) catEl.innerText = `دسته: ${item.dataset.category === 'female' ? 'بانوان' : 'آقایان'}`;
         if (recCustId) recCustId.value = activeCustId;
 
+        // Update progress bar from this customer's latest recorded session
+        const visible = Array.from(document.querySelectorAll('#clinicalRecordsTbody tr[data-custid]'))
+          .filter((r) => (r as HTMLElement).dataset.custid === activeCustId);
+        const barEl = document.getElementById('dossierProgressBar');
+        const textEl = document.getElementById('dossierProgressText');
+        if (visible.length > 0 && barEl && textEl) {
+          const badge = (visible[0] as HTMLElement).querySelector('.crm-session-badge');
+          const nums = (badge?.textContent || '').match(/\d+/g);
+          if (nums && nums.length >= 2) {
+            const done = Number(nums[0]);
+            const total = Number(nums[1]);
+            const pct = total > 0 ? Math.min(100, Math.round((done / total) * 100)) : 0;
+            barEl.style.width = `${pct}%`;
+            textEl.innerText = `جلسه ${done.toLocaleString('fa-IR')} از ${total.toLocaleString('fa-IR')} (${pct.toLocaleString('fa-IR')}٪)`;
+          }
+        } else if (barEl && textEl) {
+          barEl.style.width = '0%';
+          textEl.innerText = 'هنوز جلسه‌ای ثبت نشده است';
+        }
+
         // Filter clinical records table
         const rows = document.querySelectorAll('#clinicalRecordsTbody tr');
         rows.forEach(r => {
@@ -402,6 +992,14 @@ const DEVICE_LABEL = 'الکساندرایت کندلا جنتل پرومکس ۲
             row.style.display = 'none';
           }
         });
+      });
+
+      el.addEventListener('keydown', (e) => {
+        const key = e as KeyboardEvent;
+        if (key.key === 'Enter' || key.key === ' ') {
+          key.preventDefault();
+          (el as HTMLElement).click();
+        }
       });
     });
 
@@ -425,6 +1023,9 @@ const DEVICE_LABEL = 'الکساندرایت کندلا جنتل پرومکس ۲
     addSessionForCustBtn?.addEventListener('click', openModal);
     closeBtn?.addEventListener('click', closeModal);
     cancelBtn?.addEventListener('click', closeModal);
+    newRecordModal?.addEventListener('click', (e) => {
+      if (e.target === newRecordModal) closeModal();
+    });
 
     recordForm?.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -451,7 +1052,7 @@ const DEVICE_LABEL = 'الکساندرایت کندلا جنتل پرومکس ۲
         });
 
         if (res.ok) {
-          alert('✓ جلسه بالینی با موفقیت در پرونده الکترونیک مراجع ثبت شد.');
+          alert('جلسه بالینی با موفقیت در پرونده الکترونیک مراجع ثبت شد.');
           window.location.reload();
         } else {
           alert('خطا در ثبت جلسه بالینی.');
