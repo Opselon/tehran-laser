@@ -1207,6 +1207,13 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
     color: #f5d77f;
     text-decoration: none;
     font-weight: 700;
+    position: relative;
+  }
+
+  .meta-row a::after {
+    content: '';
+    position: absolute;
+    inset: -11px -6px;
   }
 
   .amenities-title {
