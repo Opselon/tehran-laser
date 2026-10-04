@@ -1380,6 +1380,11 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
 
   .hero-subtitle strong {
     color: var(--gold-light);
+    /* Latin device names inside an RTL paragraph wrap awkwardly; keep the
+       full name on one line and let it break as a single unit instead. */
+    display: inline-block;
+    unicode-bidi: isolate;
+    white-space: nowrap;
   }
 
   /* Technology Badges Strip */
