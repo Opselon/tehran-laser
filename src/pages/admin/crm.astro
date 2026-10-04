@@ -70,7 +70,7 @@ try {
     </div>
 
     <!-- Layout: Customer dossiers and recent clinical records -->
-    <div style="display: grid; grid-template-columns: 320px 1fr; gap: 24px; align-items: start;">
+    <div class="g-side" style="display: grid; gap: 24px; align-items: start">
       <!-- Right: Customer list sidebar -->
       <div class="admin-section-block" style="padding: 18px;">
         <h3 style="font-size: 0.95rem; font-weight: 800; color: #f5d77f; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
@@ -107,7 +107,7 @@ try {
 
       <!-- Left: Active Customer Clinical Dossier -->
       <div class="admin-section-block" style="padding: 24px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 16px; margin-bottom: 20px;">
+        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 16px; margin-bottom: 20px;">
           <div>
             <h2 id="dossierName" style="font-size: 1.25rem; font-weight: 800; color: #f8fafc; margin-bottom: 4px;">
               {customersList[0]?.name || 'انتخاب مراجع'}
@@ -119,7 +119,7 @@ try {
             </div>
           </div>
 
-          <div style="display: flex; gap: 10px;">
+          <div style="display: flex; flex-wrap: wrap; gap: 10px;">
             <button id="sendDirectSmsBtn" class="btn-3d-complete" style="font-size: 0.82rem; padding: 8px 16px;">
               ✉️ ارسال پیامک مستقیم
             </button>
@@ -199,7 +199,7 @@ try {
       <form id="recordForm" style="display: flex; flex-direction: column; gap: 16px;">
         <input type="hidden" id="recordCustId" value={customersList[0]?.id || ''} />
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+        <div class="g-2" style="display: grid; gap: 14px">
           <div>
             <label class="form-label-modal">شماره جلسه:</label>
             <input type="number" id="recSessionNum" class="form-control-modal" value="1" min="1" max="15" required />
@@ -215,7 +215,7 @@ try {
           <input type="text" id="recAreas" class="form-control-modal" value="فول بادی کاربردی (ساق، ساعد، زیربغل، بیکینی)" required />
         </div>
 
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+        <div class="g-3" style="display: grid; gap: 12px">
           <div>
             <label class="form-label-modal">انرژی (J/cm²):</label>
             <input type="number" id="recJoules" step="0.5" class="form-control-modal" value="14.0" required />

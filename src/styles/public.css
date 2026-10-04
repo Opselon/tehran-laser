@@ -2566,3 +2566,498 @@ body {
     padding-bottom: 74px;
   }
 }
+
+
+/* ─────────────────────────────────────────────────────────────
+   MISSING PUBLIC COMPONENTS
+   ───────────────────────────────────────────────────────────── */
+
+.text-body {
+  font-size: 1rem;
+  line-height: 1.9;
+  color: var(--color-text-secondary);
+}
+
+.booking-page-section {
+  padding-block: 48px;
+}
+
+.clinic-cta-box,
+.faq-bottom-cta {
+  background: linear-gradient(135deg, var(--color-primary-soft) 0%, var(--color-surface) 100%);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 28px 24px;
+  box-shadow: var(--shadow-sm);
+}
+
+.article-cover-wrapper {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-md);
+}
+
+.article-cover-wrapper img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.article-p {
+  font-size: 1.05rem;
+  line-height: 2.1;
+  color: var(--color-ink-soft);
+  margin: 0 0 18px;
+}
+
+.meta-dot::before {
+  content: '\2022';
+  margin-inline: 8px;
+  color: var(--color-border-strong);
+}
+
+.blog-card-body {
+  padding: 20px 22px 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.blog-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 14px 22px 20px;
+  border-top: 1px dashed var(--color-border);
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+
+.service-care-guide {
+  background: var(--color-surface-muted);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+}
+
+.service-detail-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.service-detail-actions > * {
+  flex: 1 1 220px;
+}
+
+.row-num {
+  width: 46px;
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.service-cell {
+  min-width: 200px;
+}
+
+.price-cell {
+  font-weight: 800;
+  color: var(--color-primary-strong);
+  white-space: nowrap;
+}
+
+.duration-cell,
+.male-cell {
+  white-space: nowrap;
+  color: var(--color-text-secondary);
+}
+
+.action-cell {
+  width: 130px;
+  text-align: left;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   PUBLIC RESPONSIVE UPGRADE LAYER
+   ───────────────────────────────────────────────────────────── */
+
+img,
+video,
+iframe,
+svg {
+  max-width: 100%;
+}
+
+.pricing-table-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.pricing-table-container .table-pricing {
+  min-width: 680px;
+}
+
+@media (max-width: 1200px) {
+  .dates-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 992px) {
+  .dates-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .slots-selection-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .article-p {
+    font-size: 1rem;
+    line-height: 2;
+  }
+
+  .service-detail-actions > * {
+    flex: 1 1 100%;
+  }
+
+  .action-cell {
+    width: auto;
+  }
+}
+
+@media (max-width: 576px) {
+  .dates-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .slots-selection-grid {
+    grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+  }
+
+  .blog-card-body {
+    padding: 16px 16px 4px;
+  }
+
+  .blog-card-footer {
+    padding: 12px 16px 16px;
+  }
+
+  .blog-card-title a {
+    font-size: 1.1rem;
+  }
+
+  .clinic-cta-box,
+  .faq-bottom-cta,
+  .service-care-guide {
+    padding: 20px 16px;
+  }
+
+  .table-pricing th,
+  .table-pricing td {
+    padding: 13px 14px;
+    font-size: 0.87rem;
+  }
+}
+
+@media (pointer: coarse) {
+  .btn {
+    min-height: 44px;
+  }
+
+  .mobile-drawer-nav a {
+    min-height: 48px;
+  }
+}
+
+
+/* ─────────────────────────────────────────────────────────────
+   PUBLIC HEADER / DRAWER UX LAYER
+   ───────────────────────────────────────────────────────────── */
+
+@media (max-width: 992px) {
+  .header-phone .phone-digits {
+    display: none;
+  }
+
+  .header-phone {
+    padding: 9px 11px;
+  }
+}
+
+@media (max-width: 768px) {
+  .header-cta {
+    display: none;
+  }
+
+  .logo-sub {
+    display: none;
+  }
+
+  .announcement-inner {
+    font-size: 0.8rem;
+    gap: 10px;
+    justify-content: space-between;
+  }
+
+  .announcement-inner span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mobile-drawer {
+    padding: 16px 18px calc(20px + env(safe-area-inset-bottom));
+    animation: drawerIn 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .drawer-link {
+    padding: 12px 0;
+    min-height: 46px;
+    display: flex;
+    align-items: center;
+  }
+}
+
+@keyframes drawerIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Open-state animation for the hamburger */
+body.drawer-open .mobile-menu-btn .bar:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+body.drawer-open .mobile-menu-btn .bar:nth-child(2) {
+  opacity: 0;
+}
+body.drawer-open .mobile-menu-btn .bar:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+body.drawer-open {
+  overflow: hidden;
+}
+
+/* Keyboard focus visibility (a11y) */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+
+/* ─────────────────────────────────────────────────────────────
+   BOOKING WIZARD COMPONENTS (BookingWizard.tsx)
+   ───────────────────────────────────────────────────────────── */
+
+.wizard-body {
+  display: block;
+}
+
+.step-content {
+  animation: fadeUp 0.32s ease both;
+}
+
+.loading-state {
+  color: var(--color-text-secondary);
+  font-size: 0.95rem;
+}
+
+.success-check {
+  width: 76px;
+  height: 76px;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.2rem;
+  background: var(--color-success-soft);
+  border: 2px solid var(--color-success);
+  color: var(--color-success);
+}
+
+.success-guidelines {
+  background: var(--color-surface-muted);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 16px 18px;
+  text-align: right;
+  font-size: 0.92rem;
+  line-height: 1.9;
+  color: var(--color-text-secondary);
+}
+
+.success-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.guidelines-title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--color-ink);
+  margin-bottom: 8px;
+}
+
+.summary-row-header {
+  background: var(--color-primary-soft);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+}
+
+.summary-row-header .label {
+  color: var(--color-text-secondary);
+  font-size: 0.85rem;
+}
+
+.summary-row-header .value {
+  font-weight: 800;
+  color: var(--color-ink);
+}
+
+.detail-label {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+
+.detail-value {
+  font-size: 0.98rem;
+  color: var(--color-ink);
+}
+
+.detail-value.highlight-ref {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-weight: 800;
+  color: var(--color-primary-strong);
+  letter-spacing: 0.02em;
+}
+
+.highlight-amount-row {
+  background: var(--color-primary-soft);
+  border: 1px dashed var(--color-primary);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+}
+
+.price-highlight {
+  font-size: 1.45rem;
+  font-weight: 900;
+  color: var(--color-primary-strong);
+}
+
+.text-gold {
+  color: var(--color-primary-strong);
+}
+
+.discount-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--color-success-soft);
+  color: var(--color-success);
+  border: 1px solid var(--color-success);
+  border-radius: 999px;
+  padding: 3px 12px;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.duration-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--color-surface-muted);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  border-radius: 999px;
+  padding: 3px 11px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.submit-booking-btn {
+  min-width: 220px;
+}
+
+.animate-shake {
+  animation: shakeAlert 0.4s ease;
+}
+
+@keyframes shakeAlert {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-7px); }
+  40% { transform: translateX(7px); }
+  60% { transform: translateX(-5px); }
+  80% { transform: translateX(5px); }
+}
+
+@media (max-width: 576px) {
+  .submit-booking-btn {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .success-actions > * {
+    flex: 1 1 100%;
+  }
+
+  .price-highlight {
+    font-size: 1.25rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .step-content,
+  .animate-shake {
+    animation: none;
+  }
+}
+
+/* ── Mobile overflow guard ───────────────────────────────────
+   `.btn` is `white-space: nowrap`, so any long label wider than
+   the viewport forces horizontal page scroll. On narrow screens
+   let labels wrap and never exceed their container.           */
+
+@media (max-width: 767.98px) {
+  .btn,
+  .btn-lg,
+  .btn-sm,
+  .service-cta,
+  .booking-cta {
+    white-space: normal;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+
+  /* Nothing in a section may force the page wider than the screen */
+  .container,
+  .section,
+  section {
+    max-width: 100%;
+    overflow-wrap: break-word;
+  }
+
+  img,
+  video,
+  iframe,
+  svg {
+    max-width: 100%;
+    height: auto;
+  }
+}
+

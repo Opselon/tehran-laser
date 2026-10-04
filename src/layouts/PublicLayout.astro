@@ -1,6 +1,7 @@
 ---
 import '@fontsource-variable/vazirmatn/index.css';
 import '../styles/tokens.css';
+import '../styles/utilities.css';
 import '../styles/base.css';
 import '../styles/components.css';
 import '../styles/public.css';
@@ -256,12 +257,34 @@ const structuredData = jsonLd
     <script is:inline>
       const btn = document.getElementById('mobileMenuBtn');
       const drawer = document.getElementById('mobileDrawer');
+
+      function setDrawer(open) {
+        if (!btn || !drawer) return;
+        drawer.hidden = !open;
+        drawer.style.display = open ? 'block' : 'none';
+        btn.setAttribute('aria-expanded', String(open));
+        btn.setAttribute('aria-label', open ? 'بستن منو' : 'باز کردن منو');
+        document.body.classList.toggle('drawer-open', open);
+      }
+
       if (btn && drawer) {
         btn.addEventListener('click', () => {
-          const isClosed = drawer.style.display === 'none' || drawer.style.display === '' || drawer.hidden;
-          drawer.hidden = !isClosed;
-          drawer.style.display = isClosed ? 'block' : 'none';
-          btn.setAttribute('aria-expanded', String(isClosed));
+          const isOpen = !drawer.hidden && drawer.style.display !== 'none';
+          setDrawer(!isOpen);
+        });
+
+        drawer.querySelectorAll('a').forEach((link) => {
+          link.addEventListener('click', () => setDrawer(false));
+        });
+
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') setDrawer(false);
+        });
+
+        // Reset state when crossing to desktop width
+        const mq = window.matchMedia('(min-width: 993px)');
+        mq.addEventListener('change', (e) => {
+          if (e.matches) setDrawer(false);
         });
       }
     </script>

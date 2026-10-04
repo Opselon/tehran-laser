@@ -82,7 +82,7 @@ try {
       <div style="position: relative; padding: 20px 0;">
         <div style="position: absolute; top: 50%; right: 0; left: 0; height: 3px; background: linear-gradient(90deg, #d4af37, #38bdf8, #818cf8); transform: translateY(-50%); z-index: 1;"></div>
 
-        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; position: relative; z-index: 2;">
+        <div class="g-4" style="display: grid; gap: 16px; position: relative; z-index: 2">
           {[
             { season: 'بهار (نوروزی)', date: '۱ تا ۲۰ فروردین', disc: '۲۵٪', icon: '🌸', status: 'گذشته' },
             { season: 'تابستانه (آفتاب)', date: '۱ تا ۱۵ تیر', disc: '۱۵٪', icon: '☀️', status: 'گذشته' },
@@ -118,7 +118,7 @@ try {
           <input type="text" id="festTitle" class="form-control-modal" placeholder="مثال: جشنواره پاییزه طلایی تهران لیزر" required />
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+        <div class="g-2" style="display: grid; gap: 14px">
           <div>
             <label class="form-label-modal">درصد تخفیف (%):</label>
             <input type="number" id="festPercent" class="form-control-modal" value="20" min="1" max="100" required />
@@ -134,7 +134,7 @@ try {
           <textarea id="festDesc" class="form-control-modal" rows="3" placeholder="توضیحاتی برای نمایش به مراجعین..."></textarea>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+        <div class="g-2" style="display: grid; gap: 14px">
           <div>
             <label class="form-label-modal">تاریخ شروع:</label>
             <input type="date" id="festStarts" class="form-control-modal" required />

@@ -43,7 +43,7 @@ const igDisc = settings.public.instagram_follower_discount_percent || '15';
     </div>
 
     <!-- Layout: Settings Form & Instagram Live Mockup -->
-    <div style="display: grid; grid-template-columns: 1fr 380px; gap: 28px; align-items: start;">
+    <div class="g-side-r" style="display: grid; gap: 28px; align-items: start">
       <!-- Form -->
       <div class="admin-section-block" style="padding: 28px;">
         <h3 class="section-block-title" style="margin-bottom: 20px;">
@@ -61,7 +61,7 @@ const igDisc = settings.public.instagram_follower_discount_percent || '15';
             <input type="url" id="igBioInput" dir="ltr" class="form-control-modal" value={igBio} required />
           </div>
 
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div class="g-2" style="display: grid; gap: 14px">
             <div>
               <label class="form-label-modal">کد تخفیف اختصاصی فالوورها:</label>
               <input type="text" id="igPromoInput" dir="ltr" class="form-control-modal" value={igPromo} required />

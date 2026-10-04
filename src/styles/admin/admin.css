@@ -80,6 +80,13 @@ body.admin-body {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 1px 0 rgba(255, 255, 255, 0.05) inset;
 }
 
+.admin-topbar__brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
 .admin-topbar__brand .brand-link {
   display: flex;
   align-items: center;
@@ -627,7 +634,9 @@ body.admin-body {
 
 .pending-bookings-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  /* min(..., 100%) keeps the 380px preference on desktop but stops the
+     track from forcing horizontal overflow on narrow screens */
+  grid-template-columns: repeat(auto-fill, minmax(min(380px, 100%), 1fr));
   gap: 20px;
 }
 

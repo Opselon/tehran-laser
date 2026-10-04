@@ -465,3 +465,80 @@ html, body {
   text-decoration: underline;
   transform: translateX(3px);
 }
+
+
+/* ─────────────────────────────────────────────────────────────
+   LOGIN RESPONSIVE / TOUCH LAYER
+   ───────────────────────────────────────────────────────────── */
+
+.admin-login-body-3d {
+  /* keyboard must never hide the submit button */
+  align-items: flex-start;
+}
+
+@media (min-height: 720px) {
+  .admin-login-body-3d {
+    align-items: center;
+  }
+}
+
+.login-3d-viewport {
+  padding: 32px 16px;
+  margin-block: auto;
+}
+
+/* iOS: prevent zoom on focus */
+.input-3d {
+  font-size: 16px;
+}
+
+@media (max-width: 560px) {
+  .login-3d-card {
+    padding: 30px 20px;
+    border-radius: 22px;
+  }
+
+  .login-3d-title {
+    font-size: 1.35rem;
+  }
+
+  .login-3d-subtitle {
+    font-size: 0.88rem;
+  }
+
+  .emblem-3d-wrap {
+    transform: scale(0.88);
+  }
+
+  .autofill-helper-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .btn-autofill-3d {
+    width: 100%;
+  }
+
+  .login-3d-footer {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+  }
+}
+
+@media (max-width: 380px) {
+  .login-3d-viewport {
+    padding: 20px 12px;
+  }
+
+  .login-3d-card {
+    padding: 24px 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .login-3d-card {
+    transition: none;
+    transform: none !important;
+  }
+}

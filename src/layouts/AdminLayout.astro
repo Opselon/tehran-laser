@@ -1,7 +1,10 @@
 ---
 import '@fontsource-variable/vazirmatn/index.css';
 import '../styles/tokens.css';
+import '../styles/utilities.css';
 import '../styles/admin/admin.css';
+import '../styles/admin/components-3d.css';
+import '../styles/admin/responsive.css';
 
 interface Props {
   title?: string;
@@ -51,6 +54,16 @@ const navItems = [
       <!-- 3D High-Tech Topbar -->
       <header class="admin-topbar">
         <div class="admin-topbar__brand">
+          <button
+            type="button"
+            class="admin-menu-btn"
+            id="adminMenuBtn"
+            aria-label="باز کردن منو"
+            aria-expanded="false"
+            aria-controls="adminSidebar"
+          >
+            <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+          </button>
           <a href="/admin" class="brand-link">
             <div class="brand-emblem-mini">💎</div>
             <div class="brand-text-col">
@@ -90,7 +103,7 @@ const navItems = [
       </header>
 
       <!-- 3D Obsidian Sidebar -->
-      <aside class="admin-sidebar">
+      <aside class="admin-sidebar" id="adminSidebar">
         <nav class="admin-sidebar__nav">
           <ul class="admin-nav-list">
             {navItems.map((item) => (
@@ -115,6 +128,9 @@ const navItems = [
         </div>
       </aside>
 
+      <!-- Mobile sidebar backdrop -->
+      <div class="admin-sidebar-overlay" id="adminSidebarOverlay" hidden></div>
+
       <!-- Main Content Area -->
       <main class="admin-main">
         <slot />
@@ -123,6 +139,26 @@ const navItems = [
 
     <!-- Script for Clock & Logout -->
     <script>
+      // Mobile sidebar drawer
+      const menuBtn = document.getElementById('adminMenuBtn');
+      const sidebar = document.getElementById('adminSidebar');
+      const overlay = document.getElementById('adminSidebarOverlay');
+
+      function setMenu(open: boolean) {
+        document.body.classList.toggle('sidebar-open', open);
+        if (menuBtn) menuBtn.setAttribute('aria-expanded', String(open));
+        if (overlay) overlay.hidden = !open;
+      }
+
+      menuBtn?.addEventListener('click', () => {
+        setMenu(!document.body.classList.contains('sidebar-open'));
+      });
+      overlay?.addEventListener('click', () => setMenu(false));
+      sidebar?.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => setMenu(false)));
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') setMenu(false);
+      });
+
       // Live Tehran Time Clock
       function updateLiveClock() {
         const clockEl = document.getElementById('liveClockTime');
