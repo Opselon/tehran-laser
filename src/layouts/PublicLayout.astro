@@ -5,6 +5,7 @@ import '../styles/utilities.css';
 import '../styles/base.css';
 import '../styles/components.css';
 import '../styles/public.css';
+import Icon from '../components/ui/Icon.astro';
 import {
   buildCanonicalUrl,
   resolveCanonicalOrigin,
@@ -174,7 +175,7 @@ const structuredData = jsonLd
     <!-- Top announcement / trust strip -->
     <div class="announcement-strip">
       <div class="container announcement-inner">
-        <span>✨ جشنواره پاییزه تهران لیزر: ۱۵٪ تخفیف ویژه پکیج کل بدن در رزرو آنلاین</span>
+        <span><Icon name="sparkles" size={14} aria-hidden /> جشنواره پاییزه تهران لیزر: ۱۵٪ تخفیف ویژه پکیج کل بدن در رزرو آنلاین</span>
         <a href="/booking" class="announcement-link">رزرو با تخفیف</a>
       </div>
     </div>
@@ -203,7 +204,7 @@ const structuredData = jsonLd
         <!-- Header Actions -->
         <div class="header-actions">
           <a href="tel:+989035555090" class="btn btn-ghost header-phone" aria-label="تماس با کلینیک">
-            <span class="icon-phone">📞</span>
+            <span class="icon-phone"><Icon name="phone" size={16} aria-hidden /></span>
             <span class="phone-digits">۰۹۰۳ ۵۵۵ ۵۰۹۰</span>
           </a>
           <a href="/booking" class="btn btn-primary header-cta">رزرو آنلاین نوبت</a>
@@ -315,7 +316,7 @@ const structuredData = jsonLd
     <!-- Sticky Mobile CTA (§140, §141) -->
     <div class="mobile-sticky-bar">
       <a href="tel:+989035555090" class="btn btn-outline sticky-phone" aria-label="تماس تلفنی">
-        <span>📞 تماس</span>
+        <span><Icon name="phone" size={16} aria-hidden /> تماس</span>
       </a>
       <a href="/booking" class="btn btn-primary sticky-book">
         <span>رزرو آنلاین نوبت</span>
