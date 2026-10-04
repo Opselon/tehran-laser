@@ -152,12 +152,16 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
                       alt={featuredPost.title}
                       class="featured-img"
                       loading="eager"
+                      onerror="this.style.display='none';this.parentElement.classList.add('img-load-failed')"
                     />
                   ) : (
                     <div class="featured-img-fallback">
                       <Icon name="document" size={48} />
                     </div>
                   )}
+                  <div class="featured-img-fallback img-failed-layer" aria-hidden="true">
+                    <Icon name="document" size={48} />
+                  </div>
                   <div class="featured-badge-pill">
                     <Icon name="star" size={13} />
                     <span>مقاله ویژه و برگزیده</span>
@@ -221,12 +225,16 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
                           alt={post.title}
                           class="article-card-img"
                           loading="lazy"
+                          onerror="this.style.display='none';this.parentElement.classList.add('img-load-failed')"
                         />
                       ) : (
                         <div class="article-card-img-fallback">
                           <Icon name="document" size={32} />
                         </div>
                       )}
+                      <div class="article-card-img-fallback img-failed-layer" aria-hidden="true">
+                        <Icon name="document" size={32} />
+                      </div>
                       <span class="card-category-tag">
                         <Icon name={cat.icon} size={12} />
                         <span>{cat.label}</span>
@@ -517,6 +525,18 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
       align-items: center;
       justify-content: center;
       color: rgba(212, 175, 55, 0.4);
+      background: linear-gradient(160deg, #14161a 0%, #0a0b0d 70%);
+    }
+
+    .img-failed-layer {
+      display: none;
+      position: absolute;
+      inset: 0;
+    }
+
+    .featured-image-col.img-load-failed .img-failed-layer,
+    .article-card-img-wrap.img-load-failed .img-failed-layer {
+      display: flex;
     }
 
     .featured-badge-pill {

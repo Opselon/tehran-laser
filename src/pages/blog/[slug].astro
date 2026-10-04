@@ -190,9 +190,19 @@ const blogJsonLdArray = [articleJsonLd, breadcrumbJsonLd];
         <!-- Main Article Column -->
         <article class="article-main-col">
           {post.coverImage && (
-            <div class="article-cover-wrap">
-              <img src={post.coverImage} alt={post.title} class="article-cover-img" />
+            <div class="article-cover-wrap" id="articleCoverWrap">
+              <img
+                src={post.coverImage}
+                alt={post.title}
+                class="article-cover-img"
+                loading="eager"
+                onerror="this.style.display='none';document.getElementById('articleCoverWrap').classList.add('cover-fallback')"
+              />
               <div class="article-cover-shade"></div>
+              <div class="article-cover-fallback" aria-hidden="true">
+                <Icon name="camera" size={34} class="cover-fallback-icon" />
+                <span>کلینیک تهران لیزر</span>
+              </div>
             </div>
           )}
 
@@ -225,7 +235,7 @@ const blogJsonLdArray = [articleJsonLd, breadcrumbJsonLd];
           )}
 
           <div class="article-content-body">
-            {hasToc && <Fragment set:html={preCareHtml} />}
+            <Fragment set:html={preCareHtml} />
             {/<[a-z][\s\S]*>/i.test(contentWithIds) ? (
               <div class="rich-article-content" set:html={contentWithIds} />
             ) : (
@@ -250,7 +260,7 @@ const blogJsonLdArray = [articleJsonLd, breadcrumbJsonLd];
                 })}
               </div>
             )}
-            {hasToc && <Fragment set:html={postCareHtml} />}
+            <Fragment set:html={postCareHtml} />
           </div>
 
           <!-- Author Footer -->
@@ -441,8 +451,8 @@ const blogJsonLdArray = [articleJsonLd, breadcrumbJsonLd];
 
     .article-layout-grid {
       display: grid;
-      grid-template-columns: 270px minmax(0, 1fr);
-      gap: 34px;
+      grid-template-columns: 296px minmax(0, 1fr);
+      gap: 44px;
       align-items: start;
     }
 
@@ -454,6 +464,7 @@ const blogJsonLdArray = [articleJsonLd, breadcrumbJsonLd];
       overflow-y: auto;
       scrollbar-width: thin;
       scrollbar-color: rgba(212, 175, 55, 0.3) transparent;
+      align-self: start;
     }
 
     .toc-inner {
@@ -488,11 +499,11 @@ const blogJsonLdArray = [articleJsonLd, breadcrumbJsonLd];
 
     .toc-link {
       display: block;
-      padding: 7px 10px;
-      border-radius: 8px;
+      padding: 9px 12px;
+      border-radius: 9px;
       color: #94a3b8;
-      font-size: 0.83rem;
-      line-height: 1.55;
+      font-size: 0.85rem;
+      line-height: 1.7;
       text-decoration: none;
       transition: color 0.18s, background 0.18s, border-right-color 0.18s;
       border-right: 2px solid transparent;
@@ -601,6 +612,37 @@ const blogJsonLdArray = [articleJsonLd, breadcrumbJsonLd];
       border: 1px solid rgba(212, 175, 55, 0.25);
       box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
       margin-bottom: 26px;
+    }
+
+    .article-cover-fallback {
+      display: none;
+      position: absolute;
+      inset: 0;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      min-height: 240px;
+      background:
+        radial-gradient(120% 100% at 30% 0%, rgba(212, 175, 55, 0.18), transparent 60%),
+        linear-gradient(160deg, #121417 0%, #0a0b0d 70%);
+      color: #d4af37;
+      font-weight: 800;
+      font-size: 1rem;
+      letter-spacing: 0.5px;
+    }
+
+    .article-cover-wrap.cover-fallback .article-cover-fallback {
+      display: flex;
+    }
+
+    .article-cover-wrap.cover-fallback .article-cover-shade {
+      display: none;
+    }
+
+    .cover-fallback-icon {
+      opacity: 0.85;
+      filter: drop-shadow(0 6px 18px rgba(212, 175, 55, 0.35));
     }
 
     .article-cover-img {

@@ -1,71 +1,896 @@
 ---
 import AdminLayout from '../../../layouts/AdminLayout.astro';
+import Icon from '../../../components/ui/Icon.astro';
 import { env } from 'cloudflare:workers';
 import { listAuditLogs } from '../../../server/repositories';
-import { formatJalaliDate } from '../../../lib/datetime/jalali';
+import { formatJalaliOfInstant } from '../../../lib/datetime/jalali';
 
-let auditLogs: Awaited<ReturnType<typeof listAuditLogs>> = { items: [], nextCursor: null };
+const TZ = 'Asia/Tehran';
+
+interface AuditRow {
+  id: string;
+  actorId: string | null;
+  actorName: string | null;
+  actor?: string | null;
+  action: string;
+  entityType: string;
+  entityId: string | null;
+  createdAt: string;
+}
+
+interface RateWindow {
+  key: string;
+  start: number;
+  end: number;
+}
+
+const CATS: Record<string, { label: string; icon: string }> = {
+  auth: { label: 'احراز هویت', icon: 'shield' },
+  booking: { label: 'نوبت‌دهی', icon: 'bookings' },
+  catalog: { label: 'خدمات و تعرفه', icon: 'tag' },
+  staff: { label: 'کارکنان', icon: 'users' },
+  customer: { label: 'مراجعین', icon: 'customers' },
+  content: { label: 'محتوا', icon: 'blog' },
+  schedule: { label: 'زمان‌بندی', icon: 'schedule' },
+  config: { label: 'پیکربندی', icon: 'settings' },
+  other: { label: 'سایر', icon: 'list' },
+};
+
+const SEVS: Record<string, { label: string; icon: string }> = {
+  crit: { label: 'بحرانی', icon: 'warning' },
+  warn: { label: 'حساس', icon: 'shield' },
+  info: { label: 'عادی', icon: 'info' },
+};
+
+function categoryOf(action: string): string {
+  const prefix = action.split('.')[0] ?? '';
+  if (prefix === 'admin') return 'auth';
+  if (prefix === 'booking') return 'booking';
+  if (prefix === 'service' || prefix === 'pricing') return 'catalog';
+  if (prefix === 'staff') return 'staff';
+  if (prefix === 'customer') return 'customer';
+  if (prefix === 'blog' || prefix === 'faq') return 'content';
+  if (prefix === 'schedule') return 'schedule';
+  if (prefix === 'settings' || prefix === 'instagram') return 'config';
+  return 'other';
+}
+
+function severityOf(action: string): string {
+  if (/\.(deleted|rejected|cancelled)$/.test(action)) return 'crit';
+  if (/^(admin|settings|pricing|instagram|staff|customer)\./.test(action)) return 'warn';
+  return 'info';
+}
+
+/** IP is not a column in audit_logs; correlate login/booking events to the
+ *  fixed-window rate-limit row that was consumed by the very same request. */
+function ipFor(action: string, createdAt: string, windows: RateWindow[]): string | null {
+  const prefix = action.startsWith('admin.') ? 'login:' : action.startsWith('booking.') ? 'booking:' : null;
+  if (!prefix) return null;
+  const t = Date.parse(createdAt);
+  if (Number.isNaN(t)) return null;
+  const hit = windows.find((w) => w.key.startsWith(prefix) && w.start <= t && t <= w.end);
+  if (!hit) return null;
+  return hit.key.slice(prefix.length);
+}
+
+function relativeFa(iso: string): string {
+  const diffMs = Date.now() - Date.parse(iso);
+  if (Number.isNaN(diffMs)) return '';
+  const rtf = new Intl.RelativeTimeFormat('fa', { numeric: 'auto' });
+  const min = Math.round(diffMs / 60000);
+  if (min < 1) return 'همین حالا';
+  if (min < 60) return rtf.format(-min, 'minute');
+  const hr = Math.round(min / 60);
+  if (hr < 24) return rtf.format(-hr, 'hour');
+  return rtf.format(-Math.round(hr / 24), 'day');
+}
+
+async function sha256Hex(input: string): Promise<string> {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(input));
+  return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+interface ViewRow extends AuditRow {
+  cat: string;
+  sev: string;
+  ip: string | null;
+  jalali: string;
+  timeFa: string;
+  rel: string;
+  actorLabel: string;
+  seal: string;
+  sealShort: string;
+  idx: number;
+  prev: string;
+}
+
+let rows: ViewRow[] = [];
+let chainHead = '';
+let recentIps: { ip: string; when: string }[] = [];
+let loadError = false;
+
 try {
-  auditLogs = await listAuditLogs(env.DB, 50);
+  const [logs, rl] = await Promise.all([
+    listAuditLogs(env.DB, 50),
+    env.DB.prepare('SELECT key, window_started_at, expires_at FROM rate_limits').all<{
+      key: string;
+      window_started_at: string;
+      expires_at: string;
+    }>(),
+  ]);
+
+  const windows: RateWindow[] = (rl.results ?? []).map((r) => ({
+    key: r.key,
+    start: Date.parse(r.window_started_at),
+    end: Date.parse(r.expires_at),
+  }));
+
+  recentIps = windows
+    .filter((w) => w.key.startsWith('login:'))
+    .sort((a, b) => b.start - a.start)
+    .slice(0, 4)
+    .map((w) => ({ ip: w.key.slice('login:'.length), when: relativeFa(new Date(w.start).toISOString()) }));
+
+  const items = (logs.items ?? []) as unknown as AuditRow[];
+  const total = items.length;
+
+  // Hash chain runs oldest → newest so any edited row breaks every later seal.
+  const chrono = [...items].reverse();
+  const seals = new Map<string, { seal: string; prev: string; idx: number }>();
+  let prev = 'GENESIS';
+  for (let i = 0; i < chrono.length; i++) {
+    const r = chrono[i]!;
+    const payload = `${prev}|${r.id}|${r.actorId ?? ''}|${r.action}|${r.entityType}|${r.entityId ?? ''}|${r.createdAt}`;
+    const seal = await sha256Hex(payload);
+    seals.set(r.id, { seal, prev, idx: i });
+    prev = seal;
+  }
+  chainHead = prev;
+
+  rows = items.map((r, i) => {
+    const s = seals.get(r.id)!;
+    return {
+      ...r,
+      cat: categoryOf(r.action),
+      sev: severityOf(r.action),
+      ip: ipFor(r.action, r.createdAt, windows),
+      jalali: formatJalaliOfInstant(r.createdAt, TZ),
+      timeFa: new Date(r.createdAt).toLocaleTimeString('fa-IR', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        timeZone: TZ,
+      }),
+      rel: relativeFa(r.createdAt),
+      actorLabel: r.actorName || r.actor || 'سیستم',
+      seal: s.seal,
+      sealShort: s.seal.slice(0, 12),
+      idx: total - 1 - i,
+      prev: s.prev,
+    };
+  });
 } catch (e) {
   console.error('Failed to load audit logs:', e);
+  loadError = true;
 }
+
+const catsPresent = [...new Set(rows.map((r) => r.cat))];
+const sevsPresent = [...new Set(rows.map((r) => r.sev))];
+const actors = new Set(rows.map((r) => r.actorId || r.actorLabel));
+const sensitiveCount = rows.filter((r) => r.sev !== 'info').length;
 ---
 
 <AdminLayout title="گزارش وقایع و لاگ" activeNav="audit">
   <div class="admin-content-pad">
-    <div class="page-title-row mb-4">
+    <!-- 3D Header -->
+    <div class="dashboard-header-row">
       <div>
-        <h1 class="text-xl font-bold">دفتر ثبت رویدادها و لاگ‌های امنیتی (Audit Log)</h1>
-        <p class="text-muted small">ردیابی تمامی عملیات‌های حساس پذیرش، تأییدها و تغییرات سامانه</p>
+        <h1 class="admin-page-title" style="display: flex; align-items: center; gap: 10px;">
+          <Icon name="audit" size={26} />
+          <span>دفتر ثبت رویدادهای امنیتی (Audit Log)</span>
+        </h1>
+        <p class="section-block-sub">
+          ردیابی عملیات‌های حساس پذیرش، تأییدها و تغییرات سامانه همراه با زنجیره مهر و موم SHA-256
+        </p>
+      </div>
+      <div class="actions">
+        <span class="audit-live-chip">
+          <span class="live-dot"></span>
+          <span>{rows.length.toLocaleString('fa-IR')} رویداد ثبت‌شده</span>
+        </span>
+        <a href="/admin/audit" class="btn-3d-secondary" title="به‌روزرسانی لاگ">
+          <Icon name="refresh" size={16} />
+          <span>به‌روزرسانی</span>
+        </a>
       </div>
     </div>
 
-    <div class="card p-0">
-      {auditLogs.items.length === 0 ? (
-        <div class="p-5 text-center text-muted">
-          <p class="mb-0">رویدادی ثبت نگردیده است.</p>
+    <!-- KPI strip -->
+    <div class="kpi-grid-3d" style="grid-template-columns: repeat(auto-fit, minmax(215px, 1fr)); margin-bottom: 24px;">
+      <div class="kpi-card-3d">
+        <div class="kpi-header">
+          <span class="kpi-title">کل رویدادهای ثبت‌شده</span>
+          <span class="kpi-icon" style="color: #d4af37;"><Icon name="list" size={20} /></span>
+        </div>
+        <div class="kpi-value">{rows.length.toLocaleString('fa-IR')}</div>
+        <div class="kpi-footer">در پنجره نمایش ۵۰ رویداد اخیر</div>
+      </div>
+
+      <div class="kpi-card-3d">
+        <div class="kpi-header">
+          <span class="kpi-title">رویدادهای حساس و بحرانی</span>
+          <span class="kpi-icon" style="color: #f87171;"><Icon name="shield" size={20} /></span>
+        </div>
+        <div class="kpi-value">{sensitiveCount.toLocaleString('fa-IR')}</div>
+        <div class="kpi-footer">ورود، حذف، تنظیمات و تغییر تعرفه</div>
+      </div>
+
+      <div class="kpi-card-3d">
+        <div class="kpi-header">
+          <span class="kpi-title">عوامل فعال (Actor)</span>
+          <span class="kpi-icon" style="color: #38bdf8;"><Icon name="users" size={20} /></span>
+        </div>
+        <div class="kpi-value">{actors.size.toLocaleString('fa-IR')}</div>
+        <div class="kpi-footer">کاربران یا سیستم دخیل در رویدادها</div>
+      </div>
+
+      <div class="kpi-card-3d">
+        <div class="kpi-header">
+          <span class="kpi-title">IPهای اخیر ورود</span>
+          <span class="kpi-icon" style="color: #34d399;"><Icon name="globe" size={20} /></span>
+        </div>
+        <div class="kpi-value" style="font-size: 1rem; padding-top: 6px;">
+          {recentIps.length > 0 ? (
+            <div class="ip-stack">
+              {recentIps.map((r) => (
+                <span class="ip-tag" dir="ltr" title={`آخرین ورود ${r.when}`}>{r.ip}</span>
+              ))}
+            </div>
+          ) : (
+            <span class="text-obsidian-muted" style="font-size: 0.85rem;">رکوردی موجود نیست</span>
+          )}
+        </div>
+        <div class="kpi-footer">از پنجره‌های محدودیت نرخ ورود (Rate-Limit)</div>
+      </div>
+    </div>
+
+    <!-- Filter bar -->
+    <div class="audit-filter-bar">
+      <div class="audit-search-wrap">
+        <span class="audit-search-icon"><Icon name="search" size={16} /></span>
+        <input
+          type="search"
+          id="auditSearch"
+          class="audit-input"
+          placeholder="جستجو در عملیات، عامل یا شناسه موجودیت…"
+          aria-label="جستجوی رویدادها"
+        />
+      </div>
+
+      <label class="audit-select-wrap">
+        <span class="audit-select-label"><Icon name="filter" size={14} /></span>
+        <select id="auditCat" class="audit-select" aria-label="فیلتر دسته‌بندی">
+          <option value="">همه دسته‌ها</option>
+          {catsPresent.map((c) => (
+            <option value={c}>{CATS[c]?.label ?? c}</option>
+          ))}
+        </select>
+      </label>
+
+      <label class="audit-select-wrap">
+        <span class="audit-select-label"><Icon name="warning" size={14} /></span>
+        <select id="auditSev" class="audit-select" aria-label="فیلتر شدت">
+          <option value="">همه شدت‌ها</option>
+          {sevsPresent.map((s) => (
+            <option value={s}>{SEVS[s]?.label ?? s}</option>
+          ))}
+        </select>
+      </label>
+
+      <label class="audit-select-wrap">
+        <span class="audit-select-label"><Icon name="clock" size={14} /></span>
+        <select id="auditRange" class="audit-select" aria-label="بازه زمانی">
+          <option value="">کل بازه</option>
+          <option value="1440">۲۴ ساعت اخیر</option>
+          <option value="10080">۷ روز اخیر</option>
+          <option value="43200">۳۰ روز اخیر</option>
+        </select>
+      </label>
+
+      <button type="button" id="auditReset" class="btn-3d-secondary audit-reset-btn">
+        <Icon name="x" size={15} />
+        <span>پاک‌کردن فیلترها</span>
+      </button>
+
+      <span class="audit-count" id="auditCount">{rows.length.toLocaleString('fa-IR')} نمایش</span>
+    </div>
+
+    <!-- Table -->
+    <div class="card-shell-3d">
+      {loadError ? (
+        <div class="audit-empty">
+          <Icon name="warning" size={34} />
+          <p>بارگذاری لاگ امنیتی ممکن نشد. لطفاً دوباره تلاش کنید.</p>
+        </div>
+      ) : rows.length === 0 ? (
+        <div class="audit-empty">
+          <Icon name="shield" size={34} />
+          <p>رویدادی ثبت نگردیده است.</p>
+          <span class="audit-empty-hint">پس از ورود پرسنل یا تغییر تنظیمات، رویدادها اینجا نمایش داده می‌شوند.</span>
         </div>
       ) : (
         <div class="table-responsive">
-          <table class="admin-table">
+          <table class="admin-table-3d audit-table">
             <thead>
               <tr>
-                <th>زمان وقوع</th>
-                <th>کاربر / عامل</th>
-                <th>عملیات انجام‌شده</th>
-                <th>نوع موجودیت</th>
-                <th>شناسه موجودیت</th>
+                <th><span class="th-with-icon"><Icon name="clock" size={13} /> زمان وقوع</span></th>
+                <th><span class="th-with-icon"><Icon name="users" size={13} /> کاربر / عامل</span></th>
+                <th><span class="th-with-icon"><Icon name="list" size={13} /> عملیات و دسته</span></th>
+                <th><span class="th-with-icon"><Icon name="globe" size={13} /> IP مبدأ</span></th>
+                <th><span class="th-with-icon"><Icon name="database" size={13} /> موجودیت</span></th>
+                <th><span class="th-with-icon"><Icon name="lock" size={13} /> مهر و موم</span></th>
               </tr>
             </thead>
-            <tbody>
-              {auditLogs.items.map((log) => {
-                const timeStr = new Date(log.createdAt).toLocaleTimeString('fa-IR', {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  second: '2-digit',
-                  timeZone: 'Asia/Tehran',
-                });
-
-                return (
-                  <tr>
-                    <td>
-                      <div>{formatJalaliDate(log.createdAt.slice(0, 10))}</div>
-                      <span class="text-muted small">ساعت {timeStr}</span>
-                    </td>
-                    <td class="font-semibold">{log.actor || 'سیستم'}</td>
-                    <td>
-                      <span class="badge badge-outline">{log.action}</span>
-                    </td>
-                    <td>{log.entityType}</td>
-                    <td dir="ltr" class="font-mono text-muted small">{log.entityId || '—'}</td>
-                  </tr>
-                );
-              })}
+            <tbody id="auditBody">
+              {rows.map((r) => (
+                <tr
+                  data-idx={r.idx}
+                  data-cat={r.cat}
+                  data-sev={r.sev}
+                  data-ts={Date.parse(r.createdAt)}
+                  data-seal={r.seal}
+                  data-prev={r.prev}
+                  data-id={r.id}
+                  data-actor={r.actorId ?? ''}
+                  data-action={r.action}
+                  data-entity={r.entityType}
+                  data-eid={r.entityId ?? ''}
+                  data-created={r.createdAt}
+                  data-search={`${r.action} ${r.actorLabel} ${r.entityType} ${r.entityId ?? ''} ${r.actorId ?? ''}`.toLowerCase()}
+                >
+                  <td>
+                    <div class="cell-primary">{r.jalali}</div>
+                    <div class="cell-meta">
+                      <span class="time-fa">{r.timeFa}</span>
+                      <span class="dot-sep">•</span>
+                      <span>{r.rel}</span>
+                    </div>
+                    <div class="cell-id" dir="ltr">{r.createdAt}</div>
+                  </td>
+                  <td>
+                    <div class="cell-primary actor-line">
+                      <Icon name={r.actorId ? 'crm' : 'settings'} size={14} />
+                      <span>{r.actorLabel}</span>
+                    </div>
+                    <div class="cell-id" dir="ltr">{r.actorId ?? 'system'}</div>
+                  </td>
+                  <td>
+                    <div class="badge-row">
+                      <span class={`sev-badge sev-${r.sev}`}>
+                        <Icon name={SEVS[r.sev]?.icon ?? 'info'} size={12} />
+                        <span>{SEVS[r.sev]?.label ?? r.sev}</span>
+                      </span>
+                      <span class="cat-chip">
+                        <Icon name={CATS[r.cat]?.icon ?? 'list'} size={12} />
+                        <span>{CATS[r.cat]?.label ?? r.cat}</span>
+                      </span>
+                    </div>
+                    <div class="cell-action" dir="ltr">{r.action}</div>
+                  </td>
+                  <td>
+                    {r.ip ? (
+                      <span class="ip-tag" dir="ltr">{r.ip}</span>
+                    ) : (
+                      <span class="ip-none" title="IP برای این رویداد در پایگاه داده ثبت نشده است">—</span>
+                    )}
+                  </td>
+                  <td>
+                    <div class="cell-primary">{r.entityType}</div>
+                    <div class="cell-id" dir="ltr">{r.entityId ?? '—'}</div>
+                  </td>
+                  <td>
+                    <span class="seal-tag" dir="ltr" title={`SHA-256: ${r.seal}`}>{r.sealShort}</span>
+                    <div class="cell-id" dir="ltr">#{r.idx}</div>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
       )}
     </div>
+
+    <!-- Chain footer -->
+    {rows.length > 0 && (
+      <div class="audit-chain-note">
+        <span class="chain-line">
+          <Icon name="lock" size={14} />
+          <span>سری مهر و موم:</span>
+          <code class="seal-tag" dir="ltr" title="SHA-256 کامل آخرین مهر زنجیره">{chainHead.slice(0, 16)}</code>
+        </span>
+        <button type="button" id="verifyChainBtn" class="btn-3d-secondary">
+          <Icon name="checkCircle" size={15} />
+          <span>بررسی سلامت زنجیره</span>
+        </button>
+        <span id="verifyResult" class="verify-result" role="status"></span>
+      </div>
+    )}
+
+    <p class="audit-footnote">
+      <Icon name="info" size={13} />
+      <span>
+        ستون IP از پنجره‌های محدودیت نرخ ورود قرینه‌سازی می‌شود؛ رویدادهای قدیمی‌تر از ماندن این پنجره‌ها IP ثبت‌شده ندارند.
+        مهر و موم هر ردیف از SHA-256 زنجیره قبلی + فیلدهای همان رویداد ساخته می‌شود؛ هر ویرایشی مهر تمام ردیف‌های بعدی را می‌شکند.
+      </span>
+    </p>
   </div>
+
+  <style>
+    .audit-live-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #f5d77f;
+      background: rgba(212, 175, 55, 0.12);
+      border: 1px solid rgba(212, 175, 55, 0.35);
+      padding: 9px 16px;
+      border-radius: 12px;
+      white-space: nowrap;
+    }
+
+    /* ── Filter bar ── */
+    .audit-filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(160deg, rgba(21, 27, 41, 0.95) 0%, rgba(11, 14, 22, 0.95) 100%);
+      border: 1px solid rgba(212, 175, 55, 0.26);
+      border-radius: 18px;
+      padding: 14px;
+      margin-bottom: 20px;
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.07);
+      min-width: 0;
+    }
+
+    .audit-search-wrap {
+      position: relative;
+      flex: 1 1 240px;
+      min-width: 0;
+      display: flex;
+      align-items: center;
+    }
+
+    .audit-search-icon {
+      position: absolute;
+      right: 13px;
+      color: rgba(212, 175, 55, 0.75);
+      display: inline-flex;
+      pointer-events: none;
+    }
+
+    .audit-input {
+      width: 100%;
+      min-width: 0;
+      background: rgba(8, 11, 18, 0.95);
+      border: 1.5px solid rgba(212, 175, 55, 0.25);
+      border-radius: 12px;
+      padding: 11px 40px 11px 14px;
+      color: #ffffff;
+      font-family: inherit;
+      font-size: 0.88rem;
+      outline: none;
+      transition: border-color 0.18s ease, box-shadow 0.18s ease;
+      box-sizing: border-box;
+    }
+
+    .audit-input:focus {
+      border-color: rgba(212, 175, 55, 0.75);
+      box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.18);
+    }
+
+    .audit-input::placeholder {
+      color: rgba(148, 163, 184, 0.7);
+    }
+
+    .audit-select-wrap {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      flex: 0 1 auto;
+      min-width: 0;
+    }
+
+    .audit-select-label {
+      position: absolute;
+      right: 11px;
+      color: rgba(212, 175, 55, 0.8);
+      display: inline-flex;
+      pointer-events: none;
+    }
+
+    .audit-select {
+      appearance: none;
+      -webkit-appearance: none;
+      background: rgba(8, 11, 18, 0.95);
+      border: 1.5px solid rgba(212, 175, 55, 0.25);
+      border-radius: 12px;
+      padding: 11px 34px 11px 30px;
+      color: #e2e8f0;
+      font-family: inherit;
+      font-size: 0.84rem;
+      font-weight: 600;
+      outline: none;
+      cursor: pointer;
+      max-width: 190px;
+      transition: border-color 0.18s ease;
+    }
+
+    .audit-select:focus {
+      border-color: rgba(212, 175, 55, 0.75);
+    }
+
+    .audit-reset-btn {
+      min-height: 40px;
+      padding: 9px 15px;
+      font-size: 0.82rem;
+    }
+
+    .audit-count {
+      margin-inline-start: auto;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #f5d77f;
+      white-space: nowrap;
+      padding-inline-start: 6px;
+    }
+
+    /* ── Table card ── */
+    .card-shell-3d {
+      border-radius: 20px;
+      border: 1px solid rgba(212, 175, 55, 0.22);
+      background: rgba(11, 14, 22, 0.88);
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.07), 0 16px 36px rgba(0, 0, 0, 0.45);
+      max-width: 100%;
+      min-width: 0;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .audit-table {
+      min-width: 920px;
+      width: 920px;
+      max-width: none;
+    }
+
+    .th-with-icon {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .cell-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 700;
+      color: #f1f5f9;
+      font-size: 0.88rem;
+    }
+
+    .cell-meta {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.76rem;
+      color: #94a3b8;
+      margin-top: 3px;
+    }
+
+    .time-fa {
+      color: #f5d77f;
+      font-weight: 700;
+    }
+
+    .dot-sep {
+      opacity: 0.5;
+    }
+
+    .cell-id {
+      font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+      font-variant-numeric: tabular-nums;
+      font-size: 0.7rem;
+      color: #7c8798;
+      margin-top: 3px;
+      overflow-wrap: anywhere;
+      max-width: 240px;
+    }
+
+    .cell-action {
+      font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+      font-size: 0.76rem;
+      color: #cbd5e1;
+      background: rgba(255, 255, 255, 0.045);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 7px;
+      padding: 3px 8px;
+      display: inline-block;
+      margin-top: 6px;
+      direction: ltr;
+      overflow-wrap: anywhere;
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .sev-badge,
+    .cat-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 3px 9px;
+      border-radius: 999px;
+      white-space: nowrap;
+      border: 1px solid transparent;
+    }
+
+    .sev-crit {
+      background: rgba(239, 68, 68, 0.16);
+      color: #fca5a5;
+      border-color: rgba(239, 68, 68, 0.45);
+    }
+
+    .sev-warn {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+      border-color: rgba(245, 158, 11, 0.42);
+    }
+
+    .sev-info {
+      background: rgba(56, 189, 248, 0.13);
+      color: #7dd3fc;
+      border-color: rgba(56, 189, 248, 0.38);
+    }
+
+    .cat-chip {
+      background: rgba(212, 175, 55, 0.12);
+      color: #e8d3a7;
+      border-color: rgba(212, 175, 55, 0.35);
+    }
+
+    .ip-tag {
+      display: inline-block;
+      font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+      font-variant-numeric: tabular-nums;
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: #a7f3d0;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      border-radius: 8px;
+      padding: 4px 9px;
+      direction: ltr;
+      max-width: 100%;
+      overflow-wrap: anywhere;
+    }
+
+    .ip-none {
+      color: #64748b;
+      font-weight: 700;
+      cursor: help;
+    }
+
+    .ip-stack {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: flex-start;
+    }
+
+    .seal-tag {
+      display: inline-block;
+      font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+      font-variant-numeric: tabular-nums;
+      font-size: 0.74rem;
+      font-weight: 700;
+      color: #f5d77f;
+      background: rgba(212, 175, 55, 0.1);
+      border: 1px solid rgba(212, 175, 55, 0.35);
+      border-radius: 7px;
+      padding: 3px 8px;
+      direction: ltr;
+    }
+
+    /* ── Empty state ── */
+    .audit-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      padding: 54px 22px;
+      color: #94a3b8;
+      text-align: center;
+    }
+
+    .audit-empty :global(svg) {
+      color: rgba(212, 175, 55, 0.6);
+    }
+
+    .audit-empty p {
+      margin: 0;
+      font-weight: 700;
+      color: #cbd5e1;
+    }
+
+    .audit-empty-hint {
+      font-size: 0.8rem;
+      max-width: 420px;
+      line-height: 1.7;
+    }
+
+    /* ── Chain footer ── */
+    .audit-chain-note {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+      margin-top: 18px;
+      background: rgba(212, 175, 55, 0.06);
+      border: 1px dashed rgba(212, 175, 55, 0.35);
+      border-radius: 16px;
+      padding: 13px 16px;
+    }
+
+    .chain-line {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 0.8rem;
+      color: #cbd5e1;
+      min-width: 0;
+      flex-wrap: wrap;
+    }
+
+    .chain-line :global(svg) {
+      color: #d4af37;
+    }
+
+    .verify-result {
+      font-size: 0.8rem;
+      font-weight: 800;
+    }
+
+    .verify-result.ok {
+      color: #34d399;
+    }
+
+    .verify-result.bad {
+      color: #f87171;
+    }
+
+    .audit-footnote {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-top: 14px;
+      font-size: 0.75rem;
+      line-height: 1.8;
+      color: #8b96a8;
+    }
+
+    .audit-footnote :global(svg) {
+      flex: 0 0 auto;
+      margin-top: 4px;
+      color: rgba(212, 175, 55, 0.7);
+    }
+
+    @media (max-width: 640px) {
+      .audit-select {
+        max-width: 100%;
+        width: 100%;
+      }
+
+      .audit-select-wrap {
+        flex: 1 1 150px;
+      }
+
+      .audit-count {
+        margin-inline-start: 0;
+      }
+    }
+  </style>
+
+  <script>
+    const search = document.getElementById('auditSearch') as HTMLInputElement | null;
+    const catSel = document.getElementById('auditCat') as HTMLSelectElement | null;
+    const sevSel = document.getElementById('auditSev') as HTMLSelectElement | null;
+    const rangeSel = document.getElementById('auditRange') as HTMLSelectElement | null;
+    const resetBtn = document.getElementById('auditReset');
+    const countEl = document.getElementById('auditCount');
+    const body = document.getElementById('auditBody');
+
+    function applyFilters() {
+      if (!body) return;
+      const q = (search?.value ?? '').trim().toLowerCase();
+      const cat = catSel?.value ?? '';
+      const sev = sevSel?.value ?? '';
+      const rangeMin = rangeSel?.value ? Number(rangeSel.value) : 0;
+      const cutoff = rangeMin ? Date.now() - rangeMin * 60000 : 0;
+
+      let visible = 0;
+      const trs = body.querySelectorAll<HTMLTableRowElement>('tr[data-seal]');
+      trs.forEach((tr) => {
+        const ts = Number(tr.dataset.ts ?? '0');
+        const okQ = !q || (tr.dataset.search ?? '').includes(q);
+        const okCat = !cat || tr.dataset.cat === cat;
+        const okSev = !sev || tr.dataset.sev === sev;
+        const okRange = !cutoff || ts >= cutoff;
+        const show = okQ && okCat && okSev && okRange;
+        tr.style.display = show ? '' : 'none';
+        if (show) visible++;
+      });
+
+      if (countEl) countEl.textContent = `${visible.toLocaleString('fa-IR')} نمایش`;
+    }
+
+    [search, catSel, sevSel, rangeSel].forEach((el) => {
+      el?.addEventListener('input', applyFilters);
+      el?.addEventListener('change', applyFilters);
+    });
+
+    resetBtn?.addEventListener('click', () => {
+      if (search) search.value = '';
+      if (catSel) catSel.value = '';
+      if (sevSel) sevSel.value = '';
+      if (rangeSel) rangeSel.value = '';
+      applyFilters();
+    });
+
+    async function sha256Hex(input: string): Promise<string> {
+      const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(input));
+      return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    const verifyBtn = document.getElementById('verifyChainBtn');
+    const verifyResult = document.getElementById('verifyResult');
+
+    verifyBtn?.addEventListener('click', async () => {
+      if (!body || !verifyResult) return;
+      verifyBtn.setAttribute('disabled', 'true');
+      verifyResult.textContent = 'در حال محاسبه…';
+      verifyResult.className = 'verify-result';
+
+      try {
+        const rows = Array.from(body.querySelectorAll<HTMLTableRowElement>('tr[data-seal]')).sort(
+          (a, b) => Number(a.dataset.idx) - Number(b.dataset.idx),
+        );
+        let broken = 0;
+        for (const tr of rows) {
+          const payload = `${tr.dataset.prev}|${tr.dataset.id}|${tr.dataset.actor}|${tr.dataset.action}|${tr.dataset.entity}|${tr.dataset.eid}|${tr.dataset.created}`;
+          const hex = await sha256Hex(payload);
+          if (hex !== tr.dataset.seal) broken++;
+        }
+        if (broken === 0) {
+          verifyResult.textContent = `زنجیره سالم است — ${rows.length.toLocaleString('fa-IR')} مهر تأیید شد.`;
+          verifyResult.className = 'verify-result ok';
+        } else {
+          verifyResult.textContent = `${broken.toLocaleString('fa-IR')} ردیف دستکاری شده است!`;
+          verifyResult.className = 'verify-result bad';
+        }
+      } catch {
+        verifyResult.textContent = 'محاسبه ممکن نشد (WebCrypto در دسترس نیست).';
+        verifyResult.className = 'verify-result bad';
+      } finally {
+        verifyBtn.removeAttribute('disabled');
+      }
+    });
+  </script>
 </AdminLayout>

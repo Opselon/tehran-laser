@@ -3,6 +3,7 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
 import { env } from 'cloudflare:workers';
 import { listAdminBlogPosts } from '../../../server/repositories';
 import { formatJalaliDate } from '../../../lib/datetime/jalali';
+import Icon from '../../../components/ui/Icon.astro';
 
 let posts: Awaited<ReturnType<typeof listAdminBlogPosts>> = { items: [], nextCursor: null };
 try {
@@ -20,7 +21,7 @@ const draftCount = posts.items.filter((p) => p.status === 'draft').length;
     <!-- 3D Header Row -->
     <div class="dashboard-header-row">
       <div>
-        <h1 class="admin-page-title">✍️ سامانه مدیریت و نگارش مقالات کلینیک (Blog CMS)</h1>
+        <h1 class="admin-page-title"><Icon name="edit" size={26} class="title-icon" /> سامانه مدیریت و نگارش مقالات کلینیک (Blog CMS)</h1>
         <p class="section-block-sub">
           تولید مقالات تخصصی، آموزش‌های مراقبت از پوست و تنظیمات سئو با ویرایشگر فوق‌حرفه‌ای HTML (API First)
         </p>
@@ -30,7 +31,7 @@ const draftCount = posts.items.filter((p) => p.status === 'draft').length;
           منتشرشده: {publishedCount.toLocaleString('fa-IR')} | پیش‌نویس: {draftCount.toLocaleString('fa-IR')}
         </span>
         <button type="button" id="newArticleBtn" class="btn-3d-refresh" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 22px;">
-          <span>+</span> نگارش مقاله جدید
+          <Icon name="plus" size={16} /> نگارش مقاله جدید
         </button>
       </div>
     </div>
@@ -44,7 +45,7 @@ const draftCount = posts.items.filter((p) => p.status === 'draft').length;
     <div class="admin-section-block" style="padding: 0; overflow: hidden; margin-bottom: 30px;">
       {posts.items.length === 0 ? (
         <div class="empty-state-card" style="border: none; margin: 20px;">
-          <span class="empty-icon">✍️</span>
+          <span class="empty-icon"><Icon name="blog" size={30} /></span>
           <p class="empty-text">هنوز مقاله‌ای در سامانه ثبت نشده است. روی دکمه «نگارش مقاله جدید» کلیک کنید.</p>
         </div>
       ) : (
@@ -70,8 +71,8 @@ const draftCount = posts.items.filter((p) => p.status === 'draft').length;
                         <img src={p.coverImage} alt={p.title} style="width: 100%; height: 100%; object-fit: cover;" />
                       </div>
                     ) : (
-                      <div style="width: 52px; height: 38px; border-radius: 8px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
-                        📄
+                      <div class="thumb-fallback-icon">
+                        <Icon name="document" size={18} />
                       </div>
                     )}
                   </td>
@@ -106,7 +107,7 @@ const draftCount = posts.items.filter((p) => p.status === 'draft').length;
                           class="btn-table-action"
                           style="border-color: rgba(56, 189, 248, 0.4); color: #38bdf8; text-decoration: none; padding: 6px 10px; font-size: 0.78rem;"
                         >
-                          👁️ نمایش
+                          <Icon name="eye" size={13} /> نمایش
                         </a>
                       )}
                       <button
@@ -124,15 +125,16 @@ const draftCount = posts.items.filter((p) => p.status === 'draft').length;
                         data-seodesc={p.seoDescription || ''}
                         data-content={encodeURIComponent(p.content || '')}
                       >
-                        ✏️ ویرایش
+                        <Icon name="edit" size={13} /> ویرایش
                       </button>
                       <button
                         type="button"
                         class="btn-3d-reject delete-post-btn"
                         style="padding: 6px 10px; font-size: 0.78rem;"
                         data-id={p.id}
+                        aria-label="حذف مقاله"
                       >
-                        ✕
+                        <Icon name="trash" size={14} />
                       </button>
                     </div>
                   </td>
@@ -149,11 +151,11 @@ const draftCount = posts.items.filter((p) => p.status === 'draft').length;
       <div class="modal-dialog" style="max-width: 1040px; width: 100%; margin: auto;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid rgba(212,175,55,0.25); padding-bottom: 14px;">
           <div>
-            <h3 class="modal-title" id="articleModalTitle" style="margin: 0;">✍️ نگارش مقاله و آموزش تخصصی</h3>
+            <h3 class="modal-title" id="articleModalTitle" style="margin: 0; display: flex; align-items: center; gap: 8px;"><Icon name="edit" size={20} /> نگارش مقاله و آموزش تخصصی</h3>
             <span style="font-size: 0.82rem; color: #94a3b8;">ویرایشگر پیشرفته HTML با پشتیبانی از کادرهای کلینیکال و سئو</span>
           </div>
-          <button type="button" id="closeArticleModalBtn" style="background: none; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer;">
-            ✕
+          <button type="button" id="closeArticleModalBtn" class="modal-close-btn" aria-label="بستن پنجره">
+            <Icon name="close" size={20} />
           </button>
         </div>
 
@@ -178,8 +180,8 @@ const draftCount = posts.items.filter((p) => p.status === 'draft').length;
             <div>
               <label style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 700; color: #f5d77f; margin-bottom: 6px;">
                 <span>پیوند یکتا (Slug انگلیسی):</span>
-                <button type="button" id="autoSlugBtn" style="background: none; border: none; color: #38bdf8; font-size: 0.75rem; cursor: pointer; text-decoration: underline;">
-                  ⚡ اسلاگ هوشمند
+                <button type="button" id="autoSlugBtn" class="smart-slug-btn">
+                  <Icon name="lightning" size={12} /> اسلاگ هوشمند
                 </button>
               </label>
               <input
@@ -244,8 +246,8 @@ const draftCount = posts.items.filter((p) => p.status === 'draft').length;
                 وضعیت انتشار در وب‌سایت:
               </label>
               <select id="articleStatus" class="form-control-modal">
-                <option value="published">🚀 انتشار عمومی در سایت</option>
-                <option value="draft">📝 ذخیره به صورت پیش‌نویس محرمانه</option>
+                <option value="published">انتشار عمومی در سایت</option>
+                <option value="draft">ذخیره به صورت پیش‌نویس محرمانه</option>
               </select>
             </div>
           </div>
@@ -260,13 +262,13 @@ const draftCount = posts.items.filter((p) => p.status === 'draft').length;
               <!-- Editor Mode Tabs -->
               <div style="display: flex; gap: 6px; background: rgba(0,0,0,0.4); padding: 4px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
                 <button type="button" id="tabVisualBtn" class="editor-tab-btn active">
-                  👁️ بصری (WYSIWYG)
+                  <Icon name="eye" size={13} /> بصری (WYSIWYG)
                 </button>
                 <button type="button" id="tabSourceBtn" class="editor-tab-btn">
-                  💻 کدهای HTML
+                  <Icon name="document" size={13} /> کدهای HTML
                 </button>
                 <button type="button" id="tabPreviewBtn" class="editor-tab-btn">
-                  📱 پیش‌نمایش سایت
+                  <Icon name="mobile" size={13} /> پیش‌نمایش سایت
                 </button>
               </div>
             </div>
@@ -300,21 +302,21 @@ const draftCount = posts.items.filter((p) => p.status === 'draft').length;
 
               <div class="tb-divider"></div>
 
-              <button type="button" class="tb-btn" id="insertLinkBtn" title="درج پیوند اینترنتی">🔗 لینک</button>
-              <button type="button" class="tb-btn" id="insertImgBtn" title="درج تصویر">🖼️ عکس</button>
-              <button type="button" class="tb-btn" id="insertHrBtn" title="خط جداکننده">― خط</button>
+              <button type="button" class="tb-btn" id="insertLinkBtn" title="درج پیوند اینترنتی"><Icon name="external" size={13} /> لینک</button>
+              <button type="button" class="tb-btn" id="insertImgBtn" title="درج تصویر"><Icon name="camera" size={13} /> عکس</button>
+              <button type="button" class="tb-btn" id="insertHrBtn" title="خط جداکننده"><Icon name="minus" size={13} /> خط</button>
 
               <div class="tb-divider"></div>
 
               <!-- Special Clinic Callouts -->
               <button type="button" class="tb-btn callout-tb-btn" id="insertTipBtn" title="درج باکس نکته طلایی">
-                💡 نکته طلایی
+                <Icon name="sparkles" size={13} /> نکته طلایی
               </button>
               <button type="button" class="tb-btn callout-tb-btn" id="insertWarnBtn" title="درج باکس هشدار پوست">
-                ⚠️ هشدار
+                <Icon name="warning" size={13} /> هشدار
               </button>
               <button type="button" class="tb-btn callout-tb-btn" id="insertDocBtn" title="درج توصیه پزشک">
-                🩺 توصیه پزشک
+                <Icon name="doctor" size={13} /> توصیه پزشک
               </button>
             </div>
 
@@ -344,7 +346,7 @@ const draftCount = posts.items.filter((p) => p.status === 'draft').length;
           <!-- SEO Drawer / Collapsible -->
           <details style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 14px 18px; margin-bottom: 22px;">
             <summary style="font-size: 0.88rem; font-weight: 700; color: #cbd5e1; cursor: pointer;">
-              🔍 تنظیمات متاتگ‌ها و بهینه‌سازی سئو (Google SEO Meta Tags)
+              <Icon name="search" size={14} /> تنظیمات متاتگ‌ها و بهینه‌سازی سئو (Google SEO Meta Tags)
             </summary>
             <div class="g-2" style="display: grid; gap: 14px; margin-top: 14px">
               <div>
@@ -367,8 +369,8 @@ const draftCount = posts.items.filter((p) => p.status === 'draft').length;
             <button type="button" id="cancelArticleBtn" class="btn-table-action">
               انصراف
             </button>
-            <button type="submit" id="saveArticleBtn" class="btn-3d-accept" style="flex: none; padding: 12px 30px;">
-              🚀 ثبت و ذخیره مقاله در دیتابیس D1
+            <button type="submit" id="saveArticleBtn" class="btn-3d-accept save-btn-fixed" style="flex: none; padding: 12px 30px;">
+              <span id="saveArticleBtnLabel" class="save-btn-label"><Icon name="upload" size={15} /> ثبت و ذخیره مقاله در دیتابیس D1</span>
             </button>
           </div>
         </form>
@@ -377,6 +379,75 @@ const draftCount = posts.items.filter((p) => p.status === 'draft').length;
   </div>
 
   <style>
+  .thumb-fallback-icon {
+  width: 52px;
+  height: 38px;
+  border-radius: 8px;
+  background: rgba(212, 175, 55, 0.10);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #d4af37;
+}
+.modal-close-btn {
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: #94a3b8;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .18s ease;
+}
+.modal-close-btn:hover {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
+}
+.smart-slug-btn {
+  background: none;
+  border: none;
+  color: #d4af37;
+  font-size: 0.75rem;
+  cursor: pointer;
+  text-decoration: underline;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.editor-tab-btn,
+.tb-btn { display: inline-flex; align-items: center; gap: 5px; }
+.callout-tb-btn { display: inline-flex; align-items: center; gap: 5px; }
+details > summary { display: flex; align-items: center; gap: 8px; }
+details > summary svg { flex: none; }
+.save-btn-fixed .save-btn-label { display: inline-flex; align-items: center; gap: 7px; }
+.modal-title-inner { display: inline-flex; align-items: center; gap: 8px; }
+
+/* Editor canvas improvements */
+#visualEditor[contenteditable="true"]:focus {
+  border-color: rgba(212, 175, 55, 0.55) !important;
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.14) !important;
+  outline: none !important;
+}
+
+/* Gold checkmark on accept buttons inside modal */
+.btn-3d-accept { display: inline-flex; align-items: center; justify-content: center; }
+
+/* Toolbar icon color */
+.tb-btn svg { opacity: .9; }
+
+/* ── 3D Obsidian-Gold finish ── */
+.admin-page-title .title-icon { color: #d4af37; display: inline-block; vertical-align: -3px; margin-left: 6px; }
+.empty-icon {
+  font-size: 2rem;
+  color: #d4af37;
+  filter: drop-shadow(0 4px 12px rgba(212,175,55,0.35));
+}
+
     .editor-tab-btn {
       background: none;
       border: none;
@@ -580,17 +651,17 @@ const draftCount = posts.items.filter((p) => p.status === 'draft').length;
 
     // Special clinical callouts
     document.getElementById('insertTipBtn')?.addEventListener('click', () => {
-      const html = `<div style="background: rgba(212, 175, 55, 0.12); border-right: 4px solid #f5d77f; padding: 16px 20px; border-radius: 8px; margin: 18px 0; color: #f5d77f;"><strong>💡 نکته طلایی کلینیک:</strong> متن نکته کاربردی و ضروری را اینجا بنویسید...</div><p><br></p>`;
+      const html = `<div style="background: rgba(212, 175, 55, 0.12); border-right: 4px solid #f5d77f; padding: 16px 20px; border-radius: 8px; margin: 18px 0; color: #f5d77f;"><strong>نکته طلایی کلینیک:</strong> متن نکته کاربردی و ضروری را اینجا بنویسید...</div><p><br></p>`;
       document.execCommand('insertHTML', false, html);
     });
 
     document.getElementById('insertWarnBtn')?.addEventListener('click', () => {
-      const html = `<div style="background: rgba(239, 68, 68, 0.12); border-right: 4px solid #ef4444; padding: 16px 20px; border-radius: 8px; margin: 18px 0; color: #fca5a5;"><strong>⚠️ هشدار پزشکی:</strong> حداقل ۲ هفته قبل از لیزر از برنزه کردن و سولاریوم خودداری نمایید.</div><p><br></p>`;
+      const html = `<div style="background: rgba(239, 68, 68, 0.12); border-right: 4px solid #ef4444; padding: 16px 20px; border-radius: 8px; margin: 18px 0; color: #fca5a5;"><strong>هشدار پزشکی:</strong> حداقل ۲ هفته قبل از لیزر از برنزه کردن و سولاریوم خودداری نمایید.</div><p><br></p>`;
       document.execCommand('insertHTML', false, html);
     });
 
     document.getElementById('insertDocBtn')?.addEventListener('click', () => {
-      const html = `<div style="background: rgba(56, 189, 248, 0.12); border-right: 4px solid #38bdf8; padding: 16px 20px; border-radius: 8px; margin: 18px 0; color: #bae6fd;"><strong>🩺 توصیه پزشک کلینیک:</strong> پس از اتمام جلسه، استفاده از ژل خنک‌کننده زینک و آلوئه‌ورا الزامی است.</div><p><br></p>`;
+      const html = `<div style="background: rgba(56, 189, 248, 0.12); border-right: 4px solid #38bdf8; padding: 16px 20px; border-radius: 8px; margin: 18px 0; color: #bae6fd;"><strong>توصیه پزشک کلینیک:</strong> پس از اتمام جلسه، استفاده از ژل خنک‌کننده زینک و آلوئه‌ورا الزامی است.</div><p><br></p>`;
       document.execCommand('insertHTML', false, html);
     });
 
@@ -636,7 +707,7 @@ const draftCount = posts.items.filter((p) => p.status === 'draft').length;
       seoDescInput.value = '';
       visualEditor.innerHTML = `<h2>مقدمه و راهنمای درمانی</h2><p>توضیحات و مقدمه مقاله را در این بخش شروع کنید...</p><h3>اهمیت آمادگی قبل از جلسه</h3><p>پوست باید کاملاً تمیز و شیو شده باشد.</p>`;
       sourceEditor.value = visualEditor.innerHTML;
-      if (modalTitle) modalTitle.innerText = '✍️ نگارش مقاله جدید';
+      if (modalTitle) modalTitle.innerHTML = '<span class="modal-title-inner">ویرایشگر مقاله جدید</span>';
       switchMode('visual');
       if (modal) modal.style.display = 'flex';
     });
@@ -661,7 +732,7 @@ const draftCount = posts.items.filter((p) => p.status === 'draft').length;
         visualEditor.innerHTML = rawContent;
         sourceEditor.value = rawContent;
 
-        if (modalTitle) modalTitle.innerText = '✏️ ویرایش مقاله: ' + target.dataset.title;
+        if (modalTitle) modalTitle.innerHTML = '<span class="modal-title-inner">ویرایش مقاله: ' + target.dataset.title + '</span>';
         switchMode('visual');
         if (modal) modal.style.display = 'flex';
       });
@@ -711,17 +782,17 @@ const draftCount = posts.items.filter((p) => p.status === 'draft').length;
 
         const json = await res.json() as any;
         if (res.ok && json.data) {
-          saveBtn.innerText = '✓ با موفقیت ذخیره شد!';
+          saveBtn.innerHTML = '<span class="save-btn-label">با موفقیت ذخیره شد!</span>';
           setTimeout(() => window.location.reload(), 400);
         } else {
           alert(json.error?.message || 'خطا در ثبت مقاله.');
           saveBtn.disabled = false;
-          saveBtn.innerText = '🚀 ثبت و ذخیره مقاله در دیتابیس D1';
+          saveBtn.innerHTML = '<span class="save-btn-label">ثبت و ذخیره مقاله در دیتابیس D1</span>';
         }
       } catch {
         alert('خطای ارتباط با سرور.');
         saveBtn.disabled = false;
-        saveBtn.innerText = '🚀 ثبت و ذخیره مقاله در دیتابیس D1';
+        saveBtn.innerHTML = '<span class="save-btn-label">ثبت و ذخیره مقاله در دیتابیس D1</span>';
       }
     });
 

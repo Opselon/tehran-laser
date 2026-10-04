@@ -1,34 +1,47 @@
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { PublicServiceDto, AvailabilitySlotDto } from '../../domain/api/dto.types';
 import type { PricingCategory } from '../../domain/booking/booking.types';
-import { formatJalaliDate } from '../../lib/datetime/jalali';
+import { IconReact } from '../ui/IconReact';
+import { JalaliCalendar } from './JalaliCalendar';
+import {
+  addDays,
+  isoDayOf,
+  isValidEmail,
+  isValidName,
+  isValidPhone,
+  moneyFa,
+  persianWeekIndex,
+  timeFa,
+  toLocalPhone,
+  TOTAL_STEPS,
+  STEP_META,
+  type BookingSuccessResult,
+  type CustomerDraft,
+  type CustomerErrors,
+  type QuoteTotals,
+} from './booking-shared';
+import './booking-wizard.css';
 
 interface BookingWizardProps {
   initialServices?: PublicServiceDto[] | undefined;
   preselectedSlug?: string | undefined;
 }
 
-interface BookingSuccessResult {
-  bookingId: string;
-  reference: string;
-  status: string;
-  startsAt: string;
-  serviceName: string;
-  pricingCategory: PricingCategory;
-  quotedAmount: number;
-  discountAmount: number;
-  currency: string;
-  customerName: string;
-  customerPhone: string;
-}
+const EMPTY_CUSTOMER: CustomerDraft = { name: '', phone: '', email: '', note: '' };
+
+const NEXT_LABEL: Record<number, string> = {
+  1: 'ادامه: تاریخ و ساعت',
+  2: 'ادامه: مشخصات مراجع',
+  3: 'ادامه: بررسی و تأیید',
+};
 
 export function BookingWizard({ initialServices = [], preselectedSlug }: BookingWizardProps) {
   const [step, setStep] = useState<number>(1);
   const [services, setServices] = useState<PublicServiceDto[]>(initialServices);
   const [loadingServices, setLoadingServices] = useState<boolean>(initialServices.length === 0);
+  const [servicesFailed, setServicesFailed] = useState<boolean>(false);
 
-  // Form selections: multiple services supported!
-  const [selectedServiceSlugs, setSelectedServiceSlugs] = useState<string[]>(
+  const [selectedServiceSlugs, setSelectedServiceSlugs] = useState<string[]>(() =>
     preselectedSlug ? [preselectedSlug] : [],
   );
   const [pricingCategory, setPricingCategory] = useState<PricingCategory>('female');
@@ -37,157 +50,201 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
   const [loadingSlots, setLoadingSlots] = useState<boolean>(false);
   const [selectedSlot, setSelectedSlot] = useState<string>('');
 
-  // Customer info
-  const [customerName, setCustomerName] = useState<string>('');
-  const [customerPhone, setCustomerPhone] = useState<string>('');
-  const [customerEmail, setCustomerEmail] = useState<string>('');
-  const [customerNote, setCustomerNote] = useState<string>('');
+  const [customer, setCustomer] = useState<CustomerDraft>(EMPTY_CUSTOMER);
+  const [fieldErrors, setFieldErrors] = useState<CustomerErrors>({});
 
-  // Submission state
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successResult, setSuccessResult] = useState<BookingSuccessResult | null>(null);
 
-  // Load services if not passed
-  useEffect(() => {
-    if (initialServices.length > 0) return;
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const headingRef = useRef<HTMLHeadingElement | null>(null);
+  const idempotencyKey = useRef<string>(makeIdempotencyKey());
+
+  /* ── Services ─────────────────────────────────────────────── */
+
+  const loadServices = useCallback(() => {
+    setLoadingServices(true);
+    setServicesFailed(false);
     fetch('/api/v1/services')
-      .then((res) => res.json())
-      .then((data: any) => {
-        if (data.data) {
-          setServices(data.data);
-          if (preselectedSlug) setSelectedServiceSlugs([preselectedSlug]);
+      .then((res) => (res.ok ? res.json() : Promise.reject(new Error('services'))))
+      .then((raw: unknown) => {
+        const data = raw as { data?: PublicServiceDto[] };
+        const list = Array.isArray(data.data) ? data.data : [];
+        setServices(list);
+        if (preselectedSlug && !list.some((s) => s.slug === preselectedSlug)) {
+          setSelectedServiceSlugs((prev) => prev.filter((slug) => slug !== preselectedSlug));
         }
       })
-      .catch(() => setErrorMessage('خطا در دریافت لیست خدمات. لطفاً صفحه را تازه‌سازی کنید.'))
+      .catch(() => {
+        setServicesFailed(true);
+        setErrorMessage('خطا در دریافت لیست خدمات. لطفاً دوباره تلاش کنید.');
+      })
       .finally(() => setLoadingServices(false));
-  }, [initialServices, preselectedSlug]);
+  }, [preselectedSlug]);
 
-  // Generate the next 14 available days (skipping Fridays where closed)
-  const availableDates: Array<{ isoDate: string; jalaliLabel: string; weekdayName: string }> = [];
-  const today = new Date();
-  for (let i = 1; i <= 21 && availableDates.length < 14; i++) {
-    const d = new Date(today);
-    d.setDate(today.getDate() + i);
-    const yyyy = d.getFullYear();
-    const mm = String(d.getMonth() + 1).padStart(2, '0');
-    const dd = String(d.getDate()).padStart(2, '0');
-    const isoDate = `${yyyy}-${mm}-${dd}`;
-    const dayOfWeek = d.getDay();
-    if (dayOfWeek === 5) continue; // Friday
+  useEffect(() => {
+    if (initialServices.length > 0) return;
+    loadServices();
+  }, [initialServices.length, loadServices]);
 
-    const weekdayNames = ['یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه', 'شنبه'];
-    availableDates.push({
-      isoDate,
-      jalaliLabel: formatJalaliDate(isoDate),
-      weekdayName: weekdayNames[dayOfWeek] || '',
-    });
-  }
+  /* ── Availability ─────────────────────────────────────────── */
 
-  // Load slots when selected services + category + date change
   useEffect(() => {
     if (selectedServiceSlugs.length === 0 || !selectedDate) {
       setAvailableSlots([]);
       return;
     }
+    let cancelled = false;
     setLoadingSlots(true);
     setErrorMessage(null);
     setSelectedSlot('');
 
     const slugsParam = encodeURIComponent(selectedServiceSlugs.join(','));
-    fetch(
-      `/api/v1/availability?services=${slugsParam}&category=${pricingCategory}&date=${selectedDate}`,
-    )
-      .then((res) => res.json())
-      .then((data: any) => {
-        if (data.data && data.data.slots) {
-          setAvailableSlots(data.data.slots);
-        } else if (data.error) {
-          setErrorMessage(data.error.message || 'زمان‌های این روز در دسترس نیست.');
-        }
+    fetch(`/api/v1/availability?services=${slugsParam}&category=${pricingCategory}&date=${selectedDate}`)
+      .then((res) => (res.ok ? res.json() : Promise.reject(new Error('availability'))))
+      .then((raw: unknown) => {
+        if (cancelled) return;
+        const data = raw as { data?: { slots?: AvailabilitySlotDto[] } };
+        setAvailableSlots(Array.isArray(data.data?.slots) ? (data.data?.slots ?? []) : []);
       })
-      .catch(() => setErrorMessage('خطا در دریافت زمان‌های خالی.'))
-      .finally(() => setLoadingSlots(false));
+      .catch(() => {
+        if (!cancelled) setErrorMessage('خطا در دریافت زمان‌های خالی. لطفاً دوباره تلاش کنید.');
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingSlots(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [selectedServiceSlugs, pricingCategory, selectedDate]);
 
-  // Multi-service toggle logic
+  /* ── Selection helpers ────────────────────────────────────── */
+
   const toggleServiceSlug = (slug: string) => {
-    setSelectedServiceSlugs((prev) => {
-      if (prev.includes(slug)) {
-        return prev.filter((s) => s !== slug);
-      } else {
-        return [...prev, slug];
-      }
-    });
-  };
-
-  const selectPopularFemale = () => {
-    setSelectedServiceSlugs(['underarm', 'bikini', 'full-legs']);
-  };
-
-  const clearAllServices = () => {
-    setSelectedServiceSlugs([]);
+    setSelectedServiceSlugs((prev) =>
+      prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug],
+    );
+    setErrorMessage(null);
   };
 
   const selectedServices = services.filter((s) => selectedServiceSlugs.includes(s.slug));
   const totalDurationMinutes = selectedServices.reduce((sum, s) => sum + s.durationMinutes, 0);
 
-  // Quote calculation for all selected services
-  const selectedPrices = selectedServices.map((s) => {
-    const p = s.prices.find((pr) => pr.pricingCategory === pricingCategory);
-    return {
-      service: s,
-      amount: p?.amount ?? 0,
-      hasPrice: Boolean(p),
-    };
-  });
+  const quote: QuoteTotals = useMemo(() => {
+    let base = 0;
+    let discount = 0;
+    let missingPrice = false;
+    for (const s of selectedServices) {
+      const price = s.prices.find((p) => p.pricingCategory === pricingCategory);
+      if (!price) {
+        missingPrice = true;
+        continue;
+      }
+      base += price.amount;
+      if (s.slug === 'full-body') discount = Math.round(price.amount * 0.15);
+    }
+    return { base, discount, final: Math.max(0, base - discount), missingPrice };
+  }, [selectedServices, pricingCategory]);
 
-  const totalBasePrice = selectedPrices.reduce((sum, item) => sum + item.amount, 0);
-  const fullBodyPriceItem = selectedPrices.find((pr) => pr.service.slug === 'full-body');
-  const discountAmount = fullBodyPriceItem ? Math.round(fullBodyPriceItem.amount * 0.15) : 0;
-  const finalPrice = Math.max(0, totalBasePrice - discountAmount);
+  /* ── Selectable days (clinic is closed on Fridays) ────────── */
 
-  // Handlers
+  const selectableDates = useMemo<string[]>(() => {
+    const today = new Date();
+    const days: string[] = [];
+    for (let i = 0; i < 90; i++) {
+      const d = addDays(today, i);
+      if (persianWeekIndex(isoDayOf(d)) === 6) continue; // جمعه
+      days.push(isoDayOf(d));
+    }
+    return days;
+  }, []);
+
+  /* ── Navigation & validation ──────────────────────────────── */
+
+  const focusStep = () => {
+    requestAnimationFrame(() => {
+      containerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      headingRef.current?.focus({ preventScroll: true });
+    });
+  };
+
+  const goTo = (next: number) => {
+    setErrorMessage(null);
+    setStep(next);
+    focusStep();
+  };
+
+  const validateStep = (current: number): string | null => {
+    if (current === 1) {
+      if (selectedServiceSlugs.length === 0) return 'لطفاً حداقل یک ناحیه یا خدمت را انتخاب فرمایید.';
+      if (pricingCategory === 'male' && quote.missingPrice) {
+        return 'تعرفه خدمات آقایان نیازمند مشاوره تلفنی است. لطفاً با کلینیک تماس حاصل فرمایید.';
+      }
+      return null;
+    }
+    if (current === 2) {
+      if (!selectedDate) return 'لطفاً تاریخ مراجعه را از تقویم انتخاب کنید.';
+      if (!selectedSlot) return 'لطفاً یکی از ساعت‌های آزاد را انتخاب فرمایید.';
+      return null;
+    }
+    if (current === 3) {
+      const errors: CustomerErrors = {};
+      if (!isValidName(customer.name)) {
+        errors.name = 'نام و نام خانوادگی را به درستی وارد فرمایید.';
+      }
+      if (!isValidPhone(customer.phone)) {
+        errors.phone = 'شماره همراه معتبر وارد فرمایید (مثال: ۰۹۱۲۳۴۵۶۷۸۹).';
+      }
+      if (!isValidEmail(customer.email)) {
+        errors.email = 'آدرس ایمیل معتبر نیست.';
+      }
+      if (Object.keys(errors).length > 0) {
+        setFieldErrors(errors);
+        return 'برخی از اطلاعات واردشده معتبر نیستند؛ فیلدهای مشخص‌شده را اصلاح کنید.';
+      }
+      setFieldErrors({});
+      return null;
+    }
+    return null;
+  };
+
   const handleNext = () => {
-    setErrorMessage(null);
-    if (step === 1 && selectedServiceSlugs.length === 0) {
-      setErrorMessage('لطفاً حداقل یک ناحیه یا خدمت را انتخاب فرمایید.');
+    const problem = validateStep(step);
+    if (problem) {
+      setErrorMessage(problem);
       return;
     }
-    if (step === 2 && pricingCategory === 'male' && selectedPrices.some((p) => !p.hasPrice)) {
-      setErrorMessage(
-        'تعرفه خدمات آقایان نیازمند مشاوره تلفنی است. لطفاً با کلینیک تماس حاصل فرمایید.',
-      );
+    if (step === 1) {
+      setErrorMessage(null);
+      if (selectedDate && !selectableDates.includes(selectedDate)) setSelectedDate('');
+      goTo(Math.min(TOTAL_STEPS - 1, step + 1));
       return;
     }
-    if (step === 3 && !selectedDate) {
-      setErrorMessage('لطفاً تاریخ مد نظر خود را انتخاب کنید.');
-      return;
-    }
-    if (step === 4 && !selectedSlot) {
-      setErrorMessage('لطفاً ساعت نوبت را انتخاب فرمایید.');
-      return;
-    }
-    if (step === 5) {
-      if (!customerName.trim() || customerName.trim().length < 2) {
-        setErrorMessage('لطفاً نام و نام خانوادگی خود را به درستی وارد فرمایید.');
-        return;
-      }
-      const cleanPhone = customerPhone.replace(/[\s-]/g, '');
-      if (!/^(09|\+989)\d{9}$/.test(cleanPhone)) {
-        setErrorMessage('لطفاً شماره تلفن همراه ۱۱ رقمی معتبر وارد فرمایید (مثال: ۰۹۱۲۳۴۵۶۷۸۹).');
-        return;
-      }
-    }
-    setStep((prev) => Math.min(6, prev + 1));
+    goTo(Math.min(TOTAL_STEPS, step + 1));
   };
 
-  const handleBack = () => {
-    setErrorMessage(null);
-    setStep((prev) => Math.max(1, prev - 1));
+  const handleBack = () => goTo(Math.max(1, step - 1));
+
+  const setCustomerField = (key: keyof CustomerDraft, value: string) => {
+    setCustomer((prev) => ({ ...prev, [key]: value }));
+    setFieldErrors((prev) => {
+      if (!prev[key]) return prev;
+      const next: CustomerErrors = { ...prev };
+      delete next[key];
+      return next;
+    });
   };
+
+  /* ── Submit ───────────────────────────────────────────────── */
 
   const handleSubmitBooking = async () => {
+    const problem = validateStep(3);
+    if (problem) {
+      setErrorMessage(problem);
+      return;
+    }
     setSubmitting(true);
     setErrorMessage(null);
 
@@ -200,21 +257,27 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
           serviceSlug: selectedServiceSlugs[0],
           pricingCategory,
           startsAt: selectedSlot,
-          customerName: customerName.trim(),
-          customerPhone: customerPhone.trim(),
-          customerEmail: customerEmail.trim() || undefined,
-          note: customerNote.trim() || undefined,
+          customerName: customer.name.trim(),
+          customerPhone: customer.phone.trim(),
+          customerEmail: customer.email.trim() || undefined,
+          note: customer.note.trim() || undefined,
+          idempotencyKey: idempotencyKey.current,
         }),
       });
 
-      const body = (await res.json()) as any;
+      const body = (await res.json()) as { data?: BookingSuccessResult; error?: { message?: string } };
       if (res.status === 201 && body.data) {
         setSuccessResult(body.data);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       } else if (res.status === 409) {
         setErrorMessage(
           'متأسفانه این زمان توسط مراجعه‌کننده دیگری رزرو شد. لطفاً ساعت دیگری را انتخاب فرمایید.',
         );
-        setStep(4);
+        setSelectedSlot('');
+        setStep(2);
+        focusStep();
+      } else if (res.status === 429) {
+        setErrorMessage('تعداد درخواست‌ها بیش از حد مجاز است. لطفاً چند لحظه بعد دوباره تلاش فرمایید.');
       } else {
         setErrorMessage(body.error?.message || 'خطا در ثبت نوبت. لطفاً دوباره تلاش فرمایید.');
       }
@@ -225,160 +288,112 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
     }
   };
 
-  // Step 6 / Confirmation View
+  /* ── Receipt ──────────────────────────────────────────────── */
+
   if (successResult) {
-    const slotDate = successResult.startsAt.slice(0, 10);
-    const slotTimeUtc = new Date(successResult.startsAt);
-    const timeFormatted = slotTimeUtc.toLocaleTimeString('fa-IR', {
-      hour: '2-digit',
-      minute: '2-digit',
-      timeZone: 'Asia/Tehran',
-    });
-
     return (
-      <div className="booking-success-card animate-scale-in">
-        <div className="success-icon-wrap">
-          <span className="success-check">✓</span>
-        </div>
-        <h2 className="success-title">رزرو شما با موفقیت ثبت شد</h2>
-        <p className="success-subtitle">
-          اطلاعات نوبت شما در سامانه ثبت گردید و جهت هماهنگی و پذیرش آماده است.
-        </p>
-
-        <div className="success-details-box">
-          <div className="detail-row">
-            <span className="detail-label">کد رهگیری رزرو:</span>
-            <span className="detail-value highlight-ref" dir="ltr">
-              {successResult.reference}
-            </span>
-          </div>
-          <div className="detail-row">
-            <span className="detail-label">نواحی و خدمات:</span>
-            <span className="detail-value font-semibold">{successResult.serviceName}</span>
-          </div>
-          <div className="detail-row">
-            <span className="detail-label">بخش پذیرش:</span>
-            <span className="detail-value">
-              {successResult.pricingCategory === 'female' ? 'بانوان' : 'آقایان'}
-            </span>
-          </div>
-          <div className="detail-row">
-            <span className="detail-label">تاریخ مراجعه:</span>
-            <span className="detail-value">{formatJalaliDate(slotDate)}</span>
-          </div>
-          <div className="detail-row">
-            <span className="detail-label">ساعت حضور:</span>
-            <span className="detail-value">{timeFormatted}</span>
-          </div>
-          <div className="detail-row">
-            <span className="detail-label">نام مراجع:</span>
-            <span className="detail-value">{successResult.customerName}</span>
-          </div>
-          <div className="detail-row">
-            <span className="detail-label">شماره همراه:</span>
-            <span className="detail-value" dir="ltr">
-              {successResult.customerPhone}
-            </span>
-          </div>
-          <div className="detail-row highlight-amount-row">
-            <span className="detail-label">مبلغ قابل پرداخت در کلینیک:</span>
-            <span className="detail-value text-gold">
-              {successResult.quotedAmount > 0
-                ? `${successResult.quotedAmount.toLocaleString('fa-IR')} هزار تومان`
-                : 'استعلام تلفنی'}
-            </span>
-          </div>
-        </div>
-
-        <div className="success-guidelines">
-          <h4 className="guidelines-title">نکات مهم قبل از مراجعه:</h4>
-          <ul>
-            <li>۲۴ ساعت قبل از نوبت، موهای نواحی انتخابی را با تیغ یا ژیلت شیو بفرمایید.</li>
-            <li>از مصرف کرم، لوسیون یا بادی اسپلش در روز مراجعه بر روی پوست خودداری کنید.</li>
-            <li>حداقل ۱۰ دقیقه قبل از ساعت مقرر در محل کلینیک حضور به هم رسانید.</li>
-          </ul>
-        </div>
-
-        <div className="success-actions mt-4 text-center">
-          <a href="/" className="btn btn-outline">
-            بازگشت به صفحه اصلی
-          </a>
-        </div>
-      </div>
+      <BookingReceiptInline
+        result={successResult}
+        onReset={() => {
+          setSuccessResult(null);
+          setCustomer(EMPTY_CUSTOMER);
+          setSelectedSlot('');
+          setSelectedDate('');
+          setSelectedServiceSlugs([]);
+          setStep(1);
+        }}
+      />
     );
   }
 
+  const categoryLabel = pricingCategory === 'female' ? 'بانوان' : 'آقایان';
+
   return (
-    <div className="booking-wizard-container">
-      {/* Step Indicator */}
+    <div className="booking-wizard-container" ref={containerRef}>
       <div className="wizard-stepper">
         <div className="stepper-track">
-          <div className="stepper-fill" style={{ width: `${((step - 1) / 5) * 100}%` }}></div>
+          <div
+            className="stepper-fill"
+            style={{ width: `${((step - 1) / (TOTAL_STEPS - 1)) * 100}%` }}
+          />
         </div>
-        <div className="stepper-steps">
-          {[
-            { num: 1, title: 'خدمات' },
-            { num: 2, title: 'تعرفه' },
-            { num: 3, title: 'تاریخ' },
-            { num: 4, title: 'ساعت' },
-            { num: 5, title: 'اطلاعات' },
-            { num: 6, title: 'تأیید' },
-          ].map((s) => (
-            <div
+        <ol className="stepper-steps">
+          {STEP_META.map((s) => (
+            <li
               key={s.num}
               className={`step-item ${step === s.num ? 'active' : ''} ${step > s.num ? 'completed' : ''}`}
+              aria-current={step === s.num ? 'step' : undefined}
             >
-              <div className="step-circle">{step > s.num ? '✓' : s.num}</div>
+              <div className="step-circle">
+                {step > s.num ? <IconReact name="check" size={16} strokeWidth={2.6} /> : s.num}
+              </div>
               <span className="step-title">{s.title}</span>
-            </div>
+            </li>
           ))}
-        </div>
+        </ol>
+        <p className="stepper-counter">
+          مرحله {step.toLocaleString('fa-IR')} از {TOTAL_STEPS.toLocaleString('fa-IR')}
+        </p>
       </div>
 
-      {/* Error Alert */}
+      <div className="sr-only" aria-live="assertive">
+        {errorMessage ?? ''}
+      </div>
+
       {errorMessage && (
         <div className="alert alert-danger animate-shake mb-4" role="alert">
-          <span className="alert-icon">⚠️</span>
+          <span className="alert-icon">
+            <IconReact name="warning" size={18} />
+          </span>
           <span>{errorMessage}</span>
         </div>
       )}
 
-      {/* Steps Content */}
       <div className="wizard-body">
-        {/* Step 1: Select Service(s) */}
         {step === 1 && (
           <div className="step-content animate-fade-in">
             <div className="step-header-with-actions">
               <div>
-                <h3 className="step-heading">مرحله اول: انتخاب نواحی لیزر</h3>
+                <h3 className="step-heading" ref={headingRef} tabIndex={-1}>
+                  مرحله اول: انتخاب نواحی و بخش مراجعین
+                </h3>
                 <p className="step-desc">
-                  می‌توانید <strong>یک یا چند ناحیه</strong> را جهت انجام در یک جلسه انتخاب فرمایید:
+                  <strong>یک یا چند ناحیه</strong> را برای انجام در یک جلسه انتخاب و بخش مراجعه را
+                  مشخص فرمایید:
                 </p>
               </div>
               <div className="quick-action-pills">
-                <button
-                  type="button"
-                  className="pill-quick-btn"
-                  onClick={selectPopularFemale}
-                >
-                  ✨ پکیج محبوب (زیر بغل + بیکینی + پا)
+                <button type="button" className="pill-quick-btn" onClick={() => setSelectedServiceSlugs(['underarm', 'bikini', 'full-legs'])}>
+                  <IconReact name="sparkles" size={14} />
+                  پکیج محبوب (زیر بغل + بیکینی + پا)
                 </button>
                 {selectedServiceSlugs.length > 0 && (
                   <button
                     type="button"
                     className="pill-quick-btn text-muted"
-                    onClick={clearAllServices}
+                    onClick={() => setSelectedServiceSlugs([])}
                   >
-                    ✕ پاک کردن ({selectedServiceSlugs.length})
+                    <IconReact name="close" size={14} />
+                    پاک کردن ({selectedServiceSlugs.length.toLocaleString('fa-IR')})
                   </button>
                 )}
               </div>
             </div>
 
             {loadingServices ? (
-              <div className="loading-state py-5 text-center">
-                <div className="spinner"></div>
-                <p className="mt-3">در حال بارگذاری لیست خدمات کلینیک...</p>
+              <div className="service-skeleton-grid" aria-hidden="true">
+                {[0, 1, 2].map((i) => (
+                  <div className="skeleton service-skeleton" key={i} />
+                ))}
+              </div>
+            ) : services.length === 0 ? (
+              <div className="empty-state">
+                <IconReact name="services" size={30} />
+                <p>{servicesFailed ? 'لیست خدمات در دسترس نیست.' : 'خدمتی ثبت نشده است.'}</p>
+                <button type="button" className="btn btn-outline btn-sm" onClick={loadServices}>
+                  <IconReact name="refresh" size={16} />
+                  تلاش دوباره
+                </button>
               </div>
             ) : (
               <div className="services-selection-grid">
@@ -398,27 +413,40 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
                           toggleServiceSlug(s.slug);
                         }
                       }}
-                      role="button"
+                      role="checkbox"
+                      aria-checked={isSelected}
                       tabIndex={0}
-                      aria-pressed={isSelected}
                     >
                       <div className="card-checkbox">
                         <span className={`checkbox-indicator ${isSelected ? 'checked' : ''}`}>
-                          {isSelected ? '✓' : ''}
+                          {isSelected && <IconReact name="check" size={14} strokeWidth={3} />}
                         </span>
                       </div>
                       <div className="card-details">
                         <div className="card-title-row">
                           <span className="service-name">{s.name}</span>
-                          {isPromo && <span className="badge badge-promo">تخفیف ویژه ۱۵٪</span>}
-                          {isSelected && <span className="badge badge-selected">انتخاب شد ✓</span>}
+                          {isPromo && (
+                            <span className="badge badge-promo">
+                              <IconReact name="percent" size={12} />
+                              تخفیف ویژه ۱۵٪
+                            </span>
+                          )}
+                          {isSelected && (
+                            <span className="badge badge-selected">
+                              <IconReact name="check" size={12} strokeWidth={3} />
+                              انتخاب شد
+                            </span>
+                          )}
                         </div>
                         <p className="service-short-desc">{s.shortDescription || s.description}</p>
                         <div className="card-price-row">
                           <span className="price-val">
-                            {fPrice ? `${fPrice.amount.toLocaleString('fa-IR')} هزار تومان` : 'استعلام قیمت'}
+                            {fPrice ? moneyFa(fPrice.amount) : 'استعلام قیمت'}
                           </span>
-                          <span className="duration-tag">⏱ {s.durationMinutes} دقیقه</span>
+                          <span className="duration-tag">
+                            <IconReact name="clock" size={13} />
+                            {s.durationMinutes.toLocaleString('fa-IR')} دقیقه
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -427,13 +455,69 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
               </div>
             )}
 
-            {/* Multi-service summary drawer */}
+            <div className="gender-selection-cards">
+              {([
+                { key: 'female', icon: 'users', title: 'بخش بانوان', desc: 'دستگاه اختصاصی، اپراتور مجرب خانم، تعرفه مصوب' },
+                { key: 'male', icon: 'customers', title: 'بخش آقایان', desc: 'اپراتور آقا، متناسب با تراکم و ضخامت موهای آقایان' },
+              ] as const).map((g) => {
+                const isSel = pricingCategory === g.key;
+                return (
+                  <div
+                    key={g.key}
+                    className={`gender-card ${isSel ? 'selected' : ''}`}
+                    onClick={() => setPricingCategory(g.key)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setPricingCategory(g.key);
+                      }
+                    }}
+                    role="radio"
+                    aria-checked={isSel}
+                    tabIndex={0}
+                  >
+                    <div className="gender-icon">
+                      <IconReact name={g.icon} size={30} />
+                    </div>
+                    <div className="gender-title">
+                      {g.title}
+                      {isSel && (
+                        <span className="badge badge-selected">
+                          <IconReact name="check" size={12} strokeWidth={3} />
+                        </span>
+                      )}
+                    </div>
+                    <p className="gender-desc">{g.desc}</p>
+                    <div className="gender-price-preview">
+                      {g.key === 'female' ? (
+                        quote.base > 0 ? (
+                          <span className="price-highlight">
+                            مجموع: {moneyFa(quote.base)}
+                            {quote.discount > 0 && (
+                              <span className="discount-badge">
+                                <IconReact name="tag" size={12} />
+                                با تخفیف: {moneyFa(quote.final)}
+                              </span>
+                            )}
+                          </span>
+                        ) : (
+                          <span className="text-muted">پس از انتخاب نواحی</span>
+                        )
+                      ) : (
+                        <span className="text-muted">استعلام تلفنی تعرفه</span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
             {selectedServices.length > 0 && (
               <div className="multi-service-summary-bar animate-fade-in mt-4">
                 <div className="summary-bar-header">
                   <div className="summary-bar-count">
-                    <span className="badge-count">{selectedServices.length}</span>
-                    <strong>نواحی انتخاب‌شده برای این جلسه:</strong>
+                    <span className="badge-count">{selectedServices.length.toLocaleString('fa-IR')}</span>
+                    <strong>نواحی انتخاب‌شده برای این جلسه ({categoryLabel}):</strong>
                   </div>
                   <div className="selected-chips-list">
                     {selectedServices.map((s) => (
@@ -449,7 +533,7 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
                           aria-label={`حذف ${s.name}`}
                           title={`حذف ${s.name}`}
                         >
-                          ×
+                          <IconReact name="x" size={11} strokeWidth={3} />
                         </button>
                       </span>
                     ))}
@@ -458,432 +542,484 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
                 <div className="summary-bar-footer">
                   <div className="summary-stats">
                     <span className="stat-pill">
-                      ⏱ مدت زمان کل: <strong>{totalDurationMinutes} دقیقه</strong>
+                      <IconReact name="clock" size={15} />
+                      مدت زمان کل: <strong>{totalDurationMinutes.toLocaleString('fa-IR')} دقیقه</strong>
                     </span>
                     <span className="stat-pill">
-                      💳 برآورد تعرفه بانوان:{' '}
-                      <strong className="highlight-gold">
-                        {finalPrice > 0 ? `${finalPrice.toLocaleString('fa-IR')} هزار تومان` : 'استعلام'}
-                      </strong>
+                      <IconReact name="wallet" size={15} />
+                      برآورد تعرفه: <strong className="highlight-gold">{moneyFa(quote.final)}</strong>
                     </span>
                   </div>
-                  <button type="button" className="btn btn-primary btn-advance" onClick={handleNext}>
-                    تأیید نواحی ({selectedServices.length} مورد) و ادامه ←
-                  </button>
                 </div>
               </div>
             )}
           </div>
         )}
 
-        {/* Step 2: Select Gender Category */}
         {step === 2 && (
           <div className="step-content animate-fade-in">
-            <h3 className="step-heading">مرحله دوم: تعیین بخش مراجعین</h3>
-            <p className="step-desc">بخش مورد نظر جهت ارائه خدمات را انتخاب فرمایید:</p>
-
-            {/* Recap of selected services */}
-            <div className="selected-areas-recap mb-4">
-              <h4 className="recap-title">
-                نواحی انتخاب‌شده شما ({selectedServices.length} ناحیه — ⏱ مجموع {totalDurationMinutes} دقیقه):
-              </h4>
-              <div className="recap-chips">
-                {selectedServices.map((s) => {
-                  const p = s.prices.find((pr) => pr.pricingCategory === 'female');
-                  return (
-                    <div key={s.slug} className="recap-item">
-                      <span className="recap-name">{s.name}</span>
-                      <span className="recap-price">
-                        {p ? `${p.amount.toLocaleString('fa-IR')} هزار تومان` : 'استعلام'}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="gender-selection-cards">
-              <div
-                className={`gender-card ${pricingCategory === 'female' ? 'selected' : ''}`}
-                onClick={() => setPricingCategory('female')}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    setPricingCategory('female');
-                  }
-                }}
-                role="button"
-                tabIndex={0}
-                aria-pressed={pricingCategory === 'female'}
-              >
-                <div className="gender-icon">👩</div>
-                <div className="gender-title">
-                  بخش بانوان {pricingCategory === 'female' && <span className="badge badge-selected">✓</span>}
-                </div>
-                <p className="gender-desc">دستگاه اختصاصی، اپراتور مجرب خانم، تعرفه مصوب</p>
-                <div className="gender-price-preview">
-                  <span className="price-highlight">
-                    مجموع: {totalBasePrice.toLocaleString('fa-IR')} هزار تومان
-                    {discountAmount > 0 && (
-                      <span className="discount-badge">
-                        با تخفیف ویژه: {finalPrice.toLocaleString('fa-IR')} هزار تومان
-                      </span>
-                    )}
-                  </span>
-                </div>
-              </div>
-
-              <div
-                className={`gender-card ${pricingCategory === 'male' ? 'selected' : ''}`}
-                onClick={() => setPricingCategory('male')}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    setPricingCategory('male');
-                  }
-                }}
-                role="button"
-                tabIndex={0}
-                aria-pressed={pricingCategory === 'male'}
-              >
-                <div className="gender-icon">👨</div>
-                <div className="gender-title">
-                  بخش آقایان {pricingCategory === 'male' && <span className="badge badge-selected">✓</span>}
-                </div>
-                <p className="gender-desc">اپراتور آقا، متناسب با تراکم و ضخامت موهای آقایان</p>
-                <div className="gender-price-preview">
-                  <span className="text-muted">استعلام تلفنی تعرفه</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="selection-confirmation-banner animate-fade-in mt-4">
-              <div className="banner-text">
-                <span className="banner-icon">✓</span>
-                <span>
-                  بخش انتخابی: <strong>{pricingCategory === 'female' ? 'بانوان' : 'آقایان'}</strong>
-                </span>
-              </div>
-              <button type="button" className="btn btn-primary btn-sm" onClick={handleNext}>
-                تأیید و انتخاب تاریخ مراجعه ←
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Step 3: Select Date */}
-        {step === 3 && (
-          <div className="step-content animate-fade-in">
-            <h3 className="step-heading">مرحله سوم: انتخاب روز مراجعه</h3>
-            <p className="step-desc">روز مورد نظر خود را جهت حضور در کلینیک مشخص فرمایید:</p>
-
-            <div className="duration-info-notice mb-3">
-              ℹ️ جهت انجام <strong>{selectedServices.length} ناحیه انتخابی</strong> ({selectedServices.map((s) => s.name).join('، ')})، نوبت متوالی به مدت <strong>{totalDurationMinutes} دقیقه</strong> تنظیم می‌شود.
-            </div>
-
-            <div className="dates-grid">
-              {availableDates.map((item) => {
-                const isSelected = selectedDate === item.isoDate;
-                return (
-                  <div
-                    key={item.isoDate}
-                    className={`date-slot-card ${isSelected ? 'selected' : ''}`}
-                    onClick={() => setSelectedDate(item.isoDate)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        setSelectedDate(item.isoDate);
-                      }
-                    }}
-                    role="button"
-                    tabIndex={0}
-                    aria-pressed={isSelected}
-                  >
-                    <span className="date-weekday">{item.weekdayName}</span>
-                    <span className="date-jalali">{item.jalaliLabel}</span>
-                    {isSelected && <span className="date-selected-check">✓</span>}
-                  </div>
-                );
-              })}
-            </div>
-
-            {selectedDate && (
-              <div className="selection-confirmation-banner animate-fade-in mt-4">
-                <div className="banner-text">
-                  <span className="banner-icon">✓</span>
-                  <span>
-                    تاریخ انتخابی: <strong>{formatJalaliDate(selectedDate)}</strong>
-                  </span>
-                </div>
-                <button type="button" className="btn btn-primary btn-sm" onClick={handleNext}>
-                  تأیید و مشاهده ساعت‌های آزاد ←
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Step 4: Select Time Slot */}
-        {step === 4 && (
-          <div className="step-content animate-fade-in">
-            <h3 className="step-heading">مرحله چهارم: انتخاب ساعت نوبت</h3>
+            <h3 className="step-heading" ref={step === 2 ? headingRef : undefined} tabIndex={-1}>
+              مرحله دوم: انتخاب تاریخ و ساعت
+            </h3>
             <p className="step-desc">
-              ساعت‌های آزاد برای نوبت {totalDurationMinutes} دقیقه‌ای در تاریخ {formatJalaliDate(selectedDate)}:
+              روز و ساعت مراجعه را از تقویم و ساعت‌های آزاد زیر انتخاب فرمایید:
             </p>
 
-            {loadingSlots ? (
-              <div className="loading-state py-5 text-center">
-                <div className="spinner"></div>
-                <p className="mt-3">در حال جستجوی ساعت‌های خالی کلینیک...</p>
-              </div>
-            ) : availableSlots.filter((s) => s.available).length === 0 ? (
-              <div className="empty-state py-4 text-center">
-                <p>متأسفانه در این تاریخ ظرفیت خالی پیوسته برای {totalDurationMinutes} دقیقه وجود ندارد.</p>
-                <button type="button" className="btn btn-outline mt-2" onClick={() => setStep(3)}>
-                  انتخاب تاریخ دیگر
-                </button>
-              </div>
-            ) : (
-              <div className="slots-selection-grid">
-                {availableSlots
-                  .filter((s) => s.available)
-                  .map((slot) => {
-                    const isSelected = selectedSlot === slot.startsAt;
-                    const slotUtc = new Date(slot.startsAt);
-                    const timeStr = slotUtc.toLocaleTimeString('fa-IR', {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                      timeZone: 'Asia/Tehran',
-                    });
+            <div className="duration-info-notice mb-3">
+              <IconReact name="info" size={16} />
+              جهت انجام <strong>{selectedServices.length.toLocaleString('fa-IR')} ناحیه انتخابی</strong>{' '}
+              ({selectedServices.map((s) => s.name).join('، ')})، نوبت متوالی به مدت{' '}
+              <strong>{totalDurationMinutes.toLocaleString('fa-IR')} دقیقه</strong> تنظیم می‌شود.
+            </div>
 
-                    return (
-                      <button
-                        key={slot.startsAt}
-                        type="button"
-                        className={`time-pill ${isSelected ? 'selected' : ''}`}
-                        onClick={() => setSelectedSlot(slot.startsAt)}
-                        aria-pressed={isSelected}
-                      >
-                        ⏱ ساعت {timeStr} {isSelected ? '✓' : ''}
-                      </button>
-                    );
-                  })}
-              </div>
-            )}
+            <div className="date-time-layout">
+              <JalaliCalendar
+                selectableDates={selectableDates}
+                selectedDate={selectedDate}
+                onSelect={(iso) => {
+                  setSelectedDate(iso);
+                  setErrorMessage(null);
+                }}
+                closedNote="در بازه زمانی فعلی روز قابل رزروی وجود ندارد. لطفاً با کلینیک تماس بگیرید."
+              />
 
-            {selectedSlot && (
+              <div className="slots-panel">
+                <h4 className="slots-title">
+                  <IconReact name="clock" size={16} />
+                  ساعت‌های آزاد
+                </h4>
+
+                {!selectedDate ? (
+                  <p className="slots-hint">برای دیدن ساعت‌های خالی، ابتدا یک روز را از تقویم انتخاب کنید.</p>
+                ) : loadingSlots ? (
+                  <div className="loading-state">
+                    <div className="spinner" />
+                    <p>در حال جستجوی ساعت‌های خالی کلینیک…</p>
+                  </div>
+                ) : availableSlots.filter((s) => s.available).length === 0 ? (
+                  <div className="empty-state">
+                    <IconReact name="calendar" size={28} />
+                    <p>برای {totalDurationMinutes.toLocaleString('fa-IR')} دقیقه در این روز ظرفیت پیوسته وجود ندارد. روز دیگری را امتحان کنید.</p>
+                  </div>
+                ) : (
+                  <div className="slots-selection-grid">
+                    {availableSlots
+                      .filter((s) => s.available)
+                      .map((slot) => {
+                        const isSelected = selectedSlot === slot.startsAt;
+                        return (
+                          <button
+                            key={slot.startsAt}
+                            type="button"
+                            className={`time-pill ${isSelected ? 'selected' : ''}`}
+                            onClick={() => {
+                              setSelectedSlot(slot.startsAt);
+                              setErrorMessage(null);
+                            }}
+                            aria-pressed={isSelected}
+                          >
+                            <IconReact name="clock" size={15} />
+                            <span className="time-pill-label">ساعت {timeFa(slot.startsAt)}</span>
+                            {isSelected && <IconReact name="check" size={15} strokeWidth={3} />}
+                          </button>
+                        );
+                      })}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {selectedDate && selectedSlot && (
               <div className="selection-confirmation-banner animate-fade-in mt-4">
                 <div className="banner-text">
-                  <span className="banner-icon">✓</span>
+                  <span className="banner-icon">
+                    <IconReact name="check" size={13} strokeWidth={3} />
+                  </span>
                   <span>
-                    ساعت انتخابی:{' '}
-                    <strong>
-                      {new Date(selectedSlot).toLocaleTimeString('fa-IR', {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        timeZone: 'Asia/Tehran',
-                      })}
-                    </strong>
+                    نوبت انتخابی: <strong>{timeFa(selectedSlot)}</strong> — روز{' '}
+                    <strong>{selectedDateLabel(selectedDate)}</strong>
                   </span>
                 </div>
-                <button type="button" className="btn btn-primary btn-sm" onClick={handleNext}>
-                  تأیید و تکمیل مشخصات مراجع ←
-                </button>
               </div>
             )}
           </div>
         )}
 
-        {/* Step 5: Customer Information */}
-        {step === 5 && (
+        {step === 3 && (
           <div className="step-content animate-fade-in">
-            <h3 className="step-heading">مرحله پنجم: مشخصات مراجع</h3>
-            <p className="step-desc">جهت ثبت نوبت و ارسال پیامک هماهنگی، اطلاعات زیر را وارد نمایید:</p>
+            <h3 className="step-heading" ref={step === 3 ? headingRef : undefined} tabIndex={-1}>
+              مرحله سوم: مشخصات مراجع
+            </h3>
+            <p className="step-desc">
+              جهت ثبت نوبت و ارسال پیامک هماهنگی، اطلاعات زیر را وارد نمایید:
+            </p>
 
             <div className="booking-form-fields">
               <div className="form-group mb-3">
                 <label htmlFor="custName" className="form-label required">
-                  نام و نام خانوادگی:
+                  نام و نام خانوادگی
                 </label>
-                <input
-                  id="custName"
-                  type="text"
-                  className="form-control"
-                  placeholder="مثال: سارا محمدی"
-                  value={customerName}
-                  onChange={(e) => setCustomerName(e.target.value)}
-                  required
-                />
+                <div className="input-with-icon">
+                  <IconReact name="users" size={17} />
+                  <input
+                    id="custName"
+                    type="text"
+                    autoComplete="name"
+                    className={`form-control ${fieldErrors.name ? 'is-invalid' : ''}`}
+                    placeholder="مثال: سارا محمدی"
+                    value={customer.name}
+                    onChange={(e) => setCustomerField('name', e.target.value)}
+                    aria-invalid={Boolean(fieldErrors.name)}
+                    aria-describedby={fieldErrors.name ? 'custName-err' : undefined}
+                    required
+                  />
+                </div>
+                {fieldErrors.name && (
+                  <span className="field-error" id="custName-err" role="alert">
+                    <IconReact name="warning" size={13} />
+                    {fieldErrors.name}
+                  </span>
+                )}
               </div>
 
               <div className="form-group mb-3">
                 <label htmlFor="custPhone" className="form-label required">
-                  شماره تلفن همراه:
+                  شماره تلفن همراه
                 </label>
-                <input
-                  id="custPhone"
-                  type="tel"
-                  dir="ltr"
-                  className="form-control text-left"
-                  placeholder="09123456789"
-                  value={customerPhone}
-                  onChange={(e) => setCustomerPhone(e.target.value)}
-                  required
-                />
-                <span className="form-hint">شماره همراه جهت هماهنگی و ارسال تأییدیه</span>
+                <div className="input-with-icon">
+                  <IconReact name="phone" size={17} />
+                  <input
+                    id="custPhone"
+                    type="tel"
+                    dir="ltr"
+                    autoComplete="tel"
+                    inputMode="tel"
+                    className={`form-control text-left ${fieldErrors.phone ? 'is-invalid' : ''}`}
+                    placeholder="09123456789"
+                    value={customer.phone}
+                    onChange={(e) => setCustomerField('phone', e.target.value)}
+                    onBlur={(e) => {
+                      const normalized = toLocalPhone(e.target.value);
+                      if (normalized !== e.target.value) setCustomerField('phone', normalized);
+                    }}
+                    aria-invalid={Boolean(fieldErrors.phone)}
+                    aria-describedby={fieldErrors.phone ? 'custPhone-err' : 'custPhone-hint'}
+                    required
+                  />
+                </div>
+                {fieldErrors.phone ? (
+                  <span className="field-error" id="custPhone-err" role="alert">
+                    <IconReact name="warning" size={13} />
+                    {fieldErrors.phone}
+                  </span>
+                ) : (
+                  <span className="form-hint" id="custPhone-hint">
+                    شماره همراه جهت هماهنگی و ارسال تأییدیه نوبت
+                  </span>
+                )}
               </div>
 
               <div className="form-group mb-3">
                 <label htmlFor="custEmail" className="form-label">
-                  آدرس ایمیل (اختیاری):
+                  آدرس ایمیل (اختیاری)
                 </label>
-                <input
-                  id="custEmail"
-                  type="email"
-                  dir="ltr"
-                  className="form-control text-left"
-                  placeholder="sara@example.com"
-                  value={customerEmail}
-                  onChange={(e) => setCustomerEmail(e.target.value)}
-                />
+                <div className="input-with-icon">
+                  <IconReact name="mail" size={17} />
+                  <input
+                    id="custEmail"
+                    type="email"
+                    dir="ltr"
+                    autoComplete="email"
+                    className={`form-control text-left ${fieldErrors.email ? 'is-invalid' : ''}`}
+                    placeholder="sara@example.com"
+                    value={customer.email}
+                    onChange={(e) => setCustomerField('email', e.target.value)}
+                    aria-invalid={Boolean(fieldErrors.email)}
+                    aria-describedby={fieldErrors.email ? 'custEmail-err' : undefined}
+                  />
+                </div>
+                {fieldErrors.email && (
+                  <span className="field-error" id="custEmail-err" role="alert">
+                    <IconReact name="warning" size={13} />
+                    {fieldErrors.email}
+                  </span>
+                )}
               </div>
 
               <div className="form-group mb-3">
                 <label htmlFor="custNote" className="form-label">
-                  توضیحات یا یادداشت (اختیاری):
+                  توضیحات یا یادداشت (اختیاری)
                 </label>
                 <textarea
                   id="custNote"
                   className="form-control"
                   rows={3}
-                  placeholder="مثال: جلسه اول / پوست حساس..."
-                  value={customerNote}
-                  onChange={(e) => setCustomerNote(e.target.value)}
-                ></textarea>
+                  maxLength={500}
+                  placeholder="مثال: جلسه اول / پوست حساس…"
+                  value={customer.note}
+                  onChange={(e) => setCustomerField('note', e.target.value)}
+                />
               </div>
             </div>
           </div>
         )}
 
-        {/* Step 6: Summary & Confirmation */}
-        {step === 6 && (
+        {step === 4 && (
           <div className="step-content animate-fade-in">
-            <h3 className="step-heading">مرحله نهایی: بازبینی و تأیید پیش‌فاکتور</h3>
-            <p className="step-desc">اطلاعات نوبت خود را بررسی و با فشردن دکمه زیر نهایی فرمایید:</p>
+            <h3 className="step-heading" ref={step === 4 ? headingRef : undefined} tabIndex={-1}>
+              مرحله چهارم: پیش‌فاکتور و تأیید نهایی
+            </h3>
+            <p className="step-desc">اطلاعات نوبت را بازبینی و با فشردن دکمه زیر نهایی فرمایید:</p>
 
             <div className="summary-invoice-card">
               <div className="summary-row-header mb-3">
-                <span className="font-bold">نواحی و خدمات انتخابی ({selectedServices.length} مورد):</span>
+                <span className="font-bold">
+                  <IconReact name="services" size={16} />
+                  نواحی و خدمات انتخابی ({selectedServices.length.toLocaleString('fa-IR')} مورد)
+                </span>
               </div>
+
               <div className="itemized-services-list mb-3">
                 {selectedServices.map((s) => {
                   const p = s.prices.find((pr) => pr.pricingCategory === pricingCategory);
                   return (
                     <div key={s.slug} className="itemized-row">
                       <span className="item-name">
-                        • {s.name} <span className="item-duration text-muted">({s.durationMinutes} دقیقه)</span>
+                        {s.name}{' '}
+                        <span className="item-duration text-muted">
+                          ({s.durationMinutes.toLocaleString('fa-IR')} دقیقه)
+                        </span>
                       </span>
-                      <span className="item-price">
-                        {p ? `${p.amount.toLocaleString('fa-IR')} هزار تومان` : 'استعلام'}
-                      </span>
+                      <span className="item-price">{p ? moneyFa(p.amount) : 'استعلام'}</span>
                     </div>
                   );
                 })}
               </div>
 
               <div className="summary-row">
-                <span className="label">بخش پذیرش:</span>
-                <span className="value">{pricingCategory === 'female' ? 'بانوان' : 'آقایان'}</span>
+                <span className="label">بخش پذیرش</span>
+                <span className="value">{categoryLabel}</span>
               </div>
               <div className="summary-row">
-                <span className="label">مدت زمان کل:</span>
-                <span className="value">⏱ {totalDurationMinutes} دقیقه</span>
-              </div>
-              <div className="summary-row">
-                <span className="label">تاریخ نوبت:</span>
-                <span className="value">{formatJalaliDate(selectedDate)}</span>
-              </div>
-              <div className="summary-row">
-                <span className="label">ساعت حضور:</span>
-                <span className="value font-semibold">
-                  {selectedSlot &&
-                    new Date(selectedSlot).toLocaleTimeString('fa-IR', {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                      timeZone: 'Asia/Tehran',
-                    })}
+                <span className="label">مدت زمان کل</span>
+                <span className="value">
+                  <IconReact name="clock" size={15} />
+                  {totalDurationMinutes.toLocaleString('fa-IR')} دقیقه
                 </span>
               </div>
               <div className="summary-row">
-                <span className="label">نام مراجع:</span>
-                <span className="value">{customerName}</span>
+                <span className="label">تاریخ نوبت</span>
+                <span className="value">{selectedDateLabel(selectedDate)}</span>
               </div>
               <div className="summary-row">
-                <span className="label">شماره همراه:</span>
+                <span className="label">ساعت حضور</span>
+                <span className="value font-semibold">{selectedSlot ? timeFa(selectedSlot) : '-'}</span>
+              </div>
+              <div className="summary-row">
+                <span className="label">نام مراجع</span>
+                <span className="value">{customer.name.trim()}</span>
+              </div>
+              <div className="summary-row">
+                <span className="label">شماره همراه</span>
                 <span className="value" dir="ltr">
-                  {customerPhone}
+                  {toLocalPhone(customer.phone) || '-'}
                 </span>
               </div>
 
               <hr className="summary-divider" />
 
               <div className="summary-row">
-                <span className="label">مجموع تعرفه مصوب:</span>
+                <span className="label">مجموع تعرفه مصوب</span>
                 <span className="value">
-                  {pricingCategory === 'female'
-                    ? `${totalBasePrice.toLocaleString('fa-IR')} هزار تومان`
-                    : 'استعلام حضوری / تلفنی'}
+                  {pricingCategory === 'female' ? moneyFa(quote.base) : 'استعلام حضوری / تلفنی'}
                 </span>
               </div>
-              {discountAmount > 0 && (
+              {quote.discount > 0 && (
                 <div className="summary-row text-success">
-                  <span className="label">تخفیف پکیج کل بدن (۱۵٪):</span>
-                  <span className="value">-{discountAmount.toLocaleString('fa-IR')} هزار تومان</span>
+                  <span className="label">تخفیف پکیج کل بدن (۱۵٪)</span>
+                  <span className="value">−{moneyFa(quote.discount)}</span>
                 </div>
               )}
               <div className="summary-row total-amount-row">
-                <span className="label">مبلغ نهایی قابل پرداخت:</span>
+                <span className="label">مبلغ نهایی قابل پرداخت</span>
                 <span className="value total-price">
-                  {pricingCategory === 'female'
-                    ? `${finalPrice.toLocaleString('fa-IR')} هزار تومان`
-                    : 'مشاوره رایگان'}
+                  {pricingCategory === 'female' ? moneyFa(quote.final) : 'مشاوره رایگان'}
                 </span>
               </div>
+
               <p className="payment-notice">
-                💳 پرداخت مبلغ در کلینیک و پس از انجام خدمت صورت می‌پذیرد.
+                <IconReact name="wallet" size={15} />
+                پرداخت مبلغ در کلینیک و پس از انجام خدمت صورت می‌پذیرد.
               </p>
+            </div>
+
+            <div className="sms-notice">
+              <IconReact name="sms" size={20} />
+              <div>
+                <strong>اطلاع‌رسانی پیامکی</strong>
+                <p>
+                  پس از ثبت نوبت، پیامک تأیید حاوی کد رهگیری به شماره{' '}
+                  <span dir="ltr">{toLocalPhone(customer.phone) || customer.phone}</span> ارسال می‌شود.
+                  لطفاً آن را نزد خود نگه دارید.
+                </p>
+              </div>
             </div>
           </div>
         )}
       </div>
 
-      {/* Wizard Footer Navigation */}
       <div className="wizard-footer">
-        {step > 1 && (
+        {step > 1 ? (
           <button type="button" className="btn btn-outline" onClick={handleBack} disabled={submitting}>
-            بازگشت به مرحله قبل
+            <IconReact name="arrowRight" size={16} />
+            بازگشت
           </button>
+        ) : (
+          <span className="wizard-footer-spacer" />
         )}
 
-        {step < 6 ? (
-          <button type="button" className="btn btn-primary mr-auto" onClick={handleNext}>
-            {step === 1 && `مرحله بعد: تعیین بخش (${selectedServices.length} ناحیه) →`}
-            {step === 2 && 'مرحله بعد: انتخاب تاریخ →'}
-            {step === 3 && 'مرحله بعد: انتخاب ساعت →'}
-            {step === 4 && 'مرحله بعد: اطلاعات مراجع →'}
-            {step === 5 && 'مرحله بعد: پیش‌فاکتور و تأیید →'}
+        {step < TOTAL_STEPS ? (
+          <button type="button" className="btn btn-primary btn-advance" onClick={handleNext}>
+            {NEXT_LABEL[step] ?? 'ادامه'}
+            <IconReact name="arrowLeft" size={16} />
           </button>
         ) : (
           <button
             type="button"
-            className="btn btn-primary btn-lg mr-auto submit-booking-btn"
+            className="btn btn-primary btn-lg submit-booking-btn"
             onClick={handleSubmitBooking}
             disabled={submitting}
           >
-            {submitting ? 'در حال ثبت نوبت...' : 'تأیید نهایی و ثبت رزرو'}
+            {submitting ? (
+              <>
+                <span className="spinner spinner-sm" />
+                در حال ثبت نوبت…
+              </>
+            ) : (
+              <>
+                <IconReact name="send" size={17} />
+                تأیید نهایی و ثبت رزرو
+              </>
+            )}
           </button>
         )}
       </div>
     </div>
   );
+}
+
+/* ── Receipt (step 5 view) ────────────────────────────────────── */
+
+function BookingReceiptInline({
+  result,
+  onReset,
+}: {
+  result: BookingSuccessResult;
+  onReset: () => void;
+}) {
+  return (
+    <div className="booking-success-card animate-scale-in">
+      <div className="success-icon-wrap">
+        <IconReact name="checkCircle" size={34} strokeWidth={2.2} />
+      </div>
+      <h2 className="success-title">رزرو شما با موفقیت ثبت شد</h2>
+      <p className="success-subtitle">اطلاعات نوبت شما در سامانه ثبت گردید و آماده پذیرش است.</p>
+
+      <div className="success-details-box">
+        <div className="detail-row">
+          <span className="detail-label">کد رهگیری رزرو</span>
+          <span className="detail-value highlight-ref" dir="ltr">
+            {result.reference}
+          </span>
+        </div>
+        <div className="detail-row">
+          <span className="detail-label">نواحی و خدمات</span>
+          <span className="detail-value font-semibold">{result.serviceName}</span>
+        </div>
+        <div className="detail-row">
+          <span className="detail-label">بخش پذیرش</span>
+          <span className="detail-value">{result.pricingCategory === 'female' ? 'بانوان' : 'آقایان'}</span>
+        </div>
+        <div className="detail-row">
+          <span className="detail-label">تاریخ مراجعه</span>
+          <span className="detail-value">{selectedDateLabel(result.startsAt.slice(0, 10))}</span>
+        </div>
+        <div className="detail-row">
+          <span className="detail-label">ساعت حضور</span>
+          <span className="detail-value">{timeFa(result.startsAt)}</span>
+        </div>
+        <div className="detail-row">
+          <span className="detail-label">نام مراجع</span>
+          <span className="detail-value">{result.customerName}</span>
+        </div>
+        <div className="detail-row">
+          <span className="detail-label">شماره همراه</span>
+          <span className="detail-value" dir="ltr">
+            {result.customerPhone}
+          </span>
+        </div>
+        <div className="detail-row highlight-amount-row">
+          <span className="detail-label">مبلغ قابل پرداخت در کلینیک</span>
+          <span className="detail-value text-gold">
+            {result.quotedAmount > 0 ? moneyFa(result.quotedAmount) : 'استعلام تلفنی'}
+          </span>
+        </div>
+      </div>
+
+      <div className="sms-notice sms-notice-success">
+        <IconReact name="sms" size={20} />
+        <div>
+          <strong>پیامک تأیید در راه است</strong>
+          <p>جزئیات این نوبت به شماره {result.customerPhone} پیامک می‌شود. در صورت نیاز با کلینیک تماس بگیرید.</p>
+        </div>
+      </div>
+
+      <div className="success-guidelines">
+        <h4 className="guidelines-title">
+          <IconReact name="info" size={16} />
+          نکات مهم قبل از مراجعه
+        </h4>
+        <ul>
+          <li>۲۴ ساعت قبل از نوبت، موهای نواحی انتخابی را با تیغ یا ژیلت شیو بفرمایید.</li>
+          <li>از مصرف کرم، لوسیون یا بادی اسپلش در روز مراجعه بر روی پوست خودداری کنید.</li>
+          <li>حداقل ۱۰ دقیقه قبل از ساعت مقرر در محل کلینیک حضور به هم رسانید.</li>
+        </ul>
+      </div>
+
+      <div className="success-actions mt-4">
+        <button type="button" className="btn btn-primary" onClick={onReset}>
+          <IconReact name="plus" size={16} />
+          ثبت نوبت جدید
+        </button>
+        <a href="/" className="btn btn-outline">
+          بازگشت به صفحه اصلی
+        </a>
+      </div>
+    </div>
+  );
+}
+
+/* ── helpers ──────────────────────────────────────────────────── */
+
+function selectedDateLabel(isoDate: string): string {
+  if (!isoDate) return '-';
+  try {
+    return new Intl.DateTimeFormat('fa-IR', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      timeZone: 'UTC',
+    }).format(new Date(`${isoDate}T00:00:00Z`));
+  } catch {
+    return isoDate;
+  }
+}
+
+function makeIdempotencyKey(): string {
+  try {
+    return crypto.randomUUID();
+  } catch {
+    return `bk-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
+  }
 }

@@ -118,13 +118,15 @@
   --gradient-gold-metallic: linear-gradient(135deg, #fff2cc 0%, #f5d77f 30%, #d4af37 60%, #997520 100%);
   --gradient-gold-radial: radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.18) 0%, transparent 70%);
 
-  /* Button Gradients */
+  /* Button Gradients — top stops darkened so white text passes WCAG AAA (≥7:1) */
   --gradient-gold-btn: linear-gradient(180deg, #f5d77f 0%, #d4af37 45%, #9e7822 100%);
   --gradient-gold-btn-hover: linear-gradient(180deg, #ffea9f 0%, #e5c14e 45%, #b58925 100%);
-  --gradient-accept-btn: linear-gradient(180deg, #10b981 0%, #059669 45%, #047857 100%);
-  --gradient-accept-btn-hover: linear-gradient(180deg, #34d399 0%, #10b981 45%, #059669 100%);
-  --gradient-danger-btn: linear-gradient(180deg, #dc2626 0%, #b91c1c 45%, #991b1b 100%);
-  --gradient-danger-btn-hover: linear-gradient(180deg, #ef4444 0%, #dc2626 45%, #b91c1c 100%);
+  --gradient-accept-btn: linear-gradient(180deg, #047857 0%, #0e6245 45%, #022c22 100%);
+  --gradient-accept-btn-hover: linear-gradient(180deg, #065f46 0%, #047857 45%, #022c22 100%);
+  --gradient-danger-btn: linear-gradient(180deg, #991b1b 0%, #b91c1c 45%, #7f1d1d 100%);
+  --gradient-danger-btn-hover: linear-gradient(180deg, #7f1d1d 0%, #991b1b 45%, #660f0f 100%);
+  --gradient-complete-btn: linear-gradient(180deg, #075985 0%, #0369a1 45%, #0c4a6e 100%);
+  --gradient-complete-btn-hover: linear-gradient(180deg, #0c4a6e 0%, #075985 45%, #082f49 100%);
   --gradient-ghost-hover: linear-gradient(180deg, rgba(212, 175, 55, 0.15) 0%, rgba(212, 175, 55, 0.05) 100%);
 
   /* ── TACTILE 3D MICRO-INTERACTION PHYSICS ────────────────── */

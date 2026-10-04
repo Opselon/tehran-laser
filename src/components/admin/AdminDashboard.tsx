@@ -173,11 +173,15 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
 
   if (loading && !data) {
     return (
-      <div className="admin-section-block text-center p-5">
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
-          <IconReact name="refresh" size={32} className="spin-icon" style={{ color: '#d4af37' }} />
+      <div className="admin-section-block" aria-busy="true" aria-live="polite" style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: '22px' }}>
+        <div className="skeleton-line skeleton-line-title" />
+        <div className="skeleton-metrics-grid">
+          <div className="skeleton-card" />
+          <div className="skeleton-card" />
+          <div className="skeleton-card" />
         </div>
-        <p className="empty-text">در حال بارگذاری اطلاعات عملیاتی روز کلینیک...</p>
+        <div className="skeleton-line skeleton-line-wide" />
+        <div className="skeleton-line skeleton-line-narrow" />
       </div>
     );
   }
@@ -231,6 +235,17 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
 
   return (
     <div className="admin-dashboard-page">
+      {/* Stale-data notice: refresh failed but we still have a previous snapshot */}
+      {error && data && (
+        <div className="dashboard-inline-error" role="alert">
+          <IconReact name="warning" size={16} />
+          <span>{error} آخرین داده‌های نمایش‌داده‌شده مربوط به آخرین دریافت موفق است.</span>
+          <button type="button" onClick={refreshDashboard} disabled={loading}>
+            <IconReact name="refresh" size={14} className={loading ? 'spin-icon' : ''} />
+            <span>{loading ? 'در حال تازه‌سازی...' : 'تلاش مجدد'}</span>
+          </button>
+        </div>
+      )}
       {/* 3D Dashboard Header Row */}
       <div className="dashboard-header-row">
         <div>
@@ -275,7 +290,7 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
         {metricCards.map((m) => (
           <div key={m.title} className={`admin-metric-card-3d ${m.cls}`}>
             <div className="metric-header"><span className="metric-title">{m.title}</span><div className="metric-icon-wrap" style={{ color: m.color }}><IconReact name={m.icon} size={20} /></div></div>
-            <div className="metric-number" style={{ color: m.color !== '#f5d77f' ? m.color : undefined }}>{m.val.toLocaleString('fa-IR')}</div>
+            <div className="metric-number" style={{ color: m.color !== '#f5d77f' ? m.color : undefined }} dir="ltr">{m.val.toLocaleString('fa-IR')}</div>
             <div className="metric-footer">{m.sub}</div>
           </div>
         ))}
@@ -341,8 +356,16 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
 
         {pendingBookings.length === 0 ? (
           <div className="empty-state-card">
-            <span className="empty-icon" style={{ display: 'flex', justifyContent: 'center' }}><IconReact name="sparkles" size={32} style={{ color: '#d4af37' }} /></span>
-            <p className="empty-text">در حال حاضر نوبت در انتظار تأییدی وجود ندارد و همه پذیرش‌ها بررسی شده‌اند.</p>
+            <span className="empty-icon" style={{ display: 'flex', justifyContent: 'center' }}><IconReact name="checkCircle" size={32} style={{ color: '#10b981' }} /></span>
+            <p className="empty-text">همه نوبت‌های آنلاین امروز تأیید شده‌اند — هیچ موردی در صف پذیرش باقی نمانده است.</p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center', marginTop: 14 }}>
+              <a href="/admin/calendar" className="filter-chip-btn" style={{ textDecoration: 'none' }}>
+                <IconReact name="calendar" size={14} /><span>برنامه کامل تقویم</span>
+              </a>
+              <a href="/admin/walkin" className="filter-chip-btn" style={{ textDecoration: 'none' }}>
+                <IconReact name="walkin" size={14} /><span>ثبت پذیرش حضوری</span>
+              </a>
+            </div>
           </div>
         ) : (
           <div className="pending-bookings-list">

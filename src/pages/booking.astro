@@ -1,6 +1,7 @@
 ---
 import PublicLayout from '../layouts/PublicLayout.astro';
 import { BookingWizard } from '../components/booking/BookingWizard';
+import Icon from '../components/ui/Icon.astro';
 import { env } from 'cloudflare:workers';
 import { listPublicServices } from '../server/repositories';
 import { createBreadcrumbSchema } from '../lib/seo';
@@ -25,6 +26,7 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
   title="رزرو آنلاین نوبت — کلینیک تخصصی تهران لیزر"
   description="سامانه هوشمند و شبانه‌روزی رزرو آنلاین نوبت کلینیک تهران لیزر پاسداران. انتخاب خدمت، ساعت و تاریخ بدون معطلی با ۱۵٪ تخفیف ویژه سایت."
   canonicalUrl="/booking"
+  theme="dark"
   keywords={[
     'رزرو آنلاین نوبت لیزر تهران',
     'رزرو وقت لیزر پاسداران',
@@ -40,6 +42,20 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
       <p class="page-subtitle">
         مراحل زیر را جهت ثبت نوبت خود تکمیل نمایید. تأییدیه و جزئیات نوبت بلافاصله ثبت خواهد شد.
       </p>
+      <ul class="booking-trust-row">
+        <li>
+          <Icon name="check" size={16} stroke={2.6} class="trust-ico" />
+          ثبت آنی نوبت در سامانه
+        </li>
+        <li>
+          <Icon name="percent" size={16} stroke={2.4} class="trust-ico" />
+          ۱۵٪ تخفیف ویژه رزرو آنلاین
+        </li>
+        <li>
+          <Icon name="sms" size={16} stroke={2.1} class="trust-ico" />
+          پشتیبانی پیامکی پس از ثبت
+        </li>
+      </ul>
     </div>
   </div>
 
@@ -53,3 +69,62 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
     </div>
   </section>
 </PublicLayout>
+
+<style>
+  /* Dark 3D Obsidian-Gold page chrome for the booking funnel.
+     The shared stylesheet has no theme-dark-obsidian rules for these
+     header elements, so they are themed here (Astro scopes them to this page). */
+  .booking-page-header {
+    background:
+      radial-gradient(circle at 82% 18%, rgba(212, 175, 55, 0.16) 0%, transparent 45%),
+      radial-gradient(circle at 15% 90%, rgba(180, 140, 45, 0.1) 0%, transparent 45%),
+      linear-gradient(180deg, #121417 0%, #0a0b0d 100%);
+    border-bottom: 1px solid rgba(212, 175, 55, 0.22);
+    padding: 52px 0 40px;
+  }
+
+  .booking-page-header .page-title {
+    color: #f5d77f;
+    text-shadow: 0 0 34px rgba(245, 215, 127, 0.28);
+  }
+
+  .booking-page-header .page-subtitle {
+    color: #9aa3b2;
+  }
+
+  .booking-trust-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px 26px;
+    margin: 22px 0 0;
+    padding: 0;
+    list-style: none;
+    color: rgba(245, 215, 127, 0.94);
+    font-size: 0.86rem;
+    font-weight: 600;
+  }
+
+  .booking-trust-row li {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .trust-ico {
+    flex: 0 0 auto;
+    color: #d4af37;
+    filter: drop-shadow(0 0 6px rgba(245, 215, 127, 0.45));
+  }
+
+  @media (max-width: 576px) {
+    .booking-page-header {
+      padding: 38px 0 30px;
+    }
+
+    .booking-trust-row {
+      gap: 8px 14px;
+      font-size: 0.78rem;
+    }
+  }
+</style>

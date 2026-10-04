@@ -691,7 +691,7 @@ for (const s of services) {
             </div>
           </div>
 
-          <div class="modal-actions-row">
+          <div class="modal-actions-row services-modal-actions">
             <button type="button" id="cancelServiceBtn" class="btn-table-action btn-modal-cancel">
               <Icon name="close" size={14} />
               <span>انصراف</span>
@@ -859,7 +859,7 @@ for (const s of services) {
             </div>
           </div>
 
-          <div class="modal-actions-row">
+          <div class="modal-actions-row services-modal-actions">
             <button type="button" id="cancelNewServiceBtn" class="btn-table-action btn-modal-cancel">
               <Icon name="close" size={14} />
               <span>انصراف</span>
@@ -1505,6 +1505,51 @@ for (const s of services) {
       overflow-y: auto;
       padding: 24px;
       box-sizing: border-box;
+      scrollbar-color: rgba(212, 175, 55, 0.45) transparent;
+    }
+
+    /* On short/mobile viewports the dialog scrolls; pin the action row so the
+       primary Save button is never hidden below the fold. */
+    .services-modal-form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .services-modal-actions {
+      position: sticky;
+      bottom: -24px;
+      margin: 0 -24px -24px;
+      padding: 12px 24px 16px;
+      background: linear-gradient(180deg, rgba(14, 17, 24, 0) 0%, rgba(14, 17, 24, 0.96) 40%, rgba(14, 17, 24, 1) 100%);
+      backdrop-filter: blur(6px);
+      border-radius: 0 0 20px 20px;
+    }
+
+    /* Error banner inside the modals — needs a real container so it reads as an
+       error state rather than stray caption text (class is page-scoped here). */
+    .alert-3d-danger {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      box-sizing: border-box;
+      padding: 11px 14px;
+      margin-bottom: 16px;
+      font-size: 0.86rem;
+      font-weight: 700;
+      line-height: 1.7;
+      color: #ffd9d9;
+      background: linear-gradient(135deg, rgba(220, 38, 38, 0.22) 0%, rgba(127, 29, 29, 0.16) 100%);
+      border: 1px solid rgba(248, 113, 113, 0.45);
+      border-radius: 12px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+      text-align: right;
+      word-break: break-word;
+    }
+
+    .alert-3d-danger svg {
+      flex: 0 0 auto;
+      color: #f87171;
     }
 
     .modal-header-row {
@@ -1645,6 +1690,11 @@ for (const s of services) {
       font-weight: 800;
     }
 
+    .btn-modal-cancel,
+    .btn-modal-save {
+      gap: 8px;
+    }
+
     /* Toast */
     .services-toast {
       position: fixed;
@@ -1718,9 +1768,18 @@ for (const s of services) {
         border-radius: 16px;
       }
 
+      /* Sticky footer insets must track the dialog's responsive padding. */
+      .services-modal-actions {
+        bottom: -18px;
+        margin: 0 -14px -18px;
+        padding: 10px 14px 14px;
+        border-radius: 0 0 16px 16px;
+      }
+
       .modal-actions-row {
         flex-direction: column-reverse;
         width: 100%;
+        margin-top: 16px;
       }
 
       .btn-modal-cancel,
@@ -1766,6 +1825,28 @@ for (const s of services) {
     let activeCategory = 'all';
     let activeStatus = 'all';
     let searchQuery = '';
+
+    // ── API error helpers ──────────────────────────────────────
+    // The API responds with { error: { code, message, fields } } on 4xx.
+    interface ApiErrorResponse {
+      error?: string | { message?: string; fields?: Record<string, string[]>; code?: string };
+    }
+
+    function extractApiError(data: ApiErrorResponse, fallback: string): string {
+      const err = data?.error;
+      if (!err) return fallback;
+      if (typeof err === 'string') return err;
+      if (err.fields) {
+        const parts: string[] = [];
+        for (const msgs of Object.values(err.fields)) {
+          if (Array.isArray(msgs) && msgs.length > 0 && typeof msgs[0] === 'string') {
+            parts.push(msgs[0]);
+          }
+        }
+        if (parts.length > 0) return parts.join(' — ');
+      }
+      return err.message || fallback;
+    }
 
     // Elements
     const searchInput = document.getElementById('serviceSearchInput') as HTMLInputElement | null;
@@ -2167,8 +2248,8 @@ for (const s of services) {
             let errMsg = 'خطا در ثبت تغییرات خدمت یا تعرفه.';
             if (errRes) {
               try {
-                const errData = (await errRes.json()) as { error?: string };
-                if (errData?.error) errMsg = errData.error;
+                const errData = (await errRes.json()) as ApiErrorResponse;
+                errMsg = extractApiError(errData, 'خطا در ثبت تغییرات خدمت یا تعرفه.');
               } catch {
                 // ignore
               }
@@ -2216,8 +2297,8 @@ for (const s of services) {
           if (!createRes.ok) {
             let errMsg = 'خطا در تعریف خدمت جدید.';
             try {
-              const errData = (await createRes.json()) as { error?: string };
-              if (errData?.error) errMsg = errData.error;
+              const errData = (await createRes.json()) as ApiErrorResponse;
+              errMsg = extractApiError(errData, 'خطا در تعریف خدمت جدید.');
             } catch {
               // ignore
             }

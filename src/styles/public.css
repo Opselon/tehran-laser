@@ -264,8 +264,7 @@ body {
 .announcement-link {
   color: #e8d3a7;
   font-weight: 700;
-  text-decoration: underline;
-  text-underline-offset: 4px;
+  text-decoration: none;
   transition: color 0.18s ease;
   white-space: nowrap;
 }
@@ -2801,11 +2800,14 @@ svg {
 
   .announcement-inner {
     font-size: 0.8rem;
-    gap: 10px;
+    gap: 12px;
     justify-content: space-between;
+    align-items: center;
   }
 
   .announcement-inner span {
+    flex: 1 1 0;
+    min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -3095,6 +3097,8 @@ body.theme-dark-obsidian .announcement-link {
   background: rgba(212, 175, 55, 0.15);
   color: #f5d77f;
   border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 999px;
+  padding: 4px 12px;
 }
 
 body.theme-dark-obsidian .announcement-link:hover {

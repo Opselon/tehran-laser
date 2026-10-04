@@ -2,6 +2,7 @@
 import PublicLayout from '../../layouts/PublicLayout.astro';
 import { env } from 'cloudflare:workers';
 import { findPublicServiceBySlug } from '../../server/repositories';
+import Icon from '../../components/ui/Icon.astro';
 import {
   createMedicalProcedureSchema,
   createBreadcrumbSchema,
@@ -14,16 +15,101 @@ const service = await findPublicServiceBySlug(env.DB, slug);
 if (!service) return Astro.redirect('/404');
 
 const femalePrice = service.prices.find((p) => p.pricingCategory === 'female');
+const malePrice = service.prices.find((p) => p.pricingCategory === 'male');
 const isPromo = service.slug === 'full-body';
-const basePrice = femalePrice?.amount ?? 0;
+const basePrice = femalePrice?.amount ?? 0; // in thousands (IRT)
+
+// Persian number formatter — amounts are stored in thousands of tomans
+function formatToman(amountInThousands: number): string {
+  return (amountInThousands * 1000).toLocaleString('fa-IR');
+}
+
+// Clinical metadata per treatment area (wavelength, sessions, comfort, results).
+// Falls back to the Alexandrite 755nm default so every detail page renders
+// full clinical context even for slugs added later.
+interface AreaMeta {
+  wavelength: string;
+  wavelengthShort: string;
+  sessions: string;
+  interval: string;
+  painLevel: string;
+  results: string;
+}
+
+const areaMeta: Record<string, AreaMeta> = {
+  'full-body': {
+    wavelength: 'الکساندرایت ۷۵۵nm + ان‌دی‌یاگ ۱۰۶۴nm',
+    wavelengthShort: 'دو طول موج (Dual)',
+    sessions: '۶ الی ۸ جلسه',
+    interval: '۶ الی ۸ هفته',
+    painLevel: 'بدون درد (کرایو DCD)',
+    results: 'کاهش دائمی ۸۵٪ الی ۹۵٪',
+  },
+  face: {
+    wavelength: 'الکساندرایت ۷۵۵nm',
+    wavelengthShort: '۷۵۵nm',
+    sessions: '۶ الی ۸ جلسه',
+    interval: '۴ الی ۵ هفته',
+    painLevel: 'بدون درد (کرایو DCD)',
+    results: 'کاهش دائمی ۸۵٪ الی ۹۵٪',
+  },
+  underarm: {
+    wavelength: 'الکساندرایت ۷۵۵nm',
+    wavelengthShort: '۷۵۵nm',
+    sessions: '۶ الی ۸ جلسه',
+    interval: '۵ الی ۶ هفته',
+    painLevel: 'بدون درد (کرایو DCD)',
+    results: 'رفع تیرگی ناشی از شیو',
+  },
+  bikini: {
+    wavelength: 'الکساندرایت ۷۵۵nm',
+    wavelengthShort: '۷۵۵nm',
+    sessions: '۶ الی ۸ جلسه',
+    interval: '۶ الی ۸ هفته',
+    painLevel: 'بدون درد (کرایو DCD)',
+    results: 'کاهش دائمی ۸۵٪ الی ۹۵٪',
+  },
+  'full-legs': {
+    wavelength: 'الکساندرایت ۷۵۵nm',
+    wavelengthShort: '۷۵۵nm',
+    sessions: '۶ الی ۸ جلسه',
+    interval: '۶ الی ۸ هفته',
+    painLevel: 'بدون درد (کرایو DCD)',
+    results: 'کاهش دائمی ۸۵٪ الی ۹۵٪',
+  },
+  'full-arms': {
+    wavelength: 'الکساندرایت ۷۵۵nm',
+    wavelengthShort: '۷۵۵nm',
+    sessions: '۶ الی ۸ جلسه',
+    interval: '۵ الی ۷ هفته',
+    painLevel: 'بدون درد (کرایو DCD)',
+    results: 'کاهش دائمی ۸۵٪ الی ۹۵٪',
+  },
+};
+
+const meta: AreaMeta =
+  areaMeta[service.slug] ?? {
+    wavelength: 'الکساندرایت ۷۵۵nm',
+    wavelengthShort: '۷۵۵nm',
+    sessions: '۶ الی ۸ جلسه',
+    interval: '۵ الی ۸ هفته',
+    painLevel: 'بدون درد (کرایو DCD)',
+    results: 'کاهش دائمی ۸۵٪ الی ۹۵٪',
+  };
+
+const promoFinalPrice = 1940; // thousands — matches the /services catalogue offer
+const promoOriginalPrice = 2290;
+const isDualWavelength =
+  meta.wavelengthShort.includes('دو طول موج') || meta.wavelengthShort.includes('Dual');
 
 // Schema.org MedicalProcedure JSON-LD for Candela GentleMax Pro treatments (§31, §135)
+// Price must be full tomans: catalogue amounts are stored in thousands.
 const serviceJsonLd = createMedicalProcedureSchema({
   name: service.name,
   slug: service.slug,
   description: service.description,
   durationMinutes: service.durationMinutes,
-  price: isPromo ? 1940000 : basePrice || undefined,
+  price: (isPromo ? promoFinalPrice : basePrice) * 1000 || undefined,
 });
 
 // BreadcrumbList schema for nested service pages (§31, §135)
@@ -34,6 +120,20 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
 ]);
 
 const serviceJsonLdArray = [serviceJsonLd, breadcrumbJsonLd];
+
+const careSteps = [
+  'ناحیه مورد نظر را ۲۴ ساعت قبل از مراجعه صرفاً با ژیلت شیو فرمایید.',
+  'از حداقل ۲ الی ۴ هفته پیش از جلسه از وکس، اپیلاسیون یا بندانداختن خودداری فرمایید.',
+  'پوست ناحیه لیزر باید عاری از هرگونه کرم، لوسیون، مام یا ضدآفتاب باشد.',
+  'در صورت مصرف داروهای خاص (مانند راکوتان)، لطفاً به اپراتور کلینیک اطلاع دهید.',
+];
+
+const afterCareSteps = [
+  'تا ۲۴ ساعت پس از جلسه از دوش آب داغ، سونا و استخر خودداری فرمایید.',
+  'از کرم آلوئه‌ورا و زینک اکساید برای تسکین و آبرسانی پوست استفاده کنید.',
+  'فعالیت ورزشی سنگین را تا ۲۴ ساعت به تعویق بیندازید.',
+  'در معرض تابش مستقیم آفتاب قرار نگیرید و از ضدآفتاب استفاده کنید.',
+];
 ---
 
 <PublicLayout
@@ -42,87 +142,1191 @@ const serviceJsonLdArray = [serviceJsonLd, breadcrumbJsonLd];
   canonicalUrl={`/services/${service.slug}`}
   jsonLd={serviceJsonLdArray}
 >
-  <div class="page-header-strip">
-    <div class="container text-center">
-      <nav class="breadcrumbs mb-3">
-        <a href="/">صفحه اصلی</a>
+  <!-- 3D Obsidian-Gold Page Header Strip -->
+  <section class="detail-hero">
+    <div class="container hero-container">
+      <nav class="detail-breadcrumbs" aria-label="مسیر صفحه">
+        <a href="/">
+          <Icon name="chevronLeft" size={13} />
+          <span>صفحه اصلی</span>
+        </a>
         <span class="bc-sep">/</span>
         <a href="/services">خدمات و تعرفه‌ها</a>
         <span class="bc-sep">/</span>
         <span class="bc-current">{service.name}</span>
       </nav>
-      <h1 class="page-title">لیزر تخصصی {service.name}</h1>
-      <p class="page-subtitle">
+
+      <div class="hero-badge">
+        <Icon name="sparkles" size={15} />
+        <span>تعرفه مصوب و شفاف — کلینیک تهران لیزر پاسداران</span>
+      </div>
+
+      <h1 class="hero-title">
+        لیزر تخصصی <span class="gold-gradient">{service.name}</span>
+      </h1>
+      <p class="hero-subtitle">
         ارائه خدمات با مدرن‌ترین تجهیزات خنک‌کننده و بالاترین استاندارد بهداشتی در منطقه پاسداران
       </p>
-    </div>
-  </div>
 
-  <section class="section">
-    <div class="container container-sm">
-      <div class="service-detail-card">
-        <div class="detail-header-row">
-          <div>
-            <span class="badge badge-primary mb-2">خدمات پوست و لیزر</span>
-            <h2 class="service-full-name">{service.name}</h2>
-          </div>
-          <div class="duration-pill">
-            <span>⏱ مدت جلسه:</span>
-            <strong>{service.durationMinutes} دقیقه</strong>
-          </div>
+      <!-- Candela GentleMax Pro Technology Badges -->
+      <div class="tech-badges-strip">
+        <div class="tech-badge">
+          <Icon name="lightning" size={15} />
+          <span>کندلا جنتل‌مکس پرو ۲۰۲۴ (Candela USA)</span>
         </div>
-
-        <p class="service-long-description">
-          {service.description}
-        </p>
-
-        <!-- Pricing Highlight Box -->
-        <div class="pricing-highlight-box my-4">
-          <div class="pricing-tier-row">
-            <span class="tier-label">تعرفه مصوب بخش بانوان:</span>
-            {femalePrice ? (
-              isPromo ? (
-                <div class="text-left" dir="ltr">
-                  <span class="strikethrough text-muted mr-2">۲,۲۹۰,۰۰۰ تومان</span>
-                  <span class="promo-final-price font-bold text-success">۱,۹۴۰,۰۰۰ تومان</span>
-                  <span class="badge badge-promo ml-2">۱۵٪ تخفیف سایت</span>
-                </div>
-              ) : (
-                <span class="tier-val font-bold">
-                  {(basePrice * 1000).toLocaleString('fa-IR')} تومان
-                </span>
-              )
-            ) : (
-              <span class="text-muted">استعلام تلفنی</span>
-            )}
-          </div>
-          <div class="pricing-tier-row mt-2">
-            <span class="tier-label">تعرفه بخش آقایان:</span>
-            <span class="text-muted small">استعلام قیمت بر اساس تراکم و وسعت در کلینیک یا تماس تلفنی</span>
-          </div>
+        <div class="tech-badge">
+          <Icon name="shield" size={15} />
+          <span>طول موج {meta.wavelengthShort} — دستگاه اصل آمریکا</span>
         </div>
-
-        <!-- Preparation & Care Guide -->
-        <div class="service-care-guide">
-          <h4 class="font-bold mb-3">مراقبت‌های ضروری پیش از جلسه لیزر {service.name}:</h4>
-          <ul class="care-list">
-            <li>✓ ناحیه مورد نظر را ۲۴ ساعت قبل از مراجعه صرفاً با ژیلت شیو فرمایید.</li>
-            <li>✓ از حداقل ۲ الی ۴ هفته پیش از جلسه از وکس، اپیلاسیون یا بندانداختن خودداری فرمایید.</li>
-            <li>✓ پوست ناحیه لیزر باید عاری از هرگونه کرم، لوسیون، مام یا ضدآفتاب باشد.</li>
-            <li>✓ در صورت مصرف داروهای خاص (مانند راکوتان)، لطفاً به اپراتور کلینیک اطلاع دهید.</li>
-          </ul>
-        </div>
-
-        <!-- Actions -->
-        <div class="service-detail-actions mt-5">
-          <a href={`/booking?service=${service.slug}`} class="btn btn-primary btn-lg btn-block">
-            رزرو آنلاین نوبت برای {service.name}
-          </a>
-          <a href="/services" class="btn btn-outline btn-block mt-2">
-            بازگشت به لیست همه خدمات
-          </a>
+        <div class="tech-badge">
+          <Icon name="snowflake" size={15} />
+          <span>کولینگ کرایو DCD منهای ۳۰ درجه بدون درد</span>
         </div>
       </div>
     </div>
   </section>
+
+  <section class="section detail-section">
+    <div class="container detail-grid">
+      <!-- ════════════ MAIN: 3D Service Detail Card ════════════ -->
+      <div class="service-detail-card">
+        <div class="detail-header-row">
+          <div class="detail-header-text">
+            <span class="badge-gold">
+              <Icon name="services" size={13} />
+              <span>خدمات پوست و لیزر</span>
+            </span>
+            <h2 class="service-full-name">{service.name}</h2>
+          </div>
+          <div class="duration-pill">
+            <Icon name="clock" size={15} />
+            <span>مدت جلسه:</span>
+            <strong>{service.durationMinutes} دقیقه</strong>
+          </div>
+        </div>
+
+        <p class="service-long-description">{service.description}</p>
+
+        <!-- ════ Obsidian Pricing Tiers (Female / Male) ════ -->
+        <div class="pricing-tier-card">
+          <div class="tier-card-title">
+            <Icon name="wallet" size={17} />
+            <span>تعرفه‌های مصوب رزرو آنلاین</span>
+          </div>
+
+          <!-- Women's tier -->
+          <div class:list={`tier-row ${isPromo ? 'tier-row-promo' : ''}`}>
+            <div class="tier-row-head">
+              <span class="tier-icon">
+                <Icon name="sparkles" size={15} />
+              </span>
+              <span class="tier-label">تعرفه بخش بانوان</span>
+              {isPromo && (
+                <span class="tier-promo-chip">
+                  <Icon name="star" size={11} />
+                  <span>۱۵٪ تخفیف سایت</span>
+                </span>
+              )}
+            </div>
+            <div class="tier-value">
+              {femalePrice ? (
+                isPromo ? (
+                  <div class="promo-price-block">
+                    <span class="strikethrough-price">{formatToman(promoOriginalPrice)}</span>
+                    <span class="promo-final-price">{formatToman(promoFinalPrice)}</span>
+                    <span class="price-currency">تومان / هر جلسه</span>
+                  </div>
+                ) : (
+                  <div class="price-block">
+                    <span class="final-price">{formatToman(basePrice)}</span>
+                    <span class="price-currency">تومان / هر جلسه</span>
+                  </div>
+                )
+              ) : (
+                <span class="tier-note">استعلام تلفنی</span>
+              )}
+            </div>
+          </div>
+
+          <!-- Men's tier -->
+          <div class="tier-row">
+            <div class="tier-row-head">
+              <span class="tier-icon">
+                <Icon name="users" size={15} />
+              </span>
+              <span class="tier-label">تعرفه بخش آقایان</span>
+            </div>
+            <div class="tier-value">
+              {malePrice ? (
+                <div class="price-block">
+                  <span class="final-price">{formatToman(malePrice.amount)}</span>
+                  <span class="price-currency">تومان / هر جلسه</span>
+                </div>
+              ) : (
+                <span class="tier-note">استعلام قیمت بر اساس تراکم و وسعت در کلینیک یا تماس تلفنی</span>
+              )}
+            </div>
+          </div>
+
+          <div class="tier-foot-note">
+            <Icon name="info" size={13} />
+            <span>تمامی تعرفه‌ها شامل سری شخصی یکبار مصرف، کولینگ کرایو و نظارت پزشک می‌باشد.</span>
+          </div>
+        </div>
+
+        <!-- ════ Candela Wavelength Badge ════ -->
+        <div class="wavelength-card">
+          <div class="wavelength-card-head">
+            <Icon name="lightning" size={18} />
+            <span>طول موج دستگاه کندلا جنتل‌مکس پرو</span>
+          </div>
+          <div class="wavelength-badges">
+            {isDualWavelength ? (
+              <>
+                <span class="wave-badge">
+                  <Icon name="shield" size={13} />
+                  <span>الکساندرایت ۷۵۵nm</span>
+                </span>
+                <span class="wave-badge">
+                  <Icon name="shield" size={13} />
+                  <span>ان‌دی‌یاگ Nd:YAG ۱۰۶۴nm</span>
+                </span>
+              </>
+            ) : (
+              <span class="wave-badge">
+                <Icon name="shield" size={13} />
+                <span>{meta.wavelength}</span>
+              </span>
+            )}
+          </div>
+          <p class="wavelength-desc">
+            طول موج الکساندرایت ۷۵۵ نانومتر با بیشترین میزان جذب ملانین، ریشه‌های موی ضخیم و سیاه را
+            هدف قرار می‌دهد؛ همزمان سیستم کولینگ داینامیک (DCD) با شات گاز مبرد منهای ۳۰ درجه،
+            پوست را بی‌حس کرده و درد و ریسک سوختگی را به صفر می‌رساند.
+          </p>
+        </div>
+
+        <!-- ════ Clinical Session Recommendations ════ -->
+        <div class="sessions-card">
+          <div class="sessions-card-head">
+            <Icon name="calendar" size={18} />
+            <span>توصیه‌های بالینی تعداد جلسات</span>
+          </div>
+          <div class="sessions-grid">
+            <div class="session-cell">
+              <Icon name="calendar" size={16} />
+              <span class="cell-label">تعداد جلسات:</span>
+              <strong>{meta.sessions}</strong>
+            </div>
+            <div class="session-cell">
+              <Icon name="clock" size={16} />
+              <span class="cell-label">فاصله جلسات:</span>
+              <strong>{meta.interval}</strong>
+            </div>
+            <div class="session-cell">
+              <Icon name="snowflake" size={16} />
+              <span class="cell-label">میزان درد:</span>
+              <strong>{meta.painLevel}</strong>
+            </div>
+            <div class="session-cell">
+              <Icon name="award" size={16} />
+              <span class="cell-label">نتیجه مورد انتظار:</span>
+              <strong>{meta.results}</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- ════ Preparation ════ -->
+        <div class="care-card">
+          <div class="care-card-head">
+            <div class="icon-circle-gold">
+              <Icon name="checkCircle" size={20} />
+            </div>
+            <div>
+              <h3 class="care-title">مراقبت‌های ضروری پیش از جلسه لیزر {service.name}</h3>
+              <p class="care-subtitle">رعایت این موارد بازدهی جلسه را به حداکثر می‌رساند</p>
+            </div>
+          </div>
+          <ul class="care-list">
+            {careSteps.map((step) => (
+              <li>
+                <span class="care-check">
+                  <Icon name="check" size={12} />
+                </span>
+                <span>{step}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <!-- ════ Aftercare ════ -->
+        <div class="care-card">
+          <div class="care-card-head">
+            <div class="icon-circle-gold">
+              <Icon name="snowflake" size={20} />
+            </div>
+            <div>
+              <h3 class="care-title">مراقبت‌های پس از جلسه لیزر</h3>
+              <p class="care-subtitle">برای جلوگیری از تحریک و تسریع بهبودی پوست</p>
+            </div>
+          </div>
+          <ul class="care-list">
+            {afterCareSteps.map((step) => (
+              <li>
+                <span class="care-check">
+                  <Icon name="check" size={12} />
+                </span>
+                <span>{step}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <!-- ════ Booking Actions ════ -->
+        <div class="detail-actions">
+          <a href={`/booking?service=${service.slug}`} class="btn-3d-gold btn-block">
+            <Icon name="calendar" size={18} />
+            <span>رزرو آنلاین نوبت برای {service.name}</span>
+          </a>
+          <div class="actions-row">
+            <a href="tel:+989****5090" class="btn-3d-subtle">
+              <Icon name="phone" size={16} />
+              <span>مشاوره تلفنی</span>
+            </a>
+            <a href="/services" class="btn-3d-subtle">
+              <Icon name="chevronRight" size={16} />
+              <span>بازگشت به لیست خدمات</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════ SIDEBAR: Sticky Summary ════════════ -->
+      <aside class="detail-sidebar" aria-label="خلاصه خدمت">
+        <div class="sidebar-card">
+          <div class="sidebar-head">
+            <Icon name="gem" size={17} />
+            <span>خلاصه خدمت</span>
+          </div>
+          <ul class="sidebar-list">
+            <li>
+              <span class="sb-label"><Icon name="clock" size={14} /> مدت جلسه</span>
+              <strong>{service.durationMinutes} دقیقه</strong>
+            </li>
+            <li>
+              <span class="sb-label"><Icon name="calendar" size={14} /> تعداد جلسات</span>
+              <strong>{meta.sessions}</strong>
+            </li>
+            <li>
+              <span class="sb-label"><Icon name="shield" size={14} /> طول موج</span>
+              <strong>{meta.wavelengthShort}</strong>
+            </li>
+            <li>
+              <span class="sb-label"><Icon name="snowflake" size={14} /> کولینگ</span>
+              <strong>کرایو DCD</strong>
+            </li>
+            <li>
+              <span class="sb-label"><Icon name="award" size={14} /> دستگاه</span>
+              <strong>جنتل‌مکس پرو ۲۰۲۴</strong>
+            </li>
+          </ul>
+
+          <div class="sidebar-price-box">
+            <span class="sb-price-label">تعرفه مصوب بانوان:</span>
+            {femalePrice ? (
+              isPromo ? (
+                <div class="sb-promo">
+                  <span class="sb-old">{formatToman(promoOriginalPrice)}</span>
+                  <span class="sb-final">{formatToman(promoFinalPrice)} تومان</span>
+                </div>
+              ) : (
+                <span class="sb-final">{formatToman(basePrice)} تومان</span>
+              )
+            ) : (
+              <span class="sb-note">استعلام تلفنی</span>
+            )}
+          </div>
+
+          <a href={`/booking?service=${service.slug}`} class="btn-3d-gold btn-block">
+            <Icon name="calendar" size={17} />
+            <span>رزرو نوبت</span>
+          </a>
+
+          <div class="sidebar-trust">
+            <div class="trust-item">
+              <Icon name="checkCircle" size={14} />
+              <span>سری شخصی یکبار مصرف</span>
+            </div>
+            <div class="trust-item">
+              <Icon name="checkCircle" size={14} />
+              <span>ضمانت کیفیت کلینیکال</span>
+            </div>
+            <div class="trust-item">
+              <Icon name="checkCircle" size={14} />
+              <span>اپراتور دارای مدرک بین‌المللی</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </section>
 </PublicLayout>
+
+<style>
+  /* ─────────────────────────────────────────────────────────────
+     Dark 3D Obsidian-Gold Aesthetics (#0a0b0d / #121417 / #d4af37)
+     Mirrors the token vocabulary of src/pages/services/index.astro
+     ───────────────────────────────────────────────────────────── */
+  :root {
+    --obsidian-bg: #0a0b0d;
+    --obsidian-surface: #12151c;
+    --obsidian-card: #151922;
+    --obsidian-hover: #1c222e;
+    --gold-primary: #d4af37;
+    --gold-light: #f5d77f;
+    --gold-dark: #997224;
+    --gold-glow: rgba(212, 175, 55, 0.25);
+    --border-gold-subtle: rgba(212, 175, 55, 0.22);
+    --border-gold-strong: rgba(212, 175, 55, 0.45);
+  }
+
+  /* Zero horizontal overflow insurance */
+  .detail-hero,
+  .detail-section,
+  .hero-container,
+  .container {
+    width: 100%;
+    max-width: 1200px;
+    margin-inline: auto;
+    box-sizing: border-box;
+  }
+
+  .detail-section *,
+  .detail-hero * {
+    box-sizing: border-box;
+  }
+
+  /* ════ Hero ════ */
+  .detail-hero {
+    background: radial-gradient(circle at 50% 0%, #1a1e28 0%, #0a0b0d 75%);
+    padding: clamp(22px, 3vw, 34px) 16px clamp(18px, 2.5vw, 28px);
+    text-align: center;
+    border-bottom: 1px solid var(--border-gold-subtle);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .detail-breadcrumbs {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    font-size: 0.8rem;
+    color: #8c857b;
+    margin-bottom: 12px;
+  }
+
+  .detail-breadcrumbs a {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #c9c3b8;
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .detail-breadcrumbs a:hover {
+    color: var(--gold-light);
+  }
+
+  .detail-breadcrumbs :global(svg) {
+    color: var(--gold-primary);
+    flex-shrink: 0;
+  }
+
+  .bc-sep {
+    color: #4d4a45;
+  }
+
+  .bc-current {
+    color: var(--gold-light);
+    font-weight: 700;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(212, 175, 55, 0.12);
+    color: var(--gold-light);
+    border: 1px solid var(--border-gold-strong);
+    padding: 5px 15px;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+    box-shadow: 0 0 16px rgba(212, 175, 55, 0.15);
+  }
+
+  .hero-badge :global(svg),
+  .tech-badge :global(svg) {
+    color: var(--gold-light);
+    flex-shrink: 0;
+  }
+
+  .hero-title {
+    font-size: clamp(1.6rem, 3.6vw, 2.3rem);
+    font-weight: 800;
+    color: #ffffff;
+    line-height: 1.35;
+    margin: 0 0 10px;
+    letter-spacing: -0.02em;
+  }
+
+  .gold-gradient {
+    background: linear-gradient(135deg, #fff2cc 0%, #f5d77f 40%, #d4af37 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: inline-block;
+  }
+
+  .hero-subtitle {
+    font-size: clamp(0.875rem, 2vw, 1.02rem);
+    color: #c9c3b8;
+    line-height: 1.8;
+    max-width: 720px;
+    margin: 0 auto 20px;
+  }
+
+  .tech-badges-strip {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .tech-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(21, 25, 34, 0.85);
+    color: #e5e0d8;
+    border: 1px solid rgba(212, 175, 55, 0.28);
+    border-radius: 12px;
+    padding: 7px 13px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+  }
+
+  /* ════ Layout: main + sticky sidebar ════ */
+  .detail-section {
+    padding: 24px 16px 72px;
+  }
+
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 26px;
+    align-items: start;
+    max-width: 1140px;
+  }
+
+  .service-detail-card {
+    background: linear-gradient(145deg, #151922 0%, #0d1017 100%);
+    border: 1px solid var(--border-gold-subtle);
+    border-radius: 22px;
+    padding: 26px 26px;
+    box-shadow: 0 14px 34px -10px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    min-width: 0; /* grid child overflow guard */
+  }
+
+  .detail-header-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+
+  .badge-gold {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(212, 175, 55, 0.15);
+    color: var(--gold-light);
+    font-size: 0.775rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    margin-bottom: 8px;
+  }
+
+  .service-full-name {
+    font-size: clamp(1.4rem, 3vw, 1.9rem);
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0;
+    line-height: 1.4;
+  }
+
+  .duration-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 999px;
+    padding: 7px 14px;
+    font-size: 0.825rem;
+    color: #c9c3b8;
+    white-space: nowrap;
+  }
+
+  .duration-pill :global(svg) {
+    color: var(--gold-light);
+    flex-shrink: 0;
+  }
+
+  .duration-pill strong {
+    color: #ffffff;
+  }
+
+  .service-long-description {
+    font-size: 0.95rem;
+    color: #c9c3b8;
+    line-height: 1.95;
+    margin: 0 0 22px;
+  }
+
+  /* ════ Pricing tier card ════ */
+  .pricing-tier-card {
+    background: #0f131a;
+    border: 1px solid rgba(212, 175, 55, 0.25);
+    border-radius: 18px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45);
+  }
+
+  .tier-card-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--gold-light);
+    margin-bottom: 14px;
+  }
+
+  .tier-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 13px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+  }
+
+  .tier-row:last-of-type {
+    margin-bottom: 0;
+  }
+
+  .tier-row-promo {
+    background: rgba(212, 175, 55, 0.07);
+    border-color: rgba(212, 175, 55, 0.35);
+    box-shadow: 0 0 14px rgba(212, 175, 55, 0.08);
+  }
+
+  .tier-row-head {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .tier-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 9px;
+    background: rgba(212, 175, 55, 0.15);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    color: var(--gold-light);
+    flex-shrink: 0;
+  }
+
+  .tier-label {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #e5e0d8;
+  }
+
+  .tier-promo-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: linear-gradient(90deg, #d4af37, #f5d77f);
+    color: #0a0b0d;
+    font-size: 0.68rem;
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: 999px;
+  }
+
+  .tier-value {
+    text-align: left;
+  }
+
+  .price-block,
+  .promo-price-block {
+    display: flex;
+    align-items: baseline;
+    justify-content: flex-end;
+    gap: 7px;
+    flex-wrap: wrap;
+  }
+
+  .final-price {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--gold-light);
+    letter-spacing: -0.01em;
+  }
+
+  .promo-final-price {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #4ade80;
+    letter-spacing: -0.01em;
+  }
+
+  .strikethrough-price {
+    font-size: 0.85rem;
+    color: #78716c;
+    text-decoration: line-through;
+  }
+
+  .price-currency {
+    font-size: 0.75rem;
+    color: #9ca3af;
+  }
+
+  .tier-note {
+    font-size: 0.825rem;
+    color: #a8a29e;
+    max-width: 260px;
+    text-align: left;
+  }
+
+  .tier-foot-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+    margin-top: 12px;
+    font-size: 0.775rem;
+    color: #8c857b;
+    line-height: 1.6;
+  }
+
+  .tier-foot-note :global(svg) {
+    color: var(--gold-primary);
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  /* ════ Wavelength card ════ */
+  .wavelength-card {
+    background: rgba(59, 130, 246, 0.05);
+    border: 1px solid rgba(59, 130, 246, 0.22);
+    border-radius: 16px;
+    padding: 18px 20px;
+    margin-bottom: 20px;
+  }
+
+  .wavelength-card-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #93c5fd;
+    margin-bottom: 12px;
+  }
+
+  .wavelength-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .wave-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(59, 130, 246, 0.12);
+    color: #93c5fd;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    border-radius: 999px;
+    padding: 5px 12px;
+    font-size: 0.775rem;
+    font-weight: 700;
+  }
+
+  .wave-badge :global(svg) {
+    color: #60a5fa;
+    flex-shrink: 0;
+  }
+
+  .wavelength-desc {
+    font-size: 0.825rem;
+    color: #b9c4d4;
+    line-height: 1.85;
+    margin: 0;
+  }
+
+  /* ════ Sessions card ════ */
+  .sessions-card {
+    background: #0f131a;
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    border-radius: 16px;
+    padding: 18px 20px;
+    margin-bottom: 20px;
+  }
+
+  .sessions-card-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--gold-light);
+    margin-bottom: 14px;
+  }
+
+  .sessions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 10px;
+  }
+
+  .session-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 11px;
+    padding: 10px 12px;
+    font-size: 0.8rem;
+    color: #c9c3b8;
+    min-width: 0;
+  }
+
+  .session-cell :global(svg) {
+    color: var(--gold-primary);
+    flex-shrink: 0;
+  }
+
+  .cell-label {
+    color: #8c857b;
+  }
+
+  .session-cell strong {
+    color: #ffffff;
+    font-size: 0.825rem;
+  }
+
+  /* ════ Care cards ════ */
+  .care-card {
+    background: linear-gradient(145deg, #131720 0%, #0c0e14 100%);
+    border: 1px solid rgba(212, 175, 55, 0.22);
+    border-radius: 18px;
+    padding: 22px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.4);
+  }
+
+  .care-card-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+
+  .icon-circle-gold {
+    width: 44px;
+    height: 44px;
+    border-radius: 13px;
+    background: rgba(212, 175, 55, 0.15);
+    border: 1px solid rgba(212, 175, 55, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gold-light);
+    flex-shrink: 0;
+  }
+
+  .care-title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0 0 4px;
+    line-height: 1.5;
+  }
+
+  .care-subtitle {
+    font-size: 0.8rem;
+    color: #a8a29e;
+    margin: 0;
+  }
+
+  .care-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .care-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 0.875rem;
+    color: #c9c3b8;
+    line-height: 1.75;
+  }
+
+  .care-check {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 999px;
+    background: rgba(74, 222, 128, 0.14);
+    border: 1px solid rgba(74, 222, 128, 0.3);
+    color: #4ade80;
+    flex-shrink: 0;
+    margin-top: 3px;
+  }
+
+  /* ════ Actions ════ */
+  .detail-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 4px;
+  }
+
+  .actions-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .btn-3d-gold {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: linear-gradient(180deg, #f0cf75 0%, #cba24f 40%, #997224 100%);
+    color: #0a0b0d;
+    font-weight: 800;
+    font-size: 0.95rem;
+    padding: 13px 20px;
+    border-radius: 14px;
+    border: none;
+    text-decoration: none;
+    box-shadow: 0 4px 16px rgba(212, 175, 55, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .btn-3d-gold:hover {
+    filter: brightness(1.08);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.5);
+    color: #0a0b0d;
+  }
+
+  .btn-3d-gold :global(svg) {
+    flex-shrink: 0;
+  }
+
+  .btn-3d-subtle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    background: rgba(255, 255, 255, 0.05);
+    color: #e5e0d8;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 11px 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+
+  .btn-3d-subtle:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(212, 175, 55, 0.35);
+    color: var(--gold-light);
+  }
+
+  .btn-block {
+    width: 100%;
+  }
+
+  /* ════ Sidebar ════ */
+  .detail-sidebar {
+    position: sticky;
+    top: 20px;
+    min-width: 0;
+  }
+
+  .sidebar-card {
+    background: linear-gradient(145deg, #151922 0%, #0d1017 100%);
+    border: 1px solid var(--border-gold-subtle);
+    border-radius: 20px;
+    padding: 22px 20px;
+    box-shadow: 0 14px 34px -10px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  }
+
+  .sidebar-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--gold-light);
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.18);
+  }
+
+  .sidebar-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .sidebar-list li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 9px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    font-size: 0.825rem;
+  }
+
+  .sidebar-list li:last-child {
+    border-bottom: none;
+  }
+
+  .sb-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #8c857b;
+  }
+
+  .sb-label :global(svg) {
+    color: var(--gold-primary);
+    flex-shrink: 0;
+  }
+
+  .sidebar-list strong {
+    color: #ffffff;
+    font-size: 0.825rem;
+    text-align: left;
+  }
+
+  .sidebar-price-box {
+    background: rgba(212, 175, 55, 0.06);
+    border: 1px solid rgba(212, 175, 55, 0.25);
+    border-radius: 14px;
+    padding: 14px;
+    margin-bottom: 14px;
+    text-align: center;
+  }
+
+  .sb-price-label {
+    display: block;
+    font-size: 0.75rem;
+    color: #8c857b;
+    margin-bottom: 6px;
+  }
+
+  .sb-final {
+    display: block;
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--gold-light);
+  }
+
+  .sb-promo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .sb-old {
+    font-size: 0.78rem;
+    color: #78716c;
+    text-decoration: line-through;
+  }
+
+  .sb-note {
+    font-size: 0.825rem;
+    color: #a8a29e;
+  }
+
+  .sidebar-trust {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .trust-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.775rem;
+    color: #c9c3b8;
+  }
+
+  .trust-item :global(svg) {
+    color: #4ade80;
+    flex-shrink: 0;
+  }
+
+  /* ════ Responsive: 768 / 390 / 320 ════ */
+  @media (max-width: 992px) {
+    .detail-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .detail-sidebar {
+      position: static;
+      order: -1;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .detail-hero {
+      padding: 28px 14px 24px;
+    }
+
+    .service-detail-card {
+      padding: 22px 18px;
+    }
+
+    .tier-row {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .tier-value {
+      text-align: right;
+      width: 100%;
+    }
+
+    .price-block,
+    .promo-price-block {
+      justify-content: flex-start;
+    }
+
+    .care-card,
+    .pricing-tier-card,
+    .sessions-card {
+      padding: 18px 16px;
+    }
+
+    .care-card-head {
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .actions-row {
+      grid-template-columns: 1fr;
+    }
+
+    .sessions-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 390px) {
+    .hero-title {
+      font-size: 1.4rem;
+    }
+
+    .service-detail-card {
+      padding: 18px 14px;
+      border-radius: 16px;
+    }
+
+    .final-price,
+    .promo-final-price {
+      font-size: 1.2rem;
+    }
+
+    .service-full-name {
+      font-size: 1.3rem;
+    }
+
+    .detail-header-row {
+      gap: 10px;
+    }
+  }
+
+  @media (max-width: 320px) {
+    .tech-badge {
+      font-size: 0.72rem;
+      padding: 6px 10px;
+    }
+
+    .hero-badge {
+      font-size: 0.75rem;
+      padding: 4px 10px;
+    }
+
+    .btn-3d-gold {
+      font-size: 0.8rem;
+      padding: 10px 12px;
+    }
+
+    .sidebar-card {
+      padding: 16px 14px;
+    }
+
+    .detail-breadcrumbs {
+      font-size: 0.72rem;
+    }
+  }
+</style>

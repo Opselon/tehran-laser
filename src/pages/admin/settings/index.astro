@@ -112,7 +112,7 @@ try {
                 <span>نام تجاری رسمی (فارسی):</span>
               </label>
               <input
-                id="business_name"
+                id="business_name" autocomplete="off"
                 type="text"
                 name="business_name"
                 class="form-control-modal"
@@ -128,7 +128,7 @@ try {
                 <span>نام بین‌المللی (انگلیسی):</span>
               </label>
               <input
-                id="business_name_en"
+                id="business_name_en" autocomplete="off"
                 type="text"
                 name="business_name_en"
                 dir="ltr"
@@ -145,7 +145,7 @@ try {
                 <span>شماره تماس و نوبت‌دهی مستقیم:</span>
               </label>
               <input
-                id="phone"
+                id="phone" autocomplete="off"
                 type="tel"
                 name="phone"
                 dir="ltr"
@@ -162,7 +162,7 @@ try {
                 <span>شماره پشتیبانی پیام‌رسان‌ها:</span>
               </label>
               <input
-                id="support_phone"
+                id="support_phone" autocomplete="off"
                 type="tel"
                 name="support_phone"
                 dir="ltr"
@@ -178,7 +178,7 @@ try {
                 <span>نشانی دقیق کلینیک:</span>
               </label>
               <input
-                id="address"
+                id="address" autocomplete="off"
                 type="text"
                 name="address"
                 class="form-control-modal"
@@ -194,7 +194,7 @@ try {
                 <span>واحد پول سیستم:</span>
               </label>
               <input
-                id="currency"
+                id="currency" autocomplete="off"
                 type="text"
                 name="currency"
                 dir="ltr"
@@ -211,7 +211,7 @@ try {
                 <span>برچسب نمایشی واحد قیمت:</span>
               </label>
               <input
-                id="currency_label"
+                id="currency_label" autocomplete="off"
                 type="text"
                 name="currency_label"
                 class="form-control-modal"
@@ -228,7 +228,7 @@ try {
               </label>
               <div style="position: relative;">
                 <input
-                  id="discount_percent"
+                  id="discount_percent" autocomplete="off"
                   type="number"
                   name="discount_percent"
                   class="form-control-modal"
@@ -262,7 +262,7 @@ try {
                 <Icon name="sms" size={15} />
                 <span>انتخاب ارائه‌دهنده پیامک:</span>
               </label>
-              <select id="sms_provider" name="sms_provider" class="form-control-modal">
+              <select id="sms_provider" autocomplete="off" name="sms_provider" class="form-control-modal">
                 <option value="kavenegar" selected={settings.sms_provider === 'kavenegar' || !settings.sms_provider}>کاوه نگار (Kavenegar Webhook / Pattern)</option>
                 <option value="farazsms" selected={settings.sms_provider === 'farazsms'}>فراز اس‌ام‌اس (FarazSMS / IPPanel)</option>
                 <option value="melipayamak" selected={settings.sms_provider === 'melipayamak'}>ملی پیامک (MeliPayamak)</option>
@@ -276,7 +276,7 @@ try {
                 <span>خط خدماتی / سرشماره فرستنده:</span>
               </label>
               <input
-                id="sms_sender_number"
+                id="sms_sender_number" autocomplete="off"
                 type="text"
                 name="sms_sender_number"
                 dir="ltr"
@@ -334,7 +334,7 @@ try {
                 <span class="field-hint">ارسال خودکار کد پیگیری، تاریخ، ساعت و نشانی کلینیک بلافاصله پس از ثبت نوبت.</span>
               </div>
               <label class="toggle-switch-3d" aria-label="ارسال تایید نوبت">
-                <input type="checkbox" name="sms_booking_confirm_enabled" checked={settings.sms_booking_confirm_enabled !== 'false'} />
+                <input type="checkbox" name="sms_booking_confirm_enabled" autocomplete="off" checked={settings.sms_booking_confirm_enabled !== 'false'} />
                 <span class="toggle-slider"></span>
               </label>
             </div>
@@ -345,7 +345,7 @@ try {
                 <span class="field-hint">یادآوری آماده‌سازی قبل لیزر (شیو کردن) و اعلام زمان حضور به مراجع.</span>
               </div>
               <label class="toggle-switch-3d" aria-label="یادآوری ۲۴ ساعته">
-                <input type="checkbox" name="sms_reminder_24h_enabled" checked={settings.sms_reminder_24h_enabled !== 'false'} />
+                <input type="checkbox" name="sms_reminder_24h_enabled" autocomplete="off" checked={settings.sms_reminder_24h_enabled !== 'false'} />
                 <span class="toggle-slider"></span>
               </label>
             </div>
@@ -356,7 +356,7 @@ try {
                 <span class="field-hint">ارسال پیامک تبریک صمیمانه همراه با هدیه شارژ کیف پول یا ۳۰٪ تخفیف جلسه.</span>
               </div>
               <label class="toggle-switch-3d" aria-label="پیامک تبریک تولد">
-                <input type="checkbox" name="sms_birthday_enabled" checked={settings.sms_birthday_enabled !== 'false'} />
+                <input type="checkbox" name="sms_birthday_enabled" autocomplete="off" checked={settings.sms_birthday_enabled !== 'false'} />
                 <span class="toggle-slider"></span>
               </label>
             </div>
@@ -367,7 +367,7 @@ try {
                 <span class="field-hint">ارسال پیامک جهت رزرو جلسه بعد در بازه طلایی ۴ الی ۶ هفته پس از جلسه فعلی.</span>
               </div>
               <label class="toggle-switch-3d" aria-label="یادآوری جلسه بعد">
-                <input type="checkbox" name="sms_next_session_enabled" checked={settings.sms_next_session_enabled !== 'false'} />
+                <input type="checkbox" name="sms_next_session_enabled" autocomplete="off" checked={settings.sms_next_session_enabled !== 'false'} />
                 <span class="toggle-slider"></span>
               </label>
             </div>
@@ -382,7 +382,7 @@ try {
               </div>
               <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
                 <input
-                  id="testSmsPhone"
+                  id="testSmsPhone" autocomplete="off"
                   type="tel"
                   dir="ltr"
                   placeholder="۰۹۱۲۳۴۵۶۷۸۹"
@@ -418,7 +418,7 @@ try {
                 <span>گام اسلات‌های نوبت‌دهی (دقیقه):</span>
               </label>
               <input
-                id="slot_granularity_minutes"
+                id="slot_granularity_minutes" autocomplete="off"
                 type="number"
                 name="slot_granularity_minutes"
                 class="form-control-modal"
@@ -436,7 +436,7 @@ try {
                 <span>زمان بافر استریل و ضدعفونی (دقیقه):</span>
               </label>
               <input
-                id="booking_buffer_minutes"
+                id="booking_buffer_minutes" autocomplete="off"
                 type="number"
                 name="booking_buffer_minutes"
                 class="form-control-modal"
@@ -454,7 +454,7 @@ try {
                 <span>حداقل زمان پیش‌خرید نوبت (دقیقه):</span>
               </label>
               <input
-                id="min_lead_minutes"
+                id="min_lead_minutes" autocomplete="off"
                 type="number"
                 name="min_lead_minutes"
                 class="form-control-modal"
@@ -472,7 +472,7 @@ try {
                 <span>حداکثر افق تقویم برای رزرو آینده (روز):</span>
               </label>
               <input
-                id="max_advance_days"
+                id="max_advance_days" autocomplete="off"
                 type="number"
                 name="max_advance_days"
                 class="form-control-modal"
@@ -490,7 +490,7 @@ try {
                 <span>منطقه زمانی سرور رزرواسیون:</span>
               </label>
               <input
-                id="timezone"
+                id="timezone" autocomplete="off"
                 type="text"
                 name="timezone"
                 dir="ltr"
@@ -508,7 +508,7 @@ try {
               <span class="field-hint">با غیرفعال‌سازی این گزینه، فرم نوبت‌دهی در وب‌سایت بسته شده و فقط رزرو تلفنی پذیرفته می‌شود.</span>
             </div>
             <label class="toggle-switch-3d" aria-label="فعال بودن نوبت‌دهی آنلاین">
-              <input type="checkbox" name="booking_enabled" checked={settings.booking_enabled !== 'false'} />
+              <input type="checkbox" name="booking_enabled" autocomplete="off" checked={settings.booking_enabled !== 'false'} />
               <span class="toggle-slider"></span>
             </label>
           </div>
@@ -550,7 +550,7 @@ try {
                 <span>عمر نشست ورود مدیران (ساعت):</span>
               </label>
               <input
-                id="session_ttl_hours"
+                id="session_ttl_hours" autocomplete="off"
                 type="number"
                 name="session_ttl_hours"
                 class="form-control-modal"
@@ -568,7 +568,7 @@ try {
                 <span>سقف تلاش‌های ورود مجاز (Rate Limit Login):</span>
               </label>
               <input
-                id="rate_limit_login"
+                id="rate_limit_login" autocomplete="off"
                 type="text"
                 name="rate_limit_login"
                 dir="ltr"
@@ -585,7 +585,7 @@ try {
                 <span>سقف درخواست ثبت نوبت (Rate Limit Booking):</span>
               </label>
               <input
-                id="rate_limit_booking"
+                id="rate_limit_booking" autocomplete="off"
                 type="text"
                 name="rate_limit_booking"
                 dir="ltr"
@@ -602,7 +602,7 @@ try {
                 <span>سقف فرم‌های عمومی و تماس (Public Form):</span>
               </label>
               <input
-                id="rate_limit_public_form"
+                id="rate_limit_public_form" autocomplete="off"
                 type="text"
                 name="rate_limit_public_form"
                 dir="ltr"

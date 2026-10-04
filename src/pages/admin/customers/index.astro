@@ -99,36 +99,36 @@ const totalBookings = displayedItems.reduce((sum, c) => sum + (c.bookingsCount ?
             <tbody>
               {displayedItems.map((c) => (
                 <tr>
-                  <td class="cell-name">
+                  <td class="cell-name" data-label="نام و نام خانوادگی">
                     <span class="cust-avatar" aria-hidden="true">{c.name?.trim()?.charAt(0) || '؟'}</span>
                     <span class="cust-name-text">{c.name}</span>
                   </td>
-                  <td dir="ltr" class="cell-phone">
+                  <td dir="ltr" class="cell-phone" data-label="شماره همراه">
                     <a href={`tel:${c.phone}`} class="cust-phone-link" dir="ltr">
                       <Icon name="phone" size={14} class="phone-icon" />
                       <span>{c.phone}</span>
                     </a>
                   </td>
-                  <td>
+                  <td data-label="بخش پذیرش">
                     <span class={`badge-status ${c.pricingCategory === 'female' ? 'badge-status-completed' : 'badge-status-pending'}`}>
                       {c.pricingCategory === 'female' ? 'بانوان' : 'آقایان'}
                     </span>
                   </td>
-                  <td class="cell-count">
+                  <td class="cell-count" data-label="تعداد نوبت‌ها">
                     <span class="count-pill">{(c.bookingsCount ?? 0).toLocaleString('fa-IR')}</span>
                     <span class="count-unit">نوبت</span>
                   </td>
-                  <td>
+                  <td data-label="آخرین نوبت">
                     {c.lastBookingAt ? (
                       <span class="date-gold">{formatJalaliDate(c.lastBookingAt.slice(0, 10))}</span>
                     ) : (
                       <span class="date-dim">—</span>
                     )}
                   </td>
-                  <td class="cell-created">
+                  <td class="cell-created" data-label="تاریخ ثبت پرونده">
                     {formatJalaliDate(c.createdAt.slice(0, 10))}
                   </td>
-                  <td>
+                  <td class="cell-action" data-label="عملیات ویرایش">
                     <button
                       type="button"
                       class="btn-table-action edit-customer-btn customers-edit-btn"
@@ -614,7 +614,7 @@ const totalBookings = displayedItems.reduce((sum, c) => sum + (c.bookingsCount ?
       padding: 12px 24px !important;
     }
 
-    /* ── Responsive ── */
+    /* ── Responsive: card-mode table on small screens ── */
 
     @media (max-width: 640px) {
       .customers-search-form {
@@ -648,8 +648,104 @@ const totalBookings = displayedItems.reduce((sum, c) => sum + (c.bookingsCount ?
         justify-content: center;
       }
 
-      .cell-name {
-        min-width: 150px;
+      /* Table becomes stacked record cards: no horizontal scroll, no clipped actions */
+      .customers-table-wrap {
+        overflow-x: visible !important;
+        background: transparent !important;
+      }
+
+      .customers-table,
+      .customers-table tbody,
+      .customers-table tr,
+      .customers-table td {
+        display: block;
+        width: 100%;
+      }
+
+      .customers-table thead {
+        display: none;
+      }
+
+      .customers-table tbody tr {
+        border: 1px solid rgba(212, 175, 55, 0.2);
+        border-radius: 14px;
+        background: linear-gradient(160deg, rgba(22, 27, 40, 0.94) 0%, rgba(11, 14, 22, 0.94) 100%);
+        box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.06), 0 8px 20px rgba(0, 0, 0, 0.38);
+        margin-bottom: 14px;
+        padding: 6px 14px 14px;
+        min-width: 0;
+      }
+
+      .customers-table tbody td {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 9px 0;
+        border-bottom: 1px dashed rgba(148, 163, 184, 0.16);
+        min-width: 0;
+        text-align: left;
+      }
+
+      .customers-table tbody td:last-child {
+        border-bottom: none;
+      }
+
+      .customers-table tbody td::before {
+        content: attr(data-label);
+        color: rgba(212, 175, 55, 0.8);
+        font-size: 0.76rem;
+        font-weight: 700;
+        flex: 0 0 auto;
+        white-space: nowrap;
+      }
+
+      /* Name row reads as the card header */
+      .customers-table tbody td.cell-name {
+        justify-content: flex-start;
+        gap: 12px;
+        padding-top: 12px;
+        border-bottom: 1px solid rgba(212, 175, 55, 0.18);
+        margin-bottom: 4px;
+      }
+
+      .customers-table tbody td.cell-name::before {
+        display: none;
+      }
+
+      .customers-table tbody td.cell-phone {
+        direction: ltr;
+        flex-direction: row-reverse;
+        justify-content: space-between;
+      }
+
+      .customers-table tbody td.cell-count {
+        flex-direction: row-reverse;
+      }
+
+      .customers-table tbody td.cell-created,
+      .customers-table tbody td[data-label="آخرین نوبت"] {
+        flex-direction: row-reverse;
+        justify-content: space-between;
+        font-size: 0.86rem;
+      }
+
+      .customers-table tbody td.cell-action {
+        flex-direction: column;
+        align-items: stretch;
+        padding-top: 12px;
+        border-bottom: none;
+      }
+
+      .customers-table tbody td.cell-action::before {
+        display: none;
+      }
+
+      .customers-edit-btn {
+        width: 100%;
+        justify-content: center;
+        min-height: 46px;
+        font-size: 0.92rem;
       }
     }
 
