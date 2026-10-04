@@ -622,16 +622,13 @@ if (auth) {
       const emailError = document.getElementById('emailError');
       const passwordError = document.getElementById('passwordError');
 
-      if (quickFillBtn && emailInput && passwordInput) {
+      if (quickFillBtn && emailInput) {
         quickFillBtn.addEventListener('click', () => {
           emailInput.value = 'admin@tehranlaser.ir';
-          passwordInput.value = 'AdminPass123!';
           emailInput.classList.remove('has-error');
-          passwordInput.classList.remove('has-error');
           if (emailError) emailError.style.display = 'none';
-          if (passwordError) passwordError.style.display = 'none';
 
-          if (quickFillBtnText) quickFillBtnText.innerText = 'مشخصات درج شد (کلیک برای ورود)';
+          if (quickFillBtnText) quickFillBtnText.innerText = 'ایمیل درج شد';
           quickFillBtn.style.borderColor = '#10b981';
           quickFillBtn.style.color = '#34d399';
         });
