@@ -113,8 +113,16 @@ export function JalaliCalendar({ selectableDates, selectedDate, onSelect, closed
           type="button"
           className="calendar-nav-btn"
           onClick={() => {
-            const prev = monthKeys[index - 1];
-            if (prev) onSelect(prev);
+            /* Month keys are Jalali ("1405-8"), but onSelect must emit an ISO
+               date — emitting the key would make the parent's
+               selectableDates.includes() check fail and wipe the selection.
+               Jump to the first selectable ISO day inside the target month. */
+            const prev = months[index - 1];
+            if (!prev) return;
+            const firstSelectable = prev.weeks
+              .flat()
+              .find((iso): iso is string => iso !== null && iso !== undefined);
+            if (firstSelectable) onSelect(firstSelectable);
           }}
           aria-label="ماه قبل"
           disabled={index <= 0}
@@ -128,8 +136,13 @@ export function JalaliCalendar({ selectableDates, selectedDate, onSelect, closed
           type="button"
           className="calendar-nav-btn"
           onClick={() => {
-            const next = monthKeys[index + 1];
-            if (next) onSelect(next);
+            /* See the "ماه قبل" handler: emit an ISO date, never the month key. */
+            const next = months[index + 1];
+            if (!next) return;
+            const firstSelectable = next.weeks
+              .flat()
+              .find((iso): iso is string => iso !== null && iso !== undefined);
+            if (firstSelectable) onSelect(firstSelectable);
           }}
           aria-label="ماه بعد"
           disabled={index >= monthKeys.length - 1}
