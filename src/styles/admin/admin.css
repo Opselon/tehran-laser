@@ -306,8 +306,15 @@ body.admin-body {
 }
 
 .admin-nav-link .nav-icon {
-  font-size: 1.25rem;
-  transition: transform 0.2s ease;
+  font-size: 1.15rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  color: inherit;
+  transition: transform 0.2s ease, color 0.2s ease;
 }
 
 .admin-nav-link:hover {

@@ -5,6 +5,7 @@ import '../styles/utilities.css';
 import '../styles/admin/admin.css';
 import '../styles/admin/components-3d.css';
 import '../styles/admin/responsive.css';
+import Icon from '../components/ui/Icon.astro';
 
 interface Props {
   title?: string;
@@ -21,22 +22,22 @@ const auth = Astro.locals.auth || {
 };
 
 const navItems = [
-  { id: 'dashboard', label: 'داشبورد و امروز', href: '/admin', icon: '📊' },
-  { id: 'walkin', label: 'پذیرش فوری و جلسه بعد', href: '/admin/walkin', icon: '⚡' },
-  { id: 'bookings', label: 'مدیریت نوبت‌ها', href: '/admin/bookings', icon: '📋' },
-  { id: 'calendar', label: 'تقویم نوبت‌ها', href: '/admin/calendar', icon: '📅' },
-  { id: 'crm', label: 'پرونده بالینی و CRM', href: '/admin/crm', icon: '🩺' },
-  { id: 'customers', label: 'بانک مراجعین', href: '/admin/customers', icon: '👥' },
-  { id: 'accounting', label: 'حسابداری و نمودارها', href: '/admin/accounting', icon: '💰' },
-  { id: 'sms', label: 'پنل پیامک و اطلاع‌رسانی', href: '/admin/sms', icon: '✉️' },
-  { id: 'lottery', label: 'قرعه‌کشی و گردونه شانس', href: '/admin/lottery', icon: '🎰' },
-  { id: 'festivals', label: 'جشنواره‌ها و تایم‌لاین', href: '/admin/festivals', icon: '🎪' },
-  { id: 'instagram', label: 'تنظیمات اینستاگرام', href: '/admin/instagram', icon: '📸' },
-  { id: 'services', label: 'خدمات و تعرفه‌ها', href: '/admin/services', icon: '💎' },
-  { id: 'schedule', label: 'ساعات کاری و زمان‌بندی', href: '/admin/schedule', icon: '⏱' },
-  { id: 'blog', label: 'مقالات و محتوا', href: '/admin/blog', icon: '✍️' },
-  { id: 'settings', label: 'تنظیمات کلینیک', href: '/admin/settings', icon: '⚙️' },
-  { id: 'audit', label: 'گزارش وقایع و لاگ', href: '/admin/audit', icon: '📜' },
+  { id: 'dashboard', label: 'داشبورد و امروز', href: '/admin', icon: 'dashboard' },
+  { id: 'walkin', label: 'پذیرش فوری و جلسه بعد', href: '/admin/walkin', icon: 'walkin' },
+  { id: 'bookings', label: 'مدیریت نوبت‌ها', href: '/admin/bookings', icon: 'bookings' },
+  { id: 'calendar', label: 'تقویم نوبت‌ها', href: '/admin/calendar', icon: 'calendar' },
+  { id: 'crm', label: 'پرونده بالینی و CRM', href: '/admin/crm', icon: 'crm' },
+  { id: 'customers', label: 'بانک مراجعین', href: '/admin/customers', icon: 'customers' },
+  { id: 'accounting', label: 'حسابداری و نمودارها', href: '/admin/accounting', icon: 'accounting' },
+  { id: 'sms', label: 'پنل پیامک و اطلاع‌رسانی', href: '/admin/sms', icon: 'sms' },
+  { id: 'lottery', label: 'قرعه‌کشی و گردونه شانس', href: '/admin/lottery', icon: 'lottery' },
+  { id: 'festivals', label: 'جشنواره‌ها و تایم‌لاین', href: '/admin/festivals', icon: 'festivals' },
+  { id: 'instagram', label: 'تنظیمات اینستاگرام', href: '/admin/instagram', icon: 'instagram' },
+  { id: 'services', label: 'خدمات و تعرفه‌ها', href: '/admin/services', icon: 'services' },
+  { id: 'schedule', label: 'ساعات کاری و زمان‌بندی', href: '/admin/schedule', icon: 'schedule' },
+  { id: 'blog', label: 'مقالات و محتوا', href: '/admin/blog', icon: 'blog' },
+  { id: 'settings', label: 'تنظیمات کلینیک', href: '/admin/settings', icon: 'settings' },
+  { id: 'audit', label: 'گزارش وقایع و لاگ', href: '/admin/audit', icon: 'audit' },
 ];
 ---
 
@@ -112,7 +113,9 @@ const navItems = [
                   href={item.href}
                   class={`admin-nav-link ${activeNav === item.id ? 'active' : ''}`}
                 >
-                  <span class="nav-icon">{item.icon}</span>
+                  <span class="nav-icon">
+                    <Icon name={item.icon} size={18} />
+                  </span>
                   <span class="nav-label">{item.label}</span>
                 </a>
               </li>
