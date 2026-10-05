@@ -1,12 +1,20 @@
 ---
 import PublicLayout from '../layouts/PublicLayout.astro';
 import Icon from '../components/ui/Icon.astro';
+import { createBreadcrumbSchema } from '../lib/seo';
+
+// Generate BreadcrumbList JSON-LD schema for SEO (same pattern as faq.astro)
+const breadcrumbJsonLd = createBreadcrumbSchema([
+  { name: 'صفحه اصلی', url: '/' },
+  { name: 'حریم خصوصی', url: '/privacy' },
+]);
 ---
 
 <PublicLayout
   title="حریم خصوصی و محرمانگی داده‌های بالینی — کلینیک تهران لیزر"
   description="سیاست‌های حفاظت از حریم خصوصی، امنیت پرونده‌های پزشکی و محرمانگی داده‌های بالینی مراجعین در کلینیک تخصصی تهران لیزر پاسداران."
   canonicalUrl="/privacy"
+  jsonLd={[breadcrumbJsonLd]}
   theme="dark"
 >
   <div class="legal-page-wrapper">
@@ -106,6 +114,62 @@ import Icon from '../components/ui/Icon.astro';
               <div class="guarantee-content">
                 <strong>حق ویرایش و لغو پیامک‌ها:</strong>
                 <span>هر مراجعه‌کننده اختیار تام دارد در هر زمان با ارسال پیامک یا تماس با کلینیک، دریافت اعلان‌های یادآوری را متوقف یا اطلاعات خود را اصلاح کند.</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Medical-Consent Callout Card (informed consent for clinical data) -->
+        <section class="privacy-guarantee-alert consent-card" aria-label="رضایت‌نامه آگاهانه پردازش داده‌های بالینی">
+          <div class="alert-glow"></div>
+          <div class="alert-header">
+            <div class="alert-icon-box">
+              <Icon name="document" size={24} />
+            </div>
+            <div>
+              <h2 class="alert-title">رضایت آگاهانه پزشکی برای پردازش داده‌های بالینی</h2>
+              <p class="alert-desc">با ثبت هر نوبت، شما اذعان می‌دارید که موارد زیر را خوانده، فهمیده و پذیرفته‌اید:</p>
+            </div>
+          </div>
+
+          <div class="guarantee-grid">
+            <div class="guarantee-item">
+              <div class="guarantee-icon">
+                <Icon name="checkCircle" size={16} />
+              </div>
+              <div class="guarantee-content">
+                <strong>افشای محدود بالینی:</strong>
+                <span>تیپ پوستی، سوابق دارویی و پارامترهای هر جلسه تنها در پرونده بالینی شما ثبت و فقط در اختیار اپراتور مسئول و پزشک ناظر قرار می‌گیرد.</span>
+              </div>
+            </div>
+
+            <div class="guarantee-item">
+              <div class="guarantee-icon">
+                <Icon name="shield" size={16} />
+              </div>
+              <div class="guarantee-content">
+                <strong>صداق اطلاعات اعلامی:</strong>
+                <span>پنهان‌کاری درباره بارداری، مصرف راکوتان، حساسیت‌ها یا داروهای حساس‌کننده نور، رضایت شما را باطل و جلسه را لغو می‌کند.</span>
+              </div>
+            </div>
+
+            <div class="guarantee-item">
+              <div class="guarantee-icon">
+                <Icon name="lock" size={16} />
+              </div>
+              <div class="guarantee-content">
+                <strong>حق انصراف در هر زمان:</strong>
+                <span>می‌توانید هر لحظه با تماس با پذیرش، از ادامه درمان یا پیامک‌های یادآوری انصراف دهید و خواستار امحای اطلاعات هویتی طبق قانون شوید.</span>
+              </div>
+            </div>
+
+            <div class="guarantee-item">
+              <div class="guarantee-icon">
+                <Icon name="warning" size={16} />
+              </div>
+              <div class="guarantee-content">
+                <strong>اقارب زیر ۱۸ سال:</strong>
+                <span>حضور ولی قانونی در جلسه اول الزامی است و امضای دیجیتال این رضایت‌نامه از سوی ایشان انجام می‌پذیرد.</span>
               </div>
             </div>
           </div>
@@ -577,6 +641,40 @@ import Icon from '../components/ui/Icon.astro';
     line-height: 1.65;
   }
 
+  /* Gold-tinted variant for the medical-consent callout card */
+  .privacy-guarantee-alert.consent-card {
+    border-color: rgba(170, 134, 36, 0.5);
+    background: linear-gradient(145deg, #17150f, #0e0d0b);
+    box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.8), 0 0 25px -10px rgba(170, 134, 36, 0.2);
+    margin-bottom: 32px;
+  }
+
+  .consent-card .alert-glow {
+    background: radial-gradient(circle, rgba(170, 134, 36, 0.18) 0%, transparent 70%);
+  }
+
+  .consent-card .alert-icon-box {
+    background: linear-gradient(135deg, rgba(170, 134, 36, 0.25), rgba(170, 134, 36, 0.06));
+    border-color: rgba(170, 134, 36, 0.6);
+    color: #e6c555;
+    box-shadow: 0 4px 15px rgba(170, 134, 36, 0.22);
+  }
+
+  .consent-card .alert-title {
+    color: #f0d68a;
+  }
+
+  .consent-card .guarantee-content strong {
+    color: #e6c555;
+  }
+
+  @media (max-width: 480px) {
+    .consent-card .alert-header {
+      flex-direction: column;
+      gap: 12px;
+    }
+  }
+
   /* 3D Obsidian Structured Accordions */
   .legal-accordions-container {
     display: flex;
@@ -806,6 +904,11 @@ import Icon from '../components/ui/Icon.astro';
      Print-Ready Readability Rules (§3, §135)
      ───────────────────────────────────────────────────────────── */
   @media print {
+    @page {
+      size: A4;
+      margin: 16mm 14mm;
+    }
+
     :global(body) {
       background: #ffffff !important;
       color: #111111 !important;
@@ -895,6 +998,23 @@ import Icon from '../components/ui/Icon.astro';
 
     .legal-list strong {
       color: #000000 !important;
+    }
+
+    /* Closed <details> bodies must still render on paper */
+    .legal-accordion .accordion-body {
+      display: block !important;
+      content-visibility: visible !important;
+      overflow: visible !important;
+    }
+
+    .alert-glow {
+      display: none !important;
+    }
+
+    .guarantee-item,
+    .legal-list li,
+    .meta-item {
+      break-inside: avoid;
     }
   }
 

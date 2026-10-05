@@ -1,12 +1,20 @@
 ---
 import PublicLayout from '../layouts/PublicLayout.astro';
 import Icon from '../components/ui/Icon.astro';
+import { createBreadcrumbSchema } from '../lib/seo';
+
+// Generate BreadcrumbList JSON-LD schema for SEO (same pattern as faq.astro)
+const breadcrumbJsonLd = createBreadcrumbSchema([
+  { name: 'صفحه اصلی', url: '/' },
+  { name: 'قوانین و مقررات', url: '/terms' },
+]);
 ---
 
 <PublicLayout
   title="قوانین و مقررات نوبت‌دهی و رضایت‌نامه پزشکی — کلینیک تهران لیزر"
   description="شرایط و قوانین حضور در کلینیک، ضوابط لغو و جابجایی نوبت، منشور بهداشتی و رضایت‌نامه آگاهانه خدمات لیزر موهای زائد تهران لیزر پاسداران."
   canonicalUrl="/terms"
+  jsonLd={[breadcrumbJsonLd]}
   theme="dark"
 >
   <div class="legal-page-wrapper">
@@ -815,6 +823,11 @@ import Icon from '../components/ui/Icon.astro';
      Print-Ready Readability Rules (§3, §135)
      ───────────────────────────────────────────────────────────── */
   @media print {
+    @page {
+      size: A4;
+      margin: 16mm 14mm;
+    }
+
     :global(body) {
       background: #ffffff !important;
       color: #111111 !important;
@@ -904,6 +917,23 @@ import Icon from '../components/ui/Icon.astro';
 
     .legal-list strong {
       color: #000000 !important;
+    }
+
+    /* Closed <details> bodies must still render on paper */
+    .legal-accordion .accordion-body {
+      display: block !important;
+      content-visibility: visible !important;
+      overflow: visible !important;
+    }
+
+    .alert-glow {
+      display: none !important;
+    }
+
+    .alert-item,
+    .legal-list li,
+    .meta-item {
+      break-inside: avoid;
     }
   }
 
