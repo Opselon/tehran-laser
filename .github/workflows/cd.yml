@@ -1,6 +1,14 @@
 name: CD
 
-# Deploys the built site to Cloudflare Workers (tehran-laser).
+# Deploys the built site to Cloudflare Workers (tehran-laser) — ONLY after CI is green.
+#
+# Gating: triggered by the CI workflow finishing (workflow_run), and the job is skipped
+# unless that CI run concluded `success`, so a push to main cannot reach production while
+# typecheck/tests/build are red. `workflow_dispatch` stays for a deliberate manual deploy.
+#
+# There is deliberately no paths-ignore here: skipping "docs-only" pushes needs a diff
+# against the triggering commit, and getting that check wrong in the fail-closed direction
+# would silently stop real deploys — deploying a docs-only change is harmless.
 #
 # REQUIRED REPOSITORY SECRET — the job degrades to a no-op notice if it is missing, so
 # adding this file is safe before the secret exists:
@@ -11,12 +19,10 @@ name: CD
 # the live database, so it must stay a deliberate human-triggered operation.
 
 on:
-  push:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
     branches: [main]
-    paths-ignore:
-      - '**.md'
-      - 'docs/**'
-      - 'LICENSE'
   workflow_dispatch:
 
 # One production deploy at a time; never cancel a deploy already in flight.
@@ -32,10 +38,19 @@ jobs:
     name: Deploy to Cloudflare Workers
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    # Only deploy when CI passed. Manual runs are always allowed.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push')
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # Pin to the exact commit CI validated (empty on a manual run -> current SHA).
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          fetch-depth: 0
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -70,4 +85,4 @@ jobs:
 
       - name: Report deployment
         if: steps.creds.outputs.present == 'true'
-        run: echo "Deployed commit $GITHUB_SHA"
+        run: echo "Deployed commit $(git rev-parse HEAD)"
