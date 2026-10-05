@@ -264,6 +264,18 @@ try {
                           </button>
                         )}
 
+                        {(b.status === 'pending' || b.status === 'confirmed') && (
+                          <button
+                            type="button"
+                            class="btn-3d-secondary cancel-booking-btn"
+                            data-id={b.id}
+                            title="لغو نوبت و آزادسازی اسلات"
+                          >
+                            <Icon name="x" size={14} />
+                            <span>لغو</span>
+                          </button>
+                        )}
+
                         <button
                           type="button"
                           class="btn-table-action edit-booking-btn"
@@ -698,6 +710,16 @@ try {
       align-items: center;
     }
 
+    /* Touch-target parity with .accept-/.reject-/.complete-booking-btn,
+       which are sized by responsive.css by class name. */
+    .cancel-booking-btn {
+      min-height: 40px;
+      padding: 9px 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
     .empty-icon-wrap {
       display: inline-flex;
       align-items: center;
@@ -949,6 +971,40 @@ try {
             setTimeout(() => window.location.reload(), 400);
           } else {
             alert('خطا در تغییر وضعیت نوبت.');
+            target.disabled = false;
+            target.innerHTML = origContent;
+          }
+        } catch {
+          alert('خطای ارتباط با سرور.');
+          target.disabled = false;
+          target.innerHTML = origContent;
+        }
+      });
+    });
+
+    // Hook Cancel Buttons
+    document.querySelectorAll('.cancel-booking-btn').forEach((btn) => {
+      btn.addEventListener('click', async (e) => {
+        const target = e.currentTarget as HTMLButtonElement;
+        const id = target.dataset.id;
+        if (!id) return;
+
+        if (!confirm('آیا از لغو این نوبت مطمئن هستید؟ اسلات آزاد می‌شود.')) return;
+
+        target.disabled = true;
+        const origContent = target.innerHTML;
+        target.innerHTML = '<span>...</span>';
+
+        try {
+          const res = await fetch(`/api/v1/admin/bookings/${id}/cancel`, {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+          });
+          if (res.ok) {
+            target.innerHTML = '<span>لغو شد</span>';
+            setTimeout(() => window.location.reload(), 400);
+          } else {
+            alert('خطا در لغو نوبت.');
             target.disabled = false;
             target.innerHTML = origContent;
           }
