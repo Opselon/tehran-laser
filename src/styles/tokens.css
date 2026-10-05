@@ -73,6 +73,15 @@
   --gold-border-bright: 1px solid rgba(52, 211, 153, 0.55);
   --gold-border-active: 1px solid rgba(110, 231, 183, 0.8);
 
+  /* Aliases for the alternate naming used by src/pages/services/[slug].astro.
+     Those pages referenced --gold-primary / --gold-light / --border-gold-*
+     which were never defined here, so their accent fills and borders silently
+     resolved to nothing. Point the aliases at the same trust-spectrum values. */
+  --gold-primary: var(--gold-400);
+  --gold-light: var(--gold-300);
+  --border-gold-subtle: var(--gold-border-subtle);
+  --border-gold-strong: var(--gold-border-bright);
+
   /* ── STATUS PALETTES (WCAG AA/AAA CALIBRATED) ────────────── */
   --color-success: #10b981;
   --color-success-soft: #064e3b;
