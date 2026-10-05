@@ -164,7 +164,14 @@ const structuredData = jsonLd
     <link rel="dns-prefetch" href="https://images.unsplash.com" />
 
     <!-- JSON-LD Structured Data (§31, §135) -->
-    <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+    <!-- set:html with a JSON.stringify payload must escape `<` or an admin
+         setting containing `</script>` breaks out of this block and injects
+         markup (stored XSS via e.g. business_name). Escape the delimiter and
+         the solidus that closes the tag. -->
+    <script
+      type="application/ld+json"
+      set:html={JSON.stringify(structuredData).replace(/</g, '\\u003c').replace(/>/g, '\\u003e').replace(/&/g, '\\u0026')}
+    />
 
     <!-- Service worker registration (§47) -->
     <script is:inline>

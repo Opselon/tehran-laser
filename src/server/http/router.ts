@@ -14,7 +14,7 @@ import {
   clearSessionCookie,
   isSecureRequest,
 } from '../../lib/security/session-cookie';
-import { consumeRateLimit, parseRateLimitPolicy } from '../../lib/security/rate-limit';
+import { peekRateLimit, consumeRateLimit, resetRateLimit, parseRateLimitPolicy } from '../../lib/security/rate-limit';
 import { verifyPassword } from '../../lib/security/password';
 import { resolveCanonicalOrigin } from '../../lib/seo/canonical';
 import { zonedTimeToUtc } from '../../lib/datetime/timezone';
@@ -114,9 +114,15 @@ export async function handleApiRequest(
     /* ── Auth: Login / Logout / Me (§53, §56, §57) ───────────── */
     if (pathname === '/api/v1/auth/login' && method === 'POST') {
       const clientIp = request.headers.get('cf-connecting-ip') ?? 'local';
+      const rlKey = `login:${clientIp}`;
       const rlPolicyRaw = (await getSettingValue(env.DB, 'rate_limit_login')) ?? undefined;
       const rlPolicy = parseRateLimitPolicy(rlPolicyRaw, { limit: 10, windowSeconds: 600 });
-      const rl = await consumeRateLimit(env.DB, `login:${clientIp}`, rlPolicy, new Date());
+      /* Only FAILURES should consume the login budget. Consuming on every
+         request meant 10 *successful* logins from one shared IP (office NAT,
+         a single agent box) locked out every admin behind it for 10 minutes.
+         Check the budget here; the failed-attempt consume sits at each throw
+         below, and resetRateLimit runs on success. */
+      const rl = await peekRateLimit(env.DB, rlKey, rlPolicy, new Date());
       if (!rl.allowed) {
         throw new ApiError('RATE_LIMITED', 'تعداد تلاش‌های ناموفق بیش از حد مجاز است. لطفاً بعداً امتحان کنید.');
       }
@@ -137,13 +143,19 @@ export async function handleApiRequest(
       );
 
       if (!user || user.active !== 1) {
+        await consumeRateLimit(env.DB, rlKey, rlPolicy, new Date());
         throw new ApiError('FORBIDDEN', 'ایمیل یا رمز عبور اشتباه است.');
       }
 
       const valid = await verifyPassword(body.password, user.passwordHash);
       if (!valid) {
+        await consumeRateLimit(env.DB, rlKey, rlPolicy, new Date());
         throw new ApiError('FORBIDDEN', 'ایمیل یا رمز عبور اشتباه است.');
       }
+
+      /* Success: release any partial failure budget so a good login never
+         contributes to a future lockout. */
+      await resetRateLimit(env.DB, rlKey);
 
       const session = await createSession(env.DB, user.id);
       const isSecure = isSecureRequest(request);
