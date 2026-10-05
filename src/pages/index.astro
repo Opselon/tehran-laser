@@ -654,8 +654,42 @@ const priceRows: PriceRowView[] = services.map((s) => {
       padding: 10px;
     }
 
+    /* Keep a two-column tariff header instead of dropping it: at 320px the
+       card layout still has to name تعرفه بانوان and تعرفه آقایان explicitly.
+       Zone/action headers do not exist in the card layout, so they go. The
+       sticky comes from the thead itself — a sticky th inside a block thead
+       can only stick while its own row is on screen. */
     .gender-price-table thead {
+      display: block;
+      position: sticky;
+      top: var(--tl-header-offset, 0px);
+      z-index: 3;
+    }
+
+    .gender-price-table thead tr {
+      margin-bottom: 6px;
+      padding: 5px 6px;
+      box-shadow: 0 8px 18px -10px rgba(0, 0, 0, 0.85);
+    }
+
+    .gender-price-table thead th {
+      position: static;
+      padding: 4px;
+      font-size: 0.76rem;
+      line-height: 1.35;
+      white-space: nowrap;
+      border-bottom: none;
+      background: #141820;
+    }
+
+    .gpt-th-zone,
+    .gpt-th-action {
       display: none;
+    }
+
+    /* Divider between the two tariff columns (RTL: inline-start = right). */
+    .gpt-th-female {
+      border-inline-end: 1px solid rgba(16, 185, 129, 0.35);
     }
 
     .gender-price-table,
@@ -744,6 +778,29 @@ const priceRows: PriceRowView[] = services.map((s) => {
     /* Icon-only book control keeps the row to two lines. */
     .gpt-book-btn span:not(.gpt-unit) {
       display: none;
+    }
+  }
+
+  /* ── ≤400px: the row grid's min-content exceeds the card's content box ──
+     The two tariff cells are white-space: nowrap, so at 320px the grid needs
+     ~264px inside a 246px content box and the leftmost (RTL) column — the
+     book button — pushes 6px past the card's own border. Reclaim exactly that
+     18px from row padding and column gap; no price text shrinks. */
+  @media (max-width: 400px) {
+    .gender-price-table tr {
+      padding: 9px 6px;
+      column-gap: 5px;
+    }
+  }
+
+  /* ── ≤768px: the male-lane strip's booking CTA block ──
+     public.css floors .male-text at 280px, but the strip's mobile padding
+     (26px + 20px + 2px border) leaves only 278px of content box at a 320px
+     viewport — the floor alone made the document 1px wider than the screen.
+     The CTA below is already width:100%, so nothing here needs the floor. */
+  @media (max-width: 768px) {
+    .male-strip-inner .male-text {
+      min-width: 0;
     }
   }
 
