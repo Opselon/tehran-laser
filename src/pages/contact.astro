@@ -855,12 +855,13 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
   .wa-main-btn {
     background: linear-gradient(135deg, #10b981 0%, #059669 100%);
     border-color: #34d399;
-    color: #ffffff;
+    /* white on this gradient measures 2.5:1 — dark ink clears WCAG AA (5.2:1 worst stop) */
+    color: #0b0d11;
     box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.3);
   }
 
   .wa-main-btn:hover {
-    color: #ffffff;
+    color: #0b0d11;
     box-shadow: 0 6px 20px rgba(16, 185, 129, 0.45);
   }
 

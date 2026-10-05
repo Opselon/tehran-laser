@@ -710,6 +710,12 @@ body {
   margin-bottom: 8px;
 }
 
+/* Dark theme: #047857 measures ~3.0:1 on the obsidian surface, so lift the
+   subtitle to the accent green on dark pages (light pages keep the token). */
+body.theme-dark-obsidian .section-subtitle {
+  color: var(--color-accent-on-dark);
+}
+
 .section-title {
   font-size: clamp(1.6rem, 3.2vw, 2.3rem);
   font-weight: 800;
@@ -3226,7 +3232,7 @@ body.theme-dark-obsidian .hero-title {
 }
 
 .gold-gradient-text {
-  background: linear-gradient(135deg, #6ee7b7 0%, #34d399 35%, #34d399 70%, #0f766e 100%);
+  background: linear-gradient(135deg, #6ee7b7 0%, #34d399 35%, #34d399 70%, #10b981 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   display: inline;
@@ -3632,7 +3638,8 @@ body.theme-dark-obsidian .male-cta {
   left: 20px;
   font-size: 1.8rem;
   font-weight: 800;
-  color: rgba(52, 211, 153, 0.25);
+  /* semi-transparent green measured 3.8:1 on the brighter local backdrop — opaque accent */
+  color: #34d399;
   font-family: inherit;
 }
 
@@ -3879,7 +3886,7 @@ body.theme-dark-obsidian .location-actions {
 /* ── Buttons & Sticky Mobile Bar ── */
 body.theme-dark-obsidian .btn-primary {
   background-color: #34d399;
-  background-image: linear-gradient(135deg, #34d399 0%, #2dd4bf 40%, #0f766e 100%);
+  background-image: linear-gradient(135deg, #34d399 0%, #2dd4bf 40%, #10b981 100%);
   color: #04211d !important;
   font-weight: 700;
   border: 1px solid #34d399;
@@ -3922,7 +3929,7 @@ body.theme-dark-obsidian .sticky-phone {
 
 body.theme-dark-obsidian .sticky-book {
   background-color: #34d399;
-  background-image: linear-gradient(135deg, #34d399 0%, #2dd4bf 40%, #0f766e 100%);
+  background-image: linear-gradient(135deg, #34d399 0%, #2dd4bf 40%, #10b981 100%);
   color: #04211d !important;
   border: 1px solid #34d399;
   font-weight: 700;

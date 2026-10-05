@@ -1658,7 +1658,8 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
     justify-content: center;
     gap: 8px;
     font-size: 0.85rem;
-    color: #8c857b;
+    /* #8c857b measures 4.36:1 on the tinted pricing box — lift to clear AA */
+    color: #bfb7aa;
     margin-bottom: 4px;
   }
 
@@ -1701,7 +1702,7 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
     align-items: center;
     justify-content: center;
     gap: 8px;
-    background: linear-gradient(180deg, #34d399 0%, #059669 40%, #047857 100%);
+    background: linear-gradient(180deg, #34d399 0%, #10b981 45%, #059669 100%);
     color: #0a0b0d;
     font-weight: 800;
     font-size: 0.95rem;
@@ -1804,7 +1805,8 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
     align-items: center;
     gap: 6px;
     background: rgba(255, 255, 255, 0.04);
-    color: #8c857b;
+    /* #8c857b dips to 3.9:1 over the tinted panel — lift to clear AA */
+    color: #bfb7aa;
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 10px;
     padding: 6px 12px;
@@ -1969,7 +1971,8 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
 
   .strikethrough-price {
     font-size: 0.8rem;
-    color: #78716c;
+    /* #78716c measures 3.87:1 on the card — lift to clear AA */
+    color: #bfb7aa;
     text-decoration: line-through;
   }
 
@@ -1995,7 +1998,7 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
     align-items: center;
     justify-content: center;
     gap: 6px;
-    background: linear-gradient(180deg, #34d399 0%, #059669 40%, #047857 100%);
+    background: linear-gradient(180deg, #34d399 0%, #10b981 45%, #059669 100%);
     color: #0a0b0d;
     font-size: 0.825rem;
     font-weight: 700;
@@ -2169,7 +2172,7 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    background: linear-gradient(180deg, #34d399 0%, #059669 40%, #047857 100%);
+    background: linear-gradient(180deg, #34d399 0%, #10b981 45%, #059669 100%);
     color: #0a0b0d;
     font-size: 0.775rem;
     font-weight: 700;
@@ -2225,7 +2228,7 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
 
   .guidance-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
     gap: 18px;
   }
 
