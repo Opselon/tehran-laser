@@ -3,21 +3,32 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 import { env } from 'cloudflare:workers';
 import { listAdminBookings } from '../../server/repositories';
 import { formatJalaliDate } from '../../lib/datetime/jalali';
+import { addDays, localDateOf, zonedTimeToUtc } from '../../lib/datetime/timezone';
 import JalaliPicker from '../../components/admin/JalaliPicker.astro';
 import Icon from '../../components/ui/Icon.astro';
 
-const url = Astro.url;
-const targetDate = url.searchParams.get('date') || new Date().toISOString().slice(0, 10);
-const fromIso = `${targetDate}T00:00:00.000Z`;
-const toIso = `${targetDate}T23:59:59.999Z`;
+const tz = env.BUSINESS_TIMEZONE || 'Asia/Tehran';
 
-// Calculate date navigation (RTL: previous day is right arrow, next day is left arrow)
-const currDateObj = new Date(targetDate + 'T12:00:00Z');
-const prevDateObj = new Date(currDateObj.getTime() - 86400000);
-const nextDateObj = new Date(currDateObj.getTime() + 86400000);
-const todayIso = new Date().toISOString().slice(0, 10);
-const prevDateStr = prevDateObj.toISOString().slice(0, 10);
-const nextDateStr = nextDateObj.toISOString().slice(0, 10);
+// Clinic-today, not UTC-today: before 03:30 Tehran the UTC date is still
+// yesterday, which made "امروز" and the default day point at the wrong date.
+const todayIso = localDateOf(new Date().toISOString(), tz);
+
+const url = Astro.url;
+const rawDate = url.searchParams.get('date');
+// `?date=` is user input — an unvalidated value reaches `new Date()` below and
+// threw RangeError (live 500 on /admin/calendar?date=garbage).
+const targetDate = rawDate && /^\d{4}-\d{2}-\d{2}$/.test(rawDate) ? rawDate : todayIso;
+
+// A Tehran day, not a UTC day: `00:00:00Z…23:59:59Z` of `targetDate` dropped
+// every booking made between 00:00 and 03:30 Tehran (those instants still
+// belong to the previous UTC date).
+const dayStartUtc = zonedTimeToUtc(targetDate, '00:00', tz);
+const fromIso = dayStartUtc;
+const toIso = new Date(Date.parse(dayStartUtc) + 86_400_000 - 1).toISOString();
+
+// Date navigation (RTL: previous day is right arrow, next day is left arrow)
+const prevDateStr = addDays(targetDate, -1);
+const nextDateStr = addDays(targetDate, 1);
 const isToday = targetDate === todayIso;
 
 let bookings: Awaited<ReturnType<typeof listAdminBookings>> = { items: [], nextCursor: null };
@@ -81,7 +92,7 @@ try {
           </a>
         </div>
 
-        <div class="cal-date-picker-form">
+        <form class="cal-date-picker-form" method="get" action="/admin/calendar">
           <span class="cal-date-label">
             <Icon name="calendar" size={16} />
             <span>انتخاب تاریخ:</span>
@@ -93,7 +104,7 @@ try {
             label="انتخاب تاریخ نوبت‌ها (شمسی)"
             submitOnChange
           />
-        </div>
+        </form>
       </div>
     </div>
 
@@ -335,6 +346,8 @@ try {
       display: flex;
       align-items: center;
       gap: 8px;
+      margin: 0;
+      min-width: 0;
       background: rgba(14, 19, 30, 0.85);
       border: 1px solid rgba(212, 175, 55, 0.25);
       border-radius: 14px;
