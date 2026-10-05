@@ -127,6 +127,12 @@ const inactiveCount = services.length - activeCount;
 const maxDisplayOrder = services.reduce((max, s) => Math.max(max, s.displayOrder || 0), 0);
 const nextDisplayOrder = maxDisplayOrder + 1;
 
+/** How many services already carry a real (non-zero) tariff for each gender list. */
+const pricedCount = (category: 'female' | 'male') =>
+  services.filter((s) => s.prices.some((p) => p.pricingCategory === category && p.amount > 0)).length;
+const femalePricedCount = pricedCount('female');
+const malePricedCount = pricedCount('male');
+
 interface CategoryCounters {
   all: number;
   face: number;
@@ -155,7 +161,7 @@ for (const s of services) {
 ---
 
 <AdminLayout title="خدمات و تعرفه‌ها" activeNav="services">
-  <div class="admin-content-pad services-page-container">
+  <div class="admin-content-pad services-page-container" id="servicesPageRoot" data-tariff-gender="female">
     <!-- 3D Header Row -->
     <div class="dashboard-header-row services-header-3d">
       <div class="services-header-info">
@@ -195,6 +201,36 @@ for (const s of services) {
 
     <!-- 3D Filter & Search Toolbar -->
     <div class="admin-section-block services-toolbar-block">
+      <!-- Gender tariff switch — the two price lists are kept fully separate -->
+      <div class="tariff-gender-switch" role="tablist" aria-label="انتخاب فهرست تعرفه">
+        <button
+          type="button"
+          class="tariff-gender-btn active"
+          role="tab"
+          aria-selected="true"
+          data-gender="female"
+          id="tariffTabFemale"
+        >
+          <span class="tariff-gender-dot tariff-gender-dot--female"></span>
+          <Icon name="heart" size={14} />
+          <span class="tariff-gender-text">تعرفه مصوب بانوان</span>
+          <span class="tariff-gender-count">{femalePricedCount.toLocaleString('fa-IR')}</span>
+        </button>
+        <button
+          type="button"
+          class="tariff-gender-btn"
+          role="tab"
+          aria-selected="false"
+          data-gender="male"
+          id="tariffTabMale"
+        >
+          <span class="tariff-gender-dot tariff-gender-dot--male"></span>
+          <Icon name="shield" size={14} />
+          <span class="tariff-gender-text">تعرفه مصوب آقایان</span>
+          <span class="tariff-gender-count">{malePricedCount.toLocaleString('fa-IR')}</span>
+        </button>
+      </div>
+
       <div class="services-toolbar-top">
         <div class="services-search-col">
           <div class="search-input-wrap">
@@ -267,8 +303,8 @@ for (const s of services) {
               <th>نام خدمت و دسته‌بندی</th>
               <th>شناسه یکتا (Slug)</th>
               <th>مدت جلسه</th>
-              <th>تعرفه مصوب بانوان</th>
-              <th>تعرفه مصوب آقایان</th>
+              <th class="col-gender-female">تعرفه مصوب بانوان</th>
+              <th class="col-gender-male">تعرفه مصوب آقایان</th>
               <th style="text-align: center;">وضعیت سایت</th>
               <th style="text-align: center;">عملیات</th>
             </tr>
@@ -315,7 +351,7 @@ for (const s of services) {
                       <span>{s.durationMinutes} دقیقه</span>
                     </span>
                   </td>
-                  <td>
+                  <td class="col-gender-female">
                     <div class="tariff-cell-wrap">
                       {femalePrice ? (
                         isPromo ? (
@@ -350,7 +386,7 @@ for (const s of services) {
                       </button>
                     </div>
                   </td>
-                  <td>
+                  <td class="col-gender-male">
                     <div class="tariff-cell-wrap">
                       {malePrice && malePrice.amount > 0 ? (
                         <span class="price-badge-male">
@@ -478,7 +514,7 @@ for (const s of services) {
             )}
 
             <div class="card-mobile-tariffs">
-              <div class="tariff-box-mobile">
+              <div class="tariff-box-mobile col-gender-female">
                 <span class="tariff-box-label">تعرفه مصوب بانوان:</span>
                 <div class="tariff-box-val">
                   {femalePrice ? (
@@ -497,7 +533,7 @@ for (const s of services) {
                 </div>
               </div>
 
-              <div class="tariff-box-mobile">
+              <div class="tariff-box-mobile col-gender-male">
                 <span class="tariff-box-label">تعرفه مصوب آقایان:</span>
                 <div class="tariff-box-val">
                   {malePrice && malePrice.amount > 0 ? (
@@ -555,7 +591,7 @@ for (const s of services) {
         </div>
 
         <p class="modal-subtitle-text">
-          تغییر نام ناحیه، زمان تخصیصی جلسه و قیمت مصوب بانوان و آقایان مستقیماً در دیتابیس D1 ذخیره می‌شود.
+          تغییر نام ناحیه، زمان تخصیصی جلسه و نرخ‌گذاری هر فهرست تعرفه (بانوان / آقایان) به‌صورت کاملاً جداگانه، مستقیماً در دیتابیس D1 ذخیره می‌شود.
         </p>
 
         <div id="serviceAlert" class="alert-3d-danger" style="display: none;">
@@ -645,16 +681,27 @@ for (const s of services) {
             </div>
           </div>
 
-          <!-- Dual Tariffs 3D Card -->
-          <div class="modal-tariffs-panel">
+          <!-- Single-gender Tariffs 3D Card — one tariff list at a time, never mixed -->
+          <div class="modal-tariffs-panel" id="editTariffsPanel" data-gender="female">
             <div class="tariffs-panel-header">
               <span class="tariffs-header-icon">
                 <Icon name="tag" size={14} />
               </span>
-              <span class="tariffs-header-title">نرخ‌گذاری تعرفه‌های مصوب (واحد: هزار تومان)</span>
+              <span class="tariffs-header-title">نرخ‌گذاری تعرفه مصوب (واحد: هزار تومان)</span>
             </div>
 
-            <div class="form-grid-2col">
+            <div class="modal-gender-tabs" role="tablist" aria-label="انتخاب فهرست تعرفه">
+              <button type="button" class="modal-gender-tab active" role="tab" aria-selected="true" data-gender="female">
+                <span class="tariff-gender-dot tariff-gender-dot--female"></span>
+                <span>بانوان</span>
+              </button>
+              <button type="button" class="modal-gender-tab" role="tab" aria-selected="false" data-gender="male">
+                <span class="tariff-gender-dot tariff-gender-dot--male"></span>
+                <span>آقایان</span>
+              </button>
+            </div>
+
+            <div class="modal-gender-pane" data-gender="female">
               <div class="form-group-item">
                 <label for="editServicePriceFemale" class="form-label-gold">تعرفه مصوب بانوان:</label>
                 <div class="input-with-hint">
@@ -671,7 +718,9 @@ for (const s of services) {
                   </div>
                 </div>
               </div>
+            </div>
 
+            <div class="modal-gender-pane" data-gender="male">
               <div class="form-group-item">
                 <label for="editServicePriceMale" class="form-label-gold">تعرفه مصوب آقایان:</label>
                 <div class="input-with-hint">
@@ -721,7 +770,7 @@ for (const s of services) {
         </div>
 
         <p class="modal-subtitle-text">
-          تعریف ناحیه جدید لیزر، تنظیم مدت جلسه و نرخ‌گذاری همزمان تعرفه مصوب بانوان و آقایان.
+          تعریف ناحیه جدید لیزر، تنظیم مدت جلسه و ثبت تعرفه هر بخش (بانوان / آقایان) در فهرست جداگانهٔ خودش.
         </p>
 
         <div id="newServiceAlert" class="alert-3d-danger" style="display: none;">
@@ -813,8 +862,8 @@ for (const s of services) {
             </div>
           </div>
 
-          <!-- Dual Tariffs 3D Card -->
-          <div class="modal-tariffs-panel">
+          <!-- Single-gender Tariffs 3D Card — one tariff list at a time, never mixed -->
+          <div class="modal-tariffs-panel" id="newTariffsPanel" data-gender="female">
             <div class="tariffs-panel-header">
               <span class="tariffs-header-icon">
                 <Icon name="tag" size={14} />
@@ -822,7 +871,18 @@ for (const s of services) {
               <span class="tariffs-header-title">نرخ‌گذاری اولیه تعرفه (واحد: هزار تومان)</span>
             </div>
 
-            <div class="form-grid-2col">
+            <div class="modal-gender-tabs" role="tablist" aria-label="انتخاب فهرست تعرفه">
+              <button type="button" class="modal-gender-tab active" role="tab" aria-selected="true" data-gender="female">
+                <span class="tariff-gender-dot tariff-gender-dot--female"></span>
+                <span>بانوان</span>
+              </button>
+              <button type="button" class="modal-gender-tab" role="tab" aria-selected="false" data-gender="male">
+                <span class="tariff-gender-dot tariff-gender-dot--male"></span>
+                <span>آقایان</span>
+              </button>
+            </div>
+
+            <div class="modal-gender-pane" data-gender="female">
               <div class="form-group-item">
                 <label for="newServicePriceFemale" class="form-label-gold">تعرفه مصوب بانوان:</label>
                 <div class="input-with-hint">
@@ -839,7 +899,9 @@ for (const s of services) {
                   </div>
                 </div>
               </div>
+            </div>
 
+            <div class="modal-gender-pane" data-gender="male">
               <div class="form-group-item">
                 <label for="newServicePriceMale" class="form-label-gold">تعرفه مصوب آقایان:</label>
                 <div class="input-with-hint">
@@ -1108,6 +1170,160 @@ for (const s of services) {
       background: linear-gradient(135deg, #f5d77f, #d4af37);
       border-color: #f5d77f;
       box-shadow: 0 2px 10px rgba(212, 175, 55, 0.4);
+    }
+
+    /* ── Gender tariff switch — بانوان / آقایان lists are never mixed ── */
+    .tariff-gender-switch {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      width: 100%;
+      box-sizing: border-box;
+      margin-bottom: 14px;
+    }
+
+    .tariff-gender-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 7px;
+      min-width: 0;
+      padding: 10px 10px;
+      border-radius: 12px;
+      background: rgba(18, 22, 32, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #94a3b8;
+      font-family: inherit;
+      font-size: 0.84rem;
+      font-weight: 800;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+
+    .tariff-gender-btn:hover {
+      color: #f5d77f;
+      border-color: rgba(212, 175, 55, 0.45);
+      background: rgba(212, 175, 55, 0.08);
+    }
+
+    .tariff-gender-btn.active {
+      color: #121417;
+      background: linear-gradient(135deg, #f5d77f, #d4af37);
+      border-color: #f5d77f;
+      box-shadow: 0 2px 10px rgba(212, 175, 55, 0.45);
+    }
+
+    .tariff-gender-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .tariff-gender-dot--female {
+      background: #f472b6;
+      box-shadow: 0 0 7px rgba(244, 114, 182, 0.75);
+    }
+
+    .tariff-gender-dot--male {
+      background: #60a5fa;
+      box-shadow: 0 0 7px rgba(96, 165, 250, 0.75);
+    }
+
+    .tariff-gender-btn.active .tariff-gender-dot--female {
+      background: #be185d;
+      box-shadow: none;
+    }
+
+    .tariff-gender-btn.active .tariff-gender-dot--male {
+      background: #1d4ed8;
+      box-shadow: none;
+    }
+
+    .tariff-gender-count {
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 1px 7px;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.22);
+      border: 1px solid rgba(0, 0, 0, 0.25);
+      color: #f5d77f;
+      line-height: 1.5;
+    }
+
+    .tariff-gender-btn.active .tariff-gender-count {
+      background: rgba(18, 20, 23, 0.85);
+      border-color: rgba(18, 20, 23, 0.9);
+      color: #f5d77f;
+    }
+
+    /* Only the selected gender's tariff column / box is ever rendered on screen. */
+    #servicesPageRoot[data-tariff-gender="female"] .col-gender-male {
+      display: none !important;
+    }
+
+    #servicesPageRoot[data-tariff-gender="male"] .col-gender-female {
+      display: none !important;
+    }
+
+    /* ── Gender tabs inside the create/edit tariff panel ── */
+    .modal-gender-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .modal-gender-tab {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      min-width: 0;
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: rgba(18, 22, 32, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #94a3b8;
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .modal-gender-tab:hover {
+      color: #f5d77f;
+      border-color: rgba(212, 175, 55, 0.45);
+      background: rgba(212, 175, 55, 0.08);
+    }
+
+    .modal-gender-tab.active {
+      color: #121417;
+      background: linear-gradient(135deg, #f5d77f, #d4af37);
+      border-color: #f5d77f;
+      box-shadow: 0 2px 10px rgba(212, 175, 55, 0.45);
+    }
+
+    .modal-gender-tab.active .tariff-gender-dot--female {
+      background: #be185d;
+      box-shadow: none;
+    }
+
+    .modal-gender-tab.active .tariff-gender-dot--male {
+      background: #1d4ed8;
+      box-shadow: none;
+    }
+
+    .modal-gender-pane {
+      display: none;
+    }
+
+    .modal-tariffs-panel[data-gender="female"] .modal-gender-pane[data-gender="female"],
+    .modal-tariffs-panel[data-gender="male"] .modal-gender-pane[data-gender="male"] {
+      display: block;
     }
 
     .services-counter-indicator {
@@ -1432,7 +1648,7 @@ for (const s of services) {
 
     .card-mobile-tariffs {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr;
       gap: 10px;
       background: rgba(14, 18, 26, 0.7);
       border: 1px solid rgba(255, 255, 255, 0.08);
@@ -1817,6 +2033,26 @@ for (const s of services) {
         padding: 5px 8px;
         font-size: 0.76rem;
       }
+
+      .tariff-gender-btn {
+        padding: 8px 6px;
+        font-size: 0.76rem;
+        gap: 5px;
+      }
+
+      .tariff-gender-btn svg {
+        display: none;
+      }
+
+      .tariff-gender-count {
+        font-size: 0.68rem;
+        padding: 0 5px;
+      }
+
+      .modal-gender-tab {
+        font-size: 0.78rem;
+        padding: 8px 6px;
+      }
     }
   </style>
 
@@ -1825,6 +2061,10 @@ for (const s of services) {
     let activeCategory = 'all';
     let activeStatus = 'all';
     let searchQuery = '';
+    /** Which single gender tariff list is on screen — the two lists are never mixed. */
+    let activeGender: 'female' | 'male' = 'female';
+    /** sessionStorage key so the chosen list survives the save-triggered page reload. */
+    const GENDER_STORAGE_KEY = 'adminServices.tariffGender';
 
     // ── API error helpers ──────────────────────────────────────
     // The API responds with { error: { code, message, fields } } on 4xx.
@@ -1854,6 +2094,12 @@ for (const s of services) {
     const statusSelect = document.getElementById('statusFilterSelect') as HTMLSelectElement | null;
     const categoryBtns = document.querySelectorAll('.category-tab-btn');
     const counterDisplay = document.getElementById('servicesCounterIndicator');
+
+    // Gender tariff switch (page scope) + gender tabs inside the tariff panels
+    const pageRoot = document.getElementById('servicesPageRoot');
+    const genderSwitchBtns = document.querySelectorAll<HTMLButtonElement>('.tariff-gender-btn');
+    const editTariffsPanel = document.getElementById('editTariffsPanel');
+    const newTariffsPanel = document.getElementById('newTariffsPanel');
 
     const editModal = document.getElementById('serviceEditModal');
     const editForm = document.getElementById('editServiceForm') as HTMLFormElement | null;
@@ -1949,6 +2195,69 @@ for (const s of services) {
       });
     }
 
+    // ── Gender tariff list: one list on screen at a time ────────────────────
+    const genderLabel = (g: 'female' | 'male') => (g === 'female' ? 'بانوان' : 'آقایان');
+
+    /** Reveals exactly one gender's price field inside a create/edit tariff panel. */
+    function setPanelGender(panel: HTMLElement | null, gender: 'female' | 'male', focusInput = false) {
+      if (!panel) return;
+      panel.dataset.gender = gender;
+      panel.querySelectorAll<HTMLButtonElement>('.modal-gender-tab').forEach((tab) => {
+        const on = tab.dataset.gender === gender;
+        tab.classList.toggle('active', on);
+        tab.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      if (focusInput) {
+        const input = panel.querySelector<HTMLInputElement>(
+          `.modal-gender-pane[data-gender="${gender}"] input.price-input`,
+        );
+        if (input) window.setTimeout(() => input.focus(), 60);
+      }
+    }
+
+    /** Scopes the whole page (table columns + mobile tariff boxes) to ONE gender list. */
+    function setGenderList(gender: 'female' | 'male') {
+      activeGender = gender;
+      if (pageRoot) pageRoot.dataset.tariffGender = gender;
+      genderSwitchBtns.forEach((btn) => {
+        const on = btn.dataset.gender === gender;
+        btn.classList.toggle('active', on);
+        btn.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      try {
+        sessionStorage.setItem(GENDER_STORAGE_KEY, gender);
+      } catch {
+        /* storage unavailable — the switch still works for this page view */
+      }
+      applyFilters();
+    }
+
+    genderSwitchBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const gender = btn.dataset.gender as 'female' | 'male' | undefined;
+        if (gender && gender !== activeGender) setGenderList(gender);
+      });
+    });
+
+    // Saving a service reloads the page — restore the list the operator was editing
+    // so the gender they chose never silently flips back to بانوان.
+    try {
+      const savedGender = sessionStorage.getItem(GENDER_STORAGE_KEY);
+      if (savedGender === 'female' || savedGender === 'male') setGenderList(savedGender);
+    } catch {
+      /* keep the SSR default (بانوان) */
+    }
+
+    [editTariffsPanel, newTariffsPanel].forEach((panel) => {
+      if (!panel) return;
+      panel.querySelectorAll<HTMLButtonElement>('.modal-gender-tab').forEach((tab) => {
+        tab.addEventListener('click', () => {
+          const gender = tab.dataset.gender as 'female' | 'male' | undefined;
+          if (gender) setPanelGender(panel, gender, true);
+        });
+      });
+    });
+
     // Filter Logic
     function applyFilters() {
       const allRows = document.querySelectorAll<HTMLElement>('.service-row');
@@ -1987,7 +2296,7 @@ for (const s of services) {
       if (noResMobile) noResMobile.style.display = visibleMobile === 0 ? 'flex' : 'none';
 
       if (counterDisplay) {
-        counterDisplay.textContent = `نمایش ${visibleDesktop.toLocaleString('fa-IR')} خدمت`;
+        counterDisplay.textContent = `نمایش ${visibleDesktop.toLocaleString('fa-IR')} خدمت · فهرست تعرفه ${genderLabel(activeGender)}`;
       }
     }
 
@@ -2052,10 +2361,14 @@ for (const s of services) {
       if (editAlertBox) editAlertBox.style.display = 'none';
       editModal.style.display = 'flex';
 
-      if (focusTarget === 'female') {
-        setTimeout(() => editPriceFemaleInput.focus(), 100);
-      } else if (focusTarget === 'male') {
-        setTimeout(() => editPriceMaleInput.focus(), 100);
+      // The edit modal opens on the same single-gender list the page is showing
+      // (or the list the quick-edit pencil was clicked from).
+      const target: 'female' | 'male' = focusTarget || activeGender;
+      setPanelGender(editTariffsPanel, target);
+
+      if (focusTarget) {
+        const focusField = target === 'female' ? editPriceFemaleInput : editPriceMaleInput;
+        setTimeout(() => focusField.focus(), 100);
       } else {
         setTimeout(() => editNameInput.focus(), 100);
       }
@@ -2093,6 +2406,7 @@ for (const s of services) {
     if (openNewBtn && newModal) {
       openNewBtn.addEventListener('click', () => {
         if (newForm) newForm.reset();
+        setPanelGender(newTariffsPanel, activeGender);
         updateTomanPreview(newPriceFemaleInput, newFemalePreview);
         updateTomanPreview(newPriceMaleInput, newMalePreview);
         if (newAlertBox) newAlertBox.style.display = 'none';
@@ -2309,8 +2623,15 @@ for (const s of services) {
             return;
           }
 
-          const createdData = (await createRes.json()) as { id?: string };
-          const newId = createdData.id;
+          const createdData = (await createRes.json()) as { id?: string; data?: { id?: string } };
+          const newId = createdData.data?.id ?? createdData.id;
+          if (!newId) {
+            if (newAlertText) newAlertText.textContent = 'شناسه خدمت جدید از سرور برنگشت؛ تعرفه ثبت نشد.';
+            if (newAlertBox) newAlertBox.style.display = 'flex';
+            saveNewBtn.disabled = false;
+            saveNewBtn.textContent = 'ایجاد خدمت و ثبت تعرفه';
+            return;
+          }
 
           // Pricing promises
           const pricingPromises: Promise<Response>[] = [];
