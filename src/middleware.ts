@@ -14,7 +14,7 @@ function needsAuth(pathname: string): boolean {
   return pathname !== '/admin/login';
 }
 
-/** CSP exceptions are documented in docs/SECURITY.md — keep them in sync. 'unsafe-inline'
+/** CSP exceptions are documented in SECURITY.md — keep them in sync. 'unsafe-inline'
  *  for scripts is required by Astro's inline hydration preamble and React island bootstrap;
  *  'unsafe-eval' is deliberately absent (§86). */
 function applySecurityHeaders(response: Response): void {
