@@ -112,7 +112,7 @@ const priceRows: PriceRowView[] = services.map((s) => {
         <div class="hero-trust-metrics animate-fade-up delay-3">
           <div class="metric-item">
             <div class="metric-top">
-              <Icon name="clean" size={18} class="metric-icon" />
+              <Icon name="shield" size={18} class="metric-icon" />
               <span class="metric-val">۱۰۰٪</span>
             </div>
             <span class="metric-label">پک بهداشتی و سری استریل اختصاصی هر مراجع</span>
@@ -547,6 +547,36 @@ const priceRows: PriceRowView[] = services.map((s) => {
   .gpt-book-btn:hover {
     background: rgba(30, 36, 48, 0.7);
     border-color: rgba(16, 185, 129, 0.85);
+  }
+
+  /* ── Announcement strip (lane h1): never truncate, never overflow ──
+     public.css clamps the festival message to ONE ellipsis line at
+     ≤768px (`.announcement-inner span { white-space: nowrap; }`), so a
+     62-character sentence (~431px) lost its tail to "…" — the 15%
+     offer's "در رزرو آنلاین" disappeared exactly on 320/390px. The
+     message is instead allowed to wrap onto a second line, and the row
+     itself may wrap, so the booking pill can never force the strip
+     wider than the viewport. Full sentence at every width; the strip
+     only grows ~20px when it wraps. Page-scoped: no shared stylesheet
+     or layout file is touched. */
+  :global(.announcement-strip .announcement-inner) {
+    flex-wrap: wrap;
+    row-gap: 6px;
+  }
+
+  :global(.announcement-strip .announcement-inner > span) {
+    white-space: normal;
+    overflow: hidden;
+    text-overflow: clip;
+    line-height: 1.6;
+  }
+
+  /* Icon.astro renders `display: block`, so the sparkles glyph claimed a
+     line of its own and the strip measured 3 lines tall. Keep it inline
+     with the message's first line. */
+  :global(.announcement-strip .announcement-inner > span svg) {
+    display: inline-block;
+    vertical-align: -2px;
   }
 
   /* ── ≤768px: compact one-card-per-zone layout + prose collapse ──
