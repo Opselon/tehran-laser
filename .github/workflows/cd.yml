@@ -1,0 +1,73 @@
+name: CD
+
+# Deploys the built site to Cloudflare Workers (tehran-laser).
+#
+# REQUIRED REPOSITORY SECRET — the job degrades to a no-op notice if it is missing, so
+# adding this file is safe before the secret exists:
+#   CLOUDFLARE_API_TOKEN   (Worker Deploy:Edit on the account)
+#   CLOUDFLARE_ACCOUNT_ID  (optional; needed only if the token spans several accounts)
+#
+# NOTE: remote D1 migrations are deliberately NOT run here. `npm run db:migrate:remote` changes
+# the live database, so it must stay a deliberate human-triggered operation.
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'LICENSE'
+  workflow_dispatch:
+
+# One production deploy at a time; never cancel a deploy already in flight.
+concurrency:
+  group: cd-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy to Cloudflare Workers
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Check deploy credentials
+        id: creds
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "::notice title=Deploy skipped::CLOUDFLARE_API_TOKEN is not set as a repository secret, so nothing was deployed. Add it under Settings -> Secrets and variables -> Actions."
+          else
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Deploy
+        if: steps.creds.outputs.present == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx wrangler deploy
+
+      - name: Report deployment
+        if: steps.creds.outputs.present == 'true'
+        run: echo "Deployed commit $GITHUB_SHA"
