@@ -970,6 +970,25 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
     -webkit-overflow-scrolling: touch;
   }
 
+  /* The focusable region (tabindex=0, role=region) must itself be the scroll
+     container: on the markup side `.spec-table-wrap` carries the keyboard focus
+     while the `overflow-x: auto` lived only on `.spec-datasheet`, so arrow keys
+     moved nothing (scrollLeft stayed 0) and keyboard users could not reach the
+     table's left-hand columns. Giving the wrap its own overflow makes the
+     focused element the scroller; `.spec-datasheet` then has nothing left to
+     scroll and its rule goes inert. */
+  .spec-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(16, 185, 129, 0.5) transparent;
+  }
+
+  .spec-table-wrap:focus-visible {
+    outline: 2px solid var(--gold-primary, #34d399);
+    outline-offset: 4px;
+  }
+
   .spec-datasheet-head {
     display: flex;
     align-items: center;
