@@ -60,6 +60,9 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
   const containerRef = useRef<HTMLDivElement | null>(null);
   const headingRef = useRef<HTMLHeadingElement | null>(null);
   const idempotencyKey = useRef<string>(makeIdempotencyKey());
+  // A key must never be reused across two different bookings: the server
+  // replays the first booking on a repeated key, so the second reservation
+  // would silently never be created. Rotate it after every successful submit.
 
   /* ── Services ─────────────────────────────────────────────── */
 
@@ -268,6 +271,7 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
       const body = (await res.json()) as { data?: BookingSuccessResult; error?: { message?: string } };
       if (res.status === 201 && body.data) {
         setSuccessResult(body.data);
+        idempotencyKey.current = makeIdempotencyKey();
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else if (res.status === 409) {
         setErrorMessage(
@@ -296,6 +300,7 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
         result={successResult}
         onReset={() => {
           setSuccessResult(null);
+          idempotencyKey.current = makeIdempotencyKey();
           setCustomer(EMPTY_CUSTOMER);
           setSelectedSlot('');
           setSelectedDate('');
@@ -363,7 +368,7 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
                 </p>
               </div>
               <div className="quick-action-pills">
-                <button type="button" className="pill-quick-btn" onClick={() => setSelectedServiceSlugs(['underarm', 'bikini', 'full-legs'])}>
+                <button type="button" className="pill-quick-btn" onClick={() => { setSelectedServiceSlugs(['underarm', 'bikini', 'full-legs']); setErrorMessage(null); }}>
                   <IconReact name="sparkles" size={14} />
                   پکیج محبوب (زیر بغل + بیکینی + پا)
                 </button>
@@ -371,7 +376,7 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
                   <button
                     type="button"
                     className="pill-quick-btn text-muted"
-                    onClick={() => setSelectedServiceSlugs([])}
+                    onClick={() => { setSelectedServiceSlugs([]); setErrorMessage(null); }}
                   >
                     <IconReact name="close" size={14} />
                     پاک کردن ({selectedServiceSlugs.length.toLocaleString('fa-IR')})
@@ -465,7 +470,7 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
                   <div
                     key={g.key}
                     className={`gender-card ${isSel ? 'selected' : ''}`}
-                    onClick={() => setPricingCategory(g.key)}
+                    onClick={() => { setPricingCategory(g.key); setErrorMessage(null); }}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
