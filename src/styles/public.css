@@ -4166,6 +4166,13 @@ body.theme-dark-obsidian .clinic-direct-contact a { color: #6ee7b7; }
   overflow: hidden;
 }
 
+/* The drawer toggles visibility with the `hidden` attribute, but `display:flex`
+   above wins over the UA `[hidden]{display:none}` rule — without this override
+   the drawer sat permanently open over the page and the close button looked dead. */
+.basket-drawer[hidden] {
+  display: none;
+}
+
 .basket-head {
   display: flex;
   align-items: center;
