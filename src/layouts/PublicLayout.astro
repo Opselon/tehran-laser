@@ -143,6 +143,9 @@ const structuredData = jsonLd
     <meta name="theme-color" content="#0f766e" />
     <meta name="application-name" content="کلینیک تهران لیزر" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
+    <!-- Modern counterpart: Chrome logs the Apple-prefixed tag as deprecated
+         unless this one is present. Harmless to ship both. -->
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="تهران لیزر" />
     <link rel="manifest" href="/manifest.webmanifest" />
@@ -627,6 +630,20 @@ const structuredData = jsonLd
 
       @media (min-width: 769px) {
         .pwa-install { inset-block-end: 20px; }
+      }
+
+      @media (max-width: 768px) {
+        /* The sticky CTA occupies bottom 64px → ~132px. The install control was
+           left at bottom:78px, i.e. INSIDE that band, where .basket-fab
+           (z-index 95 vs 94) sat directly on top of it — elementFromPoint at
+           this button's centre returned .basket-fab, so it was unclickable.
+           Lift it clear and mirror it to the leading edge so the two floats
+           never share an anchor point. */
+        .pwa-install {
+          inset-block-end: calc(144px + env(safe-area-inset-bottom, 0px));
+          inset-inline-end: auto;
+          inset-inline-start: 14px;
+        }
       }
     </style>
   </body>

@@ -4280,7 +4280,12 @@ body.theme-dark-obsidian .clinic-direct-contact a { color: #6ee7b7; }
 
 /* Basket FAB only on mobile (sits above the bottom nav); hidden on desktop */
 @media (max-width: 768px) {
-  .basket-fab { display: inline-flex; }
+  .basket-fab {
+    display: inline-flex;
+    /* Was bottom:76px — inside the .mobile-sticky-bar band (64px → ~132px),
+       so the sticky CTA ran straight through this button. Lift it clear. */
+    inset-block-end: calc(144px + env(safe-area-inset-bottom, 0px));
+  }
 }
 @media (min-width: 769px) {
   .basket-fab { display: none; }
