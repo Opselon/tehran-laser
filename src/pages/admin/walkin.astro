@@ -268,10 +268,18 @@ try {
       min-width: 0;
       flex-wrap: wrap;
       text-align: center;
+      /* .btn-3d-accept sets white-space:nowrap, which makes flex-wrap a no-op:
+         the label stayed on one line and pushed the document to
+         scrollWidth 364 vs clientWidth 320 (44px of horizontal overflow at
+         320px — visually a ~45px dead strip on the left with the card's right
+         edge clipped). Let the label actually break. */
+      white-space: normal;
     }
 
     .btn-3d-accept.walkin-submit-btn > span {
       min-width: 0;
+      white-space: normal;
+      overflow-wrap: anywhere;
     }
 
     @media (max-width: 420px) {
