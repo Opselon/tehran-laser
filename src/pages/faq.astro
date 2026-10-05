@@ -432,6 +432,9 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
   <!-- Interactive Client-side Script: Real-time Search & Category Filtering -->
   <script is:inline>
     (function() {
+      var FA_DIGITS = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
+      function toFa(n) { return String(n).replace(/\d/g, function (d) { return FA_DIGITS[+d]; }); }
+
       var searchInput = document.getElementById('faqSearchInput');
       var searchClear = document.getElementById('faqSearchClear');
       var counterText = document.getElementById('faqCounterText');
@@ -462,9 +465,9 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
           }
         });
 
-        // Update counter
+        // Update counter (Persian digits per contract rule 8)
         if (counterText) {
-          counterText.textContent = 'نمایش ' + visibleCount + ' سوال از کل ' + cards.length + ' سوال';
+          counterText.textContent = 'نمایش ' + toFa(visibleCount) + ' سوال از کل ' + toFa(cards.length) + ' سوال';
         }
 
         // Show/hide empty state
@@ -830,6 +833,13 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
     }
     .faq-hero-strip {
       padding: 40px 12px 28px;
+    }
+    .faq-search-input {
+      font-size: 0.85rem;
+    }
+    .faq-search-input::placeholder {
+      font-size: 0.8rem;
+      opacity: 0.85;
     }
     .faq-summary {
       padding: 16px 14px;
