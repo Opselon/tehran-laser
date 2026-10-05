@@ -363,23 +363,29 @@ const structuredData = jsonLd
       </div>
     </nav>
 
-    <!-- Sticky Mobile CTA (§140, §141) -->
+    <!-- Sticky Mobile CTA (§140, §141) — ONE slim row instead of the old
+         two-tier stack (floating cart/install chips above a separate bar,
+         which burned 194px = 23% of a 390x844 viewport).
+         · تماس is dropped from this row: the bottom nav right below it
+           already carries تماس as its 4th tab, so it was a duplicate.
+         · سبد and نصب moved IN here as icon-only chips (aria-label keeps
+           their accessible names), so the floating tier disappears. -->
     <div class="mobile-sticky-bar">
-      <a href="tel:+989035555090" class="btn btn-outline sticky-phone" aria-label="تماس تلفنی">
-        <span><Icon name="phone" size={16} aria-hidden /> تماس</span>
-      </a>
       <a href="/booking" class="btn btn-primary sticky-book">
         <span>رزرو آنلاین نوبت</span>
         <span class="promo-tag">۱۵٪ تخفیف</span>
       </a>
+      <button id="basketFab" class="basket-fab" type="button" aria-expanded="false" aria-controls="basketDrawer" aria-label="سبد سفارش">
+        <Icon name="shoppingBag" size={20} aria-hidden />
+        <span class="basket-fab-label">سبد</span>
+        <span id="basketCount" class="basket-count" hidden>0</span>
+      </button>
+      <!-- PWA install control (A3) — revealed only on beforeinstallprompt -->
+      <button id="pwaInstallBtn" class="pwa-install" type="button" aria-label="نصب اپلیکیشن" hidden>
+        <Icon name="sparkles" size={18} aria-hidden />
+        <span class="pwa-install-label">نصب اپلیکیشن</span>
+      </button>
     </div>
-
-    <!-- A4 · ORDER BASKET (سبد سفارش) — FAB + drawer, sessionStorage-persisted -->
-    <button id="basketFab" class="basket-fab" type="button" aria-expanded="false" aria-controls="basketDrawer" aria-label="سبد سفارش">
-      <Icon name="shoppingBag" size={20} aria-hidden />
-      <span class="basket-fab-label">سبد</span>
-      <span id="basketCount" class="basket-count" hidden>0</span>
-    </button>
 
     <div id="basketDrawer" class="basket-drawer" role="dialog" aria-modal="true" aria-label="سبد سفارش خدمات" hidden>
       <div class="basket-head">
@@ -402,12 +408,6 @@ const structuredData = jsonLd
       </div>
     </div>
     <div id="basketScrim" class="basket-scrim" hidden></div>
-
-    <!-- PWA install control (A3) — revealed only on beforeinstallprompt -->
-    <button id="pwaInstallBtn" class="pwa-install" type="button" hidden>
-      <Icon name="sparkles" size={16} aria-hidden />
-      <span>نصب اپلیکیشن</span>
-    </button>
 
     <!-- Client-side navigation toggle script -->
     <script is:inline>
@@ -614,48 +614,37 @@ const structuredData = jsonLd
         outline-offset: 2px;
       }
 
-      /* A3 · Install control — obsidian/gold, ≥44px tap target */
+      /* A3 · Install control — an in-bar icon chip, ≥44px tap target.
+         It used to be a floating pill that needed its own 52px tier above
+         the dock (inset-block-end:144px) to escape .basket-fab; now that it
+         lives INSIDE .mobile-sticky-bar, positioning is static and the two
+         can no longer fight over an anchor point at all. */
       .pwa-install {
-        position: fixed;
-        inset-block-end: calc(78px + env(safe-area-inset-bottom, 0px));
-        inset-inline-end: 14px;
-        z-index: 94;
+        position: static;
         display: inline-flex;
         align-items: center;
-        gap: 8px;
+        justify-content: center;
+        flex: 0 0 auto;
+        min-width: 44px;
         min-height: 44px;
-        padding: 11px 18px;
+        padding: 0;
         background: var(--color-ink-bg-soft, #211d18);
         color: var(--gold-400, #34d399);
         border: 1px solid rgba(52, 211, 153, 0.5);
         border-radius: 999px;
         font-family: inherit;
-        font-size: 0.85rem;
         font-weight: 700;
         cursor: pointer;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
+        box-shadow: none;
       }
 
       .pwa-install[hidden] { display: none !important; }
       .pwa-install:hover { border-color: var(--gold-400, #6ee7b7); }
 
-      @media (min-width: 769px) {
-        .pwa-install { inset-block-end: 20px; }
-      }
-
-      @media (max-width: 768px) {
-        /* The sticky CTA occupies bottom 64px → ~132px. The install control was
-           left at bottom:78px, i.e. INSIDE that band, where .basket-fab
-           (z-index 95 vs 94) sat directly on top of it — elementFromPoint at
-           this button's centre returned .basket-fab, so it was unclickable.
-           Lift it clear and mirror it to the leading edge so the two floats
-           never share an anchor point. */
-        .pwa-install {
-          inset-block-end: calc(144px + env(safe-area-inset-bottom, 0px));
-          inset-inline-end: auto;
-          inset-inline-start: 14px;
-        }
-      }
+      /* Icon-only inside the bar — the aria-label on the button carries the
+         accessible name, so hiding this span costs nothing for screen
+         readers or for the reported hit target. */
+      .pwa-install-label { display: none; }
     </style>
   </body>
 </html>

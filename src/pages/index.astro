@@ -1009,36 +1009,17 @@ function faDigits(value: string): string {
 
 
   /* ─────────────────────────────────────────────────────────────
-     h2 lane · BOTTOM DOCK — sticky CTA bar + bottom nav crowding.
-     DEFECT: .mobile-sticky-bar sat at bottom:64px while the bottom
-     nav is only 51.4px tall, leaving a 12.6px see-through sliver
-     between the two fixed bars (page text scrolled visibly through
-     it). FIX: drop the bar to bottom:0 and pay its former 64px
-     offset back as padding-bottom (64 + the bar's own 10px content
-     padding), so every button keeps its exact y-position while the
-     bar's own slab now covers the sliver down to the viewport edge.
-     The nav (z-index 96 > 95) paints over the bar's lower part, so
-     the two read as one solid dock with the nav's green hairline as
-     the only separator. Safe-area is added back on notched devices
-     so the buttons stay 12.6px above the nav there too.
-     Specificity: html body .mobile-sticky-bar beats the
-     .mobile-sticky-bar rules in shared public.css regardless of
-     source order (page-scoped fix — lead may lift it later).
-     ───────────────────────────────────────────────────────────── */
-  @media (max-width: 768px) {
-    :global(html body .mobile-sticky-bar) {
-      bottom: 0;
-      padding-bottom: calc(74px + env(safe-area-inset-bottom, 0px));
-    }
+     BOTTOM DOCK — the h2-lane page-scoped override was lifted into
+     shared public.css when the dock was made minimal: the cart and
+     install chips now live INSIDE .mobile-sticky-bar instead of
+     floating in their own 52px tier, so the dock dropped from 194px
+     (23% of a 390x844 viewport) to ~112px.
 
-    /* The basket FAB shared the dock band (bottom:76px inside the old
-       64→132px bar), painting over the left edge of the green Book
-       button. Float it clear above the dock: dock is 134px tall, so
-       142px leaves an 8px gap above it. */
-    :global(html body .basket-fab) {
-      bottom: calc(142px + env(safe-area-inset-bottom, 0px));
-    }
-  }
+     Do NOT re-add `html body .mobile-sticky-bar` here: it beats the
+     shared .mobile-sticky-bar rule on specificity regardless of source
+     order, and would silently restore the old bottom/padding geometry
+     (and the floating tier / empty slab that came with it).
+     ───────────────────────────────────────────────────────────── */
 
 
   /* ── Instagram preview + closing CTA (salvaged from .w-h4 lane) ── */

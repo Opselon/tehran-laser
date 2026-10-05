@@ -2501,9 +2501,6 @@ body.theme-dark-obsidian .section-subtitle {
   align-items: center;
 }
 
-.sticky-phone {
-  flex: 0 0 auto;
-}
 
 .sticky-book {
   flex: 1;
@@ -2625,7 +2622,7 @@ body.theme-dark-obsidian .section-subtitle {
   }
 
   body {
-    padding-bottom: 74px;
+    padding-bottom: 112px;
   }
 }
 
@@ -3950,11 +3947,6 @@ body.theme-dark-obsidian .mobile-sticky-bar {
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
 }
 
-body.theme-dark-obsidian .sticky-phone {
-  background: rgba(20, 24, 34, 0.85);
-  border: 1px solid rgba(52, 211, 153, 0.35);
-  color: #34d399 !important;
-}
 
 body.theme-dark-obsidian .sticky-book {
   background-color: #34d399;
@@ -4106,14 +4098,21 @@ body.theme-dark-obsidian .clinic-direct-contact a { color: #6ee7b7; }
   .bottom-nav { display: block; }
 
   /* Stack the sticky CTA above the bottom nav — never overlap */
+  /* The dock is ONE row now: cart + install chips live INSIDE the bar instead
+     of floating above it in their own 52px tier. bottom:0 with padding-bottom
+     equal to the nav height parks the row exactly on top of the nav — no
+     floating tier and no empty slab between them. 52px (the nav measures
+     51.4px) leaves a 1px sliver of the bar's OWN background, never a
+     see-through gap, and the nav's z-index:96 paints over that sliver. */
   .mobile-sticky-bar {
     display: flex;
-    bottom: 64px;
-    padding-bottom: 10px;
+    bottom: 0;
+    gap: 8px;
+    padding: 8px 12px calc(52px + env(safe-area-inset-bottom, 0px));
   }
 
   body {
-    padding-bottom: calc(138px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(112px + env(safe-area-inset-bottom, 0px));
   }
 }
 
@@ -4136,14 +4135,14 @@ body.theme-dark-obsidian .clinic-direct-contact a { color: #6ee7b7; }
 }
 .basket-fab {
   display: none;
-  position: fixed;
-  inset-block-end: calc(76px + env(safe-area-inset-bottom, 0px));
-  inset-inline-end: 14px;
-  z-index: 95;
-  min-width: 52px;
-  min-height: 52px;
-  padding: 10px 16px;
-  gap: 7px;
+  /* Lives INSIDE .mobile-sticky-bar now — the floating 52px FAB tier that
+     used to sit above the dock is gone, so there is nothing to anchor to. */
+  position: static;
+  flex: 0 0 auto;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 6px;
+  gap: 4px;
   align-items: center;
   justify-content: center;
   flex-direction: row;
@@ -4155,10 +4154,14 @@ body.theme-dark-obsidian .clinic-direct-contact a { color: #6ee7b7; }
   font-size: 0.85rem;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 10px 26px rgba(4, 33, 29, 0.4), 0 0 0 3px rgba(16, 185, 129, 0.14);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: none;
 }
-.basket-fab:hover { transform: translateY(-2px); }
+.basket-fab:hover { border-color: var(--color-primary, #34d399); }
+/* Icon-only inside the bar: the button's aria-label="سبد سفارش" carries the
+   accessible name, so hiding this span costs screen readers nothing. */
+.basket-fab-label {
+  display: none;
+}
 .basket-fab:focus-visible {
   outline: 2px solid var(--color-primary, #34d399);
   outline-offset: 3px;
@@ -4314,13 +4317,10 @@ body.theme-dark-obsidian .clinic-direct-contact a { color: #6ee7b7; }
 }
 .basket-clear:hover { color: #fca5a5; }
 
-/* Basket FAB only on mobile (sits above the bottom nav); hidden on desktop */
+/* Basket chip only on mobile (the bar it sits in is mobile-only) */
 @media (max-width: 768px) {
   .basket-fab {
     display: inline-flex;
-    /* Was bottom:76px — inside the .mobile-sticky-bar band (64px → ~132px),
-       so the sticky CTA ran straight through this button. Lift it clear. */
-    inset-block-end: calc(144px + env(safe-area-inset-bottom, 0px));
   }
 }
 @media (min-width: 769px) {
@@ -4444,14 +4444,10 @@ body.theme-dark-obsidian .clinic-direct-contact a { color: #6ee7b7; }
   }
 
   .mobile-sticky-bar {
-    padding: 8px 10px calc(8px + env(safe-area-inset-bottom, 0px));
+    padding: 8px 10px calc(52px + env(safe-area-inset-bottom, 0px));
     gap: 6px;
   }
 
-  .sticky-phone {
-    padding: 8px 10px;
-    font-size: 0.775rem;
-  }
 
   .sticky-book {
     padding: 8px 10px;
