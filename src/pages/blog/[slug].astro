@@ -12,6 +12,27 @@ if (!slug) return Astro.redirect('/blog');
 const post = await findPublicBlogPostBySlug(env.DB, slug);
 if (!post) return Astro.redirect('/404');
 
+/**
+ * The public image CSP is `img-src 'self' data: blob:`, so an off-site cover
+ * is refused before it ever loads: that logs a CSP error in the console and
+ * leaves a broken image behind. Treat covers the CSP would reject as absent so
+ * the built-in CSS fallback renders instead.
+ */
+function cspSafeCover(url: string | null | undefined): string | undefined {
+  if (!url) return undefined;
+  const value = url.trim();
+  if (!value) return undefined;
+  if (value.startsWith('data:') || value.startsWith('blob:')) return value;
+  if (value.startsWith('/') && !value.startsWith('//')) return value;
+  try {
+    if (new URL(value, Astro.url.origin).origin === Astro.url.origin) return value;
+  } catch {
+    // Unparsable reference — never emit it.
+  }
+  return undefined;
+}
+
+
 // Related posts (same published set, exclude current)
 let related: Awaited<ReturnType<typeof listPublicBlogPosts>>['items'] = [];
 try {
@@ -25,6 +46,7 @@ const readingMinutes = Math.max(
   3,
   Math.ceil(post.content.replace(/<[^>]*>/g, ' ').trim().split(/\s+/).filter(Boolean).length / 150),
 );
+const articleCover = cspSafeCover(post.coverImage);
 
 // Table of contents extracted from H2/H3 headings in the article body
 interface TocItem {
@@ -189,10 +211,10 @@ const blogJsonLdArray = [articleJsonLd, breadcrumbJsonLd];
 
         <!-- Main Article Column -->
         <article class="article-main-col">
-          {post.coverImage && (
+          {articleCover && (
             <div class="article-cover-wrap" id="articleCoverWrap">
               <img
-                src={post.coverImage}
+                src={articleCover}
                 alt={post.title}
                 class="article-cover-img"
                 loading="eager"
@@ -319,9 +341,9 @@ const blogJsonLdArray = [articleJsonLd, breadcrumbJsonLd];
           <div class="related-grid">
             {related.map((rp) => (
               <a href={`/blog/${rp.slug}`} class="related-card">
-                {rp.coverImage ? (
+                {cspSafeCover(rp.coverImage) ? (
                   <div class="related-img-wrap">
-                    <img src={rp.coverImage} alt={rp.title} class="related-img" loading="lazy" />
+                    <img src={cspSafeCover(rp.coverImage)} alt={rp.title} class="related-img" loading="lazy" />
                   </div>
                 ) : (
                   <div class="related-img-wrap related-img-fallback">

@@ -411,6 +411,14 @@ const priceRows: PriceRowView[] = services.map((s) => {
 </PublicLayout>
 
 <style>
+  /* ── Lane x4: contrast (page-scoped) ──────────────────────────
+     The shared teal eyebrow lands at 3.59:1 on this page's
+     near-black section background (WCAG AA body needs 4.5:1).
+     Brightened to the existing emerald stop → 7.7:1. */
+  .section-subtitle {
+    color: #10b981;
+  }
+
   /* ─────────────────────────────────────────────────────────────
      Unified gender price table (Lane B) — self-contained.
      Colour contract: light text on obsidian only. Explicit rgba

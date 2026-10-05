@@ -15,6 +15,27 @@ try {
 
 const allPosts = postsPage.items;
 
+/**
+ * The public image CSP is `img-src 'self' data: blob:`, so an off-site cover
+ * is refused before it ever loads: that logs a CSP error in the console and
+ * leaves a broken image behind. Treat covers the CSP would reject as absent so
+ * the built-in CSS fallback renders instead.
+ */
+function cspSafeCover(url: string | null | undefined): string | undefined {
+  if (!url) return undefined;
+  const value = url.trim();
+  if (!value) return undefined;
+  if (value.startsWith('data:') || value.startsWith('blob:')) return value;
+  if (value.startsWith('/') && !value.startsWith('//')) return value;
+  try {
+    if (new URL(value, Astro.url.origin).origin === Astro.url.origin) return value;
+  } catch {
+    // Unparsable reference — never emit it.
+  }
+  return undefined;
+}
+
+
 function getReadingTime(text: string): number {
   const words = (text || '').trim().split(/\s+/).filter(Boolean).length;
   return Math.max(3, Math.ceil(words / 150));
@@ -36,6 +57,7 @@ function getCategory(title: string, excerpt: string): { id: string; label: strin
 
 const featuredPost = allPosts.length > 0 ? allPosts[0] : null;
 const regularPosts = allPosts.length > 1 ? allPosts.slice(1) : [];
+const featuredCover = cspSafeCover(featuredPost?.coverImage);
 
 const categories = [
   { id: 'all', label: 'همه مقالات', icon: 'list' },
@@ -146,9 +168,9 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
             <section class="featured-article-section" id="featuredSection" data-category={getCategory(featuredPost.title, featuredPost.excerpt).id}>
               <article class="featured-card-3d">
                 <div class="featured-image-col">
-                  {featuredPost.coverImage ? (
+                  {featuredCover ? (
                     <img
-                      src={featuredPost.coverImage}
+                      src={featuredCover}
                       alt={featuredPost.title}
                       class="featured-img"
                       loading="eager"
@@ -216,12 +238,13 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
               {(regularPosts.length > 0 ? regularPosts : allPosts).map((post) => {
                 const cat = getCategory(post.title, post.excerpt);
                 const readMinutes = getReadingTime(post.excerpt);
+                const postCover = cspSafeCover(post.coverImage);
                 return (
                   <article class="article-card-3d" data-category={cat.id}>
                     <div class="article-card-img-wrap">
-                      {post.coverImage ? (
+                      {postCover ? (
                         <img
-                          src={post.coverImage}
+                          src={postCover}
                           alt={post.title}
                           class="article-card-img"
                           loading="lazy"

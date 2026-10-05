@@ -127,4 +127,11 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
       font-size: 0.78rem;
     }
   }
+
+  /* public.css themes .section-subtitle for light surfaces
+     (--color-accent-on-light); on this dark header it measured 3.31:1.
+     Accent-on-dark restores AA (9.45:1 on the obsidian background). */
+  .booking-page-header .section-subtitle {
+    color: var(--gold-400);
+  }
 </style>
