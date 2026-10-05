@@ -2207,7 +2207,9 @@ body.theme-dark-obsidian .section-subtitle {
   width: 100%;
   padding: 12px 16px;
   font-family: inherit;
-  font-size: 0.95rem;
+  /* 0.95rem = 15.2px: iOS Safari auto-zooms the viewport when a text
+     input is below 16px. 1rem is the documented no-zoom threshold. */
+  font-size: 1rem;
   border: 1.5px solid var(--color-border-strong);
   border-radius: 12px;
   background: #ffffff;
