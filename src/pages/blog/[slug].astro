@@ -1242,6 +1242,33 @@ const blogJsonLdArray = [articleJsonLd, breadcrumbJsonLd];
         line-height: 1.95;
       }
     }
+
+    /* ── Announcement strip (lane h1 fix ported to /blog/[slug]): public.css
+       clamps the festival message to ONE ellipsis line at ≤768px
+       (`.announcement-inner span { white-space: nowrap; }`), so the ~62-char
+       sentence (~345px) lost its tail ("در رزرو آنلاین") at 320/390px —
+       measured: span.scrollWidth 345 vs clientWidth 189/259. Let the message
+       wrap and let the row wrap so the booking pill can never force the strip
+       wider than the viewport. Page-scoped: no shared stylesheet or layout
+       file is touched. */
+    :global(.announcement-strip .announcement-inner) {
+      flex-wrap: wrap;
+      row-gap: 6px;
+    }
+
+    :global(.announcement-strip .announcement-inner > span) {
+      white-space: normal;
+      overflow: hidden;
+      text-overflow: clip;
+      line-height: 1.6;
+    }
+
+    /* Icon.astro renders `display: block`, so the glyph would claim a line of
+       its own; keep it inline with the first line of the message. */
+    :global(.announcement-strip .announcement-inner > span svg) {
+      display: inline-block;
+      vertical-align: -2px;
+    }
   </style>
 
   <script>
