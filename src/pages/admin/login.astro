@@ -1,7 +1,8 @@
 ---
-import '@fontsource-variable/vazirmatn/index.css';
-import '../../styles/tokens.css';
+import '../../styles/admin/login-fonts.css';
+import '../../styles/admin/login-critical.css';
 import '../../styles/admin/login-3d.css';
+import '../../styles/admin/login-touch.css';
 import Icon from '../../components/ui/Icon.astro';
 
 const auth = Astro.locals.auth;
@@ -18,276 +19,6 @@ if (auth) {
     <title>ورود پرسنل به سامانه مدیریت | کلینیک تخصصی تهران لیزر</title>
     <meta name="robots" content="noindex, nofollow" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <style is:global>
-      /* Fallback & Critical Inlined 3D Styles to guarantee immediate 3D rendering */
-      :root {
-        --gold-glow: rgba(212, 175, 55, 0.35);
-        --gold-primary: #d4af37;
-        --gold-light: #f5d77f;
-        --obsidian-bg: #07090e;
-        --obsidian-card: rgba(14, 18, 27, 0.92);
-        --obsidian-input: rgba(8, 11, 18, 0.95);
-      }
-      *, *::before, *::after {
-        box-sizing: border-box;
-      }
-      body {
-        margin: 0;
-        padding: 0;
-        background-color: #07090e !important;
-        font-family: 'Vazirmatn Variable', 'Vazirmatn', system-ui, -apple-system, sans-serif;
-        color: #f0f2f5;
-        direction: rtl;
-        overflow-x: hidden;
-        width: 100%;
-        max-width: 100vw;
-        min-height: 100vh;
-        min-height: 100dvh;
-      }
-      .admin-login-body-3d {
-        min-height: 100vh;
-        min-height: 100dvh;
-        width: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        position: relative;
-        background: radial-gradient(circle at 50% 20%, rgba(197, 160, 89, 0.14) 0%, transparent 65%), #07090e;
-        overflow-x: hidden;
-      }
-      .login-3d-viewport {
-        position: relative;
-        z-index: 10;
-        width: 100%;
-        max-width: min(480px, calc(100vw - 24px));
-        padding: 24px 12px;
-        perspective: 1400px;
-        box-sizing: border-box;
-      }
-      .login-3d-card {
-        background: var(--obsidian-card);
-        backdrop-filter: blur(28px) saturate(190%);
-        -webkit-backdrop-filter: blur(28px) saturate(190%);
-        border: 1.5px solid rgba(212, 175, 55, 0.42);
-        border-radius: 26px;
-        padding: 38px 32px;
-        box-shadow:
-          0 40px 100px -15px rgba(0, 0, 0, 0.95),
-          0 20px 50px -10px rgba(197, 160, 89, 0.28),
-          inset 0 1px 1px 0 rgba(255, 255, 255, 0.22),
-          inset 0 -1px 2px 0 rgba(212, 175, 55, 0.15);
-        transform-style: preserve-3d;
-        transition: transform 0.12s ease-out;
-        box-sizing: border-box;
-        width: 100%;
-      }
-      @media (max-width: 480px) {
-        .login-3d-viewport {
-          padding: 16px 8px;
-        }
-        .login-3d-card {
-          padding: 28px 18px;
-          border-radius: 20px;
-        }
-      }
-      @media (max-width: 360px) {
-        .login-3d-card {
-          padding: 22px 14px;
-          border-radius: 16px;
-        }
-      }
-
-      /* Input 3D styling */
-      .input-3d {
-        width: 100%;
-        background: var(--obsidian-input);
-        border: 1.5px solid rgba(212, 175, 55, 0.25);
-        border-radius: 14px;
-        padding: 13px 44px 13px 16px;
-        font-family: inherit;
-        font-size: 0.96rem;
-        color: #ffffff;
-        outline: none;
-        box-sizing: border-box;
-        transition: border-color 0.2s ease, box-shadow 0.2s ease;
-      }
-      .input-3d:focus {
-        border-color: rgba(212, 175, 55, 0.75);
-        box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.25);
-      }
-      .input-3d.has-error {
-        border-color: #ef4444;
-        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.25);
-      }
-      .input-3d-wrapper {
-        position: relative;
-        display: flex;
-        align-items: center;
-        width: 100%;
-      }
-      .input-prefix-icon {
-        position: absolute;
-        right: 14px;
-        color: #d4af37;
-        pointer-events: none;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 2;
-      }
-      .password-toggle-btn {
-        position: absolute;
-        left: 12px;
-        background: none;
-        border: none;
-        color: #94a3b8;
-        cursor: pointer;
-        padding: 4px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        transition: color 0.15s ease;
-        z-index: 2;
-      }
-      .password-toggle-btn:hover {
-        color: #f5d77f;
-      }
-
-      .btn-3d-submit {
-        width: 100%;
-        background: linear-gradient(180deg, #f0cf75 0%, #cba24f 40%, #997224 100%);
-        color: #1a1405;
-        border: none;
-        border-radius: 16px;
-        padding: 15px 22px;
-        font-family: inherit;
-        font-size: 1.02rem;
-        font-weight: 800;
-        cursor: pointer;
-        box-shadow: 0 8px 0 #6e4e13, 0 16px 30px rgba(203, 162, 79, 0.45);
-        margin-top: 16px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-        transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease;
-      }
-      .btn-3d-submit:hover:not(:disabled) {
-        transform: translateY(-2px);
-        filter: brightness(1.06);
-        box-shadow: 0 10px 0 #6e4e13, 0 20px 36px rgba(203, 162, 79, 0.55);
-      }
-      .btn-3d-submit:active:not(:disabled) {
-        transform: translateY(2px);
-        box-shadow: 0 4px 0 #6e4e13;
-      }
-      .btn-3d-submit:disabled {
-        opacity: 0.7;
-        cursor: not-allowed;
-      }
-
-      /* Alert Notifications */
-      .alert-3d-danger {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        background: rgba(239, 68, 68, 0.12);
-        border: 1px solid rgba(239, 68, 68, 0.38);
-        border-radius: 14px;
-        padding: 12px 16px;
-        margin-bottom: 20px;
-        color: #fca5a5;
-        font-size: 0.88rem;
-        line-height: 1.5;
-        animation: shakeError 0.35s ease;
-      }
-      .alert-3d-lockout {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        background: linear-gradient(160deg, rgba(239, 68, 68, 0.15) 0%, rgba(185, 28, 28, 0.25) 100%);
-        border: 1.5px solid rgba(248, 113, 113, 0.55);
-        border-radius: 16px;
-        padding: 16px;
-        margin-bottom: 20px;
-        color: #fecaca;
-        font-size: 0.86rem;
-        line-height: 1.6;
-        box-shadow: 0 0 24px rgba(239, 68, 68, 0.25);
-        animation: pulseLockout 2s infinite ease-in-out;
-      }
-      @keyframes pulseLockout {
-        0%, 100% { border-color: rgba(248, 113, 113, 0.55); }
-        50% { border-color: rgba(248, 113, 113, 0.95); box-shadow: 0 0 32px rgba(239, 68, 68, 0.4); }
-      }
-      @keyframes shakeError {
-        0%, 100% { transform: translateX(0); }
-        20%, 60% { transform: translateX(-6px); }
-        40%, 80% { transform: translateX(6px); }
-      }
-
-      .field-error-msg {
-        font-size: 0.78rem;
-        color: #f87171;
-        margin-top: 5px;
-        display: none;
-      }
-
-      /* Spin icon animation */
-      .spin-icon {
-        animation: spinAnim 1s linear infinite;
-      }
-      @keyframes spinAnim {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
-      }
-
-      .btn-autofill-3d {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        width: 100%;
-        background: rgba(255, 255, 255, 0.04);
-        border: 1px solid rgba(212, 175, 55, 0.28);
-        border-radius: 12px;
-        color: #d4af37;
-        font-family: inherit;
-        font-size: 0.85rem;
-        font-weight: 700;
-        padding: 10px 14px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-      }
-      .btn-autofill-3d:hover {
-        background: rgba(212, 175, 55, 0.12);
-        border-color: rgba(212, 175, 55, 0.6);
-        color: #f5d77f;
-      }
-
-      .telemetry-status {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        font-size: 0.76rem;
-        color: #94a3b8;
-        flex-wrap: wrap;
-        text-align: center;
-      }
-      .status-dot-pulse {
-        width: 7px;
-        height: 7px;
-        border-radius: 50%;
-        background: #10b981;
-        box-shadow: 0 0 8px #10b981;
-        animation: dotPulse 1.6s infinite ease-in-out;
-      }
-      @keyframes dotPulse {
-        0%, 100% { opacity: 1; transform: scale(1); }
-        50% { opacity: 0.4; transform: scale(0.8); }
-      }
-    </style>
   </head>
   <body class="admin-login-body-3d">
     <!-- 3D Interactive Canvas & Lights Background -->
@@ -334,7 +65,7 @@ if (auth) {
 
           <div class="login-3d-badge">
             <Icon name="shield" size={13} />
-            <span>نسخه امن پرسنلی v3.2</span>
+            <span>نسخه امن پرسنلی v۳.۲</span>
           </div>
           <h1 class="login-3d-title">ورود به پنل مدیریت کلینیک</h1>
           <p class="login-3d-subtitle">
@@ -353,7 +84,7 @@ if (auth) {
           </div>
           <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(248,113,113,0.3); padding-top: 8px; font-size: 0.8rem;">
             <span>مدت زمان باقیمانده تا آزادسازی:</span>
-            <span id="lockoutTimer" dir="ltr" style="font-family: monospace; font-weight: 800; color: #fbbf24;">10:00</span>
+            <span id="lockoutTimer" dir="ltr" style="font-variant-numeric: tabular-nums; font-weight: 800; color: #fbbf24;">۱۰:۰۰</span>
           </div>
         </div>
 
@@ -398,7 +129,7 @@ if (auth) {
                 id="adminPassword"
                 type="password"
                 dir="ltr"
-                class="input-3d"
+                class="input-3d has-toggle"
                 placeholder="••••••••••••"
                 required
                 autocomplete="current-password"
@@ -459,9 +190,19 @@ if (auth) {
 
     <!-- Client-Side 3D Physics & Canvas Script -->
     <script>
+      // A finger can steer neither the parallax nor the tilt, so both
+      // effects are opt-in behind a fine pointer on a desktop-sized view.
+      const finePointer = window.matchMedia('(pointer: fine)').matches;
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
       // 1. Particle Constellation 3D Canvas
+      // 55 particles, ~1.5k pair distance checks and a shadowBlur repaint
+      // per frame on an unbounded rAF loop. Worth it on a mouse-driven
+      // desktop; pure battery cost on a phone, where the canvas is hidden
+      // anyway — so it is never started there.
       const canvas = document.getElementById('particle3dCanvas') as HTMLCanvasElement;
-      if (canvas) {
+      const animateBackground = !reducedMotion && finePointer && window.innerWidth >= 768;
+      if (canvas && animateBackground) {
         const ctx = canvas.getContext('2d');
         let width = (canvas.width = window.innerWidth);
         let height = (canvas.height = window.innerHeight);
@@ -545,9 +286,26 @@ if (auth) {
             }
           }
 
-          requestAnimationFrame(renderParticles);
+          rafId = requestAnimationFrame(renderParticles);
         }
-        renderParticles();
+
+        let rafId = 0;
+        const startParticles = () => {
+          if (!rafId) rafId = requestAnimationFrame(renderParticles);
+        };
+        const stopParticles = () => {
+          if (rafId) {
+            cancelAnimationFrame(rafId);
+            rafId = 0;
+          }
+        };
+
+        startParticles();
+        // An abandoned tab must not keep painting.
+        document.addEventListener('visibilitychange', () => {
+          if (document.hidden) stopParticles();
+          else startParticles();
+        });
       }
 
       // 2. Interactive 3D Tilt & Specular Glare Physics
@@ -565,7 +323,7 @@ if (auth) {
         window.addEventListener('scroll', updateBounds);
 
         document.addEventListener('mousemove', (e) => {
-          if (!card || !bounds) return;
+          if (!card || !bounds || !finePointer) return;
           const mouseX = e.clientX;
           const mouseY = e.clientY;
 
@@ -635,6 +393,11 @@ if (auth) {
       }
 
       // 5. Rate-Limit Lockout Countdown Timer
+      // Contract rule 8: user-visible numerals render as Persian digits.
+      const PERSIAN_DIGITS = '\u06f0\u06f1\u06f2\u06f3\u06f4\u06f5\u06f6\u06f7\u06f8\u06f9';
+      const toPersianDigits = (value: string) =>
+        value.replace(/[0-9]/g, (digit) => PERSIAN_DIGITS.charAt(Number(digit)));
+
       let lockoutInterval: ReturnType<typeof setInterval> | null = null;
       function startLockoutCountdown(seconds = 600) {
         const timerEl = document.getElementById('lockoutTimer');
@@ -651,7 +414,7 @@ if (auth) {
           }
           const mins = Math.floor(remaining / 60).toString().padStart(2, '0');
           const secs = (remaining % 60).toString().padStart(2, '0');
-          if (timerEl) timerEl.innerText = `${mins}:${secs}`;
+          if (timerEl) timerEl.innerText = toPersianDigits(`${mins}:${secs}`);
         }, 1000);
       }
 

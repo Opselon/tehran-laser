@@ -1,0 +1,174 @@
+/* ─────────────────────────────────────────────────────────────
+   ADMIN LOGIN — TOUCH / MOBILE / RENDER-COST LAYER
+   Imported last, so every rule here wins over login-critical.css and
+   login-3d.css. Three concerns: usable controls on a 320px phone,
+   honest tap geometry, and no continuous GPU work nobody can see.
+   ───────────────────────────────────────────────────────────── */
+
+/* ── Keyboard must never hide the submit button ───────────── */
+.admin-login-body-3d {
+  /* keyboard must never hide the submit button */
+  align-items: flex-start;
+}
+
+@media (min-height: 720px) {
+  .admin-login-body-3d {
+    align-items: center;
+  }
+}
+
+.login-3d-viewport {
+  padding: 32px 16px;
+  margin-block: auto;
+}
+
+/* iOS/Android zoom the viewport when a focused input renders below 16px.
+   The critical layer declared 0.96rem and used to win the cascade. */
+.input-3d {
+  font-size: 16px;
+}
+
+/* ── Field adornments: fixed boxes, never stretched ──────────
+   `.input-prefix-icon` and `.password-toggle-btn` each picked up `left`
+   from one stylesheet and `right` from another. Both applied, so the
+   browser resolved them over-constrained and stretched each box to the
+   full field width: the "eye" became a 226x26 bar lying across the
+   middle of the password input, so tapping the field toggled visibility
+   instead of focusing it. Pin one side and give each a real hit area. */
+.input-prefix-icon {
+  right: 14px;
+  left: auto;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  justify-content: center;
+}
+
+.password-toggle-btn {
+  right: auto;
+  left: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  z-index: 3;
+}
+
+/* Reserve a gutter for each adornment instead of letting it sit on top
+   of the text. `.has-toggle` marks the password field only. */
+.input-3d {
+  padding: 13px 46px 13px 16px;
+}
+
+.input-3d.has-toggle {
+  padding-left: 52px;
+}
+
+/* ── Minimum 44px tap targets ──────────────────────────────── */
+.btn-autofill-3d {
+  min-height: 44px;
+}
+
+.back-to-site-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+}
+
+/* ── Small screens ─────────────────────────────────────────── */
+@media (max-width: 560px) {
+  .login-3d-card {
+    padding: 30px 20px;
+    border-radius: 22px;
+  }
+
+  .login-3d-title {
+    font-size: 1.35rem;
+  }
+
+  .login-3d-subtitle {
+    font-size: 0.88rem;
+  }
+
+  .emblem-3d-wrap {
+    transform: scale(0.88);
+  }
+
+  .autofill-helper-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .btn-autofill-3d {
+    width: 100%;
+  }
+
+  .login-3d-footer {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+  }
+}
+
+@media (max-width: 380px) {
+  .login-3d-viewport {
+    padding: 20px 12px;
+  }
+
+  .login-3d-card {
+    padding: 24px 16px;
+  }
+}
+
+/* ── Render cost: drop the continuous GPU work on phones ─────
+   On a coarse pointer / narrow viewport the card's `backdrop-filter:
+   blur(28px) saturate(190%)` re-filtered the whole card every frame
+   behind an already 92%-opaque surface, while `pulseAura` re-rasterised
+   a 650px `blur(50px)` layer underneath it and a full-viewport canvas
+   repainted 55 particles with `shadowBlur` on an unbounded rAF loop.
+   None of it is reachable — or visible — with a finger. */
+@media (max-width: 767px), (pointer: coarse) {
+  .login-3d-card {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .ambient-radial-glow {
+    filter: none;
+    animation: none;
+  }
+
+  .ambient-cyan-glow {
+    display: none;
+  }
+
+  #particle3dCanvas {
+    display: none;
+  }
+}
+
+/* ── Reduced motion: nothing here moves to stay usable ─────── */
+@media (prefers-reduced-motion: reduce) {
+  .login-3d-card {
+    transition: none;
+    transform: none !important;
+  }
+
+  .ambient-radial-glow {
+    filter: none;
+    animation: none;
+  }
+
+  .status-dot-pulse,
+  .alert-3d-lockout,
+  .spin-icon {
+    animation: none;
+  }
+
+  #particle3dCanvas {
+    display: none;
+  }
+}
