@@ -7,7 +7,7 @@ import TestimonialsSection from '../components/public/TestimonialsSection.astro'
 import { defaultFaqs } from '../data/faqs';
 import { MENS_ONLY_SLUG_SET } from '../data/male-pricing';
 import { env } from 'cloudflare:workers';
-import { listPublicServices, listFaqItems } from '../server/repositories';
+import { listPublicServices, listFaqItems, getPublicSettings } from '../server/repositories';
 import { createFAQPageSchema, createBreadcrumbSchema } from '../lib/seo';
 
 // Fetch public services and FAQs server-side for instant SEO & zero JS dependence (§3, §31, §191)
@@ -66,6 +66,31 @@ const priceRows: PriceRowView[] = services.map((s) => {
     mensOnly: MENS_ONLY_SLUG_SET.has(s.slug),
   };
 });
+
+// ── Instagram preview data (owner-requested homepage section) ────────────────
+// Public settings only; every value is validated before it reaches an href so
+// a malformed admin entry can never inject a scheme or markup.
+let publicSettings: Record<string, string> = {};
+try {
+  publicSettings = await getPublicSettings(env.DB);
+} catch (e) {
+  console.error('SSR homepage settings fetch failure:', e);
+}
+
+const igHandleRaw = (publicSettings.instagram_username || '').replace(/[^A-Za-z0-9._]/g, '').slice(0, 30);
+const igHandle = igHandleRaw || 'tehranlaser_clinic';
+const igProfileUrl = `https://www.instagram.com/${igHandle}/`;
+const igReelCandidate = (publicSettings.instagram_latest_reel_url || '').trim();
+const igReelUrl = /^https:\/\/(www\.)?instagram\.com\//i.test(igReelCandidate) ? igReelCandidate : igProfileUrl;
+const igPromoCode = (publicSettings.instagram_promo_code || '').replace(/[^\w-]/g, '').slice(0, 24);
+const igDiscountPct = (publicSettings.instagram_follower_discount_percent || '').replace(/\D/g, '').slice(0, 2);
+const igBioLinkCandidate = (publicSettings.instagram_bio_link || '').trim();
+const igBioLink = /^https:\/\//i.test(igBioLinkCandidate) ? igBioLinkCandidate : '';
+
+// Persian digits + ٪ for display (e.g. ۲۵٪ instead of %25)
+function faDigits(value: string): string {
+  return value.replace(/\d/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.charAt(Number(d)));
+}
 ---
 
 <PublicLayout
@@ -408,7 +433,132 @@ const priceRows: PriceRowView[] = services.map((s) => {
       </div>
     </div>
   </section>
+
+  <section class="section instagram-section" id="instagram" aria-labelledby="ig-title">
+    <div class="container">
+      <header class="section-header text-center">
+        <span class="section-subtitle ig-eyebrow">اینستاگرام رسمی کلینیک</span>
+        <h2 class="section-title" id="ig-title">نتایج و نکات لیزر را در اینستاگرام دنبال کنید</h2>
+        <p class="section-desc">
+          ریلزهای کوتاه، نکات مراقبتی قبل و بعد از لیزر و تخفیف ویژه فالوورها؛ هر هفته در صفحه ما.
+        </p>
+      </header>
+
+      <div class="ig-hub">
+        <!-- Profile card -->
+        <div class="ig-card ig-profile">
+          <div class="ig-avatar" aria-hidden="true">
+            <Icon name="instagram" size={30} />
+          </div>
+          <div class="ig-profile-main">
+            <a
+              class="ig-handle"
+              href={igProfileUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              dir="ltr"
+              >@{igHandle}</a
+            >
+            <p class="ig-profile-desc">کلینیک تخصصی تهران لیزر — الکساندرایت کندلا ۲۰۲۶ آمریکایی</p>
+            <div class="ig-profile-actions">
+              <a href={igProfileUrl} target="_blank" rel="noopener noreferrer" class="btn btn-primary ig-follow-btn">
+                <Icon name="instagram" size={17} />
+                <span>دنبال‌کردن در اینستاگرام</span>
+              </a>
+              {igBioLink && (
+                <a href={igBioLink} target="_blank" rel="noopener noreferrer" class="ig-vip-link">
+                  لینک ویژه فالوورها
+                </a>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <!-- Latest reel card -->
+        <a class="ig-card ig-reel" href={igReelUrl} target="_blank" rel="noopener noreferrer">
+          <span class="ig-reel-badge">ریلز جدید</span>
+          <span class="ig-reel-play" aria-hidden="true">
+            <Icon name="play" size={26} />
+          </span>
+          <span class="ig-reel-copy">
+            <strong>آخرین ویدیوی کلینیک</strong>
+            <span>معرفی دستگاه و تکنیک‌های لیزر بدون درد</span>
+          </span>
+        </a>
+
+        <!-- Promo card -->
+        <div class="ig-card ig-promo">
+          <div class="ig-promo-top">
+            <Icon name="sparkles" size={20} />
+            <span class="ig-promo-title">تخفیف ویژه فالوورها</span>
+          </div>
+          <p class="ig-promo-pct">
+            {igDiscountPct ? (
+              <><strong>{faDigits(igDiscountPct)}٪</strong> روی همه خدمات لیزر</>
+            ) : (
+              <>تخفیف ویژه فالوورهای اینستاگرام</>
+            )}
+          </p>
+          {igPromoCode && (
+            <div class="ig-promo-code-row">
+              <code class="ig-promo-code" dir="ltr">{igPromoCode}</code>
+              <button type="button" class="ig-copy-btn" data-code={igPromoCode}>کپی کد</button>
+            </div>
+          )}
+          <span class="ig-promo-note" role="status" aria-live="polite"></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Closing CTA -->
+  <section class="section closing-cta-section">
+    <div class="container closing-cta-inner">
+      <div class="closing-cta-text">
+        <h2 class="closing-cta-title">آماده‌اید شروع کنید؟</h2>
+        <p class="closing-cta-desc">
+          اولین مشاوره رایگان است؛ همین حالا نوبت بگیرید و ۱۵٪ تخفیف رزرو آنلاین را از دست ندهید.
+        </p>
+      </div>
+      <div class="closing-cta-actions">
+        <a href="/booking" class="btn btn-primary closing-cta-book">
+          <Icon name="calendar" size={17} />
+          <span>رزرو آنلاین نوبت (۱۵٪ تخفیف)</span>
+        </a>
+        <a href="tel:+989035555090" class="btn btn-outline closing-cta-call" dir="ltr">
+          <Icon name="phone" size={17} />
+          <span>+98 903 555 5090</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
 </PublicLayout>
+
+<script is:inline>
+  (function () {
+    document.querySelectorAll('.ig-copy-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var code = btn.getAttribute('data-code') || '';
+        var done = function () {
+          btn.textContent = 'کپی شد';
+          btn.classList.add('is-copied');
+          setTimeout(function () { btn.textContent = 'کپی'; btn.classList.remove('is-copied'); }, 1600);
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(code).then(done, done);
+        } else {
+          var ta = document.createElement('textarea');
+          ta.value = code; ta.setAttribute('readonly', '');
+          ta.style.position = 'absolute'; ta.style.left = '-9999px';
+          document.body.appendChild(ta); ta.select();
+          try { document.execCommand('copy'); } catch (e) {}
+          document.body.removeChild(ta); done();
+        }
+      });
+    });
+  })();
+</script>
 
 <style>
   /* ── Lane x4: contrast (page-scoped) ──────────────────────────
@@ -881,6 +1031,317 @@ const priceRows: PriceRowView[] = services.map((s) => {
     :global(html body .basket-fab) {
       bottom: calc(142px + env(safe-area-inset-bottom, 0px));
     }
+  }
+
+
+  /* ── Instagram preview + closing CTA (salvaged from .w-h4 lane) ── */
+     Instagram preview section (owner-requested) — self-contained.
+     Dark-safe: all colours are explicit light-on-obsidian values.
+     ───────────────────────────────────────────────────────────── */
+  .instagram-section {
+    padding: 70px 0;
+    background:
+      radial-gradient(1100px 380px at 80% -10%, rgba(52, 211, 153, 0.08), transparent 60%),
+      linear-gradient(180deg, #0b0f13 0%, #0a0b0d 100%);
+    border-top: 1px solid rgba(148, 163, 184, 0.12);
+  }
+  .instagram-section .ig-eyebrow {
+    color: #6ee7b7; /* emerald-300 on obsidian ≈ 10:1 */
+  }
+  .instagram-section .section-desc {
+    color: #94a3b8;
+    margin-inline: auto;
+  }
+  .ig-hub {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+    align-items: stretch;
+  }
+  .ig-card {
+    box-sizing: border-box;
+    min-width: 0;
+    background: linear-gradient(160deg, #12171c 0%, #0e1216 100%);
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    border-radius: 20px;
+    padding: 24px;
+    transition: border-color 0.2s ease, transform 0.2s ease;
+  }
+  .ig-card:hover {
+    border-color: rgba(110, 231, 183, 0.45);
+    transform: translateY(-2px);
+  }
+  .ig-profile {
+    display: flex;
+    gap: 18px;
+    align-items: flex-start;
+  }
+  .ig-avatar {
+    flex: 0 0 auto;
+    width: 62px;
+    height: 62px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #062018;
+    background: linear-gradient(135deg, #34d399 0%, #f5d78e 100%);
+    box-shadow: 0 8px 22px -10px rgba(52, 211, 153, 0.7);
+  }
+  .ig-profile-main {
+    min-width: 0;
+  }
+  .ig-handle {
+    display: inline-block;
+    font-weight: 800;
+    font-size: 1.05rem;
+    color: #f1f5f9;
+    text-decoration: none;
+    letter-spacing: 0.02em;
+  }
+  .ig-handle:hover {
+    color: #6ee7b7;
+  }
+  .ig-profile-desc {
+    margin: 8px 0 16px;
+    font-size: 0.9rem;
+    line-height: 1.8;
+    color: #94a3b8;
+  }
+  .ig-profile-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px;
+  }
+  .ig-follow-btn {
+    gap: 8px;
+  }
+  .ig-vip-link {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #f5d78e;
+    text-decoration: none;
+    border-bottom: 1px dashed rgba(245, 215, 142, 0.5);
+    padding-bottom: 2px;
+  }
+  .ig-vip-link:hover {
+    color: #ffe9b3;
+    border-bottom-color: #ffe9b3;
+  }
+  a.ig-reel {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 18px;
+    min-height: 190px;
+    text-decoration: none;
+    color: inherit;
+    background:
+      linear-gradient(160deg, rgba(52, 211, 153, 0.16) 0%, rgba(18, 23, 28, 0.9) 55%),
+      linear-gradient(160deg, #12171c 0%, #0e1216 100%);
+    overflow: hidden;
+  }
+  .ig-reel-badge {
+    align-self: flex-start;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    color: #062018;
+    background: #6ee7b7;
+    border-radius: 999px;
+    padding: 4px 12px;
+  }
+  .ig-reel-play {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #062018;
+    background: linear-gradient(135deg, #34d399 0%, #f5d78e 100%);
+    box-shadow: 0 10px 26px -12px rgba(52, 211, 153, 0.8);
+    margin-top: auto;
+  }
+  .ig-reel-play svg {
+    margin-inline-start: 3px; /* optical centre for the play triangle */
+  }
+  .ig-reel-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .ig-reel-copy strong {
+    font-size: 1rem;
+    color: #f1f5f9;
+  }
+  .ig-reel-copy span {
+    font-size: 0.85rem;
+    color: #94a3b8;
+    line-height: 1.7;
+  }
+  .ig-promo {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: linear-gradient(160deg, #141a15 0%, #0e1216 100%);
+    border-color: rgba(245, 215, 142, 0.28);
+  }
+  .ig-promo-top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #f5d78e;
+  }
+  .ig-promo-title {
+    font-size: 0.85rem;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+  }
+  .ig-promo-pct {
+    margin: 0;
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: #e2e8f0;
+  }
+  .ig-promo-pct strong {
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: #6ee7b7;
+  }
+  .ig-promo-code-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
+    flex-wrap: wrap;
+  }
+  .ig-promo-code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: #f5d78e;
+    background: rgba(245, 215, 142, 0.08);
+    border: 1px dashed rgba(245, 215, 142, 0.55);
+    border-radius: 10px;
+    padding: 8px 14px;
+  }
+  .ig-copy-btn {
+    font-family: inherit;
+    font-size: 0.82rem;
+    font-weight: 800;
+    color: #062018;
+    background: #6ee7b7;
+    border: 0;
+    border-radius: 10px;
+    padding: 9px 16px;
+    cursor: pointer;
+    transition: background 0.18s ease;
+  }
+  .ig-copy-btn:hover {
+    background: #a7f3d0;
+  }
+  .ig-copy-btn.is-copied {
+    background: #f5d78e;
+  }
+  .ig-promo-note {
+    min-height: 1em;
+    font-size: 0.8rem;
+    color: #94a3b8;
+  }
+  .ig-promo-note:empty {
+    display: none;
+  }
+  @media (max-width: 1100px) {
+    .ig-hub {
+      grid-template-columns: 1fr 1fr;
+    }
+    .ig-profile {
+      grid-column: 1 / -1;
+    }
+  }
+  @media (max-width: 768px) {
+    .instagram-section {
+      padding: 52px 0;
+    }
+    .ig-hub {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    .ig-card {
+      padding: 20px 18px;
+    }
+  }
+  @media (max-width: 400px) {
+    .ig-profile {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    .ig-profile-actions {
+      justify-content: center;
+    }
+  }
+  .instagram-section a:focus-visible,
+  .closing-cta-section a:focus-visible,
+  .ig-copy-btn:focus-visible {
+    outline: 2px solid #6ee7b7;
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+  .closing-cta-section {
+    padding: 0 0 70px;
+    background: linear-gradient(180deg, #0a0b0d 0%, #0a0b0d 100%);
+  }
+
+  .closing-cta-inner {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 28px;
+    flex-wrap: wrap;
+    background: linear-gradient(135deg, #0d1512 0%, #101418 100%);
+    border: 1px solid rgba(52, 211, 153, 0.28);
+    border-radius: 24px;
+    padding: 38px 40px;
+    box-shadow: var(--shadow-md, 0 12px 32px -12px rgba(0, 0, 0, 0.6));
+  }
+
+  .closing-cta-text {
+    min-width: 0;
+    flex: 1 1 320px;
+  }
+
+  .closing-cta-title {
+    margin: 0 0 10px;
+    font-size: clamp(1.4rem, 3vw, 1.9rem);
+    font-weight: 900;
+    color: #f1f5f9;
+  }
+
+  .closing-cta-desc {
+    margin: 0;
+    font-size: 0.98rem;
+    line-height: 1.85;
+    color: #94a3b8;
+    max-width: 560px;
+  }
+
+  .closing-cta-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+
+  .closing-cta-book,
+  .closing-cta-call {
+    gap: 8px;
+    white-space: nowrap;
   }
 
 </style>
