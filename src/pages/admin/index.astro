@@ -2,9 +2,19 @@
 import AdminLayout from '../../layouts/AdminLayout.astro';
 import { AdminDashboard } from '../../components/admin/AdminDashboard';
 import { env } from 'cloudflare:workers';
-import { getAdminDashboard } from '../../server/repositories';
+import { getAdminDashboard, getPublicSettings } from '../../server/repositories';
+import { localDateOf } from '../../lib/datetime/timezone';
 
-const todayStr = new Date().toISOString().slice(0, 10);
+// MUST match /api/v1/admin/dashboard: a Tehran-local date. Using the UTC date
+// (toISOString().slice(0,10)) hydrates yesterday's KPIs for 00:00–03:30 Iran time,
+// and the island never re-fetches while initialData is present.
+let tz = 'Asia/Tehran';
+try {
+  tz = (await getPublicSettings(env.DB)).timezone || tz;
+} catch {
+  /* settings unreadable — the API default is the same */
+}
+const todayStr = localDateOf(new Date().toISOString(), tz);
 const todayStartIso = `${todayStr}T00:00:00.000Z`;
 const todayEndIso = `${todayStr}T23:59:59.999Z`;
 
@@ -219,6 +229,11 @@ try {
     .quick-actions-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
     .schedule-toolbar { flex-direction: column; align-items: stretch; }
     .schedule-search-box { width: 100%; }
+    /* In a column toolbar the nowrap chips row forces the flex line's cross
+       size past the container, stretching every sibling to ~421px at 320/390
+       and pushing them off the left edge (clipped by overflow-x:hidden).
+       Give both a definite width + let them shrink. */
+    .schedule-filter-tabs, .view-switch-btn { min-width: 0; width: 100%; }
     /* Touch targets: chips/buttons were 36px — raise to 44px minimum. */
     .filter-chip-btn, .view-switch-btn { min-height: 44px; padding: 10px 14px; }
     .gauge-stats-row { gap: 8px 14px; justify-content: flex-start; }
