@@ -2156,7 +2156,9 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
   .strikethrough-mini {
     display: block;
     font-size: 0.75rem;
-    color: #78716c;
+    /* #78716c measures 3.50:1 on the tinted price box - lift to clear AA.
+       Same token as .price-currency / .strikethrough-price in this file. */
+    color: #bfb7aa;
     text-decoration: line-through;
   }
 
