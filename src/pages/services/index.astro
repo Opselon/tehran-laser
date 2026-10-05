@@ -1245,6 +1245,11 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
         panelMale?.classList.add('hidden');
         panelMale?.classList.remove('active');
       }
+
+      // Women's catalogue controls are scoped to the women's panel; leaving
+      // a stale chip/view selection when entering the men's line surfaces an
+      // empty grid because those controls are hidden with their panel.
+      resetFemaleControls();
     }
 
     tabFemale?.addEventListener('click', () => setActiveCategory('female'));
@@ -1254,51 +1259,73 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
     const filterBtns = document.querySelectorAll('.filter-btn');
     const cards = document.querySelectorAll('.service-obsidian-card');
     const tableRows = document.querySelectorAll('.table-obsidian-pricing tbody tr');
+    const cardsBtn = document.getElementById('viewCardsBtn');
+    const tableBtn = document.getElementById('viewTableBtn');
+    const cardGrid = document.getElementById('servicesCardGrid');
+    const tableView = document.getElementById('servicesTableView');
+
+    // Apply a chip filter to the women's catalogue (cards + table rows)
+    function applyFilter(filter) {
+      cards.forEach((card) => {
+        const cardCat = card.getAttribute('data-category');
+        if (filter === 'all' || cardCat === filter) {
+          card.style.display = '';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+
+      tableRows.forEach((row) => {
+        const rowCat = row.getAttribute('data-category');
+        if (filter === 'all' || rowCat === filter) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    }
+
+    // Women's catalogue controls are scoped to the women's panel; the men's
+    // line has its own content and no filter/table controls. Switching tabs
+    // with a chip/view left selected would otherwise leave the women's panel
+    // in a stale state when the user returns, so restore the catalogue
+    // defaults on every tab change.
+    function resetFemaleControls() {
+      filterBtns.forEach((b) => b.classList.remove('active'));
+      const allBtn = document.querySelector('.filter-btn[data-filter="all"]');
+      allBtn?.classList.add('active');
+      applyFilter('all');
+
+      tableBtn?.classList.remove('active');
+      cardsBtn?.classList.add('active');
+      cardGrid?.classList.remove('hidden');
+      tableView?.classList.add('hidden');
+    }
 
     filterBtns.forEach((btn) => {
       btn.addEventListener('click', () => {
         filterBtns.forEach((b) => b.classList.remove('active'));
         btn.classList.add('active');
-        const filter = btn.getAttribute('data-filter') || 'all';
-
-        // Filter cards
-        cards.forEach((card) => {
-          const cardCat = card.getAttribute('data-category');
-          if (filter === 'all' || cardCat === filter) {
-            card.style.display = 'flex';
-          } else {
-            card.style.display = 'none';
-          }
-        });
-
-        // Filter table rows
-        tableRows.forEach((row) => {
-          const rowCat = row.getAttribute('data-category');
-          if (filter === 'all' || rowCat === filter) {
-            row.style.display = '';
-          } else {
-            row.style.display = 'none';
-          }
-        });
+        applyFilter(btn.getAttribute('data-filter') || 'all');
       });
     });
 
-    // View Switch: Cards vs Table
-    const viewCardsBtn = document.getElementById('viewCardsBtn');
-    const viewTableBtn = document.getElementById('viewTableBtn');
-    const cardGrid = document.getElementById('servicesCardGrid');
-    const tableView = document.getElementById('servicesTableView');
+    // View Switch: Cards vs Table (shares the elements the reset helper
+    // mutates so there is a single source of truth for catalogue state)
+    const viewCardsBtn = cardsBtn;
+    const viewTableBtn = tableBtn;
+
 
     viewCardsBtn?.addEventListener('click', () => {
-      viewCardsBtn.classList.add('active');
-      viewTableBtn?.classList.remove('active');
+      cardsBtn.classList.add('active');
+      tableBtn?.classList.remove('active');
       cardGrid?.classList.remove('hidden');
       tableView?.classList.add('hidden');
     });
 
     viewTableBtn?.addEventListener('click', () => {
-      viewTableBtn.classList.add('active');
-      viewCardsBtn?.classList.remove('active');
+      tableBtn.classList.add('active');
+      cardsBtn?.classList.remove('active');
       tableView?.classList.remove('hidden');
       cardGrid?.classList.add('hidden');
     });
@@ -1744,9 +1771,9 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    background: transparent;
+    background: rgba(255, 255, 255, 0.03);
     color: #a8a29e;
-    border: 1px solid transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 10px;
     padding: 6px 14px;
     font-family: inherit;
@@ -2348,7 +2375,30 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
     }
 
     .view-switch-btns {
-      display: none; /* Mobile defaults to clean cards */
+      display: flex;
+      width: 100%;
+      justify-content: stretch;
+      gap: 6px;
+    }
+
+    .view-toggle-btn {
+      flex: 1;
+      justify-content: center;
+      min-width: 0;
+    }
+
+    .view-toggle-btn span {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Touch targets: 38px chips are too small for thumbs on a phone */
+    .filter-btn,
+    .view-toggle-btn {
+      min-height: 44px;
+      padding-top: 10px;
+      padding-bottom: 10px;
     }
 
     .services-3d-grid {
