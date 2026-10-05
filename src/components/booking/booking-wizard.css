@@ -152,6 +152,150 @@
   color: #6ee7b7;
 }
 
+/* ── Step 1: one-tap section switch (was two 30px-padded cards
+   buried under the whole area list) ──────────────────────────── */
+
+.booking-wizard-container .gender-selection-cards.gender-compact {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 0;
+  margin-bottom: 14px;
+}
+
+.booking-wizard-container .gender-compact .gender-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  padding: 10px 8px;
+}
+
+.booking-wizard-container .gender-compact .gender-title {
+  margin-bottom: 0;
+  font-size: 14.5px;
+  gap: 6px;
+  justify-content: center;
+}
+
+/* ── Step 1: filter + compact area tiles ─────────────────────── */
+
+.booking-wizard-container .service-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  background: #0d0f13;
+  border: 1px solid #2c3038;
+  border-radius: 10px;
+  padding: 0 12px;
+  color: #8a9099;
+  margin-bottom: 12px;
+}
+
+.booking-wizard-container .service-filter-row:focus-within {
+  border-color: #10b981;
+  color: #6ee7b7;
+  box-shadow: 0 0 0 3px rgba(110, 231, 183, 0.18);
+}
+
+.booking-wizard-container .service-filter-row .form-control {
+  flex: 1;
+  min-width: 0;
+  padding: 12px 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  color: #f1f4f8;
+}
+
+.booking-wizard-container .service-filter-row .form-control:focus {
+  padding: 12px 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+.booking-wizard-container .service-filter-row .form-control::-webkit-search-cancel-button {
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.booking-wizard-container .filter-clear-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid #2c3038;
+  color: #c9cdd6;
+}
+
+.booking-wizard-container .filter-clear-btn:hover {
+  background: rgba(110, 231, 183, 0.12);
+  border-color: rgba(16, 185, 129, 0.6);
+  color: #6ee7b7;
+}
+
+.booking-wizard-container .filter-clear-btn:focus-visible {
+  outline: 2px solid #6ee7b7;
+  outline-offset: 2px;
+}
+
+/* Name + price only: the description/duration/badge stack made each of the
+   27 areas a full card, so step 1 ran for several screens. */
+.booking-wizard-container .services-selection-grid.services-grid-compact {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 118px), 1fr));
+  gap: 10px;
+  margin-top: 0;
+}
+
+.booking-wizard-container .services-grid-compact .service-select-card {
+  align-items: center;
+  gap: 8px;
+  min-height: 64px;
+  padding: 10px;
+  border-radius: 12px;
+}
+
+.booking-wizard-container .services-grid-compact .card-checkbox {
+  margin-top: 0;
+}
+
+.booking-wizard-container .services-grid-compact .checkbox-indicator {
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  font-size: 11px;
+}
+
+.booking-wizard-container .services-grid-compact .card-title-row {
+  align-items: flex-start;
+  gap: 6px;
+  margin-bottom: 0;
+}
+
+.booking-wizard-container .services-grid-compact .service-name {
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+.booking-wizard-container .services-grid-compact .card-price-row {
+  padding-top: 6px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.08);
+}
+
+.booking-wizard-container .services-grid-compact .price-val {
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.booking-wizard-container .services-grid-compact .badge-promo {
+  padding: 2px 6px;
+  font-size: 10.5px;
+}
+
 .booking-wizard-container .services-selection-grid {
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
   overflow: visible;
@@ -361,6 +505,166 @@
   grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
   gap: 20px;
   align-items: start;
+}
+
+/* ── Jalali calendar (JalaliCalendar.tsx) ─────────────────────
+   These classes existed only as markup, so the widget collapsed to
+   inline runs of digits: no grid for the weekday row, no cell boxes,
+   no header alignment. One 7-column grid shared by the weekday row
+   and every week keeps the columns aligned in RTL. */
+
+.booking-wizard-container .jalali-calendar {
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid #262a31;
+  border-radius: 14px;
+  padding: 12px;
+  min-width: 0;
+}
+
+.booking-wizard-container .calendar-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.booking-wizard-container .calendar-month-label {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+  color: #6ee7b7;
+  font-size: 15px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.booking-wizard-container .calendar-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  min-width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid #2c3038;
+  color: #c9cdd6;
+  transition: border-color 0.18s ease, color 0.18s ease, background 0.18s ease;
+}
+
+.booking-wizard-container .calendar-nav-btn:hover:not(:disabled) {
+  background: rgba(110, 231, 183, 0.12);
+  border-color: rgba(16, 185, 129, 0.6);
+  color: #6ee7b7;
+}
+
+.booking-wizard-container .calendar-nav-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.booking-wizard-container .calendar-nav-btn:focus-visible {
+  outline: 2px solid #6ee7b7;
+  outline-offset: 2px;
+}
+
+.booking-wizard-container .calendar-weekdays,
+.booking-wizard-container .calendar-week {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.booking-wizard-container .calendar-weekdays {
+  margin-bottom: 6px;
+}
+
+.booking-wizard-container .calendar-wd {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 26px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #8a9099;
+}
+
+.booking-wizard-container .calendar-wd.is-friday-head {
+  color: #f87171;
+}
+
+.booking-wizard-container .calendar-body {
+  display: grid;
+  gap: 4px;
+}
+
+.booking-wizard-container .calendar-day,
+.booking-wizard-container .calendar-cell.is-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  min-width: 0;
+  border-radius: 10px;
+}
+
+.booking-wizard-container .calendar-cell.is-empty {
+  border: 1px dashed rgba(255, 255, 255, 0.05);
+}
+
+.booking-wizard-container .calendar-day {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid #2a2e36;
+  color: #e6e9ee;
+  font-size: 14px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  transition: border-color 0.16s ease, background 0.16s ease, color 0.16s ease;
+}
+
+.booking-wizard-container .calendar-day:hover {
+  background: rgba(110, 231, 183, 0.12);
+  border-color: rgba(16, 185, 129, 0.6);
+  color: #6ee7b7;
+}
+
+.booking-wizard-container .calendar-day:focus-visible {
+  outline: 2px solid #6ee7b7;
+  outline-offset: 2px;
+}
+
+.booking-wizard-container .calendar-day.is-friday {
+  border-color: rgba(248, 113, 113, 0.4);
+  color: #fca5a5;
+}
+
+.booking-wizard-container .calendar-day.selected {
+  background: linear-gradient(150deg, #6ee7b7, #10b981);
+  border-color: #6ee7b7;
+  color: #14161a;
+  font-weight: 800;
+  box-shadow: 0 8px 18px rgba(16, 185, 129, 0.32);
+}
+
+.booking-wizard-container .calendar-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 28px 16px;
+  text-align: center;
+  color: #9aa3b2;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px dashed #33373f;
+  border-radius: 14px;
+}
+
+.booking-wizard-container .calendar-empty p {
+  margin: 0;
+  font-size: 13.5px;
 }
 
 .booking-wizard-container .slots-panel {

@@ -45,6 +45,7 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
     preselectedSlug ? [preselectedSlug] : [],
   );
   const [pricingCategory, setPricingCategory] = useState<PricingCategory>('female');
+  const [serviceQuery, setServiceQuery] = useState<string>('');
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [availableSlots, setAvailableSlots] = useState<AvailabilitySlotDto[]>([]);
   const [loadingSlots, setLoadingSlots] = useState<boolean>(false);
@@ -134,6 +135,20 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
 
   const selectedServices = services.filter((s) => selectedServiceSlugs.includes(s.slug));
   const totalDurationMinutes = selectedServices.reduce((sum, s) => sum + s.durationMinutes, 0);
+
+  /** Step 1 lists 27 areas; a live filter is the fastest way to reach one.
+   *  Selected areas always stay visible so nothing silently disappears. */
+  const filteredServices = useMemo<PublicServiceDto[]>(() => {
+    const needle = normalizeSearch(serviceQuery);
+    if (!needle) return services;
+    return services.filter(
+      (s) =>
+        selectedServiceSlugs.includes(s.slug) ||
+        normalizeSearch(s.name).includes(needle) ||
+        normalizeSearch(s.shortDescription ?? '').includes(needle) ||
+        normalizeSearch(s.description).includes(needle),
+    );
+  }, [services, serviceQuery, selectedServiceSlugs]);
 
   const quote: QuoteTotals = useMemo(() => {
     let base = 0;
@@ -363,8 +378,7 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
                   مرحله اول: انتخاب نواحی و بخش مراجعین
                 </h3>
                 <p className="step-desc">
-                  <strong>یک یا چند ناحیه</strong> را برای انجام در یک جلسه انتخاب و بخش مراجعه را
-                  مشخص فرمایید:
+                  ابتدا بخش پذیرش را مشخص کنید، سپس نواحی مورد نظر را انتخاب فرمایید:
                 </p>
               </div>
               <div className="quick-action-pills">
@@ -385,85 +399,14 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
               </div>
             </div>
 
-            {loadingServices ? (
-              <div className="service-skeleton-grid" aria-hidden="true">
-                {[0, 1, 2].map((i) => (
-                  <div className="skeleton service-skeleton" key={i} />
-                ))}
-              </div>
-            ) : services.length === 0 ? (
-              <div className="empty-state">
-                <IconReact name="services" size={30} />
-                <p>{servicesFailed ? 'لیست خدمات در دسترس نیست.' : 'خدمتی ثبت نشده است.'}</p>
-                <button type="button" className="btn btn-outline btn-sm" onClick={loadServices}>
-                  <IconReact name="refresh" size={16} />
-                  تلاش دوباره
-                </button>
-              </div>
-            ) : (
-              <div className="services-selection-grid">
-                {services.map((s) => {
-                  const fPrice = s.prices.find((p) => p.pricingCategory === 'female');
-                  const isPromo = s.slug === 'full-body';
-                  const isSelected = selectedServiceSlugs.includes(s.slug);
-
-                  return (
-                    <div
-                      key={s.slug}
-                      className={`service-select-card ${isSelected ? 'selected' : ''}`}
-                      onClick={() => toggleServiceSlug(s.slug)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault();
-                          toggleServiceSlug(s.slug);
-                        }
-                      }}
-                      role="checkbox"
-                      aria-checked={isSelected}
-                      tabIndex={0}
-                    >
-                      <div className="card-checkbox">
-                        <span className={`checkbox-indicator ${isSelected ? 'checked' : ''}`}>
-                          {isSelected && <IconReact name="check" size={14} strokeWidth={3} />}
-                        </span>
-                      </div>
-                      <div className="card-details">
-                        <div className="card-title-row">
-                          <span className="service-name">{s.name}</span>
-                          {isPromo && (
-                            <span className="badge badge-promo">
-                              <IconReact name="percent" size={12} />
-                              تخفیف ویژه ۱۵٪
-                            </span>
-                          )}
-                          {isSelected && (
-                            <span className="badge badge-selected">
-                              <IconReact name="check" size={12} strokeWidth={3} />
-                              انتخاب شد
-                            </span>
-                          )}
-                        </div>
-                        <p className="service-short-desc">{s.shortDescription || s.description}</p>
-                        <div className="card-price-row">
-                          <span className="price-val">
-                            {fPrice ? moneyFa(fPrice.amount) : 'استعلام قیمت'}
-                          </span>
-                          <span className="duration-tag">
-                            <IconReact name="clock" size={13} />
-                            {s.durationMinutes.toLocaleString('fa-IR')} دقیقه
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-
-            <div className="gender-selection-cards">
+            <div
+              className="gender-selection-cards gender-compact"
+              role="radiogroup"
+              aria-label="بخش پذیرش"
+            >
               {([
-                { key: 'female', icon: 'users', title: 'بخش بانوان', desc: 'دستگاه اختصاصی، اپراتور مجرب خانم، تعرفه مصوب' },
-                { key: 'male', icon: 'customers', title: 'بخش آقایان', desc: 'اپراتور آقا، متناسب با تراکم و ضخامت موهای آقایان' },
+                { key: 'female', title: 'بخش بانوان' },
+                { key: 'male', title: 'بخش آقایان' },
               ] as const).map((g) => {
                 const isSel = pricingCategory === g.key;
                 return (
@@ -481,41 +424,125 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
                     aria-checked={isSel}
                     tabIndex={0}
                   >
-                    <div className="gender-icon">
-                      <IconReact name={g.icon} size={30} />
-                    </div>
-                    <div className="gender-title">
+                    <span className="gender-title">
                       {g.title}
                       {isSel && (
                         <span className="badge badge-selected">
                           <IconReact name="check" size={12} strokeWidth={3} />
                         </span>
                       )}
-                    </div>
-                    <p className="gender-desc">{g.desc}</p>
-                    <div className="gender-price-preview">
-                      {g.key === 'female' ? (
-                        quote.base > 0 ? (
-                          <span className="price-highlight">
-                            مجموع: {moneyFa(quote.base)}
-                            {quote.discount > 0 && (
-                              <span className="discount-badge">
-                                <IconReact name="tag" size={12} />
-                                با تخفیف: {moneyFa(quote.final)}
-                              </span>
-                            )}
-                          </span>
-                        ) : (
-                          <span className="text-muted">پس از انتخاب نواحی</span>
-                        )
-                      ) : (
-                        <span className="text-muted">استعلام تلفنی تعرفه</span>
-                      )}
-                    </div>
+                    </span>
                   </div>
                 );
               })}
             </div>
+
+            {!loadingServices && services.length > 0 && (
+              <div className="service-filter-row">
+                <label htmlFor="serviceFilter" className="sr-only">
+                  جستجوی ناحیه
+                </label>
+                <IconReact name="search" size={16} />
+                <input
+                  id="serviceFilter"
+                  type="search"
+                  className="form-control"
+                  placeholder="جستجوی ناحیه…"
+                  autoComplete="off"
+                  value={serviceQuery}
+                  onChange={(e) => setServiceQuery(e.target.value)}
+                />
+                {serviceQuery && (
+                  <button
+                    type="button"
+                    className="filter-clear-btn"
+                    onClick={() => setServiceQuery('')}
+                    aria-label="پاک کردن جستجو"
+                    title="پاک کردن جستجو"
+                  >
+                    <IconReact name="close" size={14} />
+                  </button>
+                )}
+              </div>
+            )}
+
+            {loadingServices ? (
+              <div className="service-skeleton-grid" aria-hidden="true">
+                {[0, 1, 2].map((i) => (
+                  <div className="skeleton service-skeleton" key={i} />
+                ))}
+              </div>
+            ) : services.length === 0 ? (
+              <div className="empty-state">
+                <IconReact name="services" size={30} />
+                <p>{servicesFailed ? 'لیست خدمات در دسترس نیست.' : 'خدمتی ثبت نشده است.'}</p>
+                <button type="button" className="btn btn-outline btn-sm" onClick={loadServices}>
+                  <IconReact name="refresh" size={16} />
+                  تلاش دوباره
+                </button>
+              </div>
+            ) : filteredServices.length === 0 ? (
+              <div className="empty-state">
+                <IconReact name="search" size={28} />
+                <p>ناحیه‌ای با عبارت «{serviceQuery.trim()}» پیدا نشد.</p>
+                <button
+                  type="button"
+                  className="btn btn-outline btn-sm"
+                  onClick={() => setServiceQuery('')}
+                >
+                  پاک کردن جستجو
+                </button>
+              </div>
+            ) : (
+              <div className="services-selection-grid services-grid-compact">
+                {filteredServices.map((s) => {
+                  // Show the price of the *chosen* section — tiles used to always
+                  // quote the women's tariff even after «بخش آقایان» was picked.
+                  const fPrice = s.prices.find((p) => p.pricingCategory === pricingCategory);
+                  const isPromo = s.slug === 'full-body';
+                  const isSelected = selectedServiceSlugs.includes(s.slug);
+                  const priceLabel = fPrice ? moneyFa(fPrice.amount) : 'استعلام قیمت';
+
+                  return (
+                    <div
+                      key={s.slug}
+                      className={`service-select-card ${isSelected ? 'selected' : ''}`}
+                      onClick={() => toggleServiceSlug(s.slug)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          toggleServiceSlug(s.slug);
+                        }
+                      }}
+                      role="checkbox"
+                      aria-checked={isSelected}
+                      aria-label={`${s.name}، ${priceLabel}`}
+                      tabIndex={0}
+                    >
+                      <div className="card-checkbox">
+                        <span className={`checkbox-indicator ${isSelected ? 'checked' : ''}`}>
+                          {isSelected && <IconReact name="check" size={14} strokeWidth={3} />}
+                        </span>
+                      </div>
+                      <div className="card-details">
+                        <div className="card-title-row">
+                          <span className="service-name">{s.name}</span>
+                          {isPromo && (
+                            <span className="badge badge-promo">
+                              <IconReact name="percent" size={11} />
+                              ۱۵٪
+                            </span>
+                          )}
+                        </div>
+                        <div className="card-price-row">
+                          <span className="price-val">{priceLabel}</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
 
             {selectedServices.length > 0 && (
               <div className="multi-service-summary-bar animate-fade-in mt-4">
@@ -1019,6 +1046,18 @@ function selectedDateLabel(isoDate: string): string {
   } catch {
     return isoDate;
   }
+}
+
+/** Fold the Persian/Arabic look-alikes so «زير»/«زیر» and ٠/۰ still match. */
+function normalizeSearch(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/ي/g, 'ی')
+    .replace(/ك/g, 'ک')
+    .replace(/[أإآٱ]/g, 'ا')
+    .replace(/[٠-٩]/g, (d) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)))
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 function makeIdempotencyKey(): string {

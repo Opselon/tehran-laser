@@ -22,8 +22,35 @@ const MONTH_NAMES = [
 
 const PERSIAN_DIGITS = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
 
-function fa(n: number): string {
+function fa(n: number | string): string {
   return String(n).replace(/\d/g, (d) => PERSIAN_DIGITS[Number(d)] ?? d);
+}
+
+/** Jalali day-of-month for a local 'YYYY-MM-DD' day.
+ *
+ *  `iso.slice(-2)` reads the *Gregorian* day (…-12-22 → 22), which only
+ *  looks right by coincidence. Cells must show the Jalali day number. */
+function jalaliDayOf(iso: string): number {
+  const [y = 0, m = 0, d = 0] = iso.split('-').map(Number);
+  if (!y || !m || !d) return 0;
+  return toJalaali(y, m, d).jd;
+}
+
+/** '۱۴۰۵/۰۷/۱۴' — Persian digits for assistive tech (never the raw ISO). */
+function jalaliLabelOf(iso: string): string {
+  const [y = 0, m = 0, d = 0] = iso.split('-').map(Number);
+  if (!y || !m || !d) return iso;
+  const j = toJalaali(y, m, d);
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${fa(j.jy)}/${fa(pad(j.jm))}/${fa(pad(j.jd))}`;
+}
+
+/** Numeric (jy, jm) order — `localeCompare` on "1405-7"/"1405-10" sorts دی
+ *  before مهر because string compare puts "1" < "7". */
+function compareMonthKeys(a: string, b: string): number {
+  const [ay = 0, am = 0] = a.split('-').map(Number);
+  const [by = 0, bm = 0] = b.split('-').map(Number);
+  return ay - by || am - bm;
 }
 
 interface CalendarMonth {
@@ -82,7 +109,7 @@ export function JalaliCalendar({ selectableDates, selectedDate, onSelect, closed
       month.weeks = weeks;
     }
 
-    return [...byKey.values()].sort((a, b) => a.key.localeCompare(b.key));
+    return [...byKey.values()].sort((a, b) => compareMonthKeys(a.key, b.key));
   }, [selectableDates]);
 
   const monthKeys = months.map((m) => m.key);
@@ -164,7 +191,7 @@ export function JalaliCalendar({ selectableDates, selectedDate, onSelect, closed
           <div className="calendar-week" key={wi}>
             {week.map((iso, di) => {
               if (!iso) return <span key={di} className="calendar-cell is-empty" aria-hidden="true" />;
-              const dayNum = Number(iso.slice(-2));
+              const dayNum = jalaliDayOf(iso);
               const isFriday = persianWeekIndex(iso) === 6;
               const selected = selectedDate === iso;
               return (
@@ -174,7 +201,7 @@ export function JalaliCalendar({ selectableDates, selectedDate, onSelect, closed
                   className={`calendar-day ${isFriday ? 'is-friday' : ''} ${selected ? 'selected' : ''}`}
                   onClick={() => onSelect(iso)}
                   aria-pressed={selected}
-                  aria-label={iso}
+                  aria-label={jalaliLabelOf(iso)}
                   dir="ltr"
                 >
                   {fa(dayNum)}
