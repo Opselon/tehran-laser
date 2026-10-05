@@ -4,6 +4,7 @@ import Icon from '../components/ui/Icon.astro';
 import { env } from 'cloudflare:workers';
 import { listFaqItems } from '../server/repositories';
 import { createFAQPageSchema, createBreadcrumbSchema } from '../lib/seo';
+import { toPersianDigits } from '../lib/datetime/jalali';
 
 // Fetch operational FAQs from D1 if available
 let dbFaqs: Awaited<ReturnType<typeof listFaqItems>> = [];
@@ -265,7 +266,7 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
           </div>
           <div class="faq-search-meta">
             <span id="faqCounterText" class="counter-badge">
-              نمایش {combinedFaqs.length} سوال تخصصی
+              نمایش {toPersianDigits(combinedFaqs.length)} سوال تخصصی
             </span>
           </div>
         </div>
@@ -285,7 +286,7 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
             aria-selected="true"
           >
             <Icon name="sparkles" size={15} />
-            <span>همه سوالات ({combinedFaqs.length})</span>
+            <span>همه سوالات ({toPersianDigits(combinedFaqs.length)})</span>
           </button>
           <button
             type="button"
