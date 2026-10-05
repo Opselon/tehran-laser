@@ -162,8 +162,8 @@ try {
               مبلغ دریافتی (هزار تومان):
             </label>
             <input type="number" id="paymentAmount" class="form-control-modal" value="1940" required />
-            <span style="font-size: 0.76rem; color: #34d399; margin-top: 4px; display: block;">
-              معادل ۱٬۹۴۰٬۰۰۰ تومان (پکیج فول بادی بانوان)
+            <span id="paymentHint" style="font-size: 0.76rem; color: #34d399; margin-top: 4px; display: block;">
+              مبلغ همراه با تعرفه خدمت و بخش انتخابی به‌روز می‌شود.
             </span>
           </div>
 
@@ -235,14 +235,52 @@ try {
         </div>
       </div>
 
-      <div style="display: flex; justify-content: flex-end; gap: 14px;">
-        <button type="submit" id="submitWalkinBtn" class="btn-3d-accept" style="padding: 16px 36px; font-size: 1.05rem; border-radius: 12px; display: inline-flex; align-items: center; gap: 10px;">
+      <div class="walkin-submit-row">
+        <button type="submit" id="submitWalkinBtn" class="btn-3d-accept walkin-submit-btn">
           <Icon name="instant" size={18} />
           <span>ثبت قطعی پذیرش، تراکنش مالی و نوبت جلسه بعد</span>
         </button>
       </div>
     </form>
   </div>
+
+  <style>
+    /* Page-scoped: at 320px the fixed 16px/36px padding made the submit row
+       13px wider than the viewport (measured scrollWidth 333 vs clientWidth
+       320), so let the label wrap and cap the button at its container. */
+    .walkin-submit-row {
+      display: flex;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .btn-3d-accept.walkin-submit-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 16px 36px;
+      font-size: 1.05rem;
+      border-radius: 12px;
+      max-width: 100%;
+      min-width: 0;
+      flex-wrap: wrap;
+      text-align: center;
+    }
+
+    .btn-3d-accept.walkin-submit-btn > span {
+      min-width: 0;
+    }
+
+    @media (max-width: 420px) {
+      .btn-3d-accept.walkin-submit-btn {
+        width: 100%;
+        padding: 16px 16px;
+      }
+    }
+  </style>
 
   <script>
     const custSelect = document.getElementById('custSelect') as unknown as HTMLSelectElement;
@@ -251,6 +289,7 @@ try {
     const custCategory = document.getElementById('custCategory') as unknown as HTMLSelectElement;
     const serviceSelect = document.getElementById('serviceSelect') as unknown as HTMLSelectElement;
     const paymentAmount = document.getElementById('paymentAmount') as HTMLInputElement;
+    const paymentHint = document.getElementById('paymentHint');
     const scheduleNextCheckbox = document.getElementById('scheduleNextCheckbox') as HTMLInputElement;
     const nextSessionFields = document.getElementById('nextSessionFields');
     const intervalWeeks = document.getElementById('intervalWeeks') as unknown as HTMLSelectElement;
@@ -286,19 +325,31 @@ try {
         custName.value = opt.dataset.name || '';
         custPhone.value = opt.dataset.phone || '';
         custCategory.value = opt.dataset.category || 'female';
+        // Assigning `.value` does not fire `change`, so the tariff for the
+        // customer's own section would otherwise stay on the previous one.
+        syncServicePrice();
       }
     });
 
     function syncServicePrice() {
+      if (!serviceSelect || !custCategory) return;
       const opt = serviceSelect.options[serviceSelect.selectedIndex];
       if (!opt) return;
       const male = custCategory.value === 'male';
-      const amount = male ? opt.dataset.priceMale : opt.dataset.price;
-      if (amount && Number(amount) > 0) paymentAmount.value = amount;
+      const amount = Number(male ? opt.dataset.priceMale : opt.dataset.price);
+      if (amount > 0) {
+        paymentAmount.value = String(amount);
+        if (paymentHint) {
+          paymentHint.textContent = `معادل ${(amount * 1000).toLocaleString('fa-IR')} تومان — ${opt.textContent?.trim() ?? ''} (${male ? 'آقایان' : 'بانوان'})`;
+        }
+      }
     }
 
     serviceSelect?.addEventListener('change', syncServicePrice);
     custCategory?.addEventListener('change', syncServicePrice);
+    // The input ships a full-body placeholder price; align it with the service
+    // that is actually selected before anyone submits.
+    syncServicePrice();
 
     form?.addEventListener('submit', async (e) => {
       e.preventDefault();

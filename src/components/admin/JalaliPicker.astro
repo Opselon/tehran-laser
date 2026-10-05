@@ -160,6 +160,9 @@ const {
     z-index: 60;
     top: calc(100% + 6px);
     right: 0;
+    /* `right:0` anchors the panel to the trigger, so a short trigger near a
+       viewport edge pushed it offscreen. clampPopover() writes --jp-shift. */
+    transform: translateX(var(--jp-shift, 0px));
     width: min(320px, 92vw);
     padding: 14px;
     border-radius: 14px;
@@ -451,12 +454,32 @@ const {
     }
   }
 
+  /** Keep the panel inside the scrollport.
+   *
+   *  The popover is anchored `right:0` on the trigger, so a short trigger that
+   *  sits near the left edge (the calendar toolbar at desktop width) pushed the
+   *  320px panel past the viewport and grew `document.scrollWidth` — a hard
+   *  horizontal-overflow failure. A positive shift moves it back inboard.
+   */
+  function clampPopover(state: PickerState): void {
+    state.popover.style.removeProperty('--jp-shift');
+    if (state.popover.hidden) return;
+    const pad = 8;
+    const viewportWidth = document.documentElement.clientWidth;
+    const rect = state.popover.getBoundingClientRect();
+    let shift = 0;
+    if (rect.left < pad) shift = pad - rect.left;
+    else if (rect.right > viewportWidth - pad) shift = viewportWidth - pad - rect.right;
+    if (shift) state.popover.style.setProperty('--jp-shift', `${Math.round(shift)}px`);
+  }
+
   function openFor(state: PickerState): void {
     closeAll(state);
     const iso = state.hidden.value;
     if (validIso(iso)) state.view = isoToJalali(iso);
     renderGrid(state);
     state.popover.hidden = false;
+    clampPopover(state);
     state.trigger.setAttribute('aria-expanded', 'true');
   }
 
@@ -558,6 +581,12 @@ const {
 
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') closeAll();
+  });
+
+  // Rotating the device or dragging the window changes where the anchored
+  // panel lands — re-clamp it so it never sits outside the scrollport.
+  window.addEventListener('resize', () => {
+    for (const state of states) clampPopover(state);
   });
 
   // Forms that reset (festival/new-service modals) must not leave a stale label.
