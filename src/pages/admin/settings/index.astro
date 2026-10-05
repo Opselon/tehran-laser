@@ -68,6 +68,12 @@ try {
       <span>تنظیمات با موفقیت در پایگاه داده لایو D1 ذخیره و اعمال شد.</span>
     </div>
 
+    <!-- Always-visible validation toast (stays on screen even when the field is far down the page) -->
+    <div id="settingsValidationToast" class="settings-validation-toast" style="display: none;" role="alert">
+      <Icon name="warning" size={18} />
+      <span id="settingsValidationText"></span>
+    </div>
+
     <!-- 3D Settings Tab Bar -->
     <nav class="settings-tab-bar" aria-label="دسته‌بندی تنظیمات">
       <button type="button" class="settings-tab-btn active" data-tab="profile" role="tab" aria-selected="true">
@@ -92,8 +98,8 @@ try {
       </button>
     </nav>
 
-    <!-- Main Settings Form -->
-    <form id="settingsForm">
+    <!-- Main Settings Form (novalidate: we surface Persian errors + jump to the offending tab) -->
+    <form id="settingsForm" novalidate>
       <!-- 1. CLINIC PROFILE PANEL -->
       <section id="panel-profile" class="settings-panel active" role="tabpanel">
         <div class="admin-section-block">
@@ -1020,6 +1026,41 @@ try {
       box-shadow: 0 4px 14px rgba(16, 185, 129, 0.15);
     }
 
+    .settings-validation-toast {
+      position: fixed;
+      left: 12px;
+      right: 12px;
+      bottom: 16px;
+      z-index: 4000;
+      box-sizing: border-box;
+      max-width: calc(100vw - 24px);
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.22) 0%, rgba(185, 28, 28, 0.12) 100%);
+      border: 1px solid rgba(239, 68, 68, 0.55);
+      color: #fecaca;
+      padding: 13px 16px;
+      border-radius: 14px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      line-height: 1.8;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      box-shadow: 0 8px 26px rgba(0, 0, 0, 0.45);
+      pointer-events: none;
+    }
+
+    .settings-validation-toast svg {
+      flex: 0 0 auto;
+      margin-top: 4px;
+    }
+
+    .settings-field-invalid {
+      outline: 2px solid #f87171 !important;
+      outline-offset: 2px;
+      border-color: rgba(239, 68, 68, 0.85) !important;
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.28) !important;
+    }
+
     @media (max-width: 640px) {
       .settings-grid {
         grid-template-columns: 1fr !important;
@@ -1205,10 +1246,59 @@ try {
     if (settingsForm && saveBtn) {
       settingsForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+
+        // --- Client-side validation gate ---------------------------------
+        // With novalidate we own the messaging: a required field inside a
+        // hidden tab would otherwise fail silently (nothing is focusable).
+        const invalidControl = settingsForm.querySelector(':invalid') as HTMLElement | null;
+        if (!settingsForm.checkValidity() && invalidControl) {
+          const panel = invalidControl.closest('.settings-panel');
+          const tabName = panel && panel.id ? panel.id.replace(/^panel-/, '') : '';
+          const tabBtn = tabName
+            ? (document.querySelector(`.settings-tab-btn[data-tab="${tabName}"]`) as HTMLButtonElement | null)
+            : null;
+
+          // 1) activate the tab that owns the invalid field
+          if (tabBtn) tabBtn.click();
+
+          // 2) mark the field so it is impossible to miss
+          settingsForm.querySelectorAll('.settings-field-invalid').forEach((el) => {
+            el.classList.remove('settings-field-invalid');
+          });
+          invalidControl.classList.add('settings-field-invalid');
+
+          // 3) Persian message — top alert + always-visible toast
+          const ic = invalidControl as HTMLInputElement;
+          const label =
+            (ic.labels && ic.labels[0] && ic.labels[0].innerText.trim()) ||
+            (invalidControl.closest('.field-group')?.querySelector('label')?.textContent?.trim()) ||
+            '';
+          const message = label
+            ? `ذخیره انجام نشد؛ فیلد «${label}» الزامی است و نمی‌تواند خالی بماند.`
+            : 'ذخیره انجام نشد؛ برخی فیلدهای الزامی خالی هستند.';
+          if (alertText) alertText.innerText = message;
+          if (alertBox) alertBox.style.display = 'flex';
+          const toastText = document.getElementById('settingsValidationText');
+          const toastBox = document.getElementById('settingsValidationToast');
+          if (toastText) toastText.innerText = message;
+          if (toastBox) toastBox.style.display = 'flex';
+
+          // 4) bring the offending field into view and report it natively
+          invalidControl.focus({ preventScroll: true });
+          invalidControl.scrollIntoView({ block: 'center', behavior: 'smooth' });
+          if (typeof ic.reportValidity === 'function') ic.reportValidity();
+          return;
+        }
+
         saveBtn.disabled = true;
         if (saveBtnText) saveBtnText.innerText = 'در حال ذخیره‌سازی در دیتابیس...';
         if (alertBox) alertBox.style.display = 'none';
         if (successBox) successBox.style.display = 'none';
+        const toastReset = document.getElementById('settingsValidationToast');
+        if (toastReset) toastReset.style.display = 'none';
+        settingsForm.querySelectorAll('.settings-field-invalid').forEach((el) => {
+          el.classList.remove('settings-field-invalid');
+        });
 
         const formData = new FormData(settingsForm);
         const payload: Record<string, any> = {};
@@ -1281,6 +1371,19 @@ try {
           window.scrollTo({ top: 0, behavior: 'smooth' });
           saveBtn.disabled = false;
           if (saveBtnText) saveBtnText.innerText = 'ذخیره کلیه تنظیمات در دیتابیس D1';
+        }
+      });
+
+      // Clear the validation markers as soon as the admin fixes the field
+      settingsForm.addEventListener('input', (ev) => {
+        const t = ev.target as HTMLElement | null;
+        if (t && t.classList.contains('settings-field-invalid')) {
+          const ic2 = t as HTMLInputElement;
+          if (ic2.checkValidity()) {
+            t.classList.remove('settings-field-invalid');
+            const tb = document.getElementById('settingsValidationToast');
+            if (tb) tb.style.display = 'none';
+          }
         }
       });
     }
