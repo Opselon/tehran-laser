@@ -158,7 +158,7 @@ function faDigits(value: string): string {
           <div class="metric-item">
             <div class="metric-top">
               <Icon name="target" size={18} class="metric-icon" />
-              <span class="metric-val">۷۵۵+۱۰۶۴</span>
+              <span class="metric-val"><bdi>۷۵۵</bdi> + <bdi>۱۰۶۴</bdi></span>
             </div>
             <span class="metric-label">طول موج دوگانه الکس و یاگ برای انواع تیپ پوست</span>
           </div>
@@ -255,11 +255,11 @@ function faDigits(value: string): string {
           </div>
           <div class="promo-pricing-box">
             <div class="old-price">
-              <span class="strikethrough">۲/۲۹۰/۰۰۰</span>
+              <span class="strikethrough">۲٬۲۹۰٬۰۰۰</span>
               <span class="price-unit">تومان</span>
             </div>
             <div class="new-price">
-              <span class="final-amount">۱/۹۴۰/۰۰۰</span>
+              <span class="final-amount">۱٬۹۴۰٬۰۰۰</span>
               <span class="price-unit">تومان</span>
             </div>
             <span class="discount-tag">۱۵٪ تخفیف اختصاصی رزرو سایت</span>
@@ -403,7 +403,7 @@ function faDigits(value: string): string {
             <Icon name="phone" size={20} class="loc-icon" />
             <div class="loc-text">
               <strong>تلفن پذیرش و هماهنگی:</strong>
-              <a href="tel:+989035555090" dir="ltr" class="loc-phone-link">+98 903 555 5090</a>
+              <a href="tel:+989035555090" class="loc-phone-link">۰۹۰۳ ۵۵۵ ۵۰۹۰</a>
             </div>
           </div>
 
@@ -525,9 +525,9 @@ function faDigits(value: string): string {
           <Icon name="calendar" size={17} />
           <span>رزرو آنلاین نوبت (۱۵٪ تخفیف)</span>
         </a>
-        <a href="tel:+989035555090" class="btn btn-outline closing-cta-call" dir="ltr">
+        <a href="tel:+989035555090" class="btn btn-outline closing-cta-call">
           <Icon name="phone" size={17} />
-          <span>+98 903 555 5090</span>
+          <span>تماس: ۰۹۰۳ ۵۵۵ ۵۰۹۰</span>
         </a>
       </div>
     </div>
@@ -975,12 +975,14 @@ function faDigits(value: string): string {
     }
 
     .gpt-book-btn {
-      padding: 6px 9px;
+      padding: 4px 8px;
+      font-size: 0.74rem;
+      gap: 3px;
     }
 
-    /* Icon-only book control keeps the row to two lines. */
+    /* Keep the reserve text visible with crisp compact geometry */
     .gpt-book-btn span:not(.gpt-unit) {
-      display: none;
+      display: inline;
     }
   }
 

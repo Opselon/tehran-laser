@@ -2519,12 +2519,12 @@ body.theme-dark-obsidian .section-subtitle {
 
 /* ── Keyframe Animations ── */
 @keyframes fadeIn {
-  from { opacity: 0; }
+  from { opacity: 0.75; }
   to { opacity: 1; }
 }
 
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(18px); }
+  from { opacity: 0.82; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
@@ -2928,7 +2928,8 @@ textarea:focus-visible,
 }
 
 .step-content {
-  animation: fadeUp 0.32s ease both;
+  opacity: 1;
+  animation: fadeUp 0.22s ease-out;
 }
 
 .loading-state {

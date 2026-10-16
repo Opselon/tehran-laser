@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { toJalaali } from 'jalaali-js';
 import type { PublicServiceDto, AvailabilitySlotDto } from '../../domain/api/dto.types';
 import type { PricingCategory } from '../../domain/booking/booking.types';
 import { IconReact } from '../ui/IconReact';
@@ -13,6 +14,8 @@ import {
   persianWeekIndex,
   timeFa,
   toLocalPhone,
+  toPersianDigits,
+  toPersianPhone,
   TOTAL_STEPS,
   STEP_META,
   type BookingSuccessResult,
@@ -345,7 +348,7 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
               aria-current={step === s.num ? 'step' : undefined}
             >
               <div className="step-circle">
-                {step > s.num ? <IconReact name="check" size={16} strokeWidth={2.6} /> : s.num}
+                {step > s.num ? <IconReact name="check" size={16} strokeWidth={2.6} /> : toPersianDigits(s.num)}
               </div>
               <span className="step-title">{s.title}</span>
             </li>
@@ -371,7 +374,7 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
 
       <div className="wizard-body">
         {step === 1 && (
-          <div className="step-content animate-fade-in">
+          <div className="step-content">
             <div className="step-header-with-actions">
               <div>
                 <h3 className="step-heading" ref={headingRef} tabIndex={-1}>
@@ -589,7 +592,7 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
         )}
 
         {step === 2 && (
-          <div className="step-content animate-fade-in">
+          <div className="step-content">
             <h3 className="step-heading" ref={step === 2 ? headingRef : undefined} tabIndex={-1}>
               مرحله دوم: انتخاب تاریخ و ساعت
             </h3>
@@ -678,7 +681,7 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
         )}
 
         {step === 3 && (
-          <div className="step-content animate-fade-in">
+          <div className="step-content">
             <h3 className="step-heading" ref={step === 3 ? headingRef : undefined} tabIndex={-1}>
               مرحله سوم: مشخصات مراجع
             </h3>
@@ -797,7 +800,7 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
         )}
 
         {step === 4 && (
-          <div className="step-content animate-fade-in">
+          <div className="step-content">
             <h3 className="step-heading" ref={step === 4 ? headingRef : undefined} tabIndex={-1}>
               مرحله چهارم: پیش‌فاکتور و تأیید نهایی
             </h3>
@@ -853,8 +856,8 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
               </div>
               <div className="summary-row">
                 <span className="label">شماره همراه</span>
-                <span className="value" dir="ltr">
-                  {toLocalPhone(customer.phone) || '-'}
+                <span className="value font-semibold">
+                  {toPersianPhone(customer.phone) || '-'}
                 </span>
               </div>
 
@@ -891,7 +894,7 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
                 <strong>اطلاع‌رسانی پیامکی</strong>
                 <p>
                   پس از ثبت نوبت، پیامک تأیید حاوی کد رهگیری به شماره{' '}
-                  <span dir="ltr">{toLocalPhone(customer.phone) || customer.phone}</span> ارسال می‌شود.
+                  <strong className="text-gold" style={{ display: 'inline-block' }}>{toPersianPhone(customer.phone) || customer.phone}</strong> ارسال می‌شود.
                   لطفاً آن را نزد خود نگه دارید.
                 </p>
               </div>
@@ -986,8 +989,8 @@ function BookingReceiptInline({
         </div>
         <div className="detail-row">
           <span className="detail-label">شماره همراه</span>
-          <span className="detail-value" dir="ltr">
-            {result.customerPhone}
+          <span className="detail-value font-semibold">
+            {toPersianPhone(result.customerPhone) || result.customerPhone}
           </span>
         </div>
         <div className="detail-row highlight-amount-row">
@@ -1036,13 +1039,18 @@ function BookingReceiptInline({
 function selectedDateLabel(isoDate: string): string {
   if (!isoDate) return '-';
   try {
-    return new Intl.DateTimeFormat('fa-IR', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      timeZone: 'UTC',
-    }).format(new Date(`${isoDate}T00:00:00Z`));
+    const [y = 0, m = 0, d = 0] = isoDate.split('-').map(Number);
+    if (!y || !m || !d) return isoDate;
+    const j = toJalaali(y, m, d);
+    const months = [
+      'فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور',
+      'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'
+    ];
+    const monthName = months[j.jm - 1] ?? '';
+    const weekdays = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'];
+    const weekIdx = persianWeekIndex(isoDate);
+    const weekdayName = weekdays[weekIdx] ?? '';
+    return `${weekdayName}، ${toPersianDigits(j.jd)} ${monthName} ${toPersianDigits(j.jy)}`;
   } catch {
     return isoDate;
   }

@@ -202,7 +202,6 @@ export function JalaliCalendar({ selectableDates, selectedDate, onSelect, closed
                   onClick={() => onSelect(iso)}
                   aria-pressed={selected}
                   aria-label={jalaliLabelOf(iso)}
-                  dir="ltr"
                 >
                   {fa(dayNum)}
                 </button>

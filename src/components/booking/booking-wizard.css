@@ -399,6 +399,30 @@
   text-align: center;
 }
 
+/* ── Step transitions: resilient visibility (never zero opacity) ── */
+.booking-wizard-container .step-content {
+  opacity: 1;
+  transform: none;
+  animation: bwStepEnter 0.22s ease-out;
+}
+
+@keyframes bwStepEnter {
+  from {
+    opacity: 0.88;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .booking-wizard-container .step-content {
+    animation: none;
+  }
+}
+
 /* ── Step 1: gender cards ────────────────────────────────────── */
 
 .booking-wizard-container .gender-selection-cards {

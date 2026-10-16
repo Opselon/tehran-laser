@@ -87,6 +87,11 @@ export function toEnglishDigits(value: string): string {
     .replace(/[٠-٩]/g, (digit) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(digit)));
 }
 
+/** ASCII digits → Persian digits (۰-۹). */
+export function toPersianDigits(value: string | number): string {
+  return String(value).replace(/\d/g, (digit) => '۰۱۲۳۴۵۶۷۸۹'[Number(digit)] ?? digit);
+}
+
 /** Loose client-side check mirroring the server's phoneSchema. */
 export function isValidPhone(value: string): boolean {
   const clean = toEnglishDigits(value).replace(/[\s\-().]/g, '');
@@ -101,6 +106,17 @@ export function toLocalPhone(value: string): string {
   if (clean.startsWith('0098')) return `0${clean.slice(4)}`;
   if (/^9\d{9}$/.test(clean)) return `0${clean}`;
   return clean;
+}
+
+/** Format phone with Persian digits and space grouping: ۰۹۱۲ ۳۴۵ ۶۷۸۹. */
+export function toPersianPhone(value: string): string {
+  const local = toLocalPhone(value);
+  if (!local) return '';
+  if (/^09\d{9}$/.test(local)) {
+    const formatted = `${local.slice(0, 4)} ${local.slice(4, 7)} ${local.slice(7)}`;
+    return toPersianDigits(formatted);
+  }
+  return toPersianDigits(local);
 }
 
 /** Client-side name check matching the server nameSchema intent. */

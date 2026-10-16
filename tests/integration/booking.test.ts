@@ -7,6 +7,15 @@ describe('Tehran Laser — Full Integration Flow', () => {
     await ensureMigrated();
   });
 
+  function getFutureNonFriday(daysAhead = 3): string {
+    const d = new Date();
+    d.setDate(d.getDate() + daysAhead);
+    while (d.getUTCDay() === 5) {
+      d.setDate(d.getDate() + 1);
+    }
+    return d.toISOString().slice(0, 10);
+  }
+
   it('1. GET /api/health returns 200 with DB status', async () => {
     const res = await worker.fetch(new Request('http://localhost/api/health'));
     expect(res.status).toBe(200);
@@ -35,8 +44,8 @@ describe('Tehran Laser — Full Integration Flow', () => {
   });
 
   it('3. GET /api/v1/availability returns available slots for a future day', async () => {
-    // Next Saturday
-    const req = new Request('http://localhost/api/v1/availability?service=full-body&category=female&date=2026-10-10');
+    const testDate = getFutureNonFriday(3);
+    const req = new Request(`http://localhost/api/v1/availability?service=full-body&category=female&date=${testDate}`);
     const res = await worker.fetch(req);
     expect(res.status).toBe(200);
     const body = (await res.json()) as {
@@ -49,7 +58,7 @@ describe('Tehran Laser — Full Integration Flow', () => {
   });
 
   it('4. POST /api/v1/bookings creates a booking with authoritative discount', async () => {
-    const targetSlot = '2026-10-10T06:30:00.000Z'; // 10:00 Iran time
+    const targetSlot = `${getFutureNonFriday(3)}T06:30:00.000Z`; // 10:00 Iran time
     const res = await worker.fetch(
       new Request('http://localhost/api/v1/bookings', {
         method: 'POST',
@@ -84,7 +93,7 @@ describe('Tehran Laser — Full Integration Flow', () => {
   });
 
   it('5. DOUBLE-BOOKING CONCURRENCY RACE (§15, §102): Conflicting simultaneous writes resolve safely', async () => {
-    const conflictSlot = '2026-10-10T07:30:00.000Z'; // 11:00 Iran time
+    const conflictSlot = `${getFutureNonFriday(4)}T07:30:00.000Z`; // 11:00 Iran time
 
     // Attempt 5 concurrent booking submissions for the exact same slot
     const attempts = Array.from({ length: 5 }, (_, i) =>
@@ -144,7 +153,7 @@ describe('Tehran Laser — Full Integration Flow', () => {
         body: JSON.stringify({
           serviceSlug: 'underarm',
           pricingCategory: 'female',
-          startsAt: '2026-10-10T08:30:00.000Z',
+          startsAt: `${getFutureNonFriday(5)}T08:30:00.000Z`,
           customerName: 'سارا حسینی',
           customerPhone: '09987654321',
         }),
@@ -219,8 +228,9 @@ describe('Tehran Laser — Full Integration Flow', () => {
 
   it('8. Multi-service booking sums quotes and allocates combined duration slots', async () => {
     // Check multi-service availability
+    const testDate = getFutureNonFriday(6);
     const availReq = new Request(
-      'http://localhost/api/v1/availability?services=face,underarm,bikini&category=female&date=2026-10-11',
+      `http://localhost/api/v1/availability?services=face,underarm,bikini&category=female&date=${testDate}`,
     );
     const availRes = await worker.fetch(availReq);
     expect(availRes.status).toBe(200);
