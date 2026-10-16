@@ -2,7 +2,7 @@
 import PublicLayout from '../../layouts/PublicLayout.astro';
 import { env } from 'cloudflare:workers';
 import { listPublicBlogPosts } from '../../server/repositories';
-import { formatJalaliDate } from '../../lib/datetime/jalali';
+import { formatJalaliDate, toPersianDigits } from '../../lib/datetime/jalali';
 import { createBreadcrumbSchema } from '../../lib/seo';
 import Icon from '../../components/ui/Icon.astro';
 
@@ -198,7 +198,7 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
                     </span>
                     <span class="meta-tag meta-time">
                       <Icon name="clock" size={13} />
-                      <span>{getReadingTime(featuredPost.excerpt)} دقیقه مطالعه</span>
+                      <span>{toPersianDigits(getReadingTime(featuredPost.excerpt))} دقیقه مطالعه</span>
                     </span>
                     {featuredPost.publishedAt && (
                       <span class="meta-tag meta-date">
@@ -268,7 +268,7 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
                       <div class="card-meta-row mb-2">
                         <span class="meta-item">
                           <Icon name="clock" size={13} />
-                          <span>{readMinutes} دقیقه</span>
+                          <span>{toPersianDigits(readMinutes)} دقیقه</span>
                         </span>
                         {post.publishedAt && (
                           <span class="meta-item">

@@ -2385,6 +2385,12 @@ body.theme-dark-obsidian .section-subtitle {
 .clinic-direct-contact a {
   color: #6ee7b7;
   text-decoration: none;
+  /* WCAG 2.2 AA 2.5.8 — the phone <a> is a standalone target inside a
+     paragraph (21px tall); grow the hit area to 24px+ without shifting
+     the line box. */
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
 }
 
 .footer-heading {
@@ -2408,6 +2414,12 @@ body.theme-dark-obsidian .section-subtitle {
   color: #b5aba0;
   text-decoration: none;
   transition: color 0.18s ease;
+  /* WCAG 2.2 AA 2.5.8 — standalone list links need a 24px target. The
+     text box alone is 22px tall; inline-flex + min-height grows the hit
+     area without moving the visible glyphs or changing the column width. */
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
 }
 
 .footer-links a:hover {

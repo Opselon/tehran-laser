@@ -3,6 +3,7 @@ import PublicLayout from '../../layouts/PublicLayout.astro';
 import { env } from 'cloudflare:workers';
 import { listPublicServices } from '../../server/repositories';
 import { createBreadcrumbSchema, resolveCanonicalOrigin } from '../../lib/seo';
+import { toPersianDigits } from '../../lib/datetime/jalali';
 import Icon from '../../components/ui/Icon.astro';
 
 // Clinical services catalogue definition with fallback and rich metadata
@@ -771,7 +772,7 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
                   <span class="category-chip">{service.categoryName}</span>
                   <div class="duration-chip">
                     <Icon name="clock" size={14} />
-                    <span>{service.durationMinutes} دقیقه</span>
+                    <span>{toPersianDigits(service.durationMinutes)} دقیقه</span>
                   </div>
                 </div>
 
@@ -877,7 +878,7 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
                     <td class="td-duration">
                       <div class="duration-badge-table">
                         <Icon name="clock" size={13} />
-                        <span>{service.durationMinutes} دقیقه</span>
+                        <span>{toPersianDigits(service.durationMinutes)} دقیقه</span>
                       </div>
                     </td>
                     <td class="td-sessions">

@@ -2,7 +2,7 @@
 import PublicLayout from '../../layouts/PublicLayout.astro';
 import { env } from 'cloudflare:workers';
 import { findPublicBlogPostBySlug, listPublicBlogPosts } from '../../server/repositories';
-import { formatJalaliDate } from '../../lib/datetime/jalali';
+import { formatJalaliDate, toPersianDigits } from '../../lib/datetime/jalali';
 import { createArticleSchema, createBreadcrumbSchema } from '../../lib/seo';
 import Icon from '../../components/ui/Icon.astro';
 
@@ -173,7 +173,7 @@ const blogJsonLdArray = [articleJsonLd, breadcrumbJsonLd];
           </span>
           <span class="meta-pill meta-pill-gold">
             <Icon name="clock" size={14} />
-            <span>{readingMinutes} دقیقه مطالعه</span>
+            <span>{toPersianDigits(readingMinutes)} دقیقه مطالعه</span>
           </span>
         </div>
       </div>
