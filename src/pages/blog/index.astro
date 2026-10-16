@@ -46,7 +46,7 @@ function getCategory(title: string, excerpt: string): { id: string; label: strin
   if (combined.includes('مراقبت') || combined.includes('آمادگی') || combined.includes('شیو') || combined.includes('قبل') || combined.includes('بعد')) {
     return { id: 'care', label: 'آمادگی و مراقبت', icon: 'shield' };
   }
-  if (combined.includes('دستگاه') || combined.includes('الکساندرایت') || combined.includes('کندلا') || combined.includes('کولینگ') || combined.includes('تکنولوژی')) {
+  if (combined.includes('دستگاه') || combined.includes('الکساندرایت') || combined.includes('رادو پلاس') || combined.includes('کولینگ') || combined.includes('تکنولوژی')) {
     return { id: 'tech', label: 'دستگاه و تکنولوژی', icon: 'lightning' };
   }
   if (combined.includes('پوست') || combined.includes('دارو') || combined.includes('راکوتان') || combined.includes('سولاریوم') || combined.includes('پزشک')) {
@@ -75,11 +75,11 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
 
 <PublicLayout
   title="مجله تخصصی زیبایی و لیزر — کلینیک تهران لیزر"
-  description="مرجع علمی و کاربردی مراقبت‌های پوستی، چک‌لیست قبل و بعد از لیزر، تکنولوژی الکساندرایت و استانداردهای کلینیکال پاسداران."
+  description="مرجع علمی و کاربردی مراقبت‌های پوستی، چک‌لیست قبل و بعد از لیزر، تکنولوژی لیزر تماسی و استانداردهای کلینیکال پاسداران."
   canonicalUrl="/blog"
   keywords={[
     'مجله لیزر موهای زائد',
-    'مقالات لیزر الکساندرایت',
+    'مقالات لیزر تماسی',
     'مراقبت‌های بعد از لیزر',
     'راهنمای لیزر موهای زائد',
   ]}
@@ -97,7 +97,7 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
         </div>
         <h1 class="blog-hero-title">مجله تخصصی و راهنمای مراجعین</h1>
         <p class="blog-hero-desc">
-          راهنماهای گام‌به‌گام آمادگی جلسات، مراقبت‌های پس از درمان، تحلیل تکنولوژی لیزر الکساندرایت و سلامت پوست تحت نظارت تیم پزشکی
+          راهنماهای گام‌به‌گام آمادگی جلسات، مراقبت‌های پس از درمان، تحلیل تکنولوژی لیزر تماسی و سلامت پوست تحت نظارت تیم پزشکی
         </p>
 
         <!-- Fast Patient Guides Strip -->
@@ -127,8 +127,8 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
               <Icon name="gem" size={22} />
             </div>
             <div class="guide-text">
-              <div class="guide-title">تکنولوژی الکساندرایت</div>
-              <div class="guide-sub">طول موج ۷۵۵ نانومتر کندلا با سیستم کولینگ سرمایشی بدون درد</div>
+              <div class="guide-title">تکنولوژی لیزر تماسی</div>
+              <div class="guide-sub">سه طول موج ۷۵۵ و ۸۰۸ و ۱۰۶۴ نانومتر با سرمایش پیوسته بدون درد</div>
             </div>
           </div>
         </div>

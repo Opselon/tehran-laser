@@ -1,7 +1,7 @@
 ---
 import PublicLayout from '../layouts/PublicLayout.astro';
 import Icon from '../components/ui/Icon.astro';
-import CandelaShowcase from '../components/public/CandelaShowcase.astro';
+import DeviceShowcase from '../components/public/DeviceShowcase.astro';
 import ProtocolSection from '../components/public/ProtocolSection.astro';
 import TestimonialsSection from '../components/public/TestimonialsSection.astro';
 import { defaultFaqs } from '../data/faqs';
@@ -94,8 +94,8 @@ function faDigits(value: string): string {
 ---
 
 <PublicLayout
-  title="تهران لیزر — مرکز تخصصی لیزر الکساندرایت کندلا ۲۰۲۶ در پاسداران"
-  description="کلینیک تخصصی تهران لیزر در خیابان پایدارفرد پاسداران. مجهز به الکساندرایت کندلا ۲۰۲۶ آمریکایی با کولینگ داینامیک بدون درد، پک استریل اختصاصی، تعرفه شفاف و ۱۵٪ تخفیف رزرو آنلاین."
+  title="تهران لیزر — مرکز تخصصی لیزر تماسی رادو پلاس در پاسداران"
+  description="کلینیک تخصصی تهران لیزر در خیابان پایدارفرد پاسداران. مجهز به دستگاه لیزر تماسی رادو پلاس با سه طول موج ۷۵۵ و ۸۰۸ و ۱۰۶۴ نانومتر، سرمایش پیوسته بدون درد، کاور یکبار مصرف اختصاصی، تعرفه شفاف و ۱۵٪ تخفیف رزرو آنلاین."
   canonicalUrl="/"
   jsonLd={[faqJsonLd, breadcrumbJsonLd]}
   theme="dark"
@@ -106,7 +106,7 @@ function faDigits(value: string): string {
       <div class="hero-content">
         <div class="hero-badge animate-fade-in">
           <Icon name="sparkles" size={15} class="gold-icon-glow" />
-          <span>مرکز تخصصی لیزر و زیبایی پاسداران — مجهز به الکساندرایت کندلا ۲۰۲۶</span>
+          <span>مرکز تخصصی لیزر و زیبایی پاسداران — مجهز به لیزر تماسی رادو پلاس</span>
         </div>
 
         <h1 class="hero-title animate-fade-up">
@@ -114,7 +114,7 @@ function faDigits(value: string): string {
         </h1>
 
         <p class="hero-subtitle animate-fade-up delay-1">
-          در کلینیک تهران لیزر، فناوری طلایی الکساندرایت کندلا ۲۰۲۶ (Candela GentleMax Pro) را با سیستم خنک‌کننده داینامیک DCD کرایوژن، نظارت مستقیم کادر درمانی و پک‌های استریل اختصاصی در محیطی VIP و آرام تجربه فرمایید.
+          در کلینیک تهران لیزر، فناوری لیزر تماسی رادو پلاس را با سه طول موج ۷۵۵ و ۸۰۸ و ۱۰۶۴ نانومتر، سرمایش پیوسته TEC Double، نظارت مستقیم کادر درمانی و پک‌های استریل اختصاصی در محیطی VIP و آرام تجربه فرمایید.
         </p>
 
         <div class="hero-cta-group animate-fade-up delay-2">
@@ -177,8 +177,8 @@ function faDigits(value: string): string {
     </div>
   </section>
 
-  <!-- Candela GentleMax Pro 2026 Showcase (§37, §38) -->
-  <CandelaShowcase />
+  <!-- Rado Plus Contact Laser Showcase (§37, §38) -->
+  <DeviceShowcase />
 
   <!-- Trust Strip (§37) -->
   <section class="trust-strip">
@@ -188,7 +188,7 @@ function faDigits(value: string): string {
           <Icon name="doctor" size={26} />
         </div>
         <h3 class="trust-title">اپراتورهای ارشد دوره‌دیده</h3>
-        <p class="trust-desc">ارائه خدمات توسط اپراتورهای دارای سرتیفیکیت رسمی کندلا، در لاین‌های کاملاً مجزای بانوان و آقایان</p>
+        <p class="trust-desc">ارائه خدمات توسط اپراتورهای دارای گواهینامه کاربری لیزرهای پزشکی، در لاین‌های کاملاً مجزای بانوان و آقایان</p>
       </div>
 
       <div class="trust-card">
@@ -224,7 +224,7 @@ function faDigits(value: string): string {
         <span class="section-subtitle">تعرفه‌های مصوب و شفاف کلینیک</span>
         <h2 class="section-title">تعرفه لیزر بانوان و آقایان — کنار هم</h2>
         <p class="section-desc">
-          تعرفه‌های رسمی کلینیک تهران لیزر با دستگاه الکساندرایت کندلا ۲۰۲۶ برای هر دو لاین بانوان و آقایان. رزرو آنلاین پکیج کل بدن مشمول ۱۵٪ تخفیف ویژه می‌باشد.
+          تعرفه‌های رسمی کلینیک تهران لیزر با دستگاه لیزر تماسی رادو پلاس برای هر دو لاین بانوان و آقایان. رزرو آنلاین پکیج کل بدن مشمول ۱۵٪ تخفیف ویژه می‌باشد.
         </p>
       </div>
 
@@ -237,7 +237,7 @@ function faDigits(value: string): string {
         <div class="promo-content">
           <div class="promo-info">
             <h3 class="promo-title">پکیج طلایی کل بدن بانوان (Full Body)</h3>
-            <p class="promo-desc">شامل دست کامل، پا کامل، زیر بغل، بیکینی، خط باسن، خط ناف و شکم با شات نامحدود کندلا</p>
+            <p class="promo-desc">شامل دست کامل، پا کامل، زیر بغل، بیکینی، خط باسن، خط ناف و شکم با شات نامحدود</p>
             <ul class="promo-features">
               <li>
                 <Icon name="checkCircle" size={16} class="check-icon" />
@@ -245,7 +245,7 @@ function faDigits(value: string): string {
               </li>
               <li>
                 <Icon name="checkCircle" size={16} class="check-icon" />
-                <span>سیستم کولینگ هوشمند کرایوژن فریز بدون درد</span>
+                <span>سرمایش پیوسته TEC Double بدون درد</span>
               </li>
               <li>
                 <Icon name="checkCircle" size={16} class="check-icon" />
@@ -459,7 +459,7 @@ function faDigits(value: string): string {
               dir="ltr"
               >@{igHandle}</a
             >
-            <p class="ig-profile-desc">کلینیک تخصصی تهران لیزر — الکساندرایت کندلا ۲۰۲۶ آمریکایی</p>
+            <p class="ig-profile-desc">کلینیک تخصصی تهران لیزر — لیزر تماسی رادو پلاس</p>
             <div class="ig-profile-actions">
               <a href={igProfileUrl} target="_blank" rel="noopener noreferrer" class="btn btn-primary ig-follow-btn">
                 <Icon name="instagram" size={17} />
@@ -776,7 +776,7 @@ function faDigits(value: string): string {
       display: none;
     }
 
-    /* Candela showcase: keep the two strongest features, drop the prose. */
+    /* Device showcase: keep the two strongest features, drop the prose. */
     :global(.candela-lead),
     :global(.candela-feat-desc) {
       display: none;

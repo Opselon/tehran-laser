@@ -3,7 +3,7 @@
  *
  * Implements Google-compliant schema specifications for:
  * - MedicalClinic & MedicalBusiness
- * - MedicalProcedure / HealthAndBeautyBusiness (Candela GentleMax Pro)
+ * - MedicalProcedure / HealthAndBeautyBusiness (Rado Plus contact laser)
  * - FAQPage
  * - BreadcrumbList
  * - Article & MedicalWebPage
@@ -97,14 +97,14 @@ export function createMedicalClinicSchema(origin = DEFAULT_CANONICAL_ORIGIN) {
       itemListElement: [
         {
           '@type': 'OfferCatalog',
-          name: 'پکیج‌های لیزر الکساندرایت کندلا ۲۰۲۶',
+          name: 'پکیج‌های لیزر تماسی رادو پلاس',
           itemListElement: [
             {
               '@type': 'Offer',
               itemOffered: {
                 '@type': 'MedicalProcedure',
                 name: 'لیزر کل بدن بانوان (Full Body)',
-                description: 'پکیج کامل دست، پا، بیکینی، زیر بغل، خط باسن، خط ناف و شکم با شات نامحدود کندلا جنتل مکس پرو',
+                description: 'پکیج کامل دست، پا، بیکینی، زیر بغل، خط باسن، خط ناف و شکم با شات نامحدود دستگاه لیزر تماسی رادو پلاس',
               },
               price: '1940000',
               priceCurrency: 'IRT',
@@ -114,7 +114,7 @@ export function createMedicalClinicSchema(origin = DEFAULT_CANONICAL_ORIGIN) {
               itemOffered: {
                 '@type': 'MedicalProcedure',
                 name: 'لیزر موهای زائد کاربردی (بیکینی و زیر بغل)',
-                description: 'لیزر نواحی حساس با سیستم کولینگ بدون درد و سری‌های استریل یکبار مصرف',
+                description: 'لیزر نواحی حساس با سرمایش پیوسته بدون درد و کاور یکبار مصرف استریل',
               },
               price: '980000',
               priceCurrency: 'IRT',
@@ -143,18 +143,18 @@ export function createMedicalProcedureSchema(
     '@context': 'https://schema.org',
     '@type': 'MedicalProcedure',
     '@id': `${serviceUrl}#procedure`,
-    name: `لیزر موهای زائد ${service.name} با کندلا جنتل مکس پرو`,
+    name: `لیزر موهای زائد ${service.name} با رادو پلاس`,
     procedureType: 'https://schema.org/NonSurgicalProcedure',
     bodyLocation: service.name,
     description:
       service.description ||
-      `خدمات تخصصی لیزر موهای زائد ناحیه ${service.name} با دستگاه الکساندرایت کندلا جنتل مکس پرو ۲۰۲۶ در کلینیک تهران لیزر پاسداران.`,
+      `خدمات تخصصی لیزر موهای زائد ناحیه ${service.name} با دستگاه لیزر تماسی رادو پلاس در کلینیک تهران لیزر پاسداران.`,
     preparation:
       'شیو کامل ناحیه با تیغ یا ژیلت ۲۴ ساعت قبل از جلسه، عدم مصرف داروهای لایه‌بردار و پرهیز از برنزه کردن و آفتاب گرفتن.',
     followup:
       'استفاده از کرم زینک اکساید و ژل آلوئه‌ورا، پرهیز از دوش آب داغ، سونا و ورزش سنگین تا ۲۴ ساعت پس از جلسه.',
     howPerformed:
-      'تابش پالس‌های متمرکز لیزر الکساندرایت با طول موج ۷۵۵ نانومتر همزمان با اسپری خنک‌کننده داینامیک کندلا (DCD) جهت مهار قطعی فولیکول مو بدون کوچک‌ترین درد و سوختگی.',
+      'تابش پالس‌های متمرکز لیزر تماسی در سه طول موج ۷۵۵ و ۸۰۸ و ۱۰۶۴ نانومتر همزمان با سرمایش پیوسته TEC Double و ژل خنک‌کننده جهت مهار قطعی فولیکول مو بدون کوچک‌ترین درد و سوختگی.',
     provider: {
       '@type': 'MedicalClinic',
       name: 'کلینیک تخصصی تهران لیزر',
@@ -273,8 +273,8 @@ export function createArticleSchema(
     },
     about: {
       '@type': 'MedicalTherapy',
-      name: 'لیزر موهای زائد الکساندرایت کندلا ۲۰۲۶',
-      description: 'استاندارد طلایی رفع موهای زائد با طول موج ۷۵۵ نانومتر و سیستم خنک‌کننده DCD',
+      name: 'لیزر موهای زائد تماسی رادو پلاس',
+      description: 'رفع موهای زائد با سه طول موج ۷۵۵ و ۸۰۸ و ۱۰۶۴ نانومتر و سیستم خنک‌کننده TEC Double',
     },
   };
 }

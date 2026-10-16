@@ -34,7 +34,7 @@ const avgJoules = clinicalRecords.length > 0
   ? clinicalRecords.reduce((s, r) => s + (Number(r.joules_energy) || 0), 0) / clinicalRecords.length
   : 0;
 
-const DEVICE_LABEL = 'الکساندرایت کندلا جنتل پرومکس ۲۰۲۶';
+const DEVICE_LABEL = 'لیزر تماسی رادو پلاس';
 ---
 
 <AdminLayout title="پرونده بالینی و CRM" activeNav="crm">
@@ -46,7 +46,7 @@ const DEVICE_LABEL = 'الکساندرایت کندلا جنتل پرومکس ۲
           <span>پرونده بالینی و ارتباط با مراجعین (Clinical CRM)</span>
         </h1>
         <p class="section-block-sub">
-          مدیریت پرونده‌های درمانی، رصد دوره‌های لیزر کندلا، شات‌ها، انرژی ژول و حافظه مراجعین (API First)
+          مدیریت پرونده‌های درمانی، رصد دوره‌های لیزر تماسی، شات‌ها، انرژی ژول و حافظه مراجعین (API First)
         </p>
       </div>
       <div class="actions">
@@ -180,7 +180,7 @@ const DEVICE_LABEL = 'الکساندرایت کندلا جنتل پرومکس ۲
             </button>
             <button id="addSessionForCustBtn" class="btn-3d-gold crm-dossier-btn">
               <Icon name="plus" size={15} />
-              <span>جلسه جدید کندلا</span>
+              <span>جلسه جدید لیزر تماسی</span>
             </button>
           </div>
         </div>
@@ -205,7 +205,7 @@ const DEVICE_LABEL = 'الکساندرایت کندلا جنتل پرومکس ۲
         <!-- Clinical records table -->
         <h4 class="crm-records-title">
           <Icon name="document" size={16} class="title-gold-icon" />
-          <span>تاریخچه جلسات، شات‌ها و دوز انرژی کندلا</span>
+          <span>تاریخچه جلسات، شات‌ها و دوز انرژی دستگاه</span>
         </h4>
 
         <div class="admin-table-container crm-table-wrap">

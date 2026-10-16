@@ -43,7 +43,7 @@ const areaMeta: Record<string, AreaMeta> = {
     wavelengthShort: 'دو طول موج (Dual)',
     sessions: '۶ الی ۸ جلسه',
     interval: '۶ الی ۸ هفته',
-    painLevel: 'بدون درد (کرایو DCD)',
+    painLevel: 'بدون درد (سرمایش TEC Double)',
     results: 'کاهش دائمی ۸۵٪ الی ۹۵٪',
   },
   face: {
@@ -51,7 +51,7 @@ const areaMeta: Record<string, AreaMeta> = {
     wavelengthShort: '۷۵۵nm',
     sessions: '۶ الی ۸ جلسه',
     interval: '۴ الی ۵ هفته',
-    painLevel: 'بدون درد (کرایو DCD)',
+    painLevel: 'بدون درد (سرمایش TEC Double)',
     results: 'کاهش دائمی ۸۵٪ الی ۹۵٪',
   },
   underarm: {
@@ -59,7 +59,7 @@ const areaMeta: Record<string, AreaMeta> = {
     wavelengthShort: '۷۵۵nm',
     sessions: '۶ الی ۸ جلسه',
     interval: '۵ الی ۶ هفته',
-    painLevel: 'بدون درد (کرایو DCD)',
+    painLevel: 'بدون درد (سرمایش TEC Double)',
     results: 'رفع تیرگی ناشی از شیو',
   },
   bikini: {
@@ -67,7 +67,7 @@ const areaMeta: Record<string, AreaMeta> = {
     wavelengthShort: '۷۵۵nm',
     sessions: '۶ الی ۸ جلسه',
     interval: '۶ الی ۸ هفته',
-    painLevel: 'بدون درد (کرایو DCD)',
+    painLevel: 'بدون درد (سرمایش TEC Double)',
     results: 'کاهش دائمی ۸۵٪ الی ۹۵٪',
   },
   'full-legs': {
@@ -75,7 +75,7 @@ const areaMeta: Record<string, AreaMeta> = {
     wavelengthShort: '۷۵۵nm',
     sessions: '۶ الی ۸ جلسه',
     interval: '۶ الی ۸ هفته',
-    painLevel: 'بدون درد (کرایو DCD)',
+    painLevel: 'بدون درد (سرمایش TEC Double)',
     results: 'کاهش دائمی ۸۵٪ الی ۹۵٪',
   },
   'full-arms': {
@@ -83,7 +83,7 @@ const areaMeta: Record<string, AreaMeta> = {
     wavelengthShort: '۷۵۵nm',
     sessions: '۶ الی ۸ جلسه',
     interval: '۵ الی ۷ هفته',
-    painLevel: 'بدون درد (کرایو DCD)',
+    painLevel: 'بدون درد (سرمایش TEC Double)',
     results: 'کاهش دائمی ۸۵٪ الی ۹۵٪',
   },
 };
@@ -94,7 +94,7 @@ const meta: AreaMeta =
     wavelengthShort: '۷۵۵nm',
     sessions: '۶ الی ۸ جلسه',
     interval: '۵ الی ۸ هفته',
-    painLevel: 'بدون درد (کرایو DCD)',
+    painLevel: 'بدون درد (سرمایش TEC Double)',
     results: 'کاهش دائمی ۸۵٪ الی ۹۵٪',
   };
 
@@ -103,7 +103,7 @@ const promoOriginalPrice = 2290;
 const isDualWavelength =
   meta.wavelengthShort.includes('دو طول موج') || meta.wavelengthShort.includes('Dual');
 
-// Schema.org MedicalProcedure JSON-LD for Candela GentleMax Pro treatments (§31, §135)
+// Schema.org MedicalProcedure JSON-LD for Rado Plus contact-laser treatments (§31, §135)
 // Price must be full tomans: catalogue amounts are stored in thousands.
 const serviceJsonLd = createMedicalProcedureSchema({
   name: service.name,
@@ -169,19 +169,19 @@ const afterCareSteps = [
         ارائه خدمات با مدرن‌ترین تجهیزات خنک‌کننده و بالاترین استاندارد بهداشتی در منطقه پاسداران
       </p>
 
-      <!-- Candela GentleMax Pro Technology Badges -->
+      <!-- Rado Plus Technology Badges -->
       <div class="tech-badges-strip">
         <div class="tech-badge">
           <Icon name="lightning" size={15} />
-          <span>کندلا جنتل‌مکس پرو ۲۰۲۴ (Candela USA)</span>
+          <span>لیزر تماسی رادو پلاس (Rado Plus)</span>
         </div>
         <div class="tech-badge">
           <Icon name="shield" size={15} />
-          <span>طول موج {meta.wavelengthShort} — دستگاه اصل آمریکا</span>
+          <span>طول موج {meta.wavelengthShort} — دستگاه لیزر تماسی</span>
         </div>
         <div class="tech-badge">
           <Icon name="snowflake" size={15} />
-          <span>کولینگ کرایو DCD منهای ۳۰ درجه بدون درد</span>
+          <span>سرمایش پیوسته TEC Double بدون درد</span>
         </div>
       </div>
     </div>
@@ -284,15 +284,15 @@ const afterCareSteps = [
 
           <div class="tier-foot-note">
             <Icon name="info" size={13} />
-            <span>تمامی تعرفه‌ها شامل سری شخصی یکبار مصرف، کولینگ کرایو و نظارت پزشک می‌باشد.</span>
+            <span>تمامی تعرفه‌ها شامل کاور یکبار مصرف اختصاصی، سرمایش پیوسته و نظارت پزشک می‌باشد.</span>
           </div>
         </div>
 
-        <!-- ════ Candela Wavelength Badge ════ -->
+        <!-- ════ Rado Plus Wavelength Badge ════ -->
         <div class="wavelength-card">
           <div class="wavelength-card-head">
             <Icon name="lightning" size={18} />
-            <span>طول موج دستگاه کندلا جنتل‌مکس پرو</span>
+            <span>طول موج دستگاه لیزر تماسی رادو پلاس</span>
           </div>
           <div class="wavelength-badges">
             {isDualWavelength ? (
@@ -315,7 +315,7 @@ const afterCareSteps = [
           </div>
           <p class="wavelength-desc">
             طول موج الکساندرایت ۷۵۵ نانومتر با بیشترین میزان جذب ملانین، ریشه‌های موی ضخیم و سیاه را
-            هدف قرار می‌دهد؛ همزمان سیستم کولینگ داینامیک (DCD) با شات گاز مبرد منهای ۳۰ درجه،
+            هدف قرار می‌دهد؛ همزمان سیستم سرمایش پیوسته TEC Double،
             پوست را بی‌حس کرده و درد و ریسک سوختگی را به صفر می‌رساند.
           </p>
         </div>
@@ -436,12 +436,12 @@ const afterCareSteps = [
               <strong>{meta.wavelengthShort}</strong>
             </li>
             <li>
-              <span class="sb-label"><Icon name="snowflake" size={14} /> کولینگ</span>
-              <strong>کرایو DCD</strong>
+              <span class="sb-label"><Icon name="snowflake" size={14} /> سرمایش</span>
+              <strong>TEC Double</strong>
             </li>
             <li>
               <span class="sb-label"><Icon name="award" size={14} /> دستگاه</span>
-              <strong>جنتل‌مکس پرو ۲۰۲۴</strong>
+              <strong>رادو پلاس</strong>
             </li>
           </ul>
 
