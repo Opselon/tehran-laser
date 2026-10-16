@@ -2,6 +2,7 @@
 import PublicLayout from '../../layouts/PublicLayout.astro';
 import { env } from 'cloudflare:workers';
 import { findPublicServiceBySlug } from '../../server/repositories';
+import { toPersianDigits } from '../../lib/datetime/jalali';
 import Icon from '../../components/ui/Icon.astro';
 import {
   createMedicalProcedureSchema,
@@ -138,7 +139,7 @@ const afterCareSteps = [
 
 <PublicLayout
   title={`لیزر ${service.name} در پاسداران — تعرفه و رزرو | کلینیک تهران لیزر`}
-  description={`خدمات تخصصی لیزر ${service.name} در کلینیک تهران لیزر پاسداران. مدت زمان ${service.durationMinutes} دقیقه، اپراتور مجرب، دستگاه خنک‌کننده بدون درد و تعرفه مصوب.`}
+  description={`خدمات تخصصی لیزر ${service.name} در کلینیک تهران لیزر پاسداران. مدت زمان ${toPersianDigits(service.durationMinutes)} دقیقه، اپراتور مجرب، دستگاه خنک‌کننده بدون درد و تعرفه مصوب.`}
   canonicalUrl={`/services/${service.slug}`}
   jsonLd={serviceJsonLdArray}
 >
@@ -201,7 +202,7 @@ const afterCareSteps = [
           <div class="duration-pill">
             <Icon name="clock" size={15} />
             <span>مدت جلسه:</span>
-            <strong>{service.durationMinutes} دقیقه</strong>
+            <strong>{toPersianDigits(service.durationMinutes)} دقیقه</strong>
           </div>
         </div>
 
@@ -424,7 +425,7 @@ const afterCareSteps = [
           <ul class="sidebar-list">
             <li>
               <span class="sb-label"><Icon name="clock" size={14} /> مدت جلسه</span>
-              <strong>{service.durationMinutes} دقیقه</strong>
+              <strong>{toPersianDigits(service.durationMinutes)} دقیقه</strong>
             </li>
             <li>
               <span class="sb-label"><Icon name="calendar" size={14} /> تعداد جلسات</span>
