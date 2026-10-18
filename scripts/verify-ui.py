@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 import time
 import urllib.request
@@ -28,7 +29,7 @@ import urllib.request
 import websocket
 
 CDP_PORT = 9333
-BASE = "http://127.0.0.1:4399"
+BASE = os.environ.get("VERIFY_BASE", "http://127.0.0.1:4399")
 
 ROUTES = [
     "/",
