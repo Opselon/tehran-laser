@@ -270,7 +270,9 @@ import Icon from '../components/ui/Icon.astro';
     color: #ffffff;
     line-height: 1.35;
     margin: 0 0 12px;
-    letter-spacing: -0.02em;
+    /* Persian joined script: negative tracking pinches the cursive joins
+       (tokens.css --tracking-display is 0 for exactly this reason). */
+    letter-spacing: var(--tracking-display);
     text-shadow: 0 3px 12px rgba(0, 0, 0, 0.8);
   }
 

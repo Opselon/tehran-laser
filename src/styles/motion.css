@@ -1,0 +1,684 @@
+/* ─────────────────────────────────────────────────────────────
+   TEHRAN LASER — MOTION, DEPTH & MEDIA PRIMITIVES
+   A small, predictable vocabulary of GPU-only motion plus the
+   reusable image-frame / frosted-glass utilities the public
+   lanes compose with.
+
+   WHY this is its own file (not inside public.css):
+     public.css is a 4.4k-line page stylesheet. Motion utilities are
+     consumed by every lane (hero, services, pricing, footer), so
+     they must load with the shared layer — not with one page.
+
+   TWO RULES GOVERN EVERY RULE BELOW — do not relax them:
+     1. Animate ONLY `transform` and `opacity`. Animating
+        `height` / `top` / `margin` forces a synchronous layout on
+        every frame; on a mid-range Android that turns a 60fps
+        reveal into a 20fps stutter, and the Persian (RTL) text is
+        line-broken every frame, so the glyph-shaping work is
+        repeated too. `transform`/`opacity` run on the compositor.
+     2. Every moving rule is fully inert under
+        `@media (prefers-reduced-motion: reduce)` (see §9). Not
+        "shorter" — inert. `--motion-*` tokens collapse to 1ms in
+        tokens.css, but a transition of 1ms still fires a
+        compositor frame, and vestibular-triggered motion must be
+        gone entirely, so the block below sets `transition: none`
+        AND pins the resting transform.
+   ───────────────────────────────────────────────────────────── */
+
+/* ── 1. REVEAL — scroll-triggered entrance ──────────────────────
+   Usage:
+     <div class="reveal-up" data-reveal> … </div>
+     document.querySelectorAll('[data-reveal]') -> add `.is-visible`
+     on first intersection.
+
+   The hidden state is the CSS default (matching the `.reveal`
+   pattern base.css already ships), so the page must add
+   `.is-visible` for content to appear. Two escape hatches keep
+   that from ever hiding real content:
+     • `@media (scripting: none)` — no JS at all: always visible.
+     • `.reveal-static` — per-element opt-out for print / SSR
+       snapshots.
+   If a lane cannot guarantee the observer runs, use `.reveal-static`
+   or gate the class server-side.                                       */
+
+.reveal-up,
+.reveal-fade,
+.reveal-scale,
+.reveal-start,
+.reveal-end {
+  /* `will-change` is intentionally NOT set here: pinning a compositor
+     layer for every reveal target on the page costs GPU memory on
+     low-end phones. The browser promotes on first transform anyway. */
+  transition:
+    opacity var(--motion-slow) var(--ease-out),
+    transform var(--motion-slow) var(--ease-out);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+.reveal-fade {
+  opacity: 0;
+}
+
+.reveal-up {
+  opacity: 0;
+  transform: translate3d(0, 18px, 0);
+}
+
+/* Slide in from the inline-start edge. `transform` has no logical
+   property, so RTL is handled by swapping the axis sign under
+   `[dir='rtl']` rather than by mirroring the whole rule. */
+.reveal-start {
+  opacity: 0;
+  transform: translate3d(-24px, 0, 0);
+}
+
+[dir='rtl'] .reveal-start {
+  transform: translate3d(24px, 0, 0);
+}
+
+.reveal-end {
+  opacity: 0;
+  transform: translate3d(24px, 0, 0);
+}
+
+[dir='rtl'] .reveal-end {
+  transform: translate3d(-24px, 0, 0);
+}
+
+/* 0.985, not 0.9: a deep scale reads as a zoom-out "jump" on text
+   and re-rasterises the Persian glyphs at a different size. */
+.reveal-scale {
+  opacity: 0;
+  transform: scale(0.985);
+}
+
+.reveal-up.is-visible,
+.reveal-fade.is-visible,
+.reveal-scale.is-visible,
+.reveal-start.is-visible,
+.reveal-end.is-visible,
+.reveal-static {
+  opacity: 1;
+  transform: none;
+}
+
+/* A collapsed delay for the n-th child of a `.reveal-stagger`
+   group. `--i` is set inline by the consumer; capped at 8 in §9 so
+   a 40-item grid cannot stagger itself into a 2.4s tail. */
+.reveal-stagger > * {
+  transition-delay: calc(min(var(--i, 0), 8) * 70ms);
+}
+
+@media (scripting: none) {
+  .reveal-up,
+  .reveal-fade,
+  .reveal-scale,
+  .reveal-start,
+  .reveal-end {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* ── 2. HOVER LIFT — pointer affordance ─────────────────────────
+   Cards lift 3-4px; the shadow deepens in the same transition so
+   the lift reads as elevation rather than as a jitter. `translate3d`
+   (not `translateY`) keeps the element on its own compositor layer
+   for the duration of the transition. Bundled `box-shadow` is the
+   one non-compositor property we accept, because a card that lifts
+   without its shadow is not readable as depth on the dark theme.   */
+
+.lift,
+.lift-sm,
+.lift-lg {
+  transition:
+    transform var(--motion-normal) var(--ease-out),
+    box-shadow var(--motion-normal) var(--ease-out),
+    border-color var(--motion-normal) var(--ease-out);
+}
+
+.lift-sm:hover {
+  transform: translate3d(0, -2px, 0);
+}
+
+.lift:hover {
+  transform: translate3d(0, -4px, 0);
+}
+
+.lift-lg:hover {
+  transform: translate3d(0, -7px, 0);
+}
+
+/* Press feedback for taps — `:active` must land instantly, so it
+   uses the fast token, not the normal one. */
+.press:active {
+  transform: scale(0.98);
+}
+
+/* ── 3. MEDIA FRAMES — ratio boxes with zero CLS ────────────────
+   Why `aspect-ratio` and not the old padding-top hack: the hack
+   needs an absolutely-positioned child and a magic percentage, and
+   it collapses in an RTL flex row. `aspect-ratio` is one
+   declaration, works with logical sizing, and the browser reserves
+   the box before the image decodes — which is what keeps CLS at 0
+   when the hero photo arrives late over a 3G connection.
+
+   Pair with `<img class="media-cover" width height loading="lazy">`.
+   Width/height attributes stay required: `aspect-ratio` alone does
+   not create the intrinsic-ratio hint that Safari 16 needs.        */
+
+.media-frame {
+  position: relative;
+  display: block;
+  overflow: hidden; /* clips the scaled cover image to the radius */
+  border-radius: var(--radius-lg, 22px);
+  background-color: var(--color-surface-muted, #f2eee8);
+  isolation: isolate;
+}
+
+.media-frame--1x1 {
+  aspect-ratio: 1 / 1;
+}
+.media-frame--4x3 {
+  aspect-ratio: 4 / 3;
+}
+.media-frame--3x2 {
+  aspect-ratio: 3 / 2;
+}
+.media-frame--16x9 {
+  aspect-ratio: 16 / 9;
+}
+.media-frame--21x9 {
+  aspect-ratio: 21 / 9;
+}
+.media-frame--3x4 {
+  aspect-ratio: 3 / 4;
+}
+.media-frame--2x3 {
+  aspect-ratio: 2 / 3;
+}
+
+/* `picture` is a zero-role wrapper — `display: contents` lets the
+   `<img>` inside be the direct box child, so `block-size: 100%`
+   resolves against the frame instead of against an auto-height
+   wrapper. */
+.media-frame picture {
+  display: contents;
+}
+
+.media-frame img,
+.media-frame video {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* Logos, diagrams and screenshots must NOT be cropped — the contain
+   variant letterboxes inside the same ratio box. */
+.media-frame--contain img,
+.media-frame--contain video,
+.media-contain {
+  object-fit: contain;
+}
+
+.media-cover {
+  object-fit: cover;
+  object-position: center;
+}
+
+.media-frame--round,
+.media-round {
+  border-radius: var(--radius-full, 999px);
+}
+
+/* Tighter radius for thumbnails inside cards. */
+.media-frame--tight {
+  border-radius: var(--radius-md, 14px);
+}
+.media-frame--square {
+  border-radius: 0;
+}
+
+/* ── 3b. LQIP — blurred placeholder ─────────────────────────────
+   Set the 20px data-URI (see public/images/MANIFEST.md) inline as
+   `--lqip`, and add `loading` on the <img>. The image's own
+   `opacity` transition cross-fades over the placeholder, so the
+   swap is a dissolve instead of a pop.
+   WHY a separate class instead of `background-image` on the frame:
+   the frame also renders on top of dark sections, where a stale
+   ivory placeholder would flash white. `filter: blur()` on a plain
+   background needs the background scaled past the edges, otherwise
+   the blur samples transparent pixels and leaves a soft halo — the
+   -20px inset + scale(1.2) trick below prevents that.              */
+
+.media-lqip {
+  background-image: var(--lqip, none);
+  background-size: cover;
+  background-position: center;
+}
+
+.media-lqip img {
+  opacity: 0;
+  transition: opacity var(--motion-normal) var(--ease-out);
+}
+
+.media-lqip.is-loaded img,
+.media-lqip img.is-loaded {
+  opacity: 1;
+}
+
+/* Blur-up variant: the *placeholder* blurs, never the photo, so the
+   decoded image stays crisp. */
+.media-lqip::before {
+  content: '';
+  position: absolute;
+  inset: -12px;
+  z-index: 0;
+  background-image: var(--lqip, none);
+  background-size: cover;
+  background-position: center;
+  filter: blur(14px);
+  transform: scale(1.06);
+  opacity: 1;
+  transition: opacity var(--motion-normal) var(--ease-out);
+  pointer-events: none;
+}
+
+.media-lqip.is-loaded::before {
+  opacity: 0;
+}
+
+.media-lqip img {
+  position: relative;
+  z-index: 1;
+}
+
+/* Caption on a scrim — bottom-anchored, inline-start aligned so it
+   flips correctly in RTL without a physical `left`. */
+.media-caption {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  z-index: 2;
+  padding: var(--space-5, 24px) var(--space-4, 16px) var(--space-3, 12px);
+  background: linear-gradient(to top, rgb(5 6 8 / 0.82) 0%, rgb(5 6 8 / 0) 100%);
+  color: #f7f3ec;
+  font-size: var(--text-body-sm, 0.9375rem);
+  line-height: var(--leading-snug, 1.45);
+  text-align: start;
+}
+
+/* ── 3c. IMAGE ZOOM ON HOVER ────────────────────────────────────
+   The photo scales INSIDE a fixed frame, so the card never changes
+   size (no reflow, no layout shift for siblings). Guarded behind
+   `(hover: hover)` so a touch device does not leave the last-tapped
+   thumbnail stuck at 1.06.                                        */
+
+@media (hover: hover) and (pointer: fine) {
+  .img-zoom img,
+  .img-zoom video {
+    transition: transform var(--motion-slow) var(--ease-out);
+    will-change: transform;
+  }
+
+  .img-zoom:hover img,
+  .img-zoom:hover video,
+  .img-zoom:focus-within img,
+  .img-zoom:focus-within video {
+    transform: scale(1.05);
+  }
+
+  /* Sheen sweep — a banded gradient translated across the frame.
+     Pure `transform` on a pseudo-element: the gradient itself is
+     static, so no repaint of the underlying photo. */
+  .media-shine::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    background: linear-gradient(
+      105deg,
+      transparent 30%,
+      rgb(255 255 255 / 0.16) 48%,
+      rgb(110 231 183 / 0.2) 52%,
+      transparent 70%
+    );
+    transform: translate3d(-120%, 0, 0);
+    transition: transform var(--motion-slow) var(--ease-out);
+    pointer-events: none;
+  }
+
+  .media-shine:hover::after,
+  .media-shine:focus-within::after {
+    transform: translate3d(120%, 0, 0);
+  }
+}
+
+/* ── 4. GLASS PANEL — frosted obsidian surface ─────────────────
+   Backdrop blur is the expensive part (it forces a read-back of the
+   painted backdrop), so it is used at two intensities only, and the
+   panel ALWAYS carries its own translucent fill: with `backdrop-
+   filter` the fill is what keeps text legible when the blurred
+   backdrop happens to be a bright photo.
+
+   Contrast: the default fill composited over the page's darkest
+   section (#0a0b0d) lands near #16191d, where the ink token
+   (#f1f5f9) measures ≈15:1 and the muted token (#94a3b8) ≈6.4:1 —
+   both clear WCAG AA for body text, so the panel is safe for prose,
+   not just for headings.
+   `@supports not (backdrop-filter)` swaps in an opaque surface;
+   without the fill fallback the panel would render as a nearly
+   transparent box on Firefox ESR and the text would sit directly on
+   whatever gradient is behind it.                                 */
+
+.glass-panel {
+  position: relative;
+  background: rgb(18 20 23 / 0.62);
+  backdrop-filter: blur(18px) saturate(1.4);
+  -webkit-backdrop-filter: blur(18px) saturate(1.4);
+  border: 1px solid rgb(52 211 153 / 0.18);
+  border-radius: var(--radius-lg, 22px);
+  box-shadow:
+    0 18px 44px -20px rgb(0 0 0 / 0.7),
+    inset 0 1px 0 rgb(255 255 255 / 0.06);
+  /* `color: inherit` on purpose: the public pages drive ink through
+     the theme tokens, and hard-coding a colour here would break the
+     light/ivory variant. */
+}
+
+.glass-panel--strong {
+  background: rgb(18 20 23 / 0.82);
+  backdrop-filter: blur(26px) saturate(1.6);
+  -webkit-backdrop-filter: blur(26px) saturate(1.6);
+  border-color: rgb(52 211 153 / 0.26);
+}
+
+.glass-panel--subtle {
+  background: rgb(18 20 23 / 0.38);
+  backdrop-filter: blur(10px) saturate(1.2);
+  -webkit-backdrop-filter: blur(10px) saturate(1.2);
+  border-color: rgb(148 163 184 / 0.18);
+}
+
+/* Light surfaces (the default token set is the ivory one): an
+   obsidian-tinted glass over ivory reads as dirty grey, so the
+   panel flips to an ivory-tinted frost. Driven by the same theme
+   hooks the rest of the public CSS uses. */
+.glass-panel--light,
+body:not(.theme-dark-obsidian) .glass-panel--light {
+  background: rgb(255 255 255 / 0.7);
+  border-color: rgb(16 185 129 / 0.2);
+  box-shadow:
+    0 16px 40px -22px rgb(4 33 29 / 0.28),
+    inset 0 1px 0 rgb(255 255 255 / 0.7);
+}
+
+@supports not ((backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))) {
+  .glass-panel {
+    background: rgb(20 23 27 / 0.94);
+  }
+  .glass-panel--strong {
+    background: rgb(16 18 22 / 0.97);
+  }
+  .glass-panel--subtle {
+    background: rgb(24 27 32 / 0.86);
+  }
+  .glass-panel--light,
+  body:not(.theme-dark-obsidian) .glass-panel--light {
+    background: rgb(255 255 255 / 0.95);
+  }
+}
+
+/* Top hairline highlight — the "lit edge" that makes the panel read
+   as a raised sheet of glass rather than as a flat rectangle. */
+.glass-panel--edge::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  block-size: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgb(110 231 183 / 0.5) 35%,
+    rgb(52 211 153 / 0.32) 65%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+/* ── 5. STACKED DEPTH — 3D tilt & press ─────────────────────────
+   `perspective` lives on the PARENT (`.depth-scene`), otherwise
+   each child gets its own vanishing point and a grid of cards tilts
+   inconsistently. `translateZ` values stay small: large ones blur
+   the Persian glyphs because the element is rasterised at the
+   transformed scale.                                              */
+
+.depth-scene {
+  perspective: 1000px;
+  perspective-origin: 50% 35%;
+}
+
+.depth-layer {
+  transform: translate3d(0, 0, 0);
+  transform-style: preserve-3d;
+  transition: transform var(--motion-normal) var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .depth-layer--raise:hover {
+    transform: translate3d(0, -4px, 24px) rotateX(2deg);
+  }
+  .depth-layer--sink:hover {
+    transform: translate3d(0, 0, -14px);
+  }
+}
+
+/* Inner-glow "3D top light" — the elevation tokens already carry
+   the inset highlight, so this only adds the green trust glow that
+   the dark theme uses for emphasis. */
+.depth-glow {
+  box-shadow:
+    var(--elevation-3d-2, 0 10px 24px rgb(0 0 0 / 0.55)),
+    0 0 22px rgb(16 185 129 / 0.16);
+}
+
+/* ── 6. PULSE / BREATHE — glow and status dots ──────────────────
+   Animates `opacity` + `transform: scale()` on a pseudo-element, so
+   the actual content is never re-painted.                          */
+
+.pulse-glow {
+  position: relative;
+}
+
+.pulse-glow::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 0 0 0 rgb(52 211 153 / 0.45);
+  opacity: 0;
+  animation: tl-pulse 2.6s var(--ease-in-out, cubic-bezier(0.65, 0, 0.35, 1)) infinite;
+  pointer-events: none;
+}
+
+.breathe {
+  animation: tl-breathe 4.5s var(--ease-in-out, cubic-bezier(0.65, 0, 0.35, 1)) infinite;
+}
+
+@keyframes tl-pulse {
+  0% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  70% {
+    opacity: 0;
+    transform: scale(1.06);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.06);
+  }
+}
+
+@keyframes tl-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.025);
+    opacity: 0.92;
+  }
+}
+
+/* ── 7. SUBTLE PARALLAX ─────────────────────────────────────────
+   Driven by `--parallax-y` (set by a scroll listener or by
+   `animation-timeline: view()` where supported). The transform is
+   the ONLY thing that changes; the element never leaves its flow
+   box, so a background photo drifting 20px can never create a
+   scrollbar or overlap the next section.                           */
+
+.parallax {
+  transform: translate3d(0, var(--parallax-y, 0px), 0);
+  transition: transform var(--motion-fast) linear;
+  will-change: transform;
+}
+
+/* ── 8. SHIMMER / SKELETON LINE ─────────────────────────────────
+   `background-position` is a paint property, not a compositor one,
+   but on a 6px bar the affected area is tiny; this is the accepted
+   trade for a shimmer that keeps sharp text edges (a transform-based
+   sweep would need a mask and re-rasterise the bar). Reduced-motion
+   pins it to the resting position.                                 */
+
+.shimmer {
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgb(110 231 183 / 0.22) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  animation: tl-shimmer 1.9s linear infinite;
+}
+
+@keyframes tl-shimmer {
+  from {
+    background-position: 150% 0;
+  }
+  to {
+    background-position: -150% 0;
+  }
+}
+
+/* ── 9. REDUCED MOTION — hard stop ──────────────────────────────
+   Every rule above is neutralised here: transitions and animations
+   are removed (not shortened), and each element is pinned to its
+   resting transform so a reveal target cannot be left mid-flight at
+   `opacity: 0`.                                                     */
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal-up,
+  .reveal-fade,
+  .reveal-scale,
+  .reveal-start,
+  .reveal-end,
+  .reveal-stagger > *,
+  .lift,
+  .lift-sm,
+  .lift-lg,
+  .press,
+  .depth-layer,
+  .img-zoom img,
+  .img-zoom video,
+  .media-shine::after,
+  .parallax,
+  .media-lqip img,
+  .media-lqip::before {
+    transition: none;
+    animation: none;
+    transition-delay: 0ms;
+  }
+
+  .reveal-up,
+  .reveal-fade,
+  .reveal-scale,
+  .reveal-start,
+  .reveal-end {
+    opacity: 1;
+    transform: none;
+  }
+
+  .reveal-stagger > * {
+    --i: 0;
+  }
+
+  .lift-sm:hover,
+  .lift:hover,
+  .lift-lg:hover,
+  .press:active,
+  .depth-layer--raise:hover,
+  .depth-layer--sink:hover,
+  .img-zoom:hover img,
+  .img-zoom:hover video,
+  .img-zoom:focus-within img,
+  .img-zoom:focus-within video,
+  .media-shine:hover::after,
+  .media-shine:focus-within::after {
+    transform: none;
+  }
+
+  .parallax {
+    --parallax-y: 0px;
+    will-change: auto;
+  }
+
+  .pulse-glow::after,
+  .breathe,
+  .shimmer {
+    animation: none;
+    opacity: 0;
+  }
+
+  .shimmer {
+    background-image: none;
+  }
+
+  .pulse-glow::after {
+    box-shadow: none;
+  }
+}
+
+/* Touch devices get no hover lift at all — a sticky `:hover` state
+   after a tap is the most common mobile "stuck card" bug. */
+@media (hover: none) {
+  .lift-sm:hover,
+  .lift:hover,
+  .lift-lg:hover,
+  .depth-layer--raise:hover,
+  .depth-layer--sink:hover {
+    transform: none;
+  }
+}
+
+/* ── 10. PRINT — never drop content on paper ───────────────────── */
+@media print {
+  .reveal-up,
+  .reveal-fade,
+  .reveal-scale,
+  .reveal-start,
+  .reveal-end {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .glass-panel {
+    backdrop-filter: none;
+    background: #fff;
+  }
+}

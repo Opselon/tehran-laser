@@ -434,7 +434,9 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
     color: #ffffff;
     line-height: 1.35;
     margin: 0 0 16px;
-    letter-spacing: -0.02em;
+    /* Persian joined script: negative tracking pinches the cursive joins
+       (tokens.css --tracking-display is 0 for exactly this reason). */
+    letter-spacing: var(--tracking-display);
     text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
   }
 
@@ -551,7 +553,7 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
   .alert-glow {
     position: absolute;
     top: -40px;
-    right: -40px;
+    inset-inline-start: -40px;
     width: 160px;
     height: 160px;
     background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 70%);
@@ -738,7 +740,9 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
     font-size: 1.05rem;
     font-weight: 800;
     color: #ffffff;
-    letter-spacing: -0.01em;
+    /* Persian joined script: negative tracking pinches the cursive joins
+       (tokens.css --tracking-display is 0 for exactly this reason). */
+    letter-spacing: var(--tracking-display);
   }
 
   .accordion-chevron {

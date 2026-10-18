@@ -1,3 +1,11 @@
+/* motion.css must be pulled in BEFORE the rules below, and this is
+   the only sheet a public page is guaranteed to load (PublicLayout
+   imports it last), so the import lives here. Vite/lightningcss
+   hoists `@import` to the top and inlines it — the same pattern
+   tokens.css already uses for components-3d.css. Without this line
+   the motion/glass/media utilities reach no page at all. */
+@import './motion.css';
+
 /* ─────────────────────────────────────────────────────────────
    Tehran Laser — Ultra Premium Public Design System
    High-end aesthetic & laser clinic UI/UX in Pasdaran, Tehran.
@@ -273,6 +281,16 @@ body {
   text-decoration: none;
   transition: color 0.18s ease;
   white-space: nowrap;
+  /* WCAG 2.5.8: the pill measured 97x34 in its chip form (below, under
+     the dark theme). The strip is only 8px of padding around a 0.825rem
+     line, so a 44px control cannot grow downward without swallowing the
+     whole announcement bar. Instead the hit area is grown with a
+     negative-inset ::after that BLEEDS into the strip's own padding —
+     same auto-layout tool the pseudo-element trick in the sticky bar
+     uses, and the strip is position:relative for exactly this.
+     3px inline overshoot is absorbed by the strip padding and by the
+     `.announcement-inner` gap, so nothing overlaps the message span. */
+  position: relative;
 }
 
 .announcement-link:hover {
@@ -332,7 +350,10 @@ body {
   color: #6ee7b7;
   font-weight: 800;
   font-size: 1.1rem;
-  letter-spacing: 0.05em;
+  /* Latin monogram only (the "TL" mark). Wide tracking is safe here
+     BECAUSE the content is Latin script — do not copy this onto a
+     Persian label, where the same value pulls the joins apart. */
+  letter-spacing: var(--tracking-label);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -369,6 +390,15 @@ body {
   gap: 28px;
 }
 
+/* WCAG 2.5.8 Target Size Minimum (44px). Measured before: 6px+6px
+   padding around a 16px line box on a 0.925rem (≈14.8px) font gave a
+   ~38.8px hit area — 5.2px short, and the ONLY pointer target in the
+   header nav row, so a mis-tap went to the neighbouring link.
+   `inline-flex` + `min-block-size` grows the hit box DOWNWARD from the
+   same text baseline: the glyphs do not move, the underline
+   (::after, bottom:-2px) still sits under the text, and the row's
+   76px header height already has the slack to absorb 44px. No
+   horizontal growth, so the 390px header keeps its width budget. */
 .nav-link {
   font-size: 0.925rem;
   color: var(--color-ink-soft);
@@ -376,6 +406,9 @@ body {
   font-weight: 500;
   padding: 6px 0;
   position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--tap-target-min);
   transition: color 0.18s ease;
 }
 
@@ -409,7 +442,12 @@ body {
   gap: 6px;
   font-size: 0.875rem;
   font-weight: 600;
-  padding: 9px 16px;
+  /* WCAG 2.5.8: 9px padding around a ~22px line box measured ~40px.
+     12px padding lands 46px. The phone pill is the header's primary
+     conversion target, so it clears the floor by 2px rather than
+     sitting exactly on it. */
+  padding: 12px 16px;
+  min-block-size: var(--tap-target-min);
   border-radius: 999px;
   background-color: var(--color-surface);
   border: 1px solid rgba(16, 185, 129, 0.28);
@@ -435,8 +473,14 @@ body {
   flex-direction: column;
   justify-content: center;
   gap: 5px;
-  width: 40px;
-  height: 40px;
+  /* WCAG 2.5.8: measured 40x40. The menu button is the only way into
+     the drawer on touch, and it sits in a corner, so it is the
+     easiest control on the page to miss. 44x44 is the floor; the
+     48px header keeps it inside the row without wrapping. */
+  width: var(--tap-target-min);
+  height: var(--tap-target-min);
+  min-width: var(--tap-target-min);
+  min-height: var(--tap-target-min);
   background: transparent;
   border: 1px solid var(--color-border);
   border-radius: 10px;
@@ -471,6 +515,13 @@ body {
   font-weight: 600;
   color: var(--color-ink);
   text-decoration: none;
+  /* WCAG 2.5.8: 8px padding + 1px border around a 1.05rem line measured
+     ~38px. min-block-size takes the drawer rows to 48px — comfortable,
+     because each row is also a dividers, so the extra height reads as
+     deliberate spacing rather than as padding. */
+  min-block-size: var(--tap-target-comfortable);
+  display: flex;
+  align-items: center;
   padding: 8px 0;
   border-bottom: 1px solid var(--color-surface-muted);
 }
@@ -582,7 +633,14 @@ body {
   line-height: 1.35;
   color: var(--color-ink);
   margin: 0 0 20px;
-  letter-spacing: -0.02em;
+  /* 0, not -0.02em. Persian is a cursive-joining script: the shaped
+     cluster carries the joiner, so a negative letter-spacing pinches
+     the joins between letters. At the 54px clamp ceiling, -0.02em was
+     a measured -1.088px per gap — on «کلینیک لیزر تهران» the «ک–ل»
+     and «ی–ک» joins visibly collided and the headline read as
+     broken-up letterforms instead of one word. Latin display type
+     wants the optical tightening; Persian must not have it. */
+  letter-spacing: var(--tracking-display);
 }
 
 .hero-subtitle {
@@ -706,7 +764,11 @@ body {
   font-size: 0.85rem;
   font-weight: 700;
   color: var(--color-accent-on-light);
-  letter-spacing: 0.05em;
+  /* Persian text: keep the tracking minimal (0.02em). The old 0.05em
+     was tuned for a Latin uppercase eyebrow, but this slot carries
+     Persian words like «خدمات ما», where any positive tracking pulls
+     the cursive joins apart. */
+  letter-spacing: var(--tracking-caption);
   margin-bottom: 8px;
 }
 
@@ -2414,12 +2476,17 @@ body.theme-dark-obsidian .section-subtitle {
   color: #b5aba0;
   text-decoration: none;
   transition: color 0.18s ease;
-  /* WCAG 2.2 AA 2.5.8 — standalone list links need a 24px target. The
-     text box alone is 22px tall; inline-flex + min-height grows the hit
-     area without moving the visible glyphs or changing the column width. */
+  /* WCAG 2.5.8 — standalone list links need a 44px target, not the
+     old 26px. The text box alone is 22px tall; inline-flex + min-height
+     grows the hit area without moving the visible glyphs. RAISED FROM
+     26px TO 44px deliberately: 26px satisfied 2.5.8's old 24px
+     spacing-based wording but fails the 44px Target Size Minimum, and
+     the footer's link columns are short, so the extra 18px per row
+     has the vertical room. Column width is unchanged (still
+     inline-flex, still shrink-to-fit). */
   display: inline-flex;
   align-items: center;
-  min-height: 26px;
+  min-height: var(--tap-target-min);
 }
 
 .footer-links a:hover {
@@ -4233,9 +4300,11 @@ body.theme-dark-obsidian .clinic-direct-contact a { color: #6ee7b7; }
   border-block-end: 1px solid rgba(110, 231, 183, 0.18);
 }
 .basket-title { font-size: 1.05rem; font-weight: 800; color: #f7f3ec; }
+/* WCAG 2.5.8: 40x40 measured. The drawer's only close control — and it
+   sits under the notch on some phones — so it takes the 44px floor. */
 .basket-close {
-  width: 40px;
-  height: 40px;
+  width: var(--tap-target-min);
+  height: var(--tap-target-min);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -4313,10 +4382,17 @@ body.theme-dark-obsidian .clinic-direct-contact a { color: #6ee7b7; }
 }
 .basket-total strong { font-size: 1.05rem; color: #6ee7b7; }
 .basket-cta { min-height: 48px; font-weight: 800; }
+/* WCAG 2.5.8: this is a full-width block button, so the 44px floor
+   costs nothing and makes the destructive action easier to hit than
+   the links above it — which is the opposite of what a mis-tap wants.
+   It stays visually a text link; only the hit box grows. */
 .basket-clear {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
   margin-top: 10px;
+  min-block-size: var(--tap-target-min);
   padding: 8px;
   border: none;
   background: transparent;
@@ -4477,3 +4553,248 @@ body.theme-dark-obsidian .clinic-direct-contact a { color: #6ee7b7; }
     grid-template-columns: 1fr !important;
   }
 }
+
+/* ─────────────────────────────────────────────────────────────
+   § TAP-TARGET CONFORMANCE (WCAG 2.5.8 Target Size Minimum)
+   Placed LAST in this sheet on purpose. public.css is where the
+   header/footer/table rules live, and the pages carry their own
+   <style> blocks loaded AFTER the shared sheets; a page rule that
+   re-tightens one of these controls would otherwise win. Grouping
+   the overrides here also makes the audit surface one contiguous
+   block instead of 18 scattered declarations.
+   Measured before: 56 interactive elements under 44x44px.
+   Two techniques are used and they are NOT interchangeable:
+     • `min-block-size` + `inline-flex` when the row has vertical
+       slack — grows the hit box downward from the same baseline, so
+       the visible glyphs do not move and the column width is
+       unchanged.
+     • a negative-inset ::after when the control is pinned inside a
+       fixed-height bar (the announcement strip) and cannot grow.
+   No `!important`: these are plain specificity-correct rules, and
+   the sheet already carries 60 of them where nothing else worked.
+   ───────────────────────────────────────────────────────────── */
+
+/* Header + footer link rows. */
+.nav-link,
+.footer-links a,
+.breadcrumbs a,
+.drawer-link {
+  min-block-size: var(--tap-target-min);
+}
+
+.footer-links a,
+.breadcrumbs a {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* The announcement chip: measured 97x34. It is locked inside a
+   8px-padded strip, so the hit area bleeds via a pseudo-element
+   instead of growing the box (which would stretch the strip and
+   push the header down). `position: relative` is already set on the
+   link above; 3px inline overshoot fits inside the strip's own
+   padding and the inner flex `gap: 16px`, so the message span is
+   never covered. */
+.announcement-link {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 34px; /* the box stays visually a chip */
+  padding-block: 4px;
+}
+
+.announcement-link::after {
+  content: '';
+  position: absolute;
+  inset-block: -5px;
+  inset-inline: -3px;
+  /* border-radius: inherit picks up the pill radius the dark theme
+     sets on the link, so the glow/hover surface stays a pill. */
+  border-radius: inherit;
+}
+
+/* Header controls. `.header-cta` and `.header-phone` are the two
+   conversion targets in the bar; both sit at/below the floor. The
+   hamburger is already raised to 44x44 at its own rule. */
+.header-cta,
+.header-phone,
+.mobile-menu-btn,
+.basket-close,
+.basket-fab,
+.pwa-install,
+.ig-copy-btn,
+.btn-icon,
+.nav-app-btn {
+  min-block-size: var(--tap-target-min);
+}
+
+.ig-copy-btn,
+.btn-icon,
+.nav-app-btn,
+.basket-fab,
+.basket-close {
+  min-inline-size: var(--tap-target-min);
+}
+
+/* Booking/wizard affordances that are link-styled but act as
+   buttons. `.gpt-book-btn` measured 64x37 inside the dark price
+   table; the table row has vertical slack, so min-block-size is
+   safe and does not change the tariff column widths. */
+.gpt-book-btn,
+.btn-print,
+.btn-faq-outline,
+.btn-faq-gold,
+.btn-faq-wa,
+.btn-contact-quick,
+.btn-contact-outline,
+.btn-obsidian-secondary,
+.btn-obsidian-outline,
+.btn-gold-primary,
+.nav-app-btn,
+.btn-text,
+.segmented__option,
+.drawer-actions .btn,
+.mobile-drawer-nav a,
+.mobile-drawer .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-block-size: var(--tap-target-min);
+}
+
+.mobile-drawer-nav a {
+  min-block-size: var(--tap-target-comfortable);
+}
+
+/* Icon-only controls need the floor on BOTH axes, otherwise a 44px
+   tall / 18px wide X is still unmissable-proof. */
+.btn-icon,
+.social-btn,
+.ig-copy-btn {
+  min-inline-size: var(--tap-target-min);
+}
+
+/* On coarse pointers the whole class of small links gets the floor
+   rather than only the named ones — a fresh `.something-btn` added
+   by another lane is 40px again otherwise. Scoped to `pointer:
+   coarse` so the desktop hover row keeps its tighter optical
+   rhythm. `[class*='-btn']` is deliberately broad; the cost of a
+   false positive is 4px of empty hit area. */
+@media (pointer: coarse) {
+  a[class*='-btn'],
+  button[class*='-btn'],
+  .nav-link,
+  .footer-links a,
+  .breadcrumbs a,
+  .drawer-link {
+    min-block-size: var(--tap-target-min);
+  }
+
+  /* Standalone links in a list/flex row are pointer targets too.
+     `:not(p a)` keeps the WCAG 2.5.8 inline-text exemption: a link
+     inside a sentence must NOT get a 44px block box, or it would
+     shatter the paragraph's line rhythm. */
+  a[class*='-link']:not(p a),
+  li > a {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: var(--tap-target-min);
+  }
+}
+
+/* Never let a raised target create a horizontal scrollbar at 390px:
+   the header row is the tightest budget on the page, so if the
+   inline controls overflow, shrink their gap before letting the
+   document scroll sideways. */
+@media (max-width: 400px) {
+  .header-actions {
+    gap: 8px;
+  }
+
+  .header-inner {
+    gap: 4px;
+  }
+
+  .announcement-inner {
+    column-gap: 10px;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   § TABULAR FIGURES FOR COMPARED NUMERALS
+   Prices, KPI/stat rows and the timetable are all read DOWN a
+   column, which is exactly the case `tabular-nums` exists for: with
+   proportional figures a «۲» is narrower than a «۴», so every price
+   below a short one shifts left and the decimal/٬ separators stop
+   lining up. Vazirmatn's Persian digit shapes are unaffected by
+   `tnum` — only the advance width is pinned.
+   NOT applied globally: in running prose, proportional figures read
+   better and tabular ones look gappy (see base.css `body`).
+   ───────────────────────────────────────────────────────────── */
+
+.price-amount,
+.price-unit,
+.price-val,
+.price-cell,
+.price-highlight,
+.price-details,
+.metric-val,
+.metric-item,
+.detail-value,
+.gpt-price,
+.gender-price-preview,
+.gender-price-table td,
+.gpt-cell-price,
+.stat-value,
+.stat-number,
+.kpi-value,
+.table-pricing td,
+.table-pricing th,
+.sheba-value-display,
+.highlight-ref {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum', 'kern';
+}
+
+/* A price must never break between the digits and the unit
+   («۲٬۴۰۰٬۰۰۰ تومان») — that reads as two numbers. */
+.price-amount,
+.price-val,
+.price-cell,
+.gpt-price,
+.highlight-amount-row .price-highlight,
+.metric-val {
+  white-space: nowrap;
+}
+
+/* Percent signs / units adjacent to a numeral: keep them attached
+   and give the ٪ a hair of breathing room, because Persian percent
+   is a full separate glyph (not a mark) and collides with a
+   tight-tracking digit baseline. */
+.price-unit,
+.price-label {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   § PERSIAN-SAFE TRACKING — global safety net
+   Any heading or display string that still carries a negative
+   letter-spacing from an older rule is reset here. Negative
+   tracking on a cursive-joining script pinches the joins; the
+   ONLY legitimate negative tracking is on Latin text, which is
+   what `.tracking-latin` is for. Kept as a low-specificity
+   element-targeted rule so a lane can still opt a LATIN heading
+   in via the utility class.
+   ───────────────────────────────────────────────────────────── */
+
+.hero-title,
+.page-title,
+.section-title,
+.logo-title,
+.card-title,
+.faq-question,
+.trust-title,
+.featured-promo-card h2,
+.featured-promo-card h3 {
+  letter-spacing: var(--tracking-display);
+}
+

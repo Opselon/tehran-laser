@@ -1189,7 +1189,7 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
     color: #6ee7b7;
     font-size: 0.78rem;
     font-weight: 800;
-    letter-spacing: 0.02em;
+    /* No letter-spacing on Persian column labels. */
     border-bottom: 1px solid rgba(16, 185, 129, 0.35);
   }
 
@@ -2287,4 +2287,298 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
       flex-direction: column;
     }
   }
+
+  /* ═════════════════════════════════════════════════════════════
+     SITE-CHROME TOUCH TARGETS (page-scoped).
+     The header/footer are rendered by PublicLayout, so these rules
+     must use :global(). Measured before: .announcement-link 34px,
+     .footer-phone-link 26px, .legal-links a 24px, .admin-entry-link
+     24px, .footer-social-link 42px, .sticky-book 36px — all below
+     the 44px WCAG 2.5.8 minimum.
+     ═════════════════════════════════════════════════════════════ */
+  :global(.announcement-link),
+  :global(.footer-phone-link),
+  :global(.clinic-direct-contact a),
+  :global(.footer-social-link),
+  :global(.legal-links a),
+  :global(.admin-entry-link),
+  :global(.sticky-book),
+  :global(.mobile-menu-btn),
+  :global(.header-phone) {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  :global(.mobile-menu-btn),
+  :global(.header-phone) {
+    min-width: 44px;
+    justify-content: center;
+  }
+
+  :global(.legal-links) {
+    align-items: center;
+    flex-wrap: wrap;
+    row-gap: 0;
+  }
+
+
+  /* ═════════════════════════════════════════════════════════════
+     MODERNIZATION LAYER — section rhythm, readable Persian
+     measure, modern datasheet table, 44px controls.
+     ═════════════════════════════════════════════════════════════ */
+
+  /* ── One consistent vertical rhythm across every section ────── */
+  .tech-section,
+  .benefits-section,
+  .rado-section,
+  .team-section,
+  .hygiene-section,
+  .location-info-section,
+  .faq-section,
+  .cta-section {
+    padding-block: clamp(48px, 6vw, 88px);
+  }
+
+  .faq-section {
+    padding-block: clamp(44px, 5.5vw, 80px);
+  }
+
+  .clinic-hero {
+    padding-block: clamp(48px, 7vw, 96px) clamp(36px, 5vw, 64px);
+  }
+
+  .section-heading {
+    margin-bottom: clamp(24px, 3.5vw, 40px);
+  }
+
+  /* ── Persian typography: no negative tracking, generous leading ─ */
+  .hero-title,
+  .section-title,
+  .wl-title,
+  .card-title,
+  .benefit-title,
+  .team-name,
+  .rado-title,
+  .spec-datasheet-title,
+  .cta-title,
+  .loc-title {
+    letter-spacing: normal;
+    line-height: 1.5;
+  }
+
+  .hero-desc,
+  .section-lead,
+  .wl-text,
+  .card-body,
+  .benefit-body,
+  .team-desc,
+  .hygiene-item,
+  .rado-body,
+  .loc-desc,
+  .faq-answer {
+    line-height: 2;
+  }
+
+  .hero-desc {
+    max-width: 44rem;
+  }
+
+  .section-lead {
+    max-width: 48rem;
+  }
+
+  /* ── Deep-dive prose must not run edge-to-edge on wide screens ─ */
+  .rado-body,
+  .card-body,
+  .hygiene-content p,
+  .loc-desc {
+    max-width: 62ch;
+  }
+
+  .stat-num,
+  .fact-num,
+  .m-val,
+  .spec-table tbody td,
+  .wl-stats {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── Modern datasheet table ──────────────────────────────────
+     Was a flat grid with a faint tinted header; give it an anchored
+     sticky header, zebra separation and a proper surface. */
+  .spec-table-wrap {
+    border-radius: 16px;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    background: linear-gradient(180deg, #101319 0%, #0b0d12 100%);
+    box-shadow: 0 22px 44px -26px rgba(0, 0, 0, 0.9);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .spec-table {
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  .spec-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: linear-gradient(180deg, #1b2130 0%, #141922 100%);
+    color: #d1fae5;
+    padding: 14px;
+    border-bottom: 1px solid rgba(52, 211, 153, 0.38);
+    white-space: nowrap;
+  }
+
+  .spec-table tbody th,
+  .spec-table tbody td {
+    padding: 13px 14px;
+    line-height: 1.8;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+  }
+
+  .spec-table tbody tr:nth-child(even) th,
+  .spec-table tbody tr:nth-child(even) td {
+    background: rgba(148, 163, 184, 0.045);
+  }
+
+  .spec-table tbody tr:hover th,
+  .spec-table tbody tr:hover td {
+    background: rgba(16, 185, 129, 0.09);
+  }
+
+  /* ── Cards: layered obsidian surface + emerald hairline ─────── */
+  .rado-card-3d,
+  .benefit-card-3d,
+  .feature-card-3d,
+  .team-card,
+  .location-card-3d,
+  .certifications-card,
+  .tech-explorer-card {
+    border-radius: 18px;
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0) 40%),
+      linear-gradient(165deg, #161a23 0%, #0d0f15 100%);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.05) inset,
+      0 18px 38px -24px rgba(0, 0, 0, 0.85);
+    transition:
+      transform var(--motion-fast) var(--ease-out),
+      border-color var(--motion-fast) var(--ease-out);
+  }
+
+  .rado-card-3d:hover,
+  .benefit-card-3d:hover,
+  .feature-card-3d:hover,
+  .team-card:hover,
+  .location-card-3d:hover {
+    transform: translateY(-3px);
+    border-color: rgba(52, 211, 153, 0.42);
+  }
+
+  .metrics-grid,
+  .benefits-grid,
+  .features-dual-grid,
+  .team-grid,
+  .hygiene-layout,
+  .rado-grid {
+    gap: clamp(16px, 2.2vw, 26px);
+  }
+
+  /* ── FAQ accordion inside the clinic page ──────────────────── */
+  .faq-item {
+    border-radius: 14px;
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+
+  .faq-summary,
+  .faq-q {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    font-weight: 700;
+    line-height: 1.7;
+    cursor: pointer;
+  }
+
+  .faq-answer {
+    padding: 0 16px 16px;
+    max-width: 68ch;
+  }
+
+  /* ── Touch targets ≥44px ───────────────────────────────────── */
+  .btn-3d-gold,
+  .btn-obsidian-outline,
+  .hero-cta-primary,
+  .hero-cta-secondary,
+  .wl-tab,
+  .wavelength-tabs .wl-tab {
+    min-height: 44px;
+    padding-block: 11px;
+  }
+
+  .pill-label,
+  .skill-tag,
+  .benefit-index,
+  .gold-icon {
+    letter-spacing: normal;
+  }
+
+  @media (max-width: 768px) {
+    .spec-table thead th,
+    .spec-table tbody th,
+    .spec-table tbody td {
+      padding: 11px 12px;
+    }
+
+    .wl-grid {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+
+    .hero-cta-row {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .hygiene-layout,
+    .features-dual-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 380px) {
+    .spec-table {
+      min-width: 520px;
+    }
+
+    .spec-datasheet-head {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .spec-datasheet-model {
+      white-space: normal;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .rado-card-3d,
+    .benefit-card-3d,
+    .feature-card-3d,
+    .team-card,
+    .location-card-3d {
+      transition: none;
+      transform: none;
+    }
+  }
+
 </style>

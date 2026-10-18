@@ -33,7 +33,26 @@ body {
   font-weight: 400;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
-  font-feature-settings: 'ss01';
+  /* `ss01` is a Vazirmatn stylistic set (the alternate digit/letter
+     shapes) and is safe to keep — it substitutes glyph designs, it does
+     not touch advances. What was MISSING is numeral handling: `pnum`
+     gives PERFECT (proportional) figures, which is what body prose wants,
+     and `kern` keeps the joins tight. Tabular figures are opted into
+     per-component (`--numeric-tabular`) because forcing them globally
+     makes Persian numerals look artificially spaced out in running text.
+     `font-variant-ligatures: common-ligatures` is required for the
+     Arabic-script joining forms to be applied by the shaper on some
+     WebKit builds. */
+  font-feature-settings:
+    'ss01',
+    'kern',
+    'pnum';
+  font-variant-ligatures: common-ligatures;
+  font-variant-numeric: proportional-nums;
+  /* Long unbroken tokens (URLs, product codes) are the one thing that
+     reliably blows out 390px. Break them rather than let one string
+     scroll the whole document sideways. */
+  overflow-wrap: break-word;
 }
 
 img,
@@ -54,7 +73,15 @@ h6 {
   line-height: var(--leading-tight);
   font-weight: 700;
   text-wrap: balance;
-  letter-spacing: -0.01em;
+  /* Tracking is 0 on purpose, NOT -0.01em.
+     Every heading on this site is Persian, and Persian letters
+     cursive-join: a negative letter-spacing shrinks each shaped
+     cluster's advance, so the joins between letters get pinched
+     and the word stops reading as one connected run. The old
+     -0.01em measured ≈ -0.5px per gap at 48px and was visible on
+     «خدمات کلینیک». Latin-only headings can opt back in with
+     .tracking-latin (below) — never Persian copy. */
+  letter-spacing: var(--tracking-heading);
 }
 
 h1 {
@@ -167,10 +194,95 @@ hr {
 
 /* ── Text helpers ──────────────────────────────────────────── */
 
+/* ── Persian-safe typographic controls ─────────────────────────
+   These exist so no lane has to hand-roll `letter-spacing` again.
+
+   `.tracking-latin` is the ONLY place a negative tracking is
+   allowed, and the name is the guard-rail: it is for Latin strings
+   (brand names, SKUs). Never put it on a Persian element — the
+   negative advance pinches the cursive joins. `.tracking-label`
+   replaces the old bare `letter-spacing: 0.14em` on `.eyebrow`:
+   0.14em on a 13px label is a 1.8px gap per letter, which on a
+   Persian word reads as letters falling apart. 0.06em is enough to
+   register as "label" without breaking the joins, and the utility
+   is meant for Latin/uppercase micro-copy in the first place. */
+.tracking-latin {
+  letter-spacing: -0.01em;
+}
+
+.tracking-label {
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+}
+
+.tracking-normal {
+  letter-spacing: normal;
+}
+
+/* Numeral handling.
+   `tnum` pins every digit to the same advance, which is what makes
+   a price column and a stat row line up. It does NOT change the
+   glyph design, so Persian digits stay Persian.
+   `pnum` is the prose default (see body) — proportional digits read
+   better in running sentences. */
+.tnum,
+.tabular-nums {
+  font-variant-numeric: var(--numeric-tabular);
+  font-feature-settings: 'tnum', 'kern';
+}
+
+.pnum,
+.proportional-nums {
+  font-variant-numeric: proportional-nums;
+  font-feature-settings: 'pnum', 'kern';
+}
+
+/* Vazirmatn's Persian numeral forms + the joining-aware kerning,
+   for text that mixes Persian digits with Latin ones (e.g.
+   «۱۵٪ تخفیف»). Applying ss01 without pnum is what made mixed
+   strings look like two different typefaces. */
+.persian-numerals {
+  font-feature-settings: 'ss01', 'kern', 'pnum';
+}
+
+/* Digits are never allowed to break to the next line mid-number. */
+.num-nowrap {
+  white-space: nowrap;
+  font-variant-numeric: var(--numeric-tabular);
+}
+
+/* ── Tap-target floor (WCAG 2.5.8 Target Size Minimum) ─────────
+   Applies to the real interactive PRIMITIVES, not to inline links
+   inside prose — 2.5.8 explicitly exempts text links that sit in a
+   sentence, and floor-ing those would turn every paragraph into a
+   44px-tall block.
+   Why a global floor as well as per-class rules: the per-class
+   rules live in public.css where a page-level <style> block can
+   override them (specificity ties resolve to the later sheet), so a
+   floor on the element primitives is the backstop. */
+button,
+[role='button'],
+input[type='submit'],
+input[type='button'],
+input[type='reset'],
+summary {
+  min-block-size: var(--tap-target-min);
+}
+
+/* Keyboard-focus affordance for the custom controls built out of
+   divs/spans (basket FAB, drawer close, chips). `:focus-visible`
+   from the base sheet already draws the ring; this only makes sure
+   a non-button trigger can receive it at all. */
+[role='button']:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--color-primary-strong);
+  outline-offset: 2px;
+}
+
 .eyebrow {
   font-size: var(--text-caption);
   font-weight: 600;
-  letter-spacing: 0.14em;
+  letter-spacing: var(--tracking-label);
   color: var(--color-primary-strong);
   text-transform: uppercase;
 }

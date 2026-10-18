@@ -606,8 +606,8 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     margin: 0 0 14px;
-    letter-spacing: -0.02em;
-    line-height: 1.3;
+    /* No letter-spacing on Persian headings. */
+    line-height: 1.5;
   }
 
   .page-subtitle {
@@ -1144,4 +1144,202 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
     border-color: rgba(16, 185, 129, 0.5);
     color: #34d399;
   }
+
+  /* ═════════════════════════════════════════════════════════════
+     SITE-CHROME TOUCH TARGETS (page-scoped).
+     The header/footer are rendered by PublicLayout, so these rules
+     must use :global(). Measured before: .announcement-link 34px,
+     .footer-phone-link 26px, .legal-links a 24px, .admin-entry-link
+     24px, .footer-social-link 42px, .sticky-book 36px — all below
+     the 44px WCAG 2.5.8 minimum.
+     ═════════════════════════════════════════════════════════════ */
+  :global(.announcement-link),
+  :global(.footer-phone-link),
+  :global(.clinic-direct-contact a),
+  :global(.footer-social-link),
+  :global(.legal-links a),
+  :global(.admin-entry-link),
+  :global(.sticky-book),
+  :global(.mobile-menu-btn),
+  :global(.header-phone) {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  :global(.mobile-menu-btn),
+  :global(.header-phone) {
+    min-width: 44px;
+    justify-content: center;
+  }
+
+  :global(.legal-links) {
+    align-items: center;
+    flex-wrap: wrap;
+    row-gap: 0;
+  }
+
+
+  /* ═════════════════════════════════════════════════════════════
+     MODERNIZATION LAYER — rhythm, readable Persian measure,
+     modern accordion cards, 44px search + controls.
+     ═════════════════════════════════════════════════════════════ */
+
+  .faq-page-wrapper {
+    padding-block: clamp(32px, 5vw, 64px);
+  }
+
+  .faq-hero-strip {
+    padding-block: clamp(36px, 5vw, 64px) clamp(28px, 4vw, 48px);
+  }
+
+  .faq-main-section > .container > * + * {
+    margin-top: clamp(28px, 4vw, 44px);
+  }
+
+  .page-title,
+  .faq-q-text,
+  .cta-heading,
+  .empty-title,
+  .takeaway-box {
+    letter-spacing: normal;
+    line-height: 1.5;
+  }
+
+  .page-subtitle,
+  .answer-text,
+  .cta-sub,
+  .empty-desc {
+    line-height: 2;
+  }
+
+  .page-subtitle {
+    max-width: 44rem;
+    margin-inline: auto;
+  }
+
+  /* Long FAQ answers: keep the Persian measure comfortable. */
+  .answer-text,
+  .faq-answer-body p {
+    max-width: 68ch;
+    font-size: 0.95rem;
+    line-height: 2.05;
+  }
+
+  .faq-answer-body {
+    padding: 0 18px 18px;
+  }
+
+  /* ── Accordion cards: layered surface + emerald hairline ───── */
+  .faq-obsidian-card,
+  .faq-accordion-list {
+    border-radius: 18px;
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0) 40%),
+      linear-gradient(165deg, #151922 0%, #0c0e14 100%);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.05) inset,
+      0 18px 38px -24px rgba(0, 0, 0, 0.85);
+    overflow: hidden;
+  }
+
+  .faq-accordion-list > details,
+  .faq-obsidian-card > details {
+    border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+  }
+
+  .faq-accordion-list > details:last-child,
+  .faq-obsidian-card > details:last-child {
+    border-bottom: none;
+  }
+
+  .faq-accordion-list > details[open],
+  .faq-obsidian-card > details[open] {
+    background: rgba(16, 185, 129, 0.07);
+  }
+
+  /* ── Touch targets ≥44px ───────────────────────────────────── */
+  .faq-summary,
+  .cat-pill,
+  .faq-search-clear,
+  .btn-faq-gold,
+  .btn-faq-outline {
+    min-height: 44px;
+  }
+
+  .faq-summary {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 16px 18px;
+    cursor: pointer;
+  }
+
+  .faq-q-text {
+    flex: 1 1 auto;
+    font-size: clamp(0.95rem, 1.4vw, 1.05rem);
+    font-weight: 700;
+  }
+
+  .faq-toggle-circle {
+    flex: 0 0 auto;
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 1px solid rgba(52, 211, 153, 0.4);
+    transition: transform var(--motion-fast) var(--ease-out);
+  }
+
+  .faq-summary:hover .faq-toggle-circle {
+    transform: scale(1.06);
+  }
+
+  .cat-pill {
+    display: inline-flex;
+    align-items: center;
+    padding-block: 10px;
+  }
+
+  .faq-search-input {
+    min-height: 48px;
+    font-size: 1rem;
+    padding-inline: 16px;
+  }
+
+  .category-pills-bar {
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .faq-search-wrapper {
+    margin-bottom: clamp(20px, 3vw, 32px);
+  }
+
+  @media (max-width: 480px) {
+    .faq-summary {
+      padding: 14px;
+      gap: 10px;
+    }
+
+    .answer-text,
+    .faq-answer-body p {
+      max-width: 100%;
+    }
+
+    .cat-pill {
+      flex: 1 1 auto;
+      justify-content: center;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .faq-toggle-circle {
+      transition: none;
+    }
+  }
+
 </style>

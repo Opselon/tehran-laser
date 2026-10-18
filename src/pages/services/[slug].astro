@@ -595,7 +595,7 @@ const afterCareSteps = [
     color: #ffffff;
     line-height: 1.35;
     margin: 0 0 10px;
-    letter-spacing: -0.02em;
+    /* No letter-spacing: Persian glyphs are joined and RTL-fragile. */
   }
 
   .gold-gradient {
@@ -826,14 +826,14 @@ const afterCareSteps = [
     font-size: 1.35rem;
     font-weight: 800;
     color: var(--gold-light);
-    letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums;
   }
 
   .promo-final-price {
     font-size: 1.5rem;
     font-weight: 800;
     color: #4ade80;
-    letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums;
   }
 
   .strikethrough-price {
@@ -1387,4 +1387,174 @@ const afterCareSteps = [
       font-size: 0.72rem;
     }
   }
+  /* ═════════════════════════════════════════════════════════════
+     MODERNIZATION LAYER — consistent rhythm, 44px controls,
+     readable Persian measure, modern card + table treatment.
+     ═════════════════════════════════════════════════════════════ */
+
+  .detail-hero {
+    padding-block: clamp(36px, 5vw, 64px) clamp(28px, 4vw, 48px);
+  }
+
+  .detail-section {
+    padding-block: clamp(36px, 5vw, 72px);
+  }
+
+  .sessions-card,
+  .sidebar-card,
+  .service-detail-card,
+  .wave-card,
+  .wavelength-card,
+  .care-card,
+  .pricing-tier-card {
+    border-radius: 18px;
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0) 40%),
+      linear-gradient(165deg, #161a23 0%, #0d0f15 100%);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.05) inset,
+      0 18px 38px -24px rgba(0, 0, 0, 0.85);
+  }
+
+  .hero-title,
+  .service-full-name,
+  .tier-card-title,
+  .wavelength-card-head,
+  .care-title,
+  .sessions-card-head {
+    letter-spacing: normal;
+    line-height: 1.5;
+  }
+
+  .hero-subtitle,
+  .service-long-description,
+  .wavelength-desc,
+  .care-subtitle,
+  .sidebar-list,
+  .tier-note {
+    line-height: 1.95;
+  }
+
+  .hero-subtitle {
+    max-width: 46rem;
+  }
+
+  .service-long-description {
+    max-width: 48rem;
+  }
+
+  .final-price,
+  .promo-final-price,
+  .sb-final,
+  .sb-old,
+  .tier-value,
+  .session-cost-note,
+  .price-value-box,
+  .bold-price {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── Touch targets ≥44px ───────────────────────────────────── */
+  .btn-3d-gold,
+  .btn-3d-subtle,
+  .detail-breadcrumbs a,
+  .toc-link {
+    min-height: 44px;
+  }
+
+  .btn-3d-gold,
+  .btn-3d-subtle {
+    padding-block: 11px;
+  }
+
+  .detail-breadcrumbs a {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  /* ── Pricing tier table: modern rows instead of a dense grid ── */
+  .pricing-tier-card .tier-row {
+    border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+  }
+
+  .pricing-tier-card .tier-row:last-child {
+    border-bottom: none;
+  }
+
+  .tier-row-head {
+    background: linear-gradient(180deg, #1b2130 0%, #141922 100%);
+    color: #d1fae5;
+    font-weight: 800;
+    letter-spacing: normal;
+  }
+
+  .tier-label,
+  .tier-value {
+    line-height: 1.8;
+  }
+
+  .wave-badge,
+  .duration-pill,
+  .trust-item {
+    letter-spacing: normal;
+  }
+
+  @media (max-width: 768px) {
+    .detail-grid {
+      gap: 20px;
+    }
+
+    .actions-row,
+    .detail-actions {
+      flex-wrap: wrap;
+    }
+
+    .actions-row > *,
+    .detail-actions > * {
+      flex: 1 1 100%;
+    }
+  }
+
+  @media (max-width: 360px) {
+    .tech-badge {
+      font-size: 0.76rem;
+    }
+  }
+
+
+  /* ═════════════════════════════════════════════════════════════
+     SITE-CHROME TOUCH TARGETS (page-scoped).
+     The header/footer are rendered by PublicLayout, so these rules
+     must use :global(). Measured before: .announcement-link 34px,
+     .footer-phone-link 26px, .legal-links a 24px, .admin-entry-link
+     24px, .footer-social-link 42px, .sticky-book 36px — all below
+     the 44px WCAG 2.5.8 minimum.
+     ═════════════════════════════════════════════════════════════ */
+  :global(.announcement-link),
+  :global(.footer-phone-link),
+  :global(.clinic-direct-contact a),
+  :global(.footer-social-link),
+  :global(.legal-links a),
+  :global(.admin-entry-link),
+  :global(.sticky-book),
+  :global(.mobile-menu-btn),
+  :global(.header-phone) {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  :global(.mobile-menu-btn),
+  :global(.header-phone) {
+    min-width: 44px;
+    justify-content: center;
+  }
+
+  :global(.legal-links) {
+    align-items: center;
+    flex-wrap: wrap;
+    row-gap: 0;
+  }
+
 </style>

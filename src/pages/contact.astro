@@ -599,8 +599,8 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     margin: 0 0 14px;
-    letter-spacing: -0.02em;
-    line-height: 1.3;
+    /* No letter-spacing on Persian headings. */
+    line-height: 1.5;
   }
 
   .page-subtitle {
@@ -1358,7 +1358,9 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
 
   .code-font {
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-    letter-spacing: 0.05em;
+    /* Latin/digit-only run — tracking is safe here, but keep it subtle. */
+    letter-spacing: 0.02em;
+    font-variant-numeric: tabular-nums;
     font-size: 1.05rem;
     font-weight: 700;
     color: #34d399;
@@ -1451,4 +1453,170 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
       width: 100%;
     }
   }
+
+  /* ═════════════════════════════════════════════════════════════
+     SITE-CHROME TOUCH TARGETS (page-scoped).
+     The header/footer are rendered by PublicLayout, so these rules
+     must use :global(). Measured before: .announcement-link 34px,
+     .footer-phone-link 26px, .legal-links a 24px, .admin-entry-link
+     24px, .footer-social-link 42px, .sticky-book 36px — all below
+     the 44px WCAG 2.5.8 minimum.
+     ═════════════════════════════════════════════════════════════ */
+  :global(.announcement-link),
+  :global(.footer-phone-link),
+  :global(.clinic-direct-contact a),
+  :global(.footer-social-link),
+  :global(.legal-links a),
+  :global(.admin-entry-link),
+  :global(.sticky-book),
+  :global(.mobile-menu-btn),
+  :global(.header-phone) {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  :global(.mobile-menu-btn),
+  :global(.header-phone) {
+    min-width: 44px;
+    justify-content: center;
+  }
+
+  :global(.legal-links) {
+    align-items: center;
+    flex-wrap: wrap;
+    row-gap: 0;
+  }
+
+
+  /* ═════════════════════════════════════════════════════════════
+     MODERNIZATION LAYER — rhythm, Persian measure, modern cards.
+     ═════════════════════════════════════════════════════════════ */
+
+  .contact-page-wrapper {
+    padding-block: clamp(32px, 5vw, 64px);
+  }
+
+  .contact-main-section > .container > section,
+  .contact-main-section > section {
+    margin-bottom: clamp(40px, 5.5vw, 76px);
+  }
+
+  .contact-main-section > *:last-child {
+    margin-bottom: 0;
+  }
+
+  .page-title {
+    letter-spacing: normal;
+    line-height: 1.45;
+  }
+
+  .page-title,
+  .card-title,
+  .location-card-title,
+  .sheba-card-title,
+  .cta-title,
+  .access-item-title {
+    line-height: 1.5;
+  }
+
+  .page-subtitle,
+  .card-desc,
+  .location-card-subtitle,
+  .access-item-desc,
+  .sheba-card-subtitle,
+  .cta-desc {
+    line-height: 1.95;
+  }
+
+  .page-subtitle {
+    max-width: 44rem;
+    margin-inline: auto;
+  }
+
+  .card-desc,
+  .access-item-desc {
+    max-width: 46ch;
+  }
+
+  /* ── Modern card treatment ─────────────────────────────────── */
+  .contact-glass-card,
+  .location-hub-card,
+  .sheba-details-card,
+  .social-card,
+  .phone-card {
+    border-radius: 20px;
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0) 40%),
+      linear-gradient(165deg, #161a23 0%, #0d0f15 100%);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.05) inset,
+      0 18px 38px -24px rgba(0, 0, 0, 0.85);
+    transition:
+      transform var(--motion-fast) var(--ease-out),
+      border-color var(--motion-fast) var(--ease-out);
+  }
+
+  .contact-glass-card:hover,
+  .phone-card:hover,
+  .social-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(52, 211, 153, 0.42);
+  }
+
+  .contact-cards-grid,
+  .access-guide-grid,
+  .sheba-items-grid {
+    gap: clamp(16px, 2.2vw, 24px);
+  }
+
+  .contact-glass-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .sheba-code,
+  .map-coords-badge,
+  .code-font {
+    font-variant-numeric: tabular-nums;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+
+  /* ── Touch targets ≥44px ───────────────────────────────────── */
+  .wa-chip,
+  .btn-copy-chip,
+  .copy-trigger-btn,
+  .copy-address-btn,
+  .social-link-item,
+  .nav-app-btn,
+  .sheet,
+  .btn-contact-gold,
+  .btn-contact-outline,
+  .cta-book-btn {
+    min-height: 44px;
+  }
+
+  .wa-chip,
+  .nav-app-btn,
+  .social-link-item {
+    display: inline-flex;
+    align-items: center;
+    padding-block: 10px;
+  }
+
+  @media (max-width: 768px) {
+    .contact-main-section > .container > section {
+      margin-bottom: 40px;
+    }
+
+    .access-guide-grid,
+    .contact-cards-grid,
+    .sheba-items-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
 </style>

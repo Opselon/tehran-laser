@@ -5,11 +5,21 @@
 
 /* ── Buttons ───────────────────────────────────────────────── */
 
+/* WCAG 2.5.8 Target Size Minimum (44px).
+   The padding-only box measured ~40px at 1rem (0.75em top+bottom +
+   1.4 line-height); a floor on the element is what actually
+   guarantees the size regardless of the font size a page sets. It
+   lives on the element rather than on a `.touch-target` utility so
+   every existing `<button class="btn">` inherits it — public.css
+   already does this under `@media (pointer: coarse)`, so the only
+   change is that the desktop pointer now gets the same floor
+   (WCAG 2.5.8 is not pointer-conditional). */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
+  min-block-size: var(--tap-target-min, 44px);
   padding: 0.75em 1.6em;
   border-radius: var(--radius-full);
   border: 1px solid transparent;
@@ -31,6 +41,14 @@
 
 .btn:active {
   transform: translateY(0) scale(0.98);
+}
+
+/* The custom buttons suppress the UA ring with their own borders, so
+   the focus indicator has to be re-drawn explicitly — a control with
+   no visible focus state fails WCAG 2.4.7 regardless of size. */
+.btn:focus-visible {
+  outline: 2px solid var(--color-primary-strong);
+  outline-offset: 2px;
 }
 
 .btn:disabled,
@@ -88,9 +106,13 @@
   filter: brightness(0.94);
 }
 
+/* The small variant stays visually small by SHRINKING ITS PADDING,
+   not by dropping below the 44px floor — shrinking the target is the
+   failure mode WCAG 2.5.8 exists to prevent. */
 .btn--sm {
-  padding: 0.5em 1.1em;
+  padding: 0.35em 1.1em;
   font-size: var(--text-body-sm);
+  min-block-size: var(--tap-target-min, 44px);
 }
 
 .btn--lg {
@@ -100,6 +122,19 @@
 
 .btn--block {
   inline-size: 100%;
+}
+
+/* Icon-only button. Both axes are floored: a 44px-tall / 20px-wide X
+   is still an unhittable target. `aspect-ratio` keeps it square when
+   the caller only sets one dimension. */
+.btn--icon {
+  inline-size: var(--tap-target-min, 44px);
+  min-inline-size: var(--tap-target-min, 44px);
+  block-size: var(--tap-target-min, 44px);
+  min-block-size: var(--tap-target-min, 44px);
+  aspect-ratio: 1;
+  padding: 0;
+  border-radius: var(--radius-full);
 }
 
 .btn.is-loading {

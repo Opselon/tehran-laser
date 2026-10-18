@@ -1392,7 +1392,7 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
     color: #ffffff;
     line-height: 1.4;
     margin: 0 0 16px;
-    letter-spacing: -0.02em;
+    /* No letter-spacing: Persian glyphs are joined and RTL-fragile. */
   }
 
   .gold-gradient {
@@ -1679,7 +1679,7 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
     font-size: 1.85rem;
     font-weight: 800;
     color: var(--gold-light);
-    letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums;
   }
 
   .unit {
@@ -2458,4 +2458,375 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
       padding: 8px 10px;
     }
   }
+  /* ═════════════════════════════════════════════════════════════
+     MODERNIZATION LAYER — premium rhythm, 44px touch targets,
+     readable Persian measure, modern pricing-table treatment.
+     Scoped to this page; appended last so it wins over the
+     legacy rules above.
+     ═════════════════════════════════════════════════════════════ */
+
+  /* ── Section rhythm: one consistent vertical scale everywhere ── */
+  .category-switch-section {
+    padding-block: clamp(40px, 6vw, 84px);
+  }
+
+  .services-hero {
+    padding: clamp(44px, 7vw, 88px) 16px clamp(36px, 5vw, 60px);
+  }
+
+  .packages-header,
+  .services-header,
+  .catalog-controls-bar {
+    margin-bottom: clamp(20px, 3vw, 32px);
+  }
+
+  .clinical-guidance-card,
+  .mens-advice-card,
+  .mens-banner-card {
+    margin-top: clamp(36px, 5vw, 60px);
+  }
+
+  /* Tech badge strip: badges hug their text so four different widths
+     broke the centered axis of the hero. Fit-content chips centred on
+     one axis read the way the hero intends. */
+  .tech-badges-strip {
+    justify-content: center;
+  }
+
+  .tech-badge {
+    width: auto;
+    max-width: 100%;
+    justify-content: center;
+    text-align: right;
+  }
+
+  /* ── Persian line-length: keep prose at a comfortable measure ── */
+  .hero-subtitle {
+    max-width: 46rem;
+    line-height: 2;
+  }
+
+  .section-desc,
+  .guidance-subtitle,
+  .mens-banner-desc {
+    max-width: 52rem;
+    margin-inline: auto;
+    line-height: 1.95;
+  }
+
+  .service-card-desc,
+  .package-subtitle,
+  .guidance-box p,
+  .cta-box-text {
+    line-height: 1.9;
+  }
+
+  .hero-title,
+  .section-h2,
+  .package-title,
+  .guidance-title,
+  .mens-banner-title {
+    /* Persian needs no negative tracking; keep the natural joining. */
+    letter-spacing: normal;
+    line-height: 1.5;
+  }
+
+  .final-amount,
+  .price-highlight,
+  .old-amount,
+  .strikethrough-mini {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── Touch targets ≥44px (WCAG 2.5.8) ──────────────────────────
+     Previously .btn-3d-primary-sm / .btn-3d-outline-sm rendered 42px
+     tall and .service-card-title a only 22px, both under the minimum. */
+  .btn-3d-gold,
+  .btn-3d-subtle,
+  .btn-3d-primary-sm,
+  .btn-3d-outline-sm,
+  .btn-table-book {
+    min-height: 44px;
+    padding-block: 11px;
+  }
+
+  .service-card-title a {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    width: 100%;
+    padding-block: 2px;
+  }
+
+  .filter-btn,
+  .view-toggle-btn,
+  .toggle-pill {
+    min-height: 44px;
+  }
+
+  .category-toggle-pills {
+    align-items: stretch;
+  }
+
+  .toggle-pill {
+    flex: 1 1 0;
+  }
+
+  .service-card-footer .btn-3d-primary-sm,
+  .service-card-footer .btn-3d-outline-sm {
+    flex: 1 1 auto;
+  }
+
+  /* ── Modern card treatment: layered surface + emerald hairline ── */
+  .package-card,
+  .service-obsidian-card {
+    border-radius: 20px;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.045) 0%, rgba(255, 255, 255, 0) 42%),
+      linear-gradient(165deg, #161a23 0%, #0d0f15 100%);
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.05) inset,
+      0 18px 38px -22px rgba(0, 0, 0, 0.85);
+    transition:
+      transform var(--motion-fast) var(--ease-out),
+      border-color var(--motion-fast) var(--ease-out),
+      box-shadow var(--motion-fast) var(--ease-out);
+  }
+
+  .package-card:hover,
+  .service-obsidian-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(52, 211, 153, 0.42);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.07) inset,
+      0 26px 50px -24px rgba(0, 0, 0, 0.9),
+      0 0 26px -8px rgba(16, 185, 129, 0.32);
+  }
+
+  .package-card-golden,
+  .service-obsidian-card.border-gold-glow {
+    border-color: rgba(52, 211, 153, 0.5);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.08) inset,
+      0 22px 46px -24px rgba(0, 0, 0, 0.9),
+      0 0 30px -12px rgba(16, 185, 129, 0.42);
+  }
+
+  /* ── Evidence grid consistent gap / equal card heights ───────── */
+  .services-3d-grid,
+  .packages-grid {
+    gap: clamp(16px, 2.2vw, 24px);
+    align-items: stretch;
+  }
+
+  .service-obsidian-card,
+  .package-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .service-card-footer,
+  .package-actions {
+    margin-top: auto;
+  }
+
+  /* ── Modern pricing table ─────────────────────────────────────
+     Was a dense, unstyled-feeling grid: 8 columns of uniform 14px
+     text with no header anchoring or row separation. */
+  .table-responsive-wrapper {
+    border-radius: 18px;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    background: linear-gradient(180deg, #101319 0%, #0b0d12 100%);
+    box-shadow: 0 24px 48px -28px rgba(0, 0, 0, 0.9);
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .table-obsidian-pricing {
+    width: 100%;
+    min-width: 860px;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  .table-obsidian-pricing thead th {
+    /* position: sticky is intentionally NOT applied: this table lives inside
+       .table-responsive-wrapper, whose overflow-x scrolling creates a new
+       scroll context, so a sticky header would pin against the wrapper's
+       own top edge (i.e. mid-card) instead of the viewport. */
+    background: linear-gradient(180deg, #1b2130 0%, #141922 100%);
+    color: #d1fae5;
+    font-size: 0.8rem;
+    font-weight: 800;
+    line-height: 1.6;
+    padding: 14px 12px;
+    text-align: right;
+    white-space: nowrap;
+    border-bottom: 1px solid rgba(52, 211, 153, 0.38);
+    letter-spacing: normal;
+  }
+
+  .table-obsidian-pricing tbody td {
+    padding: 14px 12px;
+    font-size: 0.825rem;
+    line-height: 1.75;
+    color: #cbd5e1;
+    vertical-align: middle;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+  }
+
+  .table-obsidian-pricing tbody tr:nth-child(even) td {
+    background: rgba(148, 163, 184, 0.045);
+  }
+
+  .table-obsidian-pricing tbody tr:hover td {
+    background: rgba(16, 185, 129, 0.09);
+  }
+
+  .table-obsidian-pricing tbody tr.highlight-row td {
+    background: rgba(16, 185, 129, 0.13);
+  }
+
+  .table-obsidian-pricing tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  .th-num,
+  .td-num {
+    width: 56px;
+    text-align: center;
+    color: #94a3b8;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .td-service {
+    min-width: 190px;
+  }
+
+  .td-price,
+  .td-male,
+  .td-duration,
+  .td-sessions,
+  .td-action {
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* The female-price cell stacks the struck-through original above the
+     discounted price instead of running them inline, so a long digit
+     group never collides with its replacement. */
+  .td-price .strikethrough-mini {
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  .td-price .price-highlight {
+    display: block;
+    white-space: nowrap;
+  }
+
+  .btn-table-book {
+    padding-inline: 16px;
+    border-radius: 10px;
+  }
+
+  /* ── Responsive refinements ─────────────────────────────────── */
+  @media (max-width: 1024px) {
+    .table-obsidian-pricing {
+      min-width: 780px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .category-switch-section {
+      padding-block: 36px 56px;
+    }
+
+    .hero-title {
+      line-height: 1.55;
+    }
+
+    .filter-pills {
+      width: 100%;
+    }
+
+    .filter-btn {
+      flex: 1 1 auto;
+      justify-content: center;
+    }
+
+    .table-obsidian-pricing thead th,
+    .table-obsidian-pricing tbody td {
+      padding: 12px 10px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .service-card-footer {
+      flex-wrap: wrap;
+    }
+
+    .service-card-footer .btn-3d-primary-sm,
+    .service-card-footer .btn-3d-outline-sm {
+      flex: 1 1 100%;
+    }
+  }
+
+  @media (max-width: 360px) {
+    .table-obsidian-pricing {
+      min-width: 700px;
+    }
+
+    .toggle-pill {
+      padding-inline: 12px;
+      font-size: 0.8rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .package-card,
+    .service-obsidian-card {
+      transition: none;
+      transform: none;
+    }
+  }
+
+
+  /* ═════════════════════════════════════════════════════════════
+     SITE-CHROME TOUCH TARGETS (page-scoped).
+     The header/footer are rendered by PublicLayout, so these rules
+     must use :global(). Measured before: .announcement-link 34px,
+     .footer-phone-link 26px, .legal-links a 24px, .admin-entry-link
+     24px, .footer-social-link 42px, .sticky-book 36px — all below
+     the 44px WCAG 2.5.8 minimum.
+     ═════════════════════════════════════════════════════════════ */
+  :global(.announcement-link),
+  :global(.footer-phone-link),
+  :global(.clinic-direct-contact a),
+  :global(.footer-social-link),
+  :global(.legal-links a),
+  :global(.admin-entry-link),
+  :global(.sticky-book),
+  :global(.mobile-menu-btn),
+  :global(.header-phone) {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  :global(.mobile-menu-btn),
+  :global(.header-phone) {
+    min-width: 44px;
+    justify-content: center;
+  }
+
+  :global(.legal-links) {
+    align-items: center;
+    flex-wrap: wrap;
+    row-gap: 0;
+  }
+
 </style>

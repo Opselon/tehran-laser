@@ -171,9 +171,12 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
                   {featuredCover ? (
                     <img
                       src={featuredCover}
-                      alt={featuredPost.title}
+                      alt={`تصویر شاخص مقاله ${featuredPost.title}`}
                       class="featured-img"
+                      width="1200"
+                      height="675"
                       loading="eager"
+                      decoding="async"
                       onerror="this.style.display='none';this.parentElement.classList.add('img-load-failed')"
                     />
                   ) : (
@@ -245,9 +248,12 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
                       {postCover ? (
                         <img
                           src={postCover}
-                          alt={post.title}
+                          alt={`تصویر شاخص مقاله ${post.title}`}
                           class="article-card-img"
+                          width="800"
+                          height="450"
                           loading="lazy"
+                          decoding="async"
                           onerror="this.style.display='none';this.parentElement.classList.add('img-load-failed')"
                         />
                       ) : (
@@ -381,7 +387,7 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
       color: #ffffff;
       line-height: 1.35;
       margin-bottom: 14px;
-      letter-spacing: -0.02em;
+      /* No letter-spacing on Persian headings. */
       text-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
     }
 
@@ -1063,7 +1069,208 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
       display: inline-block;
       vertical-align: -2px;
     }
-  </style>
+  
+  /* ═════════════════════════════════════════════════════════════
+     SITE-CHROME TOUCH TARGETS (page-scoped).
+     The header/footer are rendered by PublicLayout, so these rules
+     must use :global(). Measured before: .announcement-link 34px,
+     .footer-phone-link 26px, .legal-links a 24px, .admin-entry-link
+     24px, .footer-social-link 42px, .sticky-book 36px — all below
+     the 44px WCAG 2.5.8 minimum.
+     ═════════════════════════════════════════════════════════════ */
+  :global(.announcement-link),
+  :global(.footer-phone-link),
+  :global(.clinic-direct-contact a),
+  :global(.footer-social-link),
+  :global(.legal-links a),
+  :global(.admin-entry-link),
+  :global(.sticky-book),
+  :global(.mobile-menu-btn),
+  :global(.header-phone) {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  :global(.mobile-menu-btn),
+  :global(.header-phone) {
+    min-width: 44px;
+    justify-content: center;
+  }
+
+  :global(.legal-links) {
+    align-items: center;
+    flex-wrap: wrap;
+    row-gap: 0;
+  }
+
+
+    /* ═══════════════════════════════════════════════════════════
+       MODERNIZATION LAYER — rhythm, Persian measure, modern cards.
+       The homepage blog CSS includes this file's styles inside
+       `body.blog-page-obsidian`, so every rule here is also written
+       against that scope in public.css; only page-local additions
+       are safe to append.
+       ═══════════════════════════════════════════════════════════ */
+
+    .blog-hero-title,
+    .featured-title,
+    .article-card-title,
+    .cta-title,
+    .guide-title,
+    .empty-title {
+      letter-spacing: normal;
+      line-height: 1.5;
+    }
+
+    .blog-hero-desc,
+    .featured-excerpt,
+    .article-card-excerpt,
+    .cta-sub,
+    .guide-sub,
+    .empty-desc {
+      line-height: 1.95;
+    }
+
+    .blog-hero-desc {
+      max-width: 46rem;
+    }
+
+    .featured-excerpt,
+    .article-card-excerpt {
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      max-width: 58ch;
+    }
+
+    .blog-hero-section {
+      padding-block: clamp(48px, 6vw, 84px) clamp(32px, 4.5vw, 56px);
+    }
+
+    .featured-article-section,
+    .articles-grid-section {
+      margin-bottom: clamp(36px, 5vw, 60px);
+    }
+
+    .blog-cta-banner {
+      padding-block: clamp(32px, 4.5vw, 56px);
+      border-radius: 20px;
+    }
+
+    .articles-grid-section > * + * {
+      margin-top: clamp(20px, 3vw, 32px);
+    }
+
+    .article-card-3d,
+    .featured-card-3d,
+    .patient-guide-card {
+      border-radius: 18px;
+      border: 1px solid rgba(148, 163, 184, 0.16);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0) 40%),
+        linear-gradient(165deg, #161a23 0%, #0d0f15 100%);
+      box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.05) inset,
+        0 18px 38px -24px rgba(0, 0, 0, 0.85);
+    }
+
+    .article-card-3d {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .article-card-body {
+      display: flex;
+      flex-direction: column;
+      flex: 1 1 auto;
+    }
+
+    .article-card-footer {
+      margin-top: auto;
+    }
+
+    .blog-grid,
+    .patient-guides-grid {
+      gap: clamp(16px, 2.2vw, 26px);
+      align-items: stretch;
+    }
+
+    .related-title,
+    .related-date,
+    .meta-item,
+    .meta-tag {
+      letter-spacing: normal;
+    }
+
+    /* Card titles are the primary link into an article: they measured
+       29-30px tall at 768px, under the 44px target minimum. Grow the
+       hit area without disturbing the type. */
+    .featured-title a,
+    .article-card-title a {
+      display: flex;
+      align-items: center;
+      min-height: 44px;
+      line-height: 1.45;
+    }
+
+    .read-link-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 44px;
+      padding-block: 8px;
+    }
+
+    .btn-cta-primary,
+    .btn-cta-secondary,
+    .btn-read-featured,
+    .category-chips-list button {
+      min-height: 44px;
+      letter-spacing: normal;
+    }
+
+    .category-chips-list {
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .article-card-img-wrap,
+    .featured-image-col {
+      overflow: hidden;
+      border-start-start-radius: 18px;
+      border-start-end-radius: 18px;
+    }
+
+    .article-card-img,
+    .featured-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    @media (max-width: 480px) {
+      .featured-excerpt,
+      .article-card-excerpt {
+        -webkit-line-clamp: 4;
+      }
+
+      .category-chips-list button {
+        flex: 1 1 auto;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .article-card-3d,
+      .featured-card-3d {
+        transition: none;
+      }
+    }
+
+</style>
 
   <script>
     // Client-side category filtering

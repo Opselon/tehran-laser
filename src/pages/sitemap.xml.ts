@@ -11,6 +11,11 @@ import { all } from '../db/query';
 const ORIGIN = resolveCanonicalOrigin();
 
 /** Escape XML special characters so DB-sourced slugs/titles can't break the sitemap. */
+/** Slugs are DB-sourced; a malformed row must not emit a broken <loc>. */
+function isValidSlug(value: string): boolean {
+  return /^[a-z0-9][a-z0-9-]*$/i.test(value);
+}
+
 function xmlEscape(value: string): string {
   return value
     .replace(/&/g, '&amp;')
@@ -27,7 +32,12 @@ interface StaticUrl {
   lastmod?: string | undefined;
 }
 
-/** All indexable public pages (admin/api excluded — see robots.txt). */
+/**
+ * All indexable public pages. Every entry must correspond to a real file under
+ * src/pages/ — a <loc> that 404s wastes crawl budget and can get the whole
+ * sitemap distrusted. Verified against the route list in src/lib/seo/routes.ts;
+ * admin/api/404/500 are excluded on purpose (see robots.txt).
+ */
 const staticUrls: StaticUrl[] = [
   { loc: '/', changefreq: 'daily', priority: '1.0' },
   { loc: '/services', changefreq: 'weekly', priority: '0.9' },
@@ -74,14 +84,25 @@ export const GET: APIRoute = async () => {
     // If DB is unreachable during static generation, static URLs still emit cleanly
   }
 
-  const serviceUrls: StaticUrl[] = serviceRows.map((s): StaticUrl => ({
+  // Slugs come from the DB; keep malformed rows out of the sitemap rather than
+  // emitting a <loc> that 404s (a few bad URLs can sour a crawler on the file).
+  const validServices = serviceRows.filter((s) => isValidSlug(s.slug));
+  const validBlog = blogRows.filter((b) => isValidSlug(b.slug));
+  if (validServices.length < serviceRows.length || validBlog.length < blogRows.length) {
+    console.warn(
+      `[sitemap] skipped ${serviceRows.length - validServices.length} service(s) and ` +
+        `${blogRows.length - validBlog.length} blog post(s) with malformed slugs.`,
+    );
+  }
+
+  const serviceUrls: StaticUrl[] = validServices.map((s): StaticUrl => ({
     loc: `/services/${s.slug}`,
     changefreq: 'weekly',
     priority: '0.8',
     lastmod: s.updatedAt ? s.updatedAt.slice(0, 10) : undefined,
   }));
 
-  const blogUrls: StaticUrl[] = blogRows.map((b): StaticUrl => ({
+  const blogUrls: StaticUrl[] = validBlog.map((b): StaticUrl => ({
     loc: `/blog/${b.slug}`,
     changefreq: 'monthly',
     priority: '0.7',
@@ -89,7 +110,7 @@ export const GET: APIRoute = async () => {
   }));
 
   // Newest catalog timestamp drives <lastmod> for the content-backed static pages.
-  const newestContent = [...serviceRows.map((s) => s.updatedAt), ...blogRows.map((b) => b.updatedAt || b.publishedAt)]
+  const newestContent = [...validServices.map((s) => s.updatedAt), ...validBlog.map((b) => b.updatedAt || b.publishedAt)]
     .filter((d): d is string => Boolean(d))
     .sort()
     .pop();
@@ -107,7 +128,8 @@ export const GET: APIRoute = async () => {
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${items.join('\n')}
-</urlset>`;
+</urlset>
+`;
 
   return new Response(xml, {
     status: 200,

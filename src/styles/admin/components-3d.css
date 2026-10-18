@@ -117,7 +117,10 @@
   line-height: 1.2;
   color: #f8fafc;
   font-variant-numeric: tabular-nums;
-  letter-spacing: -0.01em;
+  /* Persian-safe: these KPIs render PERSIAN digits (toLocaleString('fa-IR')),
+     and a negative letter-spacing pinches the joins the same way it does in
+     Persian words. --tracking-heading is 0 for this reason. */
+  letter-spacing: var(--tracking-heading);
 }
 
 .kpi-footer {

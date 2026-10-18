@@ -1,16 +1,18 @@
 {
   "id": "/",
-  "name": "کلینیک تهران لیزر",
+  "name": "کلینیک تخصصی تهران لیزر — لیزر موهای زائد پاسداران",
   "short_name": "تهران لیزر",
-  "description": "پلتفرم تخصصی لیزر موهای زائد و زیبایی تهران لیزر",
-  "start_url": "/",
+  "description": "کلینیک تخصصی تهران لیزر در پاسداران: لیزر تماسی رادو پلاس با سه طول موج، کاور استریل یکبار مصرف و رزرو آنلاین نوبت با ۱۵٪ تخفیف.",
+  "start_url": "/?utm_source=pwa",
   "scope": "/",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "orientation": "portrait",
   "background_color": "#0d0f12",
   "theme_color": "#0f766e",
   "dir": "rtl",
   "lang": "fa-IR",
+  "dir_locale": "fa-IR",
   "categories": ["health", "medical", "beauty"],
   "icons": [
     {

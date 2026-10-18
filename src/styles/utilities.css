@@ -271,11 +271,56 @@
 
 /* ── 8. 3D SURFACE, GLASS & ELEVATION UTILITIES ────────────── */
 
+/* `.glass-obsidian` is the legacy alias kept for the admin console.
+   `.glass-panel` (motion.css) is the public successor — it is theme-
+   aware and carries a `@supports` fallback, so new work should use
+   that one. Left here unchanged so the admin pages keep rendering. */
 .glass-obsidian {
   background: rgba(18, 22, 34, 0.85) !important;
   backdrop-filter: blur(20px) saturate(180%) !important;
   -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
   border: 1px solid rgba(16, 185, 129, 0.25) !important;
+}
+
+/* ── 8b. MEDIA FRAME / COVER UTILITIES ──────────────────────────
+   Thin aliases over motion.css's `.media-frame*` so a lane that
+   only imports utilities.css still has them. Keep the ratio list in
+   sync with motion.css §3 — the ratios are the contract; if a new
+   one is needed add it in BOTH places. `aspect-ratio` (not the
+   padding-top hack) is what makes CLS 0: the browser reserves the
+   box from the ratio before the photo decodes, so the hero image
+   landing late over 3G cannot push the text down.                 */
+
+.media-ratio-1x1 { aspect-ratio: 1 / 1; }
+.media-ratio-4x3 { aspect-ratio: 4 / 3; }
+.media-ratio-3x2 { aspect-ratio: 3 / 2; }
+.media-ratio-16x9 { aspect-ratio: 16 / 9; }
+.media-ratio-21x9 { aspect-ratio: 21 / 9; }
+.media-ratio-3x4 { aspect-ratio: 3 / 4; }
+.media-ratio-2x3 { aspect-ratio: 2 / 3; }
+
+.media-contain {
+  object-fit: contain !important;
+  object-position: center !important;
+}
+
+.media-cover {
+  object-fit: cover !important;
+  object-position: center !important;
+}
+
+/* Below-the-fold images are lazy by default here; the hero must opt
+   OUT of this class (or set loading="eager") or LCP regresses. */
+.media-lazy {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 320px;
+}
+
+/* A frame that must never exceed the viewport width at 390px, even
+   inside a padded card. */
+.media-frame-fluid {
+  inline-size: 100%;
+  max-inline-size: 100%;
 }
 
 .border-gold { border: 1px solid rgba(16, 185, 129, 0.32) !important; }
@@ -294,13 +339,26 @@
 
 /* ── 9. ACCESSIBILITY, MOBILE TOUCH & UTILITY HELPERS ──────── */
 
-/* WCAG 2.5.5 Touch Target Compliance (min 44x44px) */
+/* WCAG 2.5.5 / 2.5.8 Touch Target Compliance (min 44x44px)
+   `.touch-target` sizes a specific element. The element-primitive
+   floor (button / [role='button'] / summary) lives in base.css, and
+   the public-class overrides live at the bottom of public.css —
+   this is the per-element escape hatch between them. */
 .touch-target {
   min-height: 44px !important;
   min-width: 44px !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
+}
+
+/* `.touch-target-44` is the same rule without the layout side
+   effects: for controls that must keep `display: block` (full-width
+   bar buttons) or that are already flex with their own main-axis
+   alignment. Only the floor is applied. */
+.touch-target-44 {
+  min-height: var(--tap-target-min, 44px) !important;
+  min-width: var(--tap-target-min, 44px) !important;
 }
 
 /* Screen-Reader Only Accessible Text */
@@ -344,3 +402,17 @@
 
 .w-100 { width: 100% !important; }
 .h-100 { height: 100% !important; }
+
+/* ── Persian-safe tracking: shared override ─────────────────────
+   `.kpi-value` carries `letter-spacing: -0.0x em` on a number that is
+   often written in PERSIAN digits — the same defect class as
+   `.hero-title`. The admin sheet holds the authoritative rule (and is
+   imported after this file, so this declaration loses the cascade on
+   /admin/*); this copy is kept for any public-sheet consumer. `tnum`
+   stays, as the KPI column must keep its digit advance identical.
+   Positive micro-tracking on `.kpi-title` (0.01em) is left alone:
+   a POSITIVE value separates the joins rather than pinching them,
+   so it is not a Persian-shaping defect. */
+.kpi-value {
+  letter-spacing: var(--tracking-heading);
+}

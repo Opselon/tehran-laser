@@ -253,6 +253,44 @@
   --header-height: 72px;
   --sticky-cta-height: 68px;
 
+  /* ── PERSIAN-SAFE TRACKING ───────────────────────────────────
+     Persian is an Arabic-script language: most letters CURSIVE-JOIN,
+     and the joiner glyph is part of the shaped cluster. A negative
+     `letter-spacing` shrinks the advance of every cluster, so the
+     joins visually collide / get pinched and the word stops reading
+     as one connected run. Measured on this page: -0.02em on the
+     hero title = -1.088px per gap, which pinches the joins of
+     «کلینیک لیزر» noticeably at 54px.
+     RULE: display/heading tracking is 0. Wide tracking is allowed
+     ONLY on Latin-script micro-labels (uppercase eyebrows), which
+     is what --tracking-label is for — never on Persian copy.       */
+  --tracking-display: 0;
+  --tracking-heading: 0;
+  --tracking-tight: 0;
+  --tracking-caption: 0.02em;
+  --tracking-label: 0.06em;
+
+  /* Tabular figures for anything that is compared down a column
+     (prices, stat rows, timetable slots). Persian digits ۰-۹ are
+     shaped by Vazirmatn; `tabular-nums` only fixes the advance
+     width, it does not change the glyph design, so the Persian
+     numerals still read as Persian. */
+  --numeric-tabular: tabular-nums;
+
+  /* ── WCAG 2.5.5 / 2.5.8 TAP TARGETS ──────────────────────────
+     44px is the WCAG AA floor (2.5.8 Target Size Minimum); 48px is
+     the comfortable iOS/Material size used for the nav row.        */
+  --tap-target-min: 44px;
+  --tap-target-comfortable: 48px;
+
+  /* ── MEDIA & GLASS PRIMITIVES (consumed by motion.css) ─────── */
+  --media-radius: var(--radius-lg);
+  --media-radius-tight: var(--radius-md);
+  --media-bg: var(--color-surface-muted);
+  --glass-blur: 18px;
+  --glass-saturate: 1.4;
+  --reveal-distance: 18px;
+
   /* Motion */
   --motion-instant: 120ms;
   --motion-fast: 180ms;

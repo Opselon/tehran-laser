@@ -1,0 +1,131 @@
+---
+/**
+ * SiteFooter — the public site footer.
+ *
+ * Split out of PublicLayout so the layout stays inside the ~500-line budget and
+ * so the footer's link columns can be driven by the shared route registry
+ * (src/lib/seo/routes.ts) instead of a second hardcoded list that drifts.
+ *
+ * Tap-target note: every interactive item carries the `tap-target` utility
+ * (defined once in PublicLayout's global style block, min 44×44). That is a
+ * markup-level fix — link COLUMNS are list items whose anchors had only their
+ * text line-height as a hit area (24–28px), well under WCAG 2.5.8.
+ */
+
+import Icon from './Icon.astro';
+import {
+  CLINIC_CONTACT,
+  CLINIC_HOURS_FA,
+  FOOTER_QUICK_LINKS,
+  toPersianDigits,
+} from '../../lib/seo';
+
+const currentYear = toPersianDigits(new Date().getFullYear());
+
+// Featured treatment links. Plain slugs, not DB-driven: the footer must render
+// even when D1 is unreachable, and these four are stable marketing landing
+// pages (they are also asserted by the sitemap's service rows).
+const featuredServices = [
+  { href: '/services/full-body', label: 'لیزر کل بدن (پکیج تخفیف‌دار)' },
+  { href: '/services/underarm', label: 'لیزر زیر بغل' },
+  { href: '/services/bikini', label: 'لیزر بیکینی' },
+  { href: '/services/full-legs', label: 'لیزر فول بادی پا' },
+  { href: '/services/full-arms', label: 'لیزر دست کامل' },
+  { href: '/services/face', label: 'لیزر کامل صورت' },
+];
+---
+
+<footer class="site-footer">
+  <div class="container footer-content">
+    <div class="footer-col brand-col">
+      <a href="/" class="brand-logo mb-3 tap-target" aria-label="تهران لیزر — صفحه اصلی">
+        <span class="logo-mark" aria-hidden="true">TL</span>
+        <span class="logo-text">
+          <span class="logo-title">تهران لیزر</span>
+          <span class="logo-sub">مرکز تخصصی لیزر پاسداران</span>
+        </span>
+      </a>
+      <p class="footer-desc">
+        تهران لیزر با بهره‌گیری از پیشرفته‌ترین تکنولوژی‌های روز دنیا و رعایت بالاترین استانداردهای بهداشتی، محیطی لوکس و آرام برای تجربه بهترین نتایج لیزر موهای زائد فراهم آورده است.
+      </p>
+      <address class="clinic-direct-contact mt-3">
+        <p><strong>آدرس:</strong> {CLINIC_CONTACT.streetAddress}</p>
+        <p>
+          <strong>شماره تماس:</strong>
+          <a
+            href={`tel:${CLINIC_CONTACT.telephone}`}
+            class="footer-phone-link tap-target"
+            aria-label={`تماس تلفنی با کلینیک: ${CLINIC_CONTACT.phoneDisplay}`}
+          >
+            <bdi dir="ltr">{CLINIC_CONTACT.phoneDisplay}</bdi>
+          </a>
+        </p>
+      </address>
+      <div class="footer-social mt-3">
+        <a
+          href={CLINIC_CONTACT.sameAs[0]}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="footer-social-link tap-target"
+          aria-label="صفحه اینستاگرام تهران لیزر"
+        >
+          <Icon name="instagram" size={17} aria-hidden="true" />
+          <bdi dir="ltr">@tehranlaser_clinic</bdi>
+        </a>
+      </div>
+    </div>
+
+    <nav class="footer-col" aria-labelledby="footer-quick-heading">
+      <h2 class="footer-heading" id="footer-quick-heading">دسترسی سریع</h2>
+      <ul class="footer-links">
+        {FOOTER_QUICK_LINKS.map((link) => (
+          <li>
+            <a href={link.href} class="footer-link tap-target">{link.label}</a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    <nav class="footer-col" aria-labelledby="footer-services-heading">
+      <h2 class="footer-heading" id="footer-services-heading">خدمات پرطرفدار بانوان</h2>
+      <ul class="footer-links">
+        {featuredServices.map((link) => (
+          <li>
+            <a href={link.href} class="footer-link tap-target">{link.label}</a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    <div class="footer-col">
+      <h2 class="footer-heading">ساعات کاری و پذیرش</h2>
+      <p class="footer-hours">
+        {CLINIC_HOURS_FA.map((line, index) => (
+          <>
+            {line}
+            {index < CLINIC_HOURS_FA.length - 1 && <br />}
+          </>
+        ))}
+      </p>
+      <div class="footer-cta-box mt-3">
+        <p class="small text-muted mb-2">پذیرش فقط با هماهنگی و رزرو قبلی</p>
+        <a href="/booking" class="btn btn-primary btn-sm btn-block tap-target">رزرو اینترنتی نوبت</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <div class="container footer-bottom-inner">
+      <p class="copyright">
+        © {currentYear} کلینیک تخصصی تهران لیزر. تمامی حقوق محفوظ است.
+      </p>
+      <nav class="legal-links" aria-label="پیوندهای حقوقی">
+        <a href="/privacy" class="tap-target">حریم خصوصی</a>
+        <span class="sep" aria-hidden="true">•</span>
+        <a href="/terms" class="tap-target">قوانین و مقررات</a>
+        <span class="sep" aria-hidden="true">•</span>
+        <a href="/admin/login" class="admin-entry-link tap-target" rel="nofollow">ورود پرسنل</a>
+      </nav>
+    </div>
+  </div>
+</footer>

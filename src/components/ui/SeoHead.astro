@@ -1,0 +1,157 @@
+---
+/**
+ * SeoHead — every <head> element for the public site.
+ *
+ * Extracted from PublicLayout so the layout stays about structure and this
+ * stays about crawlers. The layout computes the values (it owns `Astro.url`,
+ * the canonical origin and the page props) and passes them in; this file only
+ * renders.
+ *
+ * Two invariants it exists to enforce:
+ *  1. Social/meta URLs are ABSOLUTE. Relative og:image values are silently
+ *     dropped by most crawlers, so the layout resolves them first.
+ *  2. JSON-LD is escaped. `set:html` on a JSON.stringify payload must escape
+ *     `<`/`>`/`&` or an admin setting containing `</script>` breaks out of the
+ *     block and injects markup (stored XSS).
+ */
+
+import { DEFAULT_OG_IMAGE_ALT } from '../../lib/seo';
+
+interface Props {
+  title: string;
+  description: string;
+  canonicalUrl: string;
+  keywords: string[];
+  robotsContent: string;
+  ogType: 'website' | 'article' | 'profile';
+  ogImage: string;
+  /** `| undefined` is required: the project sets exactOptionalPropertyTypes. */
+  ogImageAlt?: string | undefined;
+  /** Site name shown by social crawlers. */
+  siteName?: string | undefined;
+  themeColor?: string | undefined;
+  geo: {
+    region: string;
+    placename: string;
+    position: string;
+    icbm: string;
+  };
+  /** Absolute URLs of the fa-IR / x-default alternates (both the canonical). */
+  hreflangAlternate: string;
+  /** One or more JSON-LD nodes; emitted as a single escaped script block. */
+  structuredData: Array<Record<string, unknown>>;
+  /** Optional Open Graph article extensions. */
+  articleMeta?:
+    | {
+        publishedTime?: string | undefined;
+        modifiedTime?: string | undefined;
+        author?: string | undefined;
+        section?: string | undefined;
+      }
+    | undefined;
+}
+
+const {
+  title,
+  description,
+  canonicalUrl,
+  keywords,
+  robotsContent,
+  ogType,
+  ogImage,
+  ogImageAlt = DEFAULT_OG_IMAGE_ALT,
+  siteName = 'تهران لیزر',
+  themeColor = '#0f766e',
+  geo,
+  hreflangAlternate,
+  structuredData,
+  articleMeta,
+} = Astro.props;
+
+// `jsonLd` may contain an escaped `</script>`-shaped string from D1/admin
+// settings; escaping these three characters is what keeps it inert.
+const jsonLdPayload = JSON.stringify(structuredData)
+  .replace(/</g, '\\u003c')
+  .replace(/>/g, '\\u003e')
+  .replace(/&/g, '\\u0026');
+---
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<!-- Persian phone numbers in body copy should stay text, not become tel: links -->
+<meta name="format-detection" content="telephone=no" />
+<!-- Send full URLs to same-origin only; never leak paths to third parties -->
+<meta name="referrer" content="strict-origin-when-cross-origin" />
+
+<title>{title}</title>
+<meta name="description" content={description} />
+<meta name="keywords" content={keywords.join('، ')} />
+<meta name="author" content="کلینیک تخصصی تهران لیزر" />
+<meta name="robots" content={robotsContent} />
+<meta name="googlebot" content={robotsContent} />
+<link rel="canonical" href={canonicalUrl} />
+
+<!-- Geo-targeting for local Pasdaran / Tehran SEO (§133) -->
+<meta name="geo.region" content={geo.region} />
+<meta name="geo.placename" content={geo.placename} />
+<meta name="geo.position" content={geo.position} />
+<meta name="ICBM" content={geo.icbm} />
+
+<!-- Open Graph (§134). Every URL here is absolute — see the layout. -->
+<meta property="og:type" content={ogType} />
+<meta property="og:url" content={canonicalUrl} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={ogImage} />
+<meta property="og:image:secure_url" content={ogImage} />
+<meta property="og:image:type" content="image/jpeg" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content={ogImageAlt} />
+<meta property="og:locale" content="fa_IR" />
+<meta property="og:locale:alternate" content="en_US" />
+<meta property="og:site_name" content={siteName} />
+{articleMeta?.publishedTime && (
+  <meta property="article:published_time" content={articleMeta.publishedTime} />
+)}
+{articleMeta?.modifiedTime && (
+  <meta property="article:modified_time" content={articleMeta.modifiedTime} />
+)}
+{articleMeta?.author && <meta property="article:author" content={articleMeta.author} />}
+{articleMeta?.section && <meta property="article:section" content={articleMeta.section} />}
+
+<!-- Twitter/X Card (§134) -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImage} />
+<meta name="twitter:image:alt" content={ogImageAlt} />
+<meta name="twitter:image:width" content="1200" />
+<meta name="twitter:image:height" content="630" />
+
+<!-- PWA metadata -->
+<meta name="theme-color" content={themeColor} />
+<meta name="application-name" content="کلینیک تهران لیزر" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<!-- Modern counterpart: Chrome logs the Apple-prefixed tag as deprecated unless
+     this one is present. Harmless to ship both. -->
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="تهران لیزر" />
+<link rel="manifest" href="/manifest.webmanifest" />
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon-180.png" />
+
+<!-- Favicons -->
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
+<link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512.png" />
+<link rel="shortcut icon" href="/favicon.ico" />
+
+<!-- Sitemap & hreflang discovery. The site is Persian-only, so both alternates
+     resolve to the same canonical URL (self-referencing hreflang). -->
+<link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml" />
+<link rel="alternate" hreflang="fa-IR" href={hreflangAlternate} />
+<link rel="alternate" hreflang="x-default" href={hreflangAlternate} />
+
+<!-- JSON-LD Structured Data (§31, §135) — one escaped graph per document -->
+<script type="application/ld+json" set:html={jsonLdPayload} />

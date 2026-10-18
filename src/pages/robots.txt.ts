@@ -5,60 +5,42 @@ import { resolveCanonicalOrigin } from '../lib/seo/canonical';
 // (live workers origin), never the parked tehranlaser.ir vanity domain.
 const ORIGIN = resolveCanonicalOrigin();
 
+/** Paths that must never be crawled OR indexed. */
+const DISALLOW = ['/admin', '/admin/', '/api/', '/api/v1/', '/_actions/', '/404', '/500'];
+
+/**
+ * Crawlers explicitly invited. Each one is given the SAME allow/disallow
+ * policy, and that repetition is load-bearing: a crawler obeys only the single
+ * most specific group matching its own product token, so a `User-agent:
+ * Googlebot` group containing nothing but `Allow: /` silently OPTS GOOGLEBOT
+ * OUT of the `Disallow: /admin` rule in the `User-agent: *` group — making
+ * admin and API surfaces crawlable by exactly the bots whose crawl budget
+ * matters most.
+ */
+const NAMED_CRAWLERS = [
+  'Googlebot',
+  'Googlebot-Image',
+  'Bingbot',
+  'YandexBot',
+  // Social unfurlers need the article/service pages for rich OG previews.
+  'facebookexternalhit',
+  'Twitterbot',
+  'LinkedInBot',
+];
+
+function policyFor(agent: string): string {
+  return [`User-agent: ${agent}`, 'Allow: /', ...DISALLOW.map((p) => `Disallow: ${p}`)].join('\n');
+}
+
 export const GET: APIRoute = () => {
   const content = `# Robots.txt — Tehran Laser Clinic (§133)
 # Canonical origin is provided at runtime via the SITE_URL var (see wrangler.jsonc).
+# The site is Persian-only (fa-IR); there is no second-language tree to manage.
 
-User-agent: *
-Allow: /
-Allow: /services
-Allow: /services/
-Allow: /clinic
-Allow: /contact
-Allow: /faq
-Allow: /blog
-Allow: /blog/
-Allow: /booking
-Allow: /privacy
-Allow: /terms
+${policyFor('*')}
 
-# Administrative & API surfaces are never indexable
-Disallow: /admin
-Disallow: /admin/
-Disallow: /api/
-Disallow: /api/v1/
-Disallow: /_actions/
-Disallow: /404
-Disallow: /500
-
-# Search engine specific directives
-User-agent: Googlebot
-Allow: /
-
-User-agent: Googlebot-Image
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-User-agent: YandexBot
-Allow: /
-
-User-agent: AhrefsBot
-Allow: /
-
-User-agent: SemrushBot
-Allow: /
-
-# Social media crawler access for rich Open Graph previews
-User-agent: facebookexternalhit
-Allow: /
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: LinkedInBot
-Allow: /
+# Named crawlers: each repeats the full policy (see NAMED_CRAWLERS).
+${NAMED_CRAWLERS.map((agent) => policyFor(agent)).join('\n\n')}
 
 # Explicit sitemap declaration
 Sitemap: ${ORIGIN}/sitemap.xml

@@ -10,3 +10,16 @@
 
 /icons/*
   Cache-Control: public, max-age=604800
+
+# Imagery is content-stable (filenames are not hashed, so keep immutable off)
+# — a week of browser caching removes a repeat-visit download of ~2.4 MB.
+/images/*
+  Cache-Control: public, max-age=604800
+
+# Self-hosted Vazirmatn variable font.
+/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Fontsource ships under /_astro/ (hashed filenames) — safe to pin forever.
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
