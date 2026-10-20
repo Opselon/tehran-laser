@@ -3747,3 +3747,265 @@ body.theme-dark-obsidian .bottom-nav-link[aria-current='page'] svg {
     78% { background-position: 0 0; }
   }
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   23. PLUGIN MODULES — premium pass
+   Styles for sections that are toggled from /admin/plugins. Everything here is
+   inert until its module renders markup, so a disabled module costs zero bytes
+   of layout and zero paint. Floors: type ≥11px, taps ≥44px, mobile-first
+   min-width queries, no horizontal overflow at 320–1440.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 23.1 Stat band (module `stat-band`) ─────────────────────────────────── */
+
+body.theme-dark-obsidian .stat-band {
+  position: relative;
+  padding-block: clamp(38px, 6vw, 74px);
+}
+
+body.theme-dark-obsidian .stat-band-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 22px;
+}
+
+body.theme-dark-obsidian .stat-band-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 112px;
+  padding: 18px 14px;
+  text-align: center;
+  border-radius: 18px;
+  background:
+    radial-gradient(120% 140% at 50% 0%, rgba(232, 203, 143, 0.14), transparent 62%),
+    linear-gradient(160deg, rgba(18, 24, 34, 0.92), rgba(9, 13, 18, 0.96));
+  border: 1px solid rgba(232, 203, 143, 0.2);
+  box-shadow:
+    0 18px 40px -28px rgba(0, 0, 0, 0.95),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  overflow: hidden;
+}
+
+body.theme-dark-obsidian .stat-band-card::after {
+  content: '';
+  position: absolute;
+  inset-inline: 22%;
+  inset-block-start: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(232, 203, 143, 0.75), transparent);
+}
+
+body.theme-dark-obsidian .stat-band-value {
+  font-size: clamp(1.7rem, 6vw, 2.6rem);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  background: linear-gradient(135deg, #fff4d2 0%, #e8cb8f 42%, #c9a45c 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+body.theme-dark-obsidian .stat-band-value small {
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin-inline-start: 2px;
+  color: rgba(244, 247, 246, 0.55);
+  -webkit-text-fill-color: rgba(244, 247, 246, 0.55);
+}
+
+body.theme-dark-obsidian .stat-band-label {
+  font-size: 0.78rem;
+  line-height: 1.6;
+  color: rgba(226, 232, 240, 0.66);
+}
+
+@media (min-width: 768px) {
+  body.theme-dark-obsidian .stat-band-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+    margin-top: 30px;
+  }
+
+  body.theme-dark-obsidian .stat-band-card {
+    min-height: 136px;
+    padding: 22px 18px;
+  }
+
+  body.theme-dark-obsidian .stat-band-label {
+    font-size: 0.84rem;
+  }
+}
+
+/* ── 23.2 WhatsApp float (module `whatsapp-float`) ───────────────────────── */
+
+.wa-float {
+  position: fixed;
+  z-index: 78;
+  inset-block-end: calc(14px + env(safe-area-inset-bottom, 0px));
+  inset-inline-end: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 14px;
+  border-radius: 999px;
+  color: #052e16;
+  text-decoration: none;
+  background: linear-gradient(150deg, #6ee7a8, #22c55e 62%, #16a34a);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow:
+    0 16px 30px -14px rgba(16, 185, 129, 0.85),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  font-size: 0.82rem;
+  font-weight: 800;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.wa-float:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 22px 36px -16px rgba(16, 185, 129, 0.9),
+    inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+.wa-float-label {
+  white-space: nowrap;
+}
+
+@media (max-width: 767px) {
+  /* Sit above the 58px bottom dock plus the 63px sticky bar so it never
+     covers either; and shrink to the icon on narrow phones. */
+  .wa-float {
+    inset-block-end: calc(134px + env(safe-area-inset-bottom, 0px));
+    inset-inline-end: 12px;
+    width: 46px;
+    min-height: 46px;
+    height: 46px;
+    padding: 0;
+    justify-content: center;
+  }
+
+  .wa-float-label {
+    display: none;
+  }
+}
+
+/* ── 23.3 Premium polish: shared public surfaces ─────────────────────────── */
+
+body.theme-dark-obsidian .section-title {
+  position: relative;
+}
+
+/* A hairline foil rule under section titles — quiet, never animated in. */
+body.theme-dark-obsidian .section-header.text-center .section-title::after {
+  content: '';
+  display: block;
+  width: 54px;
+  height: 2px;
+  margin: 14px auto 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, rgba(232, 203, 143, 0.85), transparent);
+}
+
+body.theme-dark-obsidian .trust-card,
+body.theme-dark-obsidian .testimonial-card,
+body.theme-dark-obsidian .ig-card,
+body.theme-dark-obsidian .faq-card {
+  transition:
+    transform 0.2s var(--v2-ease, cubic-bezier(0.22, 0.61, 0.36, 1)),
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  body.theme-dark-obsidian .trust-card:hover,
+  body.theme-dark-obsidian .testimonial-card:hover,
+  body.theme-dark-obsidian .ig-card:hover,
+  body.theme-dark-obsidian .faq-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(232, 203, 143, 0.45);
+    box-shadow: 0 26px 46px -30px rgba(0, 0, 0, 0.95);
+  }
+}
+
+/* Primary buttons get a single diagonal sheen on hover (no looping animation). */
+body.theme-dark-obsidian .btn-primary {
+  position: relative;
+  overflow: hidden;
+}
+
+body.theme-dark-obsidian .btn-primary::after {
+  content: '';
+  position: absolute;
+  inset-block: -40%;
+  inset-inline-start: -60%;
+  width: 38%;
+  transform: skewX(-18deg) translateX(-120%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.38), transparent);
+  transition: transform 0.55s ease;
+  pointer-events: none;
+}
+
+body.theme-dark-obsidian .btn-primary:hover::after {
+  transform: skewX(-18deg) translateX(320%);
+}
+
+/* Table rows: readable hover without breaking the sticky header. */
+body.theme-dark-obsidian .gender-price-table tbody tr {
+  transition: background-color 0.16s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  body.theme-dark-obsidian .gender-price-table tbody tr:hover {
+    background-color: rgba(232, 203, 143, 0.06);
+  }
+}
+
+/* Focus visibility for every interactive surface (never removed). */
+body.theme-dark-obsidian a:focus-visible,
+body.theme-dark-obsidian button:focus-visible,
+body.theme-dark-obsidian summary:focus-visible,
+body.theme-dark-obsidian input:focus-visible,
+body.theme-dark-obsidian select:focus-visible,
+body.theme-dark-obsidian textarea:focus-visible {
+  outline: 2px solid rgba(245, 215, 127, 0.9);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.theme-dark-obsidian .btn-primary::after,
+  body.theme-dark-obsidian .trust-card,
+  body.theme-dark-obsidian .testimonial-card,
+  body.theme-dark-obsidian .ig-card,
+  body.theme-dark-obsidian .faq-card,
+  .wa-float {
+    transition: none;
+    transform: none;
+  }
+}
+
+/* `sticky-booking-cta` .desktop=true — the admin asked for the bar on wide
+   screens too. Kept last so it overrides the mobile-only display rule. */
+@media (min-width: 1024px) {
+  .mobile-sticky-bar.is-desktop-visible {
+    display: flex;
+    inset-inline: auto;
+    inset-block-end: 18px;
+    inset-inline-start: 18px;
+    width: auto;
+    max-width: 320px;
+    border-radius: 16px;
+    padding: 8px;
+  }
+
+  .mobile-sticky-bar.is-desktop-visible .btn {
+    width: 100%;
+  }
+}

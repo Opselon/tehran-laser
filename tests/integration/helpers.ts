@@ -4,24 +4,79 @@ import m2 from '../../migrations/0002_rbac.sql?raw';
 import m3 from '../../migrations/0003_settings_hours.sql?raw';
 import m4 from '../../migrations/0004_services_prices.sql?raw';
 import m5 from '../../migrations/0005_faq.sql?raw';
+import m6 from '../../migrations/0006_seed_blog.sql?raw';
+import m7 from '../../migrations/0007_advanced_crm_suite.sql?raw';
+import m9 from '../../migrations/0009_male_prices.sql?raw';
+import m10 from '../../migrations/0010_device_content_refresh.sql?raw';
+import m11 from '../../migrations/0011_feature_modules.sql?raw';
 import { hashPassword } from '../../src/lib/security/password';
 
 let migrated = false;
 
+/**
+ * Split a migration file into executable statements.
+ *
+ * A naive `split(';')` corrupts any migration whose INSERT carries HTML copy
+ * with semicolons inside a quoted string (0010 seeds article bodies that do).
+ * This walks the SQL, tracks single-quoted strings (including the '' escape)
+ * and skips `--` / block comments, so `;` only splits real statement
+ * boundaries.
+ */
 function splitSqlStatements(sql: string): string[] {
-  const cleaned = sql
-    .replace(/\/\*[\s\S]*?\*\//g, '')
-    .split('\n')
-    .map((line) => {
-      const idx = line.indexOf('--');
-      return idx >= 0 ? line.slice(0, idx) : line;
-    })
-    .join('\n');
+  const statements: string[] = [];
+  let current = '';
+  let inString = false;
 
-  return cleaned
-    .split(';')
-    .map((s) => s.trim())
-    .filter((s) => s.length > 0);
+  for (let i = 0; i < sql.length; i += 1) {
+    const char = sql[i]!;
+    const next = sql[i + 1];
+
+    if (inString) {
+      current += char;
+      if (char === "'") {
+        if (next === "'") {
+          current += next; // escaped quote inside the literal
+          i += 1;
+        } else {
+          inString = false;
+        }
+      }
+      continue;
+    }
+
+    // Line comment → drop to end of line.
+    if (char === '-' && next === '-') {
+      while (i < sql.length && sql[i] !== '\n') i += 1;
+      current += '\n';
+      continue;
+    }
+
+    // Block comment → drop it entirely.
+    if (char === '/' && next === '*') {
+      const end = sql.indexOf('*/', i + 2);
+      i = end === -1 ? sql.length : end + 1;
+      continue;
+    }
+
+    if (char === "'") {
+      inString = true;
+      current += char;
+      continue;
+    }
+
+    if (char === ';') {
+      const stmt = current.trim();
+      if (stmt.length > 0) statements.push(stmt);
+      current = '';
+      continue;
+    }
+
+    current += char;
+  }
+
+  const tail = current.trim();
+  if (tail.length > 0) statements.push(tail);
+  return statements;
 }
 
 async function runMigration(sql: string): Promise<void> {
@@ -39,6 +94,11 @@ export async function ensureMigrated(): Promise<void> {
   await runMigration(m3);
   await runMigration(m4);
   await runMigration(m5);
+  await runMigration(m6);
+  await runMigration(m7);
+  await runMigration(m9);
+  await runMigration(m10);
+  await runMigration(m11);
 
   // Seed a test super_admin for admin integration tests
   const adminId = 'usr_test_superadmin';

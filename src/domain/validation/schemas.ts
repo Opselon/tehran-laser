@@ -427,3 +427,34 @@ export const instagramSettingsSchema = z.object({
   discountPercent: z.number().finite().min(0).max(100).optional(),
 });
 export type InstagramSettingsInput = z.infer<typeof instagramSettingsSchema>;
+
+/* ── Feature modules (WordPress-style plugin hub, migration 0011) ───────────
+   The payload only carries what the hub can change; module identity lives in
+   the URL (`PUT /api/v1/admin/features/:key`) and config is re-validated
+   against that module's own schema in src/server/features.ts. */
+export const featureUpdateSchema = z
+  .object({
+    enabled: z.boolean().optional(),
+    displayOrder: z.number().int().min(0).max(10_000).optional(),
+    config: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])).optional(),
+  })
+  .strict()
+  .refine((v) => v.enabled !== undefined || v.displayOrder !== undefined || v.config !== undefined, {
+    message: 'حداقل یکی از فیلدهای enabled، displayOrder یا config لازم است.',
+  });
+export type FeatureUpdateInput = z.infer<typeof featureUpdateSchema>;
+
+export const featureReorderSchema = z
+  .object({
+    order: z
+      .array(
+        z.object({
+          key: z.string().trim().min(1).max(64),
+          displayOrder: z.number().int().min(0).max(10_000),
+        }),
+      )
+      .min(1)
+      .max(64),
+  })
+  .strict();
+export type FeatureReorderInput = z.infer<typeof featureReorderSchema>;

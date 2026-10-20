@@ -49,6 +49,7 @@
 | [`docs/DATETIME-JALALI.md`](docs/DATETIME-JALALI.md) | **قرارداد تاریخ جلالی (شمسی)** |
 | [`docs/PWA-MOBILE.md`](docs/PWA-MOBILE.md) | **PWA، نصب اپلیکیشن و تجربه موبایل** |
 | [`docs/OPERATIONS.md`](docs/OPERATIONS.md) | **استقرار، مسیر ورود ادمین و نکات امنیتی** |
+| [`docs/FEATURE-MODULES.md`](docs/FEATURE-MODULES.md) | **سیستم افزونه‌ها (Plugin Hub)**: هر سکشن/قابلیت یک ماژول روشن/خاموش با تنظیمات اختصاصی |
 | [`docs/API.md`](docs/API.md) | قرارداد کامل `/api/v1` |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) · [`DATABASE.md`](DATABASE.md) · [`SECURITY.md`](SECURITY.md) · [`DEPLOYMENT.md`](DEPLOYMENT.md) | معماری، پایگاه‌داده، امنیت، استقرار |
 

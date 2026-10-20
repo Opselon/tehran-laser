@@ -73,6 +73,24 @@
 
 ---
 
+## ۲.۱ موتور افزونه‌ها (Feature Modules) — «وردپرس‌مانند»
+
+منبع حقیقت ماژول‌ها **کد** است (`src/domain/features/registry.ts`)؛ جدول D1
+(`feature_modules`، مهاجرت ۰۰۱۱) فقط **override** ذخیره می‌کند. هیچ ردیفی برای
+یک ماژول وجود ندارد ⇔ دقیقاً همان default رجیستری اعمال می‌شود («default IS the
+absence») و حذف override یعنی بازگشت به پیش‌فرض کارخانه، نه حذف ماژول.
+
+لایه‌ها (Node-testable تا D1):
+- `src/domain/features/registry.ts` — تعریف ماژول‌ها + schema مشتق برای config.
+- `src/domain/features/state.ts` — merge/gate/config resolution خالص.
+- `src/server/features.ts` — تنها خواننده/نویسندهٔ جدول (اعتبارسنجی پیش از UPSERT).
+
+قرارداد: هر ماژول غیرفعال هیچ مارکاپ، placeholder و کشف‌پذیری از API عمومی ندارد
+(SSR gate با `isOn()` + خروجی `GET /api/v1/features` فقط ماژول‌های فعال عمومی).
+جزئیات قرارداد API: `docs/API.md`؛ راهنمای ادمین: `docs/FEATURE-MODULES.md`.
+
+---
+
 ## ۳. موتور دسترسی‌پذیری و کوانتیزاسیون زمان (Availability Engine)
 
 - **منطقه زمانی استاندارد کلینیک:** تمامی ساعت‌های کاری و محاسبات اسلات در منطقه زمانی `Asia/Tehran` انجام می‌پذیرد.

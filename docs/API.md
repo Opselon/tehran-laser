@@ -38,6 +38,7 @@ buttons is never authorization.
 | GET | `/api/v1/blog/:slug` | – | `PublicBlogPostDto` | `404` for non-published |
 | GET | `/api/v1/clinic` | – | `ClinicInfoDto` | `{ settings: PublicSettingsDto, hours: BusinessHoursDto[] }` |
 | GET | `/api/v1/settings/public` | – | `PublicSettingsDto` | public scope only — never private keys |
+| GET | `/api/v1/features` | – | `{ key, config }[]` | **enabled public modules only** — a disabled module is absent, not `enabled:false` |
 | GET | `/api/health` | – | `HealthDto` | lightweight; no heavy diagnostics |
 
 ### POST /api/v1/bookings (authoritative flow)
@@ -76,6 +77,29 @@ buttons is never authorization.
 | settings | `GET /admin/settings` (`settings.read`), `PUT /admin/settings` (`settings.write`) | |
 | notifications | `GET /admin/notifications` (`settings.read`) | |
 | audit | `GET /admin/audit` (`audit.read`) | |
+| features | `GET /admin/features` (`settings.read`), `PUT /admin/features/:key` (`settings.write`), `DELETE /admin/features/:key` (reset to registry default, `settings.write`), `POST /admin/features/order` (`settings.write`) | |
+
+### Feature modules (the plugin hub)
+
+The registry (`src/domain/features/registry.ts`) is the source of truth — adding a
+module means adding one entry, not a migration. The `feature_modules` table
+(`migrations/0011_feature_modules.sql`) stores only **overrides**: a module with no
+row renders exactly its registry default, and `DELETE` (reset) is "remove the
+override", never "delete the module".
+
+- `PUT /admin/features/:key` body `{ enabled?, displayOrder?, config? }` — a **partial**
+  update; unknown config keys are a `422 VALIDATION_ERROR` (never silently dropped),
+  an unknown module key is a `404` (never creates a row).
+- Config is validated per-field by a zod schema derived from the module's field
+  definitions **before** the UPSERT, so the table cannot hold unvalidated state.
+- Modules marked `internal` (e.g. `sms-campaigns`) admin-only: never listed by
+  `GET /api/v1/features`.
+- Misses never break the site: a transient D1 error on a public page falls back to
+  registry defaults instead of rendering a blank page.
+- Writes purge the edge-cached public routes (`/`, `/booking`, `/blog`) so a toggle
+  is visible on the next request, not after the 60 s TTL.
+- Instagram stays single-source: saving `instagram-hub` config mirrors the
+  validated values into the legacy `instagram_*` settings rows.
 
 Rules:
 

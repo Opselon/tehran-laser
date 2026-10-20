@@ -2,6 +2,17 @@
 import PublicLayout from '../../layouts/PublicLayout.astro';
 import { env } from 'cloudflare:workers';
 import { listPublicBlogPosts } from '../../server/repositories';
+import { isModuleEnabled } from '../../server/features';
+
+/* Plugin gate: the blog module can be switched off from the hub; the index then
+   redirects home and its nav entry disappears (PublicLayout). */
+let blogEnabled = true;
+try {
+  blogEnabled = await isModuleEnabled(env.DB, 'content-blog');
+} catch (e) {
+  console.error('blog module gate read failed:', e);
+}
+if (!blogEnabled) return Astro.redirect('/', 307);
 import { formatJalaliDate, toPersianDigits } from '../../lib/datetime/jalali';
 import { createBreadcrumbSchema } from '../../lib/seo';
 import Icon from '../../components/ui/Icon.astro';

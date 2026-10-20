@@ -9,6 +9,8 @@ import { defaultFaqs } from '../data/faqs';
 import { MENS_ONLY_SLUG_SET } from '../data/male-pricing';
 import { env } from 'cloudflare:workers';
 import { listPublicServices, listFaqItems, getPublicSettings } from '../server/repositories';
+import { getModuleStateMap } from '../server/features';
+import { enabledConfig, isModuleOn, mergeModuleStates, resolveInstagram, toStateMap } from '../domain/features/state';
 import { createFAQPageSchema, createBreadcrumbSchema } from '../lib/seo';
 
 // Fetch public services and FAQs server-side for instant SEO & zero JS dependence (§3, §31, §191)
@@ -23,6 +25,30 @@ try {
 } catch (e) {
   console.error('SSR homepage data fetch failure:', e);
 }
+
+/* ── Feature modules (the plugin gate) ───────────────────────────────────────
+   A section renders only when its module is enabled in the plugin hub. If D1
+   cannot be read we fall back to the REGISTRY DEFAULTS rather than an empty
+   map: a transient DB error must never blank the clinic's marketing page, and
+   those defaults are exactly the state a fresh install ships with. */
+let moduleStates: Map<string, ReturnType<typeof mergeModuleStates>[number]>;
+try {
+  moduleStates = await getModuleStateMap(env.DB);
+} catch (e) {
+  console.error('SSR homepage feature-state fetch failure:', e);
+  moduleStates = toStateMap(mergeModuleStates([]));
+}
+const isOn = (key: string) => isModuleOn(moduleStates, key);
+
+const pricingCfg = enabledConfig(moduleStates, 'pricing-table');
+const faqCfg = enabledConfig(moduleStates, 'faq');
+const mensCfg = enabledConfig(moduleStates, 'mens-line');
+const closingCfg = enabledConfig(moduleStates, 'closing-cta');
+const statsCfg = enabledConfig(moduleStates, 'stat-band');
+const igModuleCfg = enabledConfig(moduleStates, 'instagram-hub');
+
+const str = (value: unknown, fallback = ''): string =>
+  typeof value === 'string' && value.trim() !== '' ? value : fallback;
 
 // Fallback FAQs if database is empty
 const activeFaqs = faqs && faqs.length > 0 ? faqs : defaultFaqs;
@@ -78,15 +104,13 @@ try {
   console.error('SSR homepage settings fetch failure:', e);
 }
 
-const igHandleRaw = (publicSettings.instagram_username || '').replace(/[^A-Za-z0-9._]/g, '').slice(0, 30);
-const igHandle = igHandleRaw || 'tehranlaser_clinic';
-const igProfileUrl = `https://www.instagram.com/${igHandle}/`;
-const igReelCandidate = (publicSettings.instagram_latest_reel_url || '').trim();
-const igReelUrl = /^https:\/\/(www\.)?instagram\.com\//i.test(igReelCandidate) ? igReelCandidate : igProfileUrl;
-const igPromoCode = (publicSettings.instagram_promo_code || '').replace(/[^\w-]/g, '').slice(0, 24);
-const igDiscountPct = (publicSettings.instagram_follower_discount_percent || '').replace(/\D/g, '').slice(0, 2);
-const igBioLinkCandidate = (publicSettings.instagram_bio_link || '').trim();
-const igBioLink = /^https:\/\//i.test(igBioLinkCandidate) ? igBioLinkCandidate : '';
+const ig = resolveInstagram(igModuleCfg, publicSettings);
+const igHandle = ig.handle;
+const igProfileUrl = ig.profileUrl;
+const igReelUrl = ig.reelUrl;
+const igPromoCode = ig.promoCode;
+const igDiscountPct = ig.discountPercent;
+const igBioLink = ig.bioLink;
 
 // Persian digits + ٪ for display (e.g. ۲۵٪ instead of %25)
 function faDigits(value: string): string {
@@ -131,7 +155,8 @@ function faDigits(value: string): string {
     },
   ]}
 >
-  <!-- Hero Section (§38) -->
+  <!-- Hero Section (§38) — module gate: plugin `hero` -->
+{isOn('hero') && (
   <section class="hero-section">
     <!-- The stage: three light sources, a hairline grid and one gold beam.
          Decorative only — nothing here is announced, focusable or measureable. -->
@@ -323,10 +348,13 @@ function faDigits(value: string): string {
     </div>
   </section>
 
+)}
+
   <!-- Rado Plus Contact Laser Showcase (§37, §38) -->
-  <DeviceShowcase />
+  {isOn('device-showcase') && <DeviceShowcase />}
 
   <!-- Trust Strip (§37) -->
+{isOn('trust-strip') && (
   <section class="trust-strip">
     <div class="container trust-grid">
       <div class="trust-card">
@@ -363,10 +391,13 @@ function faDigits(value: string): string {
     </div>
   </section>
 
+)}
+
   <!-- Clinic ambience band (Lane L2) — imagery-led visual proof -->
-  <ClinicGallery />
+  {isOn('clinic-gallery') && <ClinicGallery />}
 
   <!-- Services & Pricing Section (§10, §11, §253, §254) -->
+{isOn('pricing-table') && (
   <section id="services" class="section services-section">
     <div class="container">
       <div class="section-header text-center">
@@ -381,11 +412,11 @@ function faDigits(value: string): string {
       <div class="featured-promo-card">
         <div class="promo-badge-ribbon">
           <Icon name="sparkles" size={14} />
-          <span>پیشنهاد طلایی رزرو آنلاین</span>
+          <span>{str(pricingCfg.promoBadge, 'پیشنهاد طلایی رزرو آنلاین')}</span>
         </div>
         <div class="promo-content">
           <div class="promo-info">
-            <h3 class="promo-title">پکیج طلایی کل بدن بانوان (Full Body)</h3>
+            <h3 class="promo-title">{str(pricingCfg.promoTitle, 'پکیج طلایی کل بدن بانوان (Full Body)')}</h3>
             <p class="promo-desc">شامل دست کامل، پا کامل، زیر بغل، بیکینی، خط باسن، خط ناف و شکم با شات نامحدود</p>
             <ul class="promo-features">
               <li>
@@ -404,15 +435,15 @@ function faDigits(value: string): string {
           </div>
           <div class="promo-pricing-box">
             <div class="old-price">
-              <span class="strikethrough">۲٬۲۹۰٬۰۰۰</span>
+              <span class="strikethrough">{str(pricingCfg.promoOldPrice, '۲٬۲۹۰٬۰۰۰')}</span>
               <span class="price-unit">تومان</span>
             </div>
             <div class="new-price">
-              <span class="final-amount">۱٬۹۴۰٬۰۰۰</span>
+              <span class="final-amount">{str(pricingCfg.promoNewPrice, '۱٬۹۴۰٬۰۰۰')}</span>
               <span class="price-unit">تومان</span>
             </div>
-            <span class="discount-tag">۱۵٪ تخفیف اختصاصی رزرو سایت</span>
-            <a href="/booking?service=full-body" class="btn btn-primary btn-block mt-3">
+            <span class="discount-tag">{str(pricingCfg.promoDiscountLabel, '۱۵٪ تخفیف اختصاصی رزرو سایت')}</span>
+            <a href={`/booking?service=${encodeURIComponent(str(pricingCfg.promoServiceSlug, 'full-body'))}`} class="btn btn-primary btn-block mt-3">
               <Icon name="calendar" size={18} />
               <span>رزرو نوبت پکیج کل بدن</span>
             </a>
@@ -479,7 +510,10 @@ function faDigits(value: string): string {
     </div>
   </section>
 
+)}
+
   <!-- Male Services Section Info (§11) -->
+{isOn('mens-line') && (
   <section class="section male-services-strip">
     <div class="container male-strip-inner">
       <div class="male-text">
@@ -487,9 +521,12 @@ function faDigits(value: string): string {
           <Icon name="shield" size={14} />
           <span>لاین درمانی مجزا</span>
         </span>
-        <h3 class="male-title">خدمات اختصاصی لیزر آقایان با اپراتور آقا</h3>
+        <h3 class="male-title">{str(mensCfg.title, 'خدمات اختصاصی لیزر آقایان با اپراتور آقا')}</h3>
         <p class="male-desc">
-          کلینیک تهران لیزر مجهز به لاین اختصاصی آقایان با اپراتورهای مجرب آقا و پروتکل‌های ویژه موهای ضخیم می‌باشد. نواحی آنکارد ریش، خط گردن و گونه، پشت، شانه‌ها، سینه و پکیج کامل کل بدن با تعیین وقت قبلی و در کمال حریم شخصی ارائه می‌گردد.
+          {str(
+            mensCfg.description,
+            'کلینیک تهران لیزر مجهز به لاین اختصاصی آقایان با اپراتورهای مجرب آقا و پروتکل‌های ویژه موهای ضخیم می‌باشد. نواحی آنکارد ریش، خط گردن و گونه، پشت، شانه‌ها، سینه و پکیج کامل کل بدن با تعیین وقت قبلی و در کمال حریم شخصی ارائه می‌گردد.',
+          )}
         </p>
       </div>
       <div class="male-cta">
@@ -501,18 +538,51 @@ function faDigits(value: string): string {
     </div>
   </section>
 
+)}
+
   <!-- Clinical Protocol & Trust Standards Section -->
-  <ProtocolSection />
+  {isOn('protocol') && <ProtocolSection />}
 
   <!-- Patient Testimonials Section -->
-  <TestimonialsSection />
+  {isOn('testimonials') && <TestimonialsSection />}
+
+  <!-- Stat band — module `stat-band` (off by default: enable it in /admin/plugins) -->
+  {isOn('stat-band') && (
+    <section class="section stat-band" aria-labelledby="stat-band-title">
+      <div class="container">
+        <header class="section-header text-center">
+          <span class="section-subtitle">اعتماد در اعداد</span>
+          <h2 class="section-title" id="stat-band-title">تهران لیزر از نگاه مراجعین</h2>
+        </header>
+        <div class="stat-band-grid">
+          <div class="stat-band-card">
+            <span class="stat-band-value">{str(statsCfg.clients, '۱۲٬۰۰۰+')}</span>
+            <span class="stat-band-label">مراجع محترم</span>
+          </div>
+          <div class="stat-band-card">
+            <span class="stat-band-value">{str(statsCfg.sessions, '۴۵٬۰۰۰+')}</span>
+            <span class="stat-band-label">جلسه لیزر انجام‌شده</span>
+          </div>
+          <div class="stat-band-card">
+            <span class="stat-band-value">{str(statsCfg.rating, '۴.۹')}<small>/۵</small></span>
+            <span class="stat-band-label">امتیاز رضایت مراجعین</span>
+          </div>
+          <div class="stat-band-card">
+            <span class="stat-band-value">{str(statsCfg.years, '۹')}</span>
+            <span class="stat-band-label">سال تجربه در پاسداران</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  )}
 
   <!-- FAQ Section (§31, §256) -->
+{isOn('faq') && (
   <section id="faq" class="section faq-section">
     <div class="container">
       <div class="section-header text-center">
-        <span class="section-subtitle">پاسخ به سوالات پرتکرار</span>
-        <h2 class="section-title">سوالات متداول مراجعین تهران لیزر</h2>
+        <span class="section-subtitle">{str(faqCfg.subtitle, 'پاسخ به سوالات پرتکرار')}</span>
+        <h2 class="section-title">{str(faqCfg.title, 'سوالات متداول مراجعین تهران لیزر')}</h2>
       </div>
 
       <div class="faq-accordion">
@@ -533,7 +603,10 @@ function faDigits(value: string): string {
     </div>
   </section>
 
+)}
+
   <!-- Clinic Location & Direct CTA (§34, §35, §36) -->
+{isOn('location') && (
   <section class="section clinic-location-section">
     <div class="container location-container">
       <div class="location-card">
@@ -576,13 +649,16 @@ function faDigits(value: string): string {
           </a>
           <a href="/booking" class="btn btn-primary loc-book-btn">
             <Icon name="calendar" size={17} />
-            <span>رزرو آنلاین نوبت (۱۵٪ تخفیف)</span>
+            <span>رزرو آنلاین نوبت{str(closingCfg.badge, ' (۱۵٪ تخفیف)')}</span>
           </a>
         </div>
       </div>
     </div>
   </section>
 
+)}
+
+{isOn('instagram-hub') && (
   <section class="section instagram-section" id="instagram" aria-labelledby="ig-title">
     <div class="container">
       <header class="section-header text-center">
@@ -660,13 +736,19 @@ function faDigits(value: string): string {
     </div>
   </section>
 
+)}
+
   <!-- Closing CTA -->
+{isOn('closing-cta') && (
   <section class="section closing-cta-section">
     <div class="container closing-cta-inner">
       <div class="closing-cta-text">
-        <h2 class="closing-cta-title">آماده‌اید شروع کنید؟</h2>
+        <h2 class="closing-cta-title">{str(closingCfg.title, 'آماده‌اید شروع کنید؟')}</h2>
         <p class="closing-cta-desc">
-          اولین مشاوره رایگان است؛ همین حالا نوبت بگیرید و ۱۵٪ تخفیف رزرو آنلاین را از دست ندهید.
+          {str(
+            closingCfg.description,
+            'اولین مشاوره رایگان است؛ همین حالا نوبت بگیرید و ۱۵٪ تخفیف رزرو آنلاین را از دست ندهید.',
+          )}
         </p>
       </div>
       <div class="closing-cta-actions">
@@ -681,6 +763,8 @@ function faDigits(value: string): string {
       </div>
     </div>
   </section>
+
+)}
 
 </PublicLayout>
 

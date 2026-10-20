@@ -5,6 +5,9 @@ import '../styles/utilities.css';
 import '../styles/admin/admin.css';
 import '../styles/admin/components-3d.css';
 import '../styles/admin/responsive.css';
+// Premium layer — loaded LAST, refines the three sheets above (nav groups,
+// switch/hub styles, focus rings). Append new shared admin rules there.
+import '../styles/admin/premium.css';
 import Icon from '../components/ui/Icon.astro';
 
 interface Props {
@@ -22,23 +25,33 @@ const auth = Astro.locals.auth || {
 };
 
 const navItems = [
-  { id: 'dashboard', label: 'داشبورد و امروز', href: '/admin', icon: 'dashboard' },
-  { id: 'walkin', label: 'پذیرش فوری و جلسه بعد', href: '/admin/walkin', icon: 'walkin' },
-  { id: 'bookings', label: 'مدیریت نوبت‌ها', href: '/admin/bookings', icon: 'bookings' },
-  { id: 'calendar', label: 'تقویم نوبت‌ها', href: '/admin/calendar', icon: 'calendar' },
-  { id: 'crm', label: 'پرونده بالینی و CRM', href: '/admin/crm', icon: 'crm' },
-  { id: 'customers', label: 'بانک مراجعین', href: '/admin/customers', icon: 'customers' },
-  { id: 'accounting', label: 'حسابداری و نمودارها', href: '/admin/accounting', icon: 'accounting' },
-  { id: 'sms', label: 'پنل پیامک و اطلاع‌رسانی', href: '/admin/sms', icon: 'sms' },
-  { id: 'lottery', label: 'قرعه‌کشی و گردونه شانس', href: '/admin/lottery', icon: 'lottery' },
-  { id: 'festivals', label: 'جشنواره‌ها و تایم‌لاین', href: '/admin/festivals', icon: 'festivals' },
-  { id: 'instagram', label: 'تنظیمات اینستاگرام', href: '/admin/instagram', icon: 'instagram' },
-  { id: 'services', label: 'خدمات و تعرفه‌ها', href: '/admin/services', icon: 'services' },
-  { id: 'schedule', label: 'ساعات کاری و زمان‌بندی', href: '/admin/schedule', icon: 'schedule' },
-  { id: 'blog', label: 'مقالات و محتوا', href: '/admin/blog', icon: 'blog' },
-  { id: 'settings', label: 'تنظیمات کلینیک', href: '/admin/settings', icon: 'settings' },
-  { id: 'audit', label: 'گزارش وقایع و لاگ', href: '/admin/audit', icon: 'audit' },
+  { id: 'dashboard', label: 'داشبورد و امروز', href: '/admin', icon: 'dashboard', group: 'فرماندهی' },
+  { id: 'plugins', label: 'افزونه‌ها و بخش‌های سایت', href: '/admin/plugins', icon: 'puzzle', group: 'فرماندهی' },
+  { id: 'walkin', label: 'پذیرش فوری و جلسه بعد', href: '/admin/walkin', icon: 'walkin', group: 'عملیات' },
+  { id: 'bookings', label: 'مدیریت نوبت‌ها', href: '/admin/bookings', icon: 'bookings', group: 'عملیات' },
+  { id: 'calendar', label: 'تقویم نوبت‌ها', href: '/admin/calendar', icon: 'calendar', group: 'عملیات' },
+  { id: 'crm', label: 'پرونده بالینی و CRM', href: '/admin/crm', icon: 'crm', group: 'عملیات' },
+  { id: 'customers', label: 'بانک مراجعین', href: '/admin/customers', icon: 'customers', group: 'عملیات' },
+  { id: 'accounting', label: 'حسابداری و نمودارها', href: '/admin/accounting', icon: 'accounting', group: 'عملیات' },
+  { id: 'sms', label: 'پنل پیامک و اطلاع‌رسانی', href: '/admin/sms', icon: 'sms', group: 'رشد و بازاریابی' },
+  { id: 'lottery', label: 'قرعه‌کشی و گردونه شانس', href: '/admin/lottery', icon: 'lottery', group: 'رشد و بازاریابی' },
+  { id: 'festivals', label: 'جشنواره‌ها و تایم‌لاین', href: '/admin/festivals', icon: 'festivals', group: 'رشد و بازاریابی' },
+  { id: 'instagram', label: 'تنظیمات اینستاگرام', href: '/admin/instagram', icon: 'instagram', group: 'رشد و بازاریابی' },
+  { id: 'services', label: 'خدمات و تعرفه‌ها', href: '/admin/services', icon: 'services', group: 'محتوا و تنظیمات' },
+  { id: 'schedule', label: 'ساعات کاری و زمان‌بندی', href: '/admin/schedule', icon: 'schedule', group: 'محتوا و تنظیمات' },
+  { id: 'blog', label: 'مقالات و محتوا', href: '/admin/blog', icon: 'blog', group: 'محتوا و تنظیمات' },
+  { id: 'settings', label: 'تنظیمات کلینیک', href: '/admin/settings', icon: 'settings', group: 'محتوا و تنظیمات' },
+  { id: 'audit', label: 'گزارش وقایع و لاگ', href: '/admin/audit', icon: 'audit', group: 'محتوا و تنظیمات' },
 ];
+
+/* Sidebar renders one quiet group heading when the group changes, so 17 links
+   read as four short clusters instead of one wall (see admin/premium.css). */
+const navGroups = navItems.reduce<Array<{ group: string; items: typeof navItems }>>((acc, item) => {
+  const last = acc[acc.length - 1];
+  if (last && last.group === item.group) last.items.push(item);
+  else acc.push({ group: item.group, items: [item] });
+  return acc;
+}, []);
 ---
 
 <!doctype html>
@@ -105,20 +118,27 @@ const navItems = [
 
       <!-- 3D Obsidian Sidebar -->
       <aside class="admin-sidebar" id="adminSidebar">
-        <nav class="admin-sidebar__nav">
+        <nav class="admin-sidebar__nav" aria-label="ناوبری پنل مدیریت">
           <ul class="admin-nav-list">
-            {navItems.map((item) => (
-              <li class="admin-nav-item">
-                <a
-                  href={item.href}
-                  class={`admin-nav-link ${activeNav === item.id ? 'active' : ''}`}
-                >
-                  <span class="nav-icon">
-                    <Icon name={item.icon} size={18} />
-                  </span>
-                  <span class="nav-label">{item.label}</span>
-                </a>
-              </li>
+            {navGroups.map((group) => (
+              <>
+                <li class="admin-nav-grouphead" aria-hidden="true">{group.group}</li>
+                {group.items.map((item) => (
+                  <li class="admin-nav-item">
+                    <a
+                      href={item.href}
+                      class={`admin-nav-link ${activeNav === item.id ? 'active' : ''}`}
+                      aria-current={activeNav === item.id ? 'page' : undefined}
+                    >
+                      <span class="nav-icon">
+                        <Icon name={item.icon} size={18} />
+                      </span>
+                      <span class="nav-label">{item.label}</span>
+                      {item.id === 'plugins' && <span class="nav-badge-new">جدید</span>}
+                    </a>
+                  </li>
+                ))}
+              </>
             ))}
           </ul>
         </nav>

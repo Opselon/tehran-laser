@@ -1,8 +1,11 @@
 ---
 import AdminLayout from '../../layouts/AdminLayout.astro';
+import Icon from '../../components/ui/Icon.astro';
 import { AdminDashboard } from '../../components/admin/AdminDashboard';
 import { env } from 'cloudflare:workers';
 import { getAdminDashboard, getPublicSettings } from '../../server/repositories';
+import { listAdminModules } from '../../server/features';
+import type { AdminModuleView } from '../../domain/features/registry';
 import { localDateOf } from '../../lib/datetime/timezone';
 
 // MUST match /api/v1/admin/dashboard: a Tehran-local date. Using the UTC date
@@ -14,6 +17,14 @@ try {
 } catch {
   /* settings unreadable — the API default is the same */
 }
+let modules: AdminModuleView[] = [];
+try {
+  modules = await listAdminModules(env.DB);
+} catch (e) {
+  console.error('Failed to load feature modules for dashboard strip:', e);
+}
+const enabledModules = modules.filter((m) => m.enabled).length;
+
 const todayStr = localDateOf(new Date().toISOString(), tz);
 const todayStartIso = `${todayStr}T00:00:00.000Z`;
 const todayEndIso = `${todayStr}T23:59:59.999Z`;
@@ -28,6 +39,35 @@ try {
 
 <AdminLayout title="داشبورد و وضعیت امروز" activeNav="dashboard">
   <div class="admin-content-pad">
+    <!-- Plugin status strip: one glance at what the public site is actually
+         rendering, with a link into the hub. Server-rendered so it is present
+         on first paint (no extra fetch, no spinner). -->
+    <section class="dashboard-plugin-strip" aria-labelledby="plugin-strip-title">
+      <div class="dashboard-plugin-strip__head">
+        <div class="dashboard-plugin-strip__title">
+          <span class="dashboard-plugin-strip__icon"><Icon name="puzzle" size={18} /></span>
+          <div>
+            <h2 id="plugin-strip-title">افزونه‌های سایت</h2>
+            <p>{enabledModules} از {modules.length} ماژول فعال است؛ فقط ماژول‌های فعال در سایت رندر می‌شوند.</p>
+          </div>
+        </div>
+        <a class="dashboard-plugin-strip__cta" href="/admin/plugins">
+          <span>مدیریت افزونه‌ها</span>
+          <Icon name="arrowLeft" size={15} />
+        </a>
+      </div>
+
+      <ul class="dashboard-plugin-chips" role="list">
+        {modules.map((m) => (
+          <li class:list={['plugin-mini', m.enabled ? 'on' : 'off']} title={m.enabled ? 'فعال' : m.offNote}>
+            <span class="plugin-mini__dot" aria-hidden="true" />
+            <span class="plugin-mini__name">{m.name}</span>
+            <span class="plugin-mini__state">{m.enabled ? 'روشن' : 'خاموش'}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+
     <AdminDashboard client:load initialData={initialDashboard} />
   </div>
 </AdminLayout>
