@@ -2984,3 +2984,34 @@ body.theme-dark-obsidian .trust-title {
     border-inline-end: 1px solid rgba(232, 203, 143, 0.16);
   }
 }
+
+/* ── 20. Final floors: type 11px, taps 44px ───────────────────────────────
+   The last live audit (390×844) still found two 10px labels — the men-only
+   tariff pill and the "new reel" badge — plus five 40px-tall links in the
+   footer and Instagram card. Both are below the floor this design layer
+   enforces everywhere else, and a 40px footer link is exactly the size that
+   gets mis-tapped by a thumb. */
+body.theme-dark-obsidian .gpt-mens-tag,
+body.theme-dark-obsidian .ig-reel-badge {
+  font-size: 11px;
+}
+
+body.theme-dark-obsidian .ig-handle,
+body.theme-dark-obsidian .footer-phone-link,
+body.theme-dark-obsidian .admin-entry-link,
+body.theme-dark-obsidian .footer-link,
+body.theme-dark-obsidian .footer-bottom a {
+  min-height: 44px;
+}
+
+body.theme-dark-obsidian .ig-handle {
+  display: inline-flex;
+  align-items: center;
+}
+
+@media (max-width: 900px) {
+  body.theme-dark-obsidian .footer-legal,
+  body.theme-dark-obsidian .footer-copy {
+    padding-bottom: 4px;
+  }
+}
