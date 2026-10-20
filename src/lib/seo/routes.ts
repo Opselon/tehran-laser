@@ -31,7 +31,7 @@ export const PRIMARY_NAV: NavItem[] = [
 /** Mobile bottom navigation (≤768px). */
 export const BOTTOM_NAV: Array<NavItem & { icon: string }> = [
   { href: '/', label: 'خانه', icon: 'dashboard' },
-  { href: '/services', label: 'خدمات', icon: 'services' },
+  { href: '/services', label: 'خدمات', icon: 'layers' },
   { href: '/booking', label: 'رزرو', icon: 'calendar' },
   { href: '/contact', label: 'تماس', icon: 'phone' },
 ];

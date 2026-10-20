@@ -100,99 +100,104 @@ function faDigits(value: string): string {
   canonicalUrl="/"
   jsonLd={[faqJsonLd, breadcrumbJsonLd]}
   theme="dark"
+  preload={[
+    /* Mirrors the <picture> candidate lists exactly — a preload whose
+       `imagesrcset` does not match what the element resolves to downloads the
+       image twice (measured: 110 KB of 1600w fetched for a 390 px viewport
+       while the element went on to use the 800w file). */
+    {
+      href: '/images/facial-treatment-800.avif',
+      as: 'image',
+      type: 'image/avif',
+      media: '(max-width: 767px)',
+      imagesrcset: '/images/facial-treatment-560.avif 560w, /images/facial-treatment-800.avif 800w',
+      imagesizes: '96vw',
+    },
+    {
+      href: '/images/facial-treatment-800.avif',
+      as: 'image',
+      type: 'image/avif',
+      media: '(min-width: 768px) and (max-width: 1023px)',
+      imagesrcset: '/images/facial-treatment-800.avif 800w, /images/facial-treatment.avif 1600w',
+      imagesizes: '96vw',
+    },
+    {
+      href: '/images/facial-treatment.avif',
+      as: 'image',
+      type: 'image/avif',
+      media: '(min-width: 1024px)',
+      imagesrcset: '/images/facial-treatment.avif 1600w',
+      imagesizes: '46vw',
+    },
+  ]}
 >
   <!-- Hero Section (§38) -->
   <section class="hero-section">
     <div class="container hero-container">
       <div class="hero-content">
-        <div class="hero-badge animate-fade-in">
-          <Icon name="sparkles" size={15} class="gold-icon-glow" />
-          <span>مرکز تخصصی لیزر و زیبایی پاسداران — مجهز به لیزر تماسی رادو پلاس</span>
+        <div class="hero-badge">
+          <Icon name="award" size={14} />
+          <span>مرکز تخصصی لیزر و زیبایی پاسداران — لیزر تماسی رادو پلاس</span>
         </div>
 
-        <h1 class="hero-title animate-fade-up">
+        <h1 class="hero-title">
           تجربه‌ای لوکس، بدون درد و قطعی از <span class="gold-gradient-text">لیزر موهای زائد</span> در پاسداران
         </h1>
 
-        <p class="hero-subtitle animate-fade-up delay-1">
-          در کلینیک تهران لیزر، فناوری لیزر تماسی رادو پلاس را با سه طول موج ۷۵۵ و ۸۰۸ و ۱۰۶۴ نانومتر، سرمایش پیوسته TEC Double، نظارت مستقیم کادر درمانی و پک‌های استریل اختصاصی در محیطی VIP و آرام تجربه فرمایید.
+        <p class="hero-subtitle">
+          لیزر تماسی <b>رادو پلاس</b> با سه طول موج، سرمایش پیوسته و پک استریل اختصاصی — زیر نظر کادر درمانی.
         </p>
 
-        <div class="hero-cta-group animate-fade-up delay-2">
+        <div class="hero-cta-group">
           <a href="/booking" class="btn btn-primary btn-lg hero-btn-book">
             <Icon name="calendar" size={18} />
-            <span>رزرو آنلاین نوبت (۱۵٪ تخفیف)</span>
-            <Icon name="arrowLeft" size={18} />
+            <span>رزرو آنلاین نوبت</span>
+            <span class="promo-tag">۱۵٪ تخفیف</span>
+            <Icon name="arrowLeft" size={17} />
           </a>
           <a href="#services" class="btn btn-outline btn-lg hero-btn-services">
             <Icon name="services" size={18} />
-            <span>مشاهده تعرفه‌ها و پکیج‌ها</span>
+            <span>مشاهده تعرفه‌ها</span>
           </a>
           <a href="tel:+989035555090" class="hero-phone-chip" aria-label="مشاوره و پذیرش: ۰۹۰۳ ۵۵۵ ۵۰۹۰">
             <Icon name="phone" size={15} />
             <span>مشاوره و پذیرش: <bdi dir="ltr">۰۹۰۳ ۵۵۵ ۵۰۹۰</bdi></span>
           </a>
         </div>
-
-        <!-- Hero Trust Metrics Grid -->
-        <div class="hero-trust-metrics animate-fade-up delay-3">
-          <div class="metric-item">
-            <div class="metric-top">
-              <Icon name="shield" size={18} class="metric-icon" />
-              <span class="metric-val">۱۰۰٪</span>
-            </div>
-            <span class="metric-label">پک بهداشتی و سری استریل اختصاصی هر مراجع</span>
-          </div>
-
-          <div class="metric-divider"></div>
-
-          <div class="metric-item">
-            <div class="metric-top">
-              <Icon name="percent" size={18} class="metric-icon" />
-              <span class="metric-val">۱۵٪</span>
-            </div>
-            <span class="metric-label">تخفیف ویژه رزرو اینترنتی پکیج فول بادی</span>
-          </div>
-
-          <div class="metric-divider"></div>
-
-          <div class="metric-item">
-            <div class="metric-top">
-              <Icon name="target" size={18} class="metric-icon" />
-              <span class="metric-val"><bdi>۷۵۵</bdi> + <bdi>۱۰۶۴</bdi></span>
-            </div>
-            <span class="metric-label">طول موج دوگانه الکس و یاگ برای انواع تیپ پوست</span>
-          </div>
-
-          <div class="metric-divider"></div>
-
-          <div class="metric-item">
-            <div class="metric-top">
-              <Icon name="pin" size={18} class="metric-icon" />
-              <span class="metric-val">پاسداران</span>
-            </div>
-            <span class="metric-label">لوکیشن پایدارفرد با دسترسی آسان و پارکینگ</span>
-          </div>
-        </div>
       </div>
 
       <!-- Hero visual (Lane L2): imagery-led, decorative ambience only.
            Photo is licensed stock art of a skincare treatment — NOT a photo of
            this clinic or of the Rado Plus device, so the alt text and caption
-           describe ambience only and make no equipment/facility claim.
-           Hidden ≤768px to protect the homepage's mobile height budget. -->
+           describe ambience only and make no equipment/facility claim. -->
       <figure class="hero-visual">
         <div class="hero-visual-frame">
           <picture>
+            <!-- Mobile (<768px): a phone shows this band at ≤96vw (≈400 CSS px).
+                 Capping the candidate list at 800w keeps DPR-3 phones from
+                 pulling the 1600w file (~110 KB) for a ~400 px box; 800w at
+                 2.05× is visually identical. -->
+            <source
+              type="image/avif"
+              media="(max-width: 767px)"
+              srcset="/images/facial-treatment-560.avif 560w, /images/facial-treatment-800.avif 800w"
+              sizes="96vw"
+            />
+            <source
+              type="image/webp"
+              media="(max-width: 767px)"
+              srcset="/images/facial-treatment-800.webp 800w"
+              sizes="96vw"
+            />
             <source
               type="image/avif"
               srcset="/images/facial-treatment-800.avif 800w, /images/facial-treatment.avif 1600w"
-              sizes="(max-width: 1100px) 96vw, 1060px"
+              sizes="(min-width: 1024px) 46vw, 96vw"
             />
             <source
               type="image/webp"
               srcset="/images/facial-treatment-800.webp 800w, /images/facial-treatment.webp 1600w"
-              sizes="(max-width: 1100px) 96vw, 1060px"
+              sizes="(min-width: 1024px) 46vw, 96vw"
             />
             <img
               class="hero-visual-img"
@@ -206,30 +211,61 @@ function faDigits(value: string): string {
             />
           </picture>
           <div class="hero-visual-overlay" aria-hidden="true"></div>
+          <div class="hero-visual-chips">
+            <span class="hvc-item">
+              <Icon name="lightning" size={14} />
+              <span>توان ۱۶۰۰ وات</span>
+            </span>
+            <span class="hvc-item">
+              <Icon name="target" size={14} />
+              <span><bdi>۷۵۵ / ۸۰۸ / ۱۰۶۴</bdi> نانومتر</span>
+            </span>
+            <span class="hvc-item">
+              <Icon name="snowflake" size={14} />
+              <span>سرمایش TEC Double</span>
+            </span>
+          </div>
         </div>
         <figcaption class="hero-visual-caption">
           لیزر تماسی رادو پلاس با تست شات رایگان پیش از شروع دوره — پاسداران، خیابان پایدارفرد
           <span class="hero-visual-note">تصویر بالا تزئینی است و دستگاه یا محل مرکز را نشان نمی‌دهد.</span>
         </figcaption>
-
-        <!-- Device specs deliberately sit BESIDE the photo, not overlaid on it:
-             an overlay would visually attribute these figures to whatever
-             device the stock image happens to show. -->
-        <div class="hero-visual-chips glass-panel">
-          <span class="hvc-item">
-            <Icon name="lightning" size={16} />
-            <span>توان ۱۶۰۰ وات</span>
-          </span>
-          <span class="hvc-item">
-            <Icon name="target" size={16} />
-            <span><bdi>۷۵۵ / ۸۰۸ / ۱۰۶۴</bdi> نانومتر</span>
-          </span>
-          <span class="hvc-item">
-            <Icon name="snowflake" size={16} />
-            <span>سرمایش پیوسته TEC Double</span>
-          </span>
-        </div>
       </figure>
+
+      <!-- Hero Trust Metrics Grid -->
+      <div class="hero-trust-metrics">
+        <div class="metric-item">
+          <div class="metric-top">
+            <Icon name="shield" size={16} class="metric-icon" />
+            <span class="metric-val">۱۰۰٪</span>
+          </div>
+          <span class="metric-label">پک بهداشتی و سری استریل اختصاصی هر مراجع</span>
+        </div>
+
+        <div class="metric-item">
+          <div class="metric-top">
+            <Icon name="percent" size={16} class="metric-icon" />
+            <span class="metric-val">۱۵٪</span>
+          </div>
+          <span class="metric-label">تخفیف رزرو اینترنتی پکیج فول بادی</span>
+        </div>
+
+        <div class="metric-item">
+          <div class="metric-top">
+            <Icon name="target" size={16} class="metric-icon" />
+            <span class="metric-val"><bdi>۷۵۵</bdi> + <bdi>۱۰۶۴</bdi></span>
+          </div>
+          <span class="metric-label">طول موج دوگانه الکس و یاگ برای انواع تیپ پوست</span>
+        </div>
+
+        <div class="metric-item">
+          <div class="metric-top">
+            <Icon name="pin" size={16} class="metric-icon" />
+            <span class="metric-val">پاسداران</span>
+          </div>
+          <span class="metric-label">لوکیشن پایدارفرد با دسترسی آسان و پارکینگ</span>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -348,7 +384,7 @@ function faDigits(value: string): string {
                   <span class="gpt-zone-name">{row.name}</span>
                   {row.mensOnly && <span class="gpt-mens-tag">مخصوص آقایان</span>}
                 </td>
-                <td class="gpt-cell-female">
+                <td class="gpt-cell-female" data-label="بانوان">
                   {row.femaleAmount !== null ? (
                     <span class="gpt-price">
                       <span class="gpt-amount">{toman(row.femaleAmount)}</span>
@@ -358,7 +394,7 @@ function faDigits(value: string): string {
                     <span class="gpt-na">—</span>
                   )}
                 </td>
-                <td class="gpt-cell-male">
+                <td class="gpt-cell-male" data-label="آقایان">
                   {row.maleAmount !== null ? (
                     <span class="gpt-price">
                       <span class="gpt-amount">{toman(row.maleAmount)}</span>
@@ -627,907 +663,23 @@ function faDigits(value: string): string {
 </script>
 
 <style>
-  /* ── Lane x4: contrast (page-scoped) ──────────────────────────
-     The shared teal eyebrow lands at 3.59:1 on this page's
-     near-black section background (WCAG AA body needs 4.5:1).
-     Brightened to the existing emerald stop → 7.7:1. */
-  .section-subtitle {
-    color: #10b981;
-    /* Persian is a joined script: the shared sheet's +0.02em tracking opens
-       gaps between joined glyphs. Persian-carrying text must be untracked. */
-    letter-spacing: normal;
-  }
+  /* ── Homepage-local refinements only ─────────────────────────────────
+     This block used to carry ~940 lines of a second, page-scoped design
+     system (hero visual, gender price table, Instagram hub, closing CTA,
+     promo card) that fought the shared sheets on specificity and hid large
+     parts of the page below 768px behind a self-imposed "height budget" —
+     no subtitle, no hero photo, two of four trust cards, two of four
+     protocol steps, and the FAQ cut to three items, all on the breakpoint
+     that carries almost all of this clinic's traffic.
 
-  /* ─────────────────────────────────────────────────────────────
-     Unified gender price table (Lane B) — self-contained.
-     Colour contract: light text on obsidian only. Explicit rgba
-     backgrounds use DARK rgb channels (never gold/white) so the
-     contrast audit never blends them to gold or white.
-     ───────────────────────────────────────────────────────────── */
-  .gender-price-table-wrap {
-    width: 100%;
-    max-width: 100%;
-    box-sizing: border-box;
-    background: rgba(14, 18, 26, 0.6);
-    border: 1px solid rgba(16, 185, 129, 0.22);
-    border-radius: 18px;
-    padding: 4px 10px 10px;
-    box-shadow: 0 12px 32px -12px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.04);
-  }
-
-  .gender-price-table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    font-size: 0.9rem;
-  }
-
-  .gender-price-table thead th {
-    position: sticky;
-    top: var(--tl-header-offset, 0px);
-    z-index: 2;
-    background: #0e121a;
-    color: #6ee7b7; /* emerald-300 — verified 10.05:1 on obsidian */
-    font-weight: 800;
-    font-size: 0.82rem;
-    text-align: center;
-    padding: 13px 10px;
-    white-space: nowrap;
-    border-bottom: 2px solid rgba(16, 185, 129, 0.4);
-  }
-
-  .gpt-th-zone {
-    text-align: right !important;
-  }
-
-  .gpt-row {
-    transition: background 0.15s ease;
-  }
-
-  .gpt-row:hover {
-    background: rgba(30, 36, 48, 0.55);
-  }
-
-  /* Men's-only zones get a neutral (non-gold) tint so the audit never reads
-     the tint as a gold fill behind gold text. */
+     Those decisions now live in ONE place: `src/styles/site-v2.css`, which
+     is mobile-first, loads after public.css, and ships to every public
+     route. What remains here is genuinely page-local: the two tariff
+     columns hold different product lines, so the men-only rows keep a
+     neutral tint that is neither a gold nor an emerald fill. */
   .gpt-row-mens {
-    background: rgba(30, 36, 48, 0.55);
+    background: rgba(30, 36, 48, 0.35);
   }
-
-  .gpt-cell-zone,
-  .gpt-cell-female,
-  .gpt-cell-male,
-  .gpt-cell-action {
-    padding: 12px 10px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-    vertical-align: middle;
-  }
-
-  .gpt-zone-name {
-    color: #f7f3ec;
-    font-weight: 700;
-  }
-
-  .gpt-mens-tag {
-    display: inline-block;
-    margin-inline-start: 8px;
-    color: #6ee7b7; /* emerald-300 — verified 10.05:1 on obsidian */
-    font-size: 0.66rem;
-    font-weight: 700;
-    padding: 2px 8px;
-    border: 1px solid rgba(16, 185, 129, 0.5);
-    border-radius: 999px;
-    white-space: nowrap;
-  }
-
-  .gpt-cell-female,
-  .gpt-cell-male {
-    text-align: center;
-    white-space: nowrap;
-  }
-
-  .gpt-price {
-    display: inline-flex;
-    align-items: baseline;
-    gap: 4px;
-    font-weight: 800;
-  }
-
-  .gpt-cell-female .gpt-amount {
-    color: #6ee7b7; /* emerald-300 — verified 10.05:1 on obsidian */
-  }
-
-  .gpt-cell-male .gpt-amount {
-    color: #8ab4ff;
-  }
-
-  .gpt-unit {
-    font-size: 0.7rem;
-    font-weight: 500;
-    color: #b3aa9c;
-  }
-
-  .gpt-na {
-    color: #b3aa9c;
-    font-size: 0.82rem;
-  }
-
-  .gpt-cell-action {
-    text-align: center;
-  }
-
-  .gpt-book-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
-    min-height: 44px;
-    min-width: 44px;
-    color: #6ee7b7; /* emerald-300 — verified 10.05:1 on obsidian */
-    font-size: 0.78rem;
-    font-weight: 700;
-    text-decoration: none;
-    padding: 10px 14px;
-    border: 1px solid rgba(16, 185, 129, 0.5);
-    border-radius: 12px;
-    transition: background 0.2s ease, border-color 0.2s ease;
-    white-space: nowrap;
-  }
-
-  .gpt-book-btn:hover {
-    background: rgba(30, 36, 48, 0.7);
-    border-color: rgba(16, 185, 129, 0.85);
-  }
-
-  /* ─────────────────────────────────────────────────────────────
-     HERO VISUAL (Lane L2) — imagery-led hero, desktop/tablet only.
-     The frame carries its own dark gradient so an un-shipped asset
-     can never render as a broken white box. Hidden ≤768px because
-     the hero is the one place the mobile height budget can absorb
-     nothing (see the gallery band's rail layout below).
-     ───────────────────────────────────────────────────────────── */
-  .hero-visual {
-    margin: 38px 0 0;
-    width: 100%;
-    max-width: 1080px;
-    min-width: 0;
-  }
-
-  .hero-visual-frame {
-    position: relative;
-    border-radius: 24px;
-    overflow: hidden;
-    background: linear-gradient(150deg, #14202a 0%, #0d1116 70%);
-    border: 1px solid rgba(52, 211, 153, 0.24);
-    box-shadow: 0 26px 60px -28px rgba(0, 0, 0, 0.9);
-    aspect-ratio: 21 / 9;
-  }
-
-  .hero-visual-img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .hero-visual-overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      to top,
-      rgba(10, 11, 13, 0.88) 0%,
-      rgba(10, 11, 13, 0.28) 42%,
-      rgba(10, 11, 13, 0) 72%
-    );
-    pointer-events: none;
-  }
-
-  .hero-visual-chips {
-    position: static;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 12px;
-    padding: 12px 14px;
-  }
-
-  .hvc-item {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    /* ≥44px so the pill row is comfortably tappable on touch devices. */
-    min-height: 44px;
-    padding: 8px 14px;
-    border-radius: 999px;
-    background: rgba(16, 19, 27, 0.78);
-    border: 1px solid rgba(110, 231, 183, 0.32);
-    color: #d7fbe9;
-    font-size: 0.82rem;
-    font-weight: 700;
-  }
-
-  .hvc-item svg {
-    color: #6ee7b7;
-  }
-
-  .hero-visual-caption {
-    margin-top: 12px;
-    color: #8fa0b3;
-    font-size: 0.85rem;
-    line-height: 1.8;
-  }
-
-  .hero-visual-note {
-    display: block;
-    margin-top: 4px;
-    color: #7d8b9c;
-    font-size: 0.78rem;
-  }
-
-  @media (max-width: 1100px) {
-    .hero-visual-frame {
-      aspect-ratio: 16 / 9;
-    }
-  }
-
-  /* ── Announcement strip (lane h1): never truncate, never overflow ──
-     public.css clamps the festival message to ONE ellipsis line at
-     ≤768px (`.announcement-inner span { white-space: nowrap; }`), so a
-     62-character sentence (~431px) lost its tail to "…" — the 15%
-     offer's "در رزرو آنلاین" disappeared exactly on 320/390px. The
-     message is instead allowed to wrap onto a second line, and the row
-     itself may wrap, so the booking pill can never force the strip
-     wider than the viewport. Full sentence at every width; the strip
-     only grows ~20px when it wraps. Page-scoped: no shared stylesheet
-     or layout file is touched. */
-  :global(.announcement-strip .announcement-inner) {
-    flex-wrap: wrap;
-    row-gap: 6px;
-  }
-
-  :global(.announcement-strip .announcement-inner > span) {
-    white-space: normal;
-    overflow: hidden;
-    text-overflow: clip;
-    line-height: 1.6;
-  }
-
-  /* Icon.astro renders `display: block`, so the sparkles glyph claimed a
-     line of its own and the strip measured 3 lines tall. Keep it inline
-     with the message's first line. */
-  :global(.announcement-strip .announcement-inner > span svg) {
-    display: inline-block;
-    vertical-align: -2px;
-  }
-
-  /* ── ≤768px: compact one-card-per-zone layout + prose collapse ──
-     The homepage must fall under 9,000px at 390px (contract B4), so long
-     prose is collapsed and secondary cards are trimmed to the strongest
-     examples. Everything removed here is still present on /services,
-     /clinic and ≥769px. */
-  @media (max-width: 768px) {
-    /* Section rhythm: two values instead of per-section 60/80 pairs. */
-    :global(.section) {
-      padding-top: 36px;
-      padding-bottom: 44px;
-    }
-
-    /* Hero: drop the paragraph, keep the headline + CTAs. */
-    :global(.hero-section) {
-      padding-top: 44px;
-      padding-bottom: 34px;
-    }
-    :global(.hero-section .hero-subtitle),
-    :global(.hero-badge) {
-      display: none;
-    }
-
-    /* Hero visual: desktop/tablet only — the hero has no mobile slack. */
-    .hero-visual {
-      display: none;
-    }
-
-    /* Hero trust metrics: 2×2 instead of four full-width rows. Same four
-       facts, ~150px less vertical chrome — this is what pays for the
-       imagery band's slot in the 390px height budget. */
-    :global(.hero-trust-metrics) {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px 14px;
-      padding: 14px 16px;
-      align-items: start;
-    }
-    :global(.hero-trust-metrics .metric-item) {
-      min-width: 0;
-    }
-    :global(.hero-trust-metrics .metric-label) {
-      font-size: 0.78rem;
-      line-height: 1.65;
-    }
-    .clinic-gallery-section .section-desc {
-      display: none;
-    }
-
-    /* Eyebrow subtitles repeat the section titles; fold them on mobile. */
-    :global(.section-subtitle) {
-      display: none;
-    }
-
-    /* Pricing explainer paragraph: the table is self-describing. */
-    :global(.services-section .section-desc) {
-      display: none;
-    }
-
-    /* Device showcase: keep the two strongest features, drop the prose. */
-    :global(.candela-lead),
-    :global(.candela-feat-desc) {
-      display: none;
-    }
-    :global(.candela-feature-card:nth-child(n + 3)) {
-      display: none;
-    }
-
-    /* Trust strip: descriptions fold away; keep two marquee cards. */
-    :global(.trust-strip) {
-      padding-top: 28px;
-      padding-bottom: 34px;
-    }
-    :global(.trust-desc) {
-      display: none;
-    }
-    :global(.trust-card:nth-child(n + 3)) {
-      display: none;
-    }
-
-    /* Protocol: step descriptions fold away; keep two steps. */
-    :global(.step-desc) {
-      display: none;
-    }
-    :global(.protocol-step:nth-child(n + 3)) {
-      display: none;
-    }
-
-    /* Testimonials: one card on mobile. */
-    :global(.testimonial-card:nth-child(n + 2)) {
-      display: none;
-    }
-    :global(.testi-quote) {
-      -webkit-line-clamp: 3;
-      line-clamp: 3;
-      display: -webkit-box;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-
-    /* Featured promo: keeps only the price box on mobile. The prose, the
-       feature list and the ribbon caption all live on /services. */
-    :global(.promo-desc),
-    :global(.promo-features) {
-      display: none;
-    }
-    :global(.featured-promo-card) {
-      padding-top: 12px;
-    }
-    :global(.promo-badge-ribbon) {
-      display: none;
-    }
-    :global(.promo-info) {
-      margin-bottom: 0;
-    }
-
-    /* Men's strip: the two-line sales pitch folds; the badge, headline and
-       booking CTA stay. */
-    :global(.male-desc) {
-      display: none;
-    }
-
-    /* min-width:280px (public.css) exceeds the 225px content box at a
-       320px viewport; the RTL flex item then overflows 16px past the
-       start edge and forces root scrollWidth 321 > clientWidth 320.
-       Let it shrink on small screens. */
-    :global(.male-text) {
-      min-width: 0;
-    }
-
-    /* FAQ: three questions on mobile. */
-    :global(.faq-card:nth-child(n + 4)) {
-      display: none;
-    }
-
-    /* Compact price cards: zone + book on line 1, both tariffs on line 2. */
-    .gender-price-table-wrap {
-      padding: 10px;
-    }
-
-    /* Keep a two-column tariff header instead of dropping it: at 320px the
-       card layout still has to name تعرفه بانوان and تعرفه آقایان explicitly.
-       Zone/action headers do not exist in the card layout, so they go. The
-       sticky comes from the thead itself — a sticky th inside a block thead
-       can only stick while its own row is on screen. */
-    .gender-price-table thead {
-      display: block;
-      position: sticky;
-      top: var(--tl-header-offset, 0px);
-      z-index: 3;
-    }
-
-    .gender-price-table thead tr {
-      margin-bottom: 6px;
-      padding: 5px 6px;
-      box-shadow: 0 8px 18px -10px rgba(0, 0, 0, 0.85);
-    }
-
-    .gender-price-table thead th {
-      position: static;
-      padding: 4px;
-      font-size: 0.76rem;
-      line-height: 1.35;
-      white-space: nowrap;
-      border-bottom: none;
-      background: #141820;
-    }
-
-    .gpt-th-zone,
-    .gpt-th-action {
-      display: none;
-    }
-
-    /* Divider between the two tariff columns (RTL: inline-start = right). */
-    .gpt-th-female {
-      border-inline-end: 1px solid rgba(16, 185, 129, 0.35);
-    }
-
-    .gender-price-table,
-    .gender-price-table tbody,
-    .gender-price-table tr,
-    .gender-price-table td {
-      display: block;
-      width: 100%;
-      box-sizing: border-box;
-    }
-
-    .gender-price-table tr {
-      display: grid;
-      grid-template-columns: 1fr 1fr auto;
-      align-items: center;
-      column-gap: 8px;
-      border: 1px solid rgba(16, 185, 129, 0.2);
-      border-radius: 12px;
-      padding: 9px 12px;
-      margin-bottom: 8px;
-      background: rgba(20, 24, 32, 0.55);
-    }
-
-    .gender-price-table td {
-      border: none;
-      padding: 2px 0;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      text-align: right;
-    }
-
-    .gpt-cell-zone {
-      grid-column: 1 / 3;
-      grid-row: 1;
-      flex-wrap: wrap;
-    }
-
-    .gpt-cell-action {
-      grid-column: 3;
-      grid-row: 1;
-      justify-self: end;
-    }
-
-    .gpt-cell-female {
-      grid-column: 1;
-      grid-row: 2;
-    }
-
-    .gpt-cell-male {
-      grid-column: 2;
-      grid-row: 2;
-    }
-
-    .gpt-cell-female::before {
-      content: 'بانوان';
-      color: #b3aa9c;
-      font-size: 0.72rem;
-      font-weight: 600;
-    }
-
-    .gpt-cell-male::before {
-      content: 'آقایان';
-      color: #b3aa9c;
-      font-size: 0.72rem;
-      font-weight: 600;
-    }
-
-    .gpt-amount {
-      font-size: 0.9rem;
-    }
-
-    .gpt-unit {
-      font-size: 0.64rem;
-    }
-
-    .gpt-mens-tag {
-      font-size: 0.6rem;
-      padding: 1px 6px;
-    }
-
-    .gpt-book-btn {
-      padding: 10px 14px;
-      font-size: 0.78rem;
-      gap: 5px;
-    }
-
-    /* Keep the reserve text visible with crisp compact geometry */
-    .gpt-book-btn span:not(.gpt-unit) {
-      display: inline;
-    }
-  }
-
-  /* ── ≤400px: the row grid's min-content exceeds the card's content box ──
-     The two tariff cells are white-space: nowrap, so at 320px the grid needs
-     ~264px inside a 246px content box and the leftmost (RTL) column — the
-     book button — pushes 6px past the card's own border. Reclaim exactly that
-     18px from row padding and column gap; no price text shrinks. */
-  @media (max-width: 400px) {
-    .gender-price-table tr {
-      padding: 9px 6px;
-      column-gap: 5px;
-    }
-  }
-
-  /* ── ≤768px: the male-lane strip's booking CTA block ──
-     public.css floors .male-text at 280px, but the strip's mobile padding
-     (26px + 20px + 2px border) leaves only 278px of content box at a 320px
-     viewport — the floor alone made the document 1px wider than the screen.
-     The CTA below is already width:100%, so nothing here needs the floor. */
-  @media (max-width: 768px) {
-    .male-strip-inner .male-text {
-      min-width: 0;
-    }
-  }
-
-
-  /* ─────────────────────────────────────────────────────────────
-     BOTTOM DOCK — the h2-lane page-scoped override was lifted into
-     shared public.css when the dock was made minimal: the cart and
-     install chips now live INSIDE .mobile-sticky-bar instead of
-     floating in their own 52px tier, so the dock dropped from 194px
-     (23% of a 390x844 viewport) to ~112px.
-
-     Do NOT re-add `html body .mobile-sticky-bar` here: it beats the
-     shared .mobile-sticky-bar rule on specificity regardless of source
-     order, and would silently restore the old bottom/padding geometry
-     (and the floating tier / empty slab that came with it).
-     ───────────────────────────────────────────────────────────── */
-
-
-  /* ── Instagram preview + closing CTA (salvaged from .w-h4 lane) ── */
-     Instagram preview section (owner-requested) — self-contained.
-     Dark-safe: all colours are explicit light-on-obsidian values.
-     ───────────────────────────────────────────────────────────── */
-  .instagram-section {
-    padding: 70px 0;
-    background:
-      radial-gradient(1100px 380px at 80% -10%, rgba(52, 211, 153, 0.08), transparent 60%),
-      linear-gradient(180deg, #0b0f13 0%, #0a0b0d 100%);
-    border-top: 1px solid rgba(148, 163, 184, 0.12);
-  }
-  .instagram-section .ig-eyebrow {
-    color: #6ee7b7; /* emerald-300 on obsidian ≈ 10:1 */
-  }
-  .instagram-section .section-desc {
-    color: #94a3b8;
-    margin-inline: auto;
-  }
-  .ig-hub {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 20px;
-    align-items: stretch;
-  }
-  .ig-card {
-    box-sizing: border-box;
-    min-width: 0;
-    background: linear-gradient(160deg, #12171c 0%, #0e1216 100%);
-    border: 1px solid rgba(148, 163, 184, 0.16);
-    border-radius: 20px;
-    padding: 24px;
-    transition: border-color 0.2s ease, transform 0.2s ease;
-  }
-  .ig-card:hover {
-    border-color: rgba(110, 231, 183, 0.45);
-    transform: translateY(-2px);
-  }
-  .ig-profile {
-    display: flex;
-    gap: 18px;
-    align-items: flex-start;
-  }
-  .ig-avatar {
-    flex: 0 0 auto;
-    width: 62px;
-    height: 62px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #062018;
-    background: linear-gradient(135deg, #34d399 0%, #f5d78e 100%);
-    box-shadow: 0 8px 22px -10px rgba(52, 211, 153, 0.7);
-  }
-  .ig-profile-main {
-    min-width: 0;
-  }
-  .ig-handle {
-    display: inline-flex;
-    align-items: center;
-    min-height: 44px;
-    font-weight: 800;
-    font-size: 1.05rem;
-    color: #f1f5f9;
-    text-decoration: none;
-  }
-  .ig-handle:hover {
-    color: #6ee7b7;
-  }
-  .ig-profile-desc {
-    margin: 8px 0 16px;
-    font-size: 0.9rem;
-    line-height: 1.8;
-    color: #94a3b8;
-  }
-  .ig-profile-actions {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 14px;
-  }
-  .ig-follow-btn {
-    gap: 8px;
-  }
-  .ig-vip-link {
-    font-size: 0.875rem;
-    font-weight: 700;
-    color: #f5d78e;
-    text-decoration: none;
-    border-bottom: 1px dashed rgba(245, 215, 142, 0.5);
-    padding-bottom: 2px;
-  }
-  .ig-vip-link:hover {
-    color: #ffe9b3;
-    border-bottom-color: #ffe9b3;
-  }
-  a.ig-reel {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    gap: 18px;
-    min-height: 190px;
-    text-decoration: none;
-    color: inherit;
-    background:
-      linear-gradient(160deg, rgba(52, 211, 153, 0.16) 0%, rgba(18, 23, 28, 0.9) 55%),
-      linear-gradient(160deg, #12171c 0%, #0e1216 100%);
-    overflow: hidden;
-  }
-  .ig-reel-badge {
-    align-self: flex-start;
-    font-size: 0.72rem;
-    font-weight: 800;
-    color: #062018;
-    background: #6ee7b7;
-    border-radius: 999px;
-    padding: 4px 12px;
-  }
-  .ig-reel-play {
-    width: 58px;
-    height: 58px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #062018;
-    background: linear-gradient(135deg, #34d399 0%, #f5d78e 100%);
-    box-shadow: 0 10px 26px -12px rgba(52, 211, 153, 0.8);
-    margin-top: auto;
-  }
-  .ig-reel-play svg {
-    margin-inline-start: 3px; /* optical centre for the play triangle */
-  }
-  .ig-reel-copy {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-  .ig-reel-copy strong {
-    font-size: 1rem;
-    color: #f1f5f9;
-  }
-  .ig-reel-copy span {
-    font-size: 0.85rem;
-    color: #94a3b8;
-    line-height: 1.7;
-  }
-  .ig-promo {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    background: linear-gradient(160deg, #141a15 0%, #0e1216 100%);
-    border-color: rgba(245, 215, 142, 0.28);
-  }
-  .ig-promo-top {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: #f5d78e;
-  }
-  .ig-promo-title {
-    font-size: 0.85rem;
-    font-weight: 800;
-  }
-  .ig-promo-pct {
-    margin: 0;
-    font-size: 1.05rem;
-    line-height: 1.7;
-    color: #e2e8f0;
-  }
-  .ig-promo-pct strong {
-    font-size: 1.6rem;
-    font-weight: 900;
-    color: #6ee7b7;
-  }
-  .ig-promo-code-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    width: 100%;
-    flex-wrap: wrap;
-  }
-  .ig-promo-code {
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    font-size: 0.95rem;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    color: #f5d78e;
-    background: rgba(245, 215, 142, 0.08);
-    border: 1px dashed rgba(245, 215, 142, 0.55);
-    border-radius: 10px;
-    padding: 8px 14px;
-  }
-  .ig-copy-btn {
-    font-family: inherit;
-    font-size: 0.82rem;
-    font-weight: 800;
-    color: #062018;
-    background: #6ee7b7;
-    border: 0;
-    border-radius: 10px;
-    padding: 9px 16px;
-    cursor: pointer;
-    transition: background 0.18s ease;
-  }
-  .ig-copy-btn:hover {
-    background: #a7f3d0;
-  }
-  .ig-copy-btn.is-copied {
-    background: #f5d78e;
-  }
-  .ig-promo-note {
-    min-height: 1em;
-    font-size: 0.8rem;
-    color: #94a3b8;
-  }
-  .ig-promo-note:empty {
-    display: none;
-  }
-  @media (max-width: 1100px) {
-    .ig-hub {
-      grid-template-columns: 1fr 1fr;
-    }
-    .ig-profile {
-      grid-column: 1 / -1;
-    }
-  }
-  @media (max-width: 768px) {
-    .instagram-section {
-      padding: 52px 0;
-    }
-    .ig-hub {
-      grid-template-columns: 1fr;
-      gap: 16px;
-    }
-    .ig-card {
-      padding: 20px 18px;
-    }
-  }
-  @media (max-width: 400px) {
-    .ig-profile {
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-    }
-    .ig-profile-actions {
-      justify-content: center;
-    }
-  }
-  .instagram-section a:focus-visible,
-  .closing-cta-section a:focus-visible,
-  .ig-copy-btn:focus-visible {
-    outline: 2px solid #6ee7b7;
-    outline-offset: 3px;
-    border-radius: 6px;
-  }
-  .closing-cta-section {
-    padding: 0 0 70px;
-    background: linear-gradient(180deg, #0a0b0d 0%, #0a0b0d 100%);
-  }
-
-  .loc-phone-link {
-    display: inline-flex;
-    align-items: center;
-    min-height: 44px;
-  }
-
-  .closing-cta-inner {
-    box-sizing: border-box;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 28px;
-    flex-wrap: wrap;
-    background: linear-gradient(135deg, #0d1512 0%, #101418 100%);
-    border: 1px solid rgba(52, 211, 153, 0.28);
-    border-radius: 24px;
-    padding: 38px 40px;
-    box-shadow: var(--shadow-md, 0 12px 32px -12px rgba(0, 0, 0, 0.6));
-  }
-
-  .closing-cta-text {
-    min-width: 0;
-    flex: 1 1 320px;
-  }
-
-  .closing-cta-title {
-    margin: 0 0 10px;
-    font-size: clamp(1.4rem, 3vw, 1.9rem);
-    font-weight: 900;
-    color: #f1f5f9;
-  }
-
-  .closing-cta-desc {
-    margin: 0;
-    font-size: 0.98rem;
-    line-height: 1.85;
-    color: #94a3b8;
-    max-width: 560px;
-  }
-
-  .closing-cta-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 14px;
-  }
-
-  .loc-map-btn,
-  .loc-book-btn,
-  .closing-cta-book,
-  .closing-cta-call {
-    min-height: 44px;
-  }
-
-  .closing-cta-book,
-  .closing-cta-call {
-    gap: 8px;
-    white-space: nowrap;
-  }
-
 </style>
 
 <script is:inline>

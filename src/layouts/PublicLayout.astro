@@ -5,10 +5,14 @@ import '../styles/utilities.css';
 import '../styles/base.css';
 import '../styles/components.css';
 import '../styles/public.css';
+// v2 design layer — mobile-first, loaded last so it refines public.css.
+import '../styles/site-v2.css';
 import Icon from '../components/ui/Icon.astro';
+import BrandMark from '../components/ui/BrandMark.astro';
 import SeoHead from '../components/ui/SeoHead.astro';
 import SiteFooter from '../components/ui/SiteFooter.astro';
 import LayoutStyles from '../components/ui/LayoutStyles.astro';
+import arabicWoff2 from '@fontsource-variable/vazirmatn/files/vazirmatn-arabic-wght-normal.woff2?url';
 import {
   buildCanonicalUrl,
   resolveCanonicalOrigin,
@@ -29,10 +33,21 @@ import {
   BOTTOM_NAV,
 } from '../lib/seo';
 
+interface PreloadAsset {
+  href: string;
+  as: 'image' | 'font' | 'script' | 'style';
+  type?: string;
+  media?: string;
+  imagesrcset?: string;
+  imagesizes?: string;
+}
+
 interface Props {
   title?: string;
   description?: string;
   canonicalUrl?: string;
+  /** Above-the-fold assets to fetch before the parser reaches the markup. */
+  preload?: PreloadAsset[];
   ogType?: 'website' | 'article' | 'profile';
   ogImage?: string | undefined;
   /** Alt text for the share image. Defaults to the clinic's branded alt. */
@@ -54,6 +69,7 @@ const {
   title = DEFAULT_SEO_TITLE,
   description = DEFAULT_SEO_DESCRIPTION,
   canonicalUrl,
+  preload = [],
   ogType = 'website',
   ogImage,
   ogImageAlt,
@@ -179,9 +195,25 @@ const isActive = (href: string): 'active' | undefined =>
 
     <!-- Resource hints for Core Web Vitals (§136). The hero photography is
          self-hosted under CSP img-src 'self', so no third-party origin is
-         preconnected — these hints are inert unless the asset moves off-origin. -->
-    <link rel="preconnect" href="https://images.unsplash.com" crossorigin />
-    <link rel="dns-prefetch" href="https://images.unsplash.com" />
+         preconnected — the old unsplash.com hints were dead weight (a DNS
+         lookup and a TLS handshake to an origin this page never uses). -->
+    <!-- The Arabic subset carries every Persian glyph, so it is the one font
+         file on the critical path; preloading it removes the swap-induced
+         reflow that measured 0.196 CLS on desktop. -->
+    <link rel="preload" href={arabicWoff2} as="font" type="font/woff2" crossorigin="anonymous" />
+    {
+      preload.map((asset) => (
+        <link
+          rel="preload"
+          as={asset.as}
+          href={asset.href}
+          type={asset.type}
+          media={asset.media}
+          imagesrcset={asset.imagesrcset}
+          imagesizes={asset.imagesizes}
+        />
+      ))
+    }
 
     <!-- Service worker registration (§47) -->
     <script is:inline>
@@ -213,10 +245,10 @@ const isActive = (href: string): 'active' | undefined =>
     </aside>
 
     <!-- Header -->
-    <header class="site-header">
+    <header class="site-header" data-header-scroll>
       <div class="container header-inner">
         <a href="/" class="brand-logo" aria-current={currentPath === '/' ? 'page' : undefined}>
-          <span class="logo-mark" aria-hidden="true">TL</span>
+          <span class="logo-mark" aria-hidden="true"><BrandMark size={22} /></span>
           <span class="logo-text">
             <span class="logo-title">تهران لیزر</span>
             <span class="logo-sub">کلینیک تخصصی زیبایی و لیزر</span>
@@ -238,17 +270,26 @@ const isActive = (href: string): 'active' | undefined =>
 
         <!-- Header Actions -->
         <div class="header-actions">
-          <a href={`tel:${CLINIC_CONTACT.telephone}`} class="btn btn-ghost header-phone" aria-label={`تماس با کلینیک: ${CLINIC_CONTACT.phoneDisplay}`}>
+          <a href={`tel:${CLINIC_CONTACT.telephone}`} class="header-phone" aria-label={`تماس با کلینیک: ${CLINIC_CONTACT.phoneDisplay}`}>
             <span class="icon-phone"><Icon name="phone" size={16} aria-hidden="true" /></span>
             <span class="phone-digits"><bdi dir="ltr">{CLINIC_CONTACT.phoneDisplay}</bdi></span>
           </a>
           <a href="/booking" class="btn btn-primary header-cta">رزرو آنلاین نوبت</a>
+          <!-- One-tap call on phones: the header is the only persistent
+               surface, so the highest-intent local action lives here. -->
+          <a
+            href={`tel:${CLINIC_CONTACT.telephone}`}
+            class="header-call-icon tap-target"
+            aria-label={`تماس با کلینیک: ${CLINIC_CONTACT.phoneDisplay}`}
+          >
+            <Icon name="phone" size={18} aria-hidden="true" />
+          </a>
           <!-- Mobile Menu Trigger. aria-controls pairs the button with the
                drawer so assistive tech announces WHAT expands, not just that
                something did. -->
           <button
             id="mobileMenuBtn"
-            class="mobile-menu-btn"
+            class="mobile-menu-btn tap-target"
             type="button"
             aria-label="باز کردن منو"
             aria-expanded="false"
@@ -586,6 +627,45 @@ const isActive = (href: string): 'active' | undefined =>
         });
 
         render();
+      })();
+    </script>
+
+    <!-- Chrome scroll state: the header gains a solid backdrop once the page
+         moves, and the booking bar only docks after the hero's own CTA has
+         scrolled away (so the first screen is never double-CTA'd). rAF-throttled,
+         passive, and a no-op when a user prefers reduced motion. -->
+    <script is:inline>
+      (function () {
+        var header = document.querySelector('[data-header-scroll]');
+        var hero = document.querySelector('.hero-section');
+        var body = document.body;
+        var dockAt = hero ? Math.round(hero.offsetHeight * 0.72) : 420;
+        var ticking = false;
+        var lastDocked = null;
+
+        function apply() {
+          ticking = false;
+          var y = window.scrollY || window.pageYOffset || 0;
+          if (header) header.classList.toggle('is-scrolled', y > 8);
+          var docked = y > dockAt;
+          if (docked !== lastDocked) {
+            body.classList.toggle('chrome-docked', docked);
+            lastDocked = docked;
+          }
+        }
+
+        function onScroll() {
+          if (ticking) return;
+          ticking = true;
+          window.requestAnimationFrame(apply);
+        }
+
+        window.addEventListener('scroll', onScroll, { passive: true });
+        window.addEventListener('resize', function () {
+          dockAt = hero ? Math.round(hero.offsetHeight * 0.72) : 420;
+          onScroll();
+        }, { passive: true });
+        apply();
       })();
     </script>
 
