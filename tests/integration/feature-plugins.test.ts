@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeAll } from 'vitest';
+import { env } from 'cloudflare:workers';
 import worker from './worker';
 import { ensureMigrated } from './helpers';
 
@@ -311,5 +312,24 @@ describe('feature plugins API', () => {
     for (const item of list) {
       expect(Object.keys(item).sort()).toEqual(['config', 'key']);
     }
+  });
+
+  it('survives a missing feature_modules table by answering registry defaults', async () => {
+    // Production regression: the worker was deployed before migration 0011 was
+    // applied remotely; the endpoint must not turn a storage problem into a
+    // 5xx — it must describe the site exactly as SSR renders it (defaults).
+    await env.DB.prepare('DROP TABLE feature_modules').run();
+
+    const res = await api('/api/v1/features');
+    expect(res.status).toBe(200);
+    const list = (await res.json()) as { data: Array<{ key: string }> };
+    const keys = list.data.map((m) => m.key);
+    // Enabled-by-default modules are still there…
+    expect(keys).toContain('hero');
+    // …off-by-default modules are not rendered…
+    expect(keys).not.toContain('stat-band');
+    expect(keys).not.toContain('sms-campaigns');
+    // …and the list matches what the homepage gates would render.
+    expect(keys).not.toContain('announcement-bar');
   });
 });
