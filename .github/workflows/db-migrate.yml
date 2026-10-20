@@ -1,0 +1,70 @@
+name: DB Migrate (remote)
+
+# Applies pending D1 migrations to the LIVE Cloudflare D1 database.
+#
+# Deliberately manual-only: `wrangler d1 migrations apply --remote` changes
+# production data, so it must never ride along with a normal push — CD ships
+# code, a human ships schema. The `confirm` input must be the word `migrate`,
+# which makes an accidental click a no-op instead of a schema change.
+#
+# Required repository secret: CLOUDFLARE_API_TOKEN (D1:Edit on the account).
+# CLOUDFLARE_ACCOUNT_ID is optional unless the token spans several accounts.
+#
+# Usage: Actions -> DB Migrate (remote) -> Run workflow -> type `migrate`.
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "migrate" to apply pending migrations to the live D1 database'
+        required: true
+        type: string
+
+concurrency:
+  group: d1-migrate-remote
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  migrate:
+    name: Apply D1 migrations (remote)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Refuse without confirmation
+        if: github.event.inputs.confirm != 'migrate'
+        run: |
+          echo "::error title=Not applied::The confirm input must be exactly 'migrate'. Nothing was changed."
+          exit 1
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Show pending migrations
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx wrangler d1 migrations list tehran-laser-db --remote
+
+      - name: Apply migrations
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx wrangler d1 migrations apply tehran-laser-db --remote
+
+      - name: Confirm applied state
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx wrangler d1 migrations list tehran-laser-db --remote

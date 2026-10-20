@@ -89,3 +89,29 @@ export async function writeEdgeCache(
     /* ignore — see the doc comment */
   }
 }
+
+/** The optional `delete` half of the Workers Cache API (absent in Node). */
+export interface PurgeableCacheStore extends EdgeCacheStore {
+  delete?(request: Request): Promise<boolean>;
+}
+
+/**
+ * Best-effort purge of cached public HTML.
+ *
+ * A plugin toggle must be visible on the next request: waiting out the 60s TTL
+ * reads to the admin as "the switch does nothing". Purges are fire-and-forget —
+ * a cache miss costs one render, a failed purge must never fail the write.
+ */
+export async function purgeEdgeRoutes(origin: string, paths: readonly string[]): Promise<void> {
+  const store = getEdgeCacheStore() as PurgeableCacheStore | null;
+  if (!store?.delete) return;
+  await Promise.all(
+    paths.map(async (path) => {
+      try {
+        await store.delete!(edgeCacheKey(new URL(path, origin)));
+      } catch {
+        /* ignore — see the doc comment */
+      }
+    }),
+  );
+}

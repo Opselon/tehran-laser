@@ -32,6 +32,10 @@ import {
   PRIMARY_NAV,
   BOTTOM_NAV,
 } from '../lib/seo';
+import { env } from 'cloudflare:workers';
+import { getModuleStateMap } from '../server/features';
+import { enabledConfig, isModuleOn, mergeModuleStates, safeExternalLink, toStateMap } from '../domain/features/state';
+import type { ModuleState } from '../domain/features/registry';
 
 interface PreloadAsset {
   href: string;
@@ -173,6 +177,51 @@ const isActive = (href: string): 'active' | undefined =>
       ? 'active'
       : undefined;
 
+/* ── Feature modules (the plugin gate) ─────────────────────────────────────
+   Site chrome (announcement bar, sticky booking bar, WhatsApp float) and the
+   nav entries for gated routes render only when their module is ON. Same
+   registry-default fallback as the homepage: a DB hiccup never blanks chrome. */
+let moduleStates: Map<string, ModuleState>;
+try {
+  moduleStates = await getModuleStateMap(env.DB);
+} catch (e) {
+  console.error('Feature-state fetch failure (public layout):', e);
+  moduleStates = toStateMap(mergeModuleStates([]));
+}
+const isOn = (key: string) => isModuleOn(moduleStates, key);
+
+const bookingOn = isOn('online-booking');
+const blogOn = isOn('content-blog');
+
+/** Routes that can be switched off from the plugin hub drop out of the nav —
+ *  a hidden module must not advertise a link to a page that 404s/redirects. */
+const primaryNav = PRIMARY_NAV.filter((item) => bookingOn || item.href !== '/booking').filter(
+  (item) => blogOn || item.href !== '/blog',
+);
+const bottomNav = BOTTOM_NAV.filter((item) => bookingOn || item.href !== '/booking').filter(
+  (item) => blogOn || item.href !== '/blog',
+);
+
+const announcementCfg = enabledConfig(moduleStates, 'announcement-bar');
+const stickyCfg = enabledConfig(moduleStates, 'sticky-booking-cta');
+const whatsappCfg = enabledConfig(moduleStates, 'whatsapp-float');
+const stickyLabel = typeof stickyCfg.label === 'string' && stickyCfg.label ? stickyCfg.label : 'رزرو آنلاین نوبت';
+const stickyBadge = typeof stickyCfg.badge === 'string' && stickyCfg.badge ? stickyCfg.badge : '';
+const announcementMessage =
+  typeof announcementCfg.message === 'string' && announcementCfg.message ? announcementCfg.message : '';
+const announcementCtaLabel =
+  typeof announcementCfg.ctaLabel === 'string' && announcementCfg.ctaLabel ? announcementCfg.ctaLabel : 'رزرو با تخفیف';
+const announcementHrefRaw =
+  typeof announcementCfg.ctaHref === 'string' && announcementCfg.ctaHref ? announcementCfg.ctaHref : '/booking';
+const announcementCtaHref = /^\//.test(announcementHrefRaw)
+  ? announcementHrefRaw
+  : safeExternalLink(announcementHrefRaw) || '/booking';
+const whatsappPhone = (typeof whatsappCfg.phone === 'string' ? whatsappCfg.phone : '').replace(/[^\d]/g, '').slice(0, 20);
+const whatsappShow = isOn('whatsapp-float') && whatsappPhone.length >= 10;
+const whatsappHref = whatsappPhone
+  ? `https://wa.me/${whatsappPhone}${whatsappCfg.message ? `?text=${encodeURIComponent(String(whatsappCfg.message))}` : ''}`
+  : '';
+
 ---
 
 <!doctype html>
@@ -228,21 +277,22 @@ const isActive = (href: string): 'active' | undefined =>
     <!-- WCAG 2.4.1 Bypass Blocks — first focusable element -->
     <a href="#main-content" class="skip-link">پرش به محتوای اصلی</a>
 
-    <!-- Top announcement / trust strip. The message is allowed to wrap at
-         ≤768px (a previous fix) so the 15% offer is never truncated; the CTA
-         stays a single 44px-min tap target underneath it. -->
-    <aside class="announcement-strip" aria-label="اطلاعیه تخفیف">
-      <div class="container announcement-inner">
-        <span class="announcement-text">
-          <Icon name="sparkles" size={14} aria-hidden="true" />
-          جشنواره پاییزه تهران لیزر: ۱۵٪ تخفیف ویژه پکیج کل بدن در رزرو آنلاین
-        </span>
-        <a href="/booking" class="announcement-link">
-          <span>رزرو با تخفیف</span>
-          <Icon name="arrowLeft" size={14} aria-hidden="true" />
-        </a>
-      </div>
-    </aside>
+    <!-- Top announcement / trust strip. Rendered by the `announcement-bar`
+         module — until it is enabled in /admin/plugins, nothing is here. -->
+    {isOn('announcement-bar') && announcementMessage && (
+      <aside class="announcement-strip" aria-label="اطلاعیه تخفیف">
+        <div class="container announcement-inner">
+          <span class="announcement-text">
+            <Icon name="sparkles" size={14} aria-hidden="true" />
+            {announcementMessage}
+          </span>
+          <a href={announcementCtaHref} class="announcement-link">
+            <span>{announcementCtaLabel}</span>
+            <Icon name="arrowLeft" size={14} aria-hidden="true" />
+          </a>
+        </div>
+      </aside>
+    )}
 
     <!-- Header -->
     <header class="site-header" data-header-scroll>
@@ -255,9 +305,11 @@ const isActive = (href: string): 'active' | undefined =>
           </span>
         </a>
 
-        <!-- Desktop Navigation -->
+        <!-- Desktop Navigation. /booking and /blog are plugin-gated: when their
+             module is off the link disappears so it can never advertise a dead
+             route. -->
         <nav class="desktop-nav" aria-label="منوی اصلی">
-          {PRIMARY_NAV.map((item) => (
+          {primaryNav.map((item) => (
             <a
               href={item.href}
               class:list={['nav-link', isActive(item.href)]}
@@ -274,7 +326,7 @@ const isActive = (href: string): 'active' | undefined =>
             <span class="icon-phone"><Icon name="phone" size={16} aria-hidden="true" /></span>
             <span class="phone-digits"><bdi dir="ltr">{CLINIC_CONTACT.phoneDisplay}</bdi></span>
           </a>
-          <a href="/booking" class="btn btn-primary header-cta">رزرو آنلاین نوبت</a>
+          {bookingOn && <a href="/booking" class="btn btn-primary header-cta">رزرو آنلاین نوبت</a>}
           <!-- One-tap call on phones: the header is the only persistent
                surface, so the highest-intent local action lives here. -->
           <a
@@ -306,7 +358,7 @@ const isActive = (href: string): 'active' | undefined =>
            reader lands here with context instead of a bare "navigation". -->
       <div id="mobileDrawer" class="mobile-drawer" hidden aria-label="منوی موبایل">
         <nav class="mobile-drawer-nav" aria-label="منوی موبایل">
-          {PRIMARY_NAV.map((item) => (
+          {primaryNav.map((item) => (
             <a
               href={item.href}
               class:list={['drawer-link', isActive(item.href)]}
@@ -316,7 +368,7 @@ const isActive = (href: string): 'active' | undefined =>
             </a>
           ))}
           <div class="drawer-actions">
-            <a href="/booking" class="btn btn-primary btn-block">رزرو آنلاین نوبت</a>
+            {bookingOn && <a href="/booking" class="btn btn-primary btn-block">رزرو آنلاین نوبت</a>}
             <a href={`tel:${CLINIC_CONTACT.telephone}`} class="btn btn-outline btn-block mt-2">
               تماس: <bdi dir="ltr">{CLINIC_CONTACT.phoneDisplay}</bdi>
             </a>
@@ -337,7 +389,7 @@ const isActive = (href: string): 'active' | undefined =>
          label span carries the accessible name. -->
     <nav class="bottom-nav" aria-label="ناوبری پایین">
       <div class="bottom-nav-inner">
-        {BOTTOM_NAV.map((item) => (
+        {bottomNav.map((item) => (
           <a
             href={item.href}
             class:list={['bottom-nav-link', 'tap-target', isActive(item.href)]}
@@ -357,11 +409,12 @@ const isActive = (href: string): 'active' | undefined =>
            already carries تماس as its 4th tab, so it was a duplicate.
          · سبد and نصب moved IN here as icon-only chips (aria-label keeps
            their accessible names), so the floating tier disappears. -->
-    <div class="mobile-sticky-bar">
-      <a href="/booking" class="btn btn-primary sticky-book tap-target">
-        <span>رزرو آنلاین نوبت</span>
-        <span class="promo-tag">۱۵٪ تخفیف</span>
-      </a>
+    {isOn('sticky-booking-cta') && (
+      <div class:list={['mobile-sticky-bar', stickyCfg.desktop === true && 'is-desktop-visible']}>
+        <a href="/booking" class="btn btn-primary sticky-book tap-target">
+          <span>{stickyLabel}</span>
+          {stickyBadge && <span class="promo-tag">{stickyBadge}</span>}
+        </a>
       <button
         id="basketFab"
         class="basket-fab tap-target"
@@ -379,7 +432,8 @@ const isActive = (href: string): 'active' | undefined =>
         <Icon name="sparkles" size={18} aria-hidden="true" />
         <span class="pwa-install-label">نصب اپلیکیشن</span>
       </button>
-    </div>
+      </div>
+    )}
 
     <!-- Basket drawer: labelled dialog with an inert scrim while open. The
          fab's aria-expanded + this dialog's aria-labelledby give AT a
@@ -668,6 +722,20 @@ const isActive = (href: string): 'active' | undefined =>
         apply();
       })();
     </script>
+
+    <!-- WhatsApp float — module `whatsapp-float` (off by default). -->
+    {whatsappShow && (
+      <a
+        class="wa-float tap-target"
+        href={whatsappHref}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="گفتگو با پذیرش در واتساپ"
+      >
+        <Icon name="whatsapp" size={22} aria-hidden="true" />
+        <span class="wa-float-label">واتساپ</span>
+      </a>
+    )}
 
     <LayoutStyles />
   </body>

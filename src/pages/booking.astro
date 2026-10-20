@@ -4,6 +4,18 @@ import { BookingWizard } from '../components/booking/BookingWizard';
 import Icon from '../components/ui/Icon.astro';
 import { env } from 'cloudflare:workers';
 import { listPublicServices } from '../server/repositories';
+import { isModuleEnabled } from '../server/features';
+
+/* Plugin gate: an admin can switch online booking off entirely. The route then
+   redirects to the contact page (phone booking) instead of rendering a form
+   that cannot submit — and the header CTA/nav already drop the link. */
+let bookingEnabled = true;
+try {
+  bookingEnabled = await isModuleEnabled(env.DB, 'online-booking');
+} catch (e) {
+  console.error('booking module gate read failed:', e);
+}
+if (!bookingEnabled) return Astro.redirect('/contact?booking=off', 307);
 import { createBreadcrumbSchema } from '../lib/seo';
 
 let services: Awaited<ReturnType<typeof listPublicServices>> = [];

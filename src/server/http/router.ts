@@ -50,6 +50,8 @@ import {
   lotteryDrawSchema,
   discountFestivalSchema,
   instagramSettingsSchema,
+  featureUpdateSchema,
+  featureReorderSchema,
 } from '../../domain/validation/schemas';
 import {
   findPublicBlogPostBySlug,
@@ -76,6 +78,15 @@ import {
   writeAuditLog,
 } from '../repositories';
 import { createBooking, rescheduleBooking, transitionBooking } from '../booking';
+import { purgeEdgeRoutes } from '../../lib/http/edge-cache';
+import {
+  listAdminModules,
+  listModuleStates,
+  persistModule,
+  resetModule,
+} from '../features';
+import { isKnownModuleKey } from '../../domain/features/registry';
+import { publicModules } from '../../domain/features/state';
 import { calculateAvailability } from '../../domain/schedule/availability';
 import {
   isPrivateSettingKey,
@@ -86,6 +97,9 @@ import { slotStaffKey } from '../../domain/booking/booking.slots';
 import { dispatchNotification } from '../notifications';
 import { all, one, run } from '../../db/query';
 import { localDateOf } from '../../lib/datetime/timezone';
+
+/** Public pages whose edge cache must refresh when a plugin state changes. */
+const PUBLIC_CACHE_PURGE_PATHS = ['/', '/booking', '/blog'] as const;
 
 export async function handleApiRequest(
   request: Request,
@@ -378,6 +392,14 @@ export async function handleApiRequest(
     if (pathname === '/api/v1/faq' && method === 'GET') {
       const faq = await listPublicFaq(env.DB);
       return ok(faq);
+    }
+
+    /* ── Public: Installed feature modules (§plugin-hub) ──────── */
+    /* Only enabled, public modules are listed; disabled ones must not be
+       discoverable via the API (same reason their markup is not rendered). */
+    if (pathname === '/api/v1/features' && method === 'GET') {
+      const states = await listModuleStates(env.DB);
+      return ok(publicModules(states));
     }
 
     /* ══════════════════════════════════════════════════════════
@@ -1507,7 +1529,113 @@ export async function handleApiRequest(
       }
 
       await writeAuditLog(env.DB, auth.id, 'instagram.updated', 'settings', null);
+
+      /* Keep the module override in sync with the legacy screen: the hub reads
+         `feature_modules.config`, and one input must never produce two truths. */
+      const moduleConfig: Record<string, string | number> = {};
+      if (body.username !== undefined) moduleConfig.handle = body.username;
+      if (body.promoCode !== undefined) moduleConfig.promoCode = body.promoCode;
+      if (body.discountPercent !== undefined) moduleConfig.promoDiscountPercent = body.discountPercent;
+      if (body.bioLink !== undefined) moduleConfig.bioLink = body.bioLink;
+      if (body.latestReel !== undefined) moduleConfig.latestReelUrl = body.latestReel;
+      if (Object.keys(moduleConfig).length > 0) {
+        await persistModule(env.DB, 'instagram-hub', { config: moduleConfig, updatedBy: auth.id });
+      }
+
       return ok({ success: true });
+    }
+
+    /* ── Admin: Feature modules / plugin hub (§plugin-hub) ────── */
+    /* GET lists every registry module with its EFFECTIVE state, so the hub can
+       render switches without a second round-trip. PUT upserts one override,
+       DELETE resets it to the registry default, POST /order persists the
+       drag-free reorder the hub exposes as up/down controls. */
+    if (pathname === '/api/v1/admin/features' && method === 'GET') {
+      requirePermission(locals, 'settings.read');
+      const modules = await listAdminModules(env.DB);
+      return ok(modules);
+    }
+
+    if (pathname === '/api/v1/admin/features/order' && method === 'POST') {
+      const auth = requirePermission(locals, 'settings.write');
+      const body = await parseBody(request, featureReorderSchema);
+      const unknown = body.order.map((o) => o.key).filter((key) => !isKnownModuleKey(key));
+      if (unknown.length > 0) {
+        throw new ApiError('VALIDATION_ERROR', 'ماژول ناشناخته در ترتیب ارسالی است.', {
+          fields: Object.fromEntries(unknown.map((key) => [key, ['این ماژول وجود ندارد.']])),
+        });
+      }
+      for (const entry of body.order) {
+        await persistModule(env.DB, entry.key, {
+          order: entry.displayOrder,
+          updatedBy: auth.id,
+        });
+      }
+      await writeAuditLog(env.DB, auth.id, 'feature.reordered', 'feature_module', null);
+      await purgeEdgeRoutes(new URL(request.url).origin, PUBLIC_CACHE_PURGE_PATHS);
+      return ok(await listAdminModules(env.DB));
+    }
+
+    if (pathname.startsWith('/api/v1/admin/features/') && method === 'PUT') {
+      const auth = requirePermission(locals, 'settings.write');
+      const key = pathname.slice('/api/v1/admin/features/'.length);
+      if (!isKnownModuleKey(key)) throw new ApiError('NOT_FOUND', 'ماژول مورد نظر یافت نشد.');
+
+      const body = await parseBody(request, featureUpdateSchema);
+      const state = await persistModule(env.DB, key, {
+        ...(body.enabled !== undefined ? { enabled: body.enabled } : {}),
+        ...(body.displayOrder !== undefined ? { order: body.displayOrder } : {}),
+        ...(body.config !== undefined ? { config: body.config } : {}),
+        updatedBy: auth.id,
+      });
+
+      /* Instagram keeps its legacy `instagram_*` settings rows in sync: the
+         public page and the older admin screen still read them, and silently
+         diverging the two stores is exactly the kind of bug this hub exists to
+         prevent. One direction only — the module is the source of truth. */
+      if (key === 'instagram-hub' && body.config) {
+        const nowIso = new Date().toISOString();
+        // Mirror the *validated* state: the raw body may hold an unnormalised
+        // handle (@x, pasted URL) that must not reach the legacy settings.
+        const cfg = state.config;
+        const mirror: Array<[string, string | undefined]> = [
+          ['instagram_username', cfg.handle !== undefined ? String(cfg.handle) : undefined],
+          ['instagram_promo_code', cfg.promoCode !== undefined ? String(cfg.promoCode) : undefined],
+          [
+            'instagram_follower_discount_percent',
+            cfg.promoDiscountPercent !== undefined ? String(cfg.promoDiscountPercent) : undefined,
+          ],
+          ['instagram_bio_link', cfg.bioLink !== undefined ? String(cfg.bioLink) : undefined],
+          ['instagram_latest_reel_url', cfg.latestReelUrl !== undefined ? String(cfg.latestReelUrl) : undefined],
+        ];
+        for (const [settingKey, value] of mirror) {
+          if (value === undefined) continue;
+          await run(
+            env.DB,
+            `INSERT INTO settings (key, value, scope, updated_at)
+             VALUES (?, ?, 'public', ?)
+             ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at`,
+            settingKey,
+            value,
+            nowIso,
+          );
+        }
+      }
+
+      await writeAuditLog(env.DB, auth.id, 'feature.updated', 'feature_module', key);
+      await purgeEdgeRoutes(new URL(request.url).origin, PUBLIC_CACHE_PURGE_PATHS);
+      return ok(state);
+    }
+
+    if (pathname.startsWith('/api/v1/admin/features/') && method === 'DELETE') {
+      const auth = requirePermission(locals, 'settings.write');
+      const key = pathname.slice('/api/v1/admin/features/'.length);
+      if (!isKnownModuleKey(key)) throw new ApiError('NOT_FOUND', 'ماژول مورد نظر یافت نشد.');
+
+      const removed = await resetModule(env.DB, key);
+      await writeAuditLog(env.DB, auth.id, 'feature.reset', 'feature_module', key);
+      await purgeEdgeRoutes(new URL(request.url).origin, PUBLIC_CACHE_PURGE_PATHS);
+      return ok({ key, reset: true, removedOverride: removed });
     }
 
     /* ── 404 Route Not Found ─────────────────────────────────── */

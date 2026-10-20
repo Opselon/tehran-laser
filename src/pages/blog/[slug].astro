@@ -2,6 +2,16 @@
 import PublicLayout from '../../layouts/PublicLayout.astro';
 import { env } from 'cloudflare:workers';
 import { findPublicBlogPostBySlug, listPublicBlogPosts } from '../../server/repositories';
+import { isModuleEnabled } from '../../server/features';
+
+/* Plugin gate: a disabled blog module takes its article routes with it. */
+let blogEnabled = true;
+try {
+  blogEnabled = await isModuleEnabled(env.DB, 'content-blog');
+} catch (e) {
+  console.error('blog module gate read failed:', e);
+}
+if (!blogEnabled) return Astro.redirect('/', 307);
 import { formatJalaliDate, toPersianDigits } from '../../lib/datetime/jalali';
 import { createArticleSchema, createBreadcrumbSchema } from '../../lib/seo';
 import Icon from '../../components/ui/Icon.astro';
