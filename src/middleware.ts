@@ -3,6 +3,12 @@ import { env } from 'cloudflare:workers';
 import { loadAuthUser } from './server/auth/session';
 import { readSessionCookie } from './lib/security/session-cookie';
 import { fail } from './lib/api/respond';
+import {
+  getEdgeCacheStore,
+  isEdgeCacheable,
+  readEdgeCache,
+  writeEdgeCache,
+} from './lib/http/edge-cache';
 import type { AuthUser } from './domain/rbac/rbac.types';
 
 /** Routes that must never render or respond before authentication is established (§326).
@@ -56,6 +62,19 @@ function applyPublicCache(response: Response, request: Request, pathname: string
   response.headers.set('cache-control', 'public, max-age=60, stale-while-revalidate=300');
 }
 
+/* ── Edge HTML cache ─────────────────────────────────────────────────────────
+   `cache-control` above only reaches the browser; a Worker response is *not*
+   stored by Cloudflare's CDN on its own. Every anonymous page view therefore
+   paid a full SSR render plus the D1 reads behind it (~400 ms TTFB measured
+   from Tehran on a cold colo), even though the markup is identical for every
+   visitor. Putting the rendered HTML in `caches.default` turns repeat views in
+   the same colo into a ~20-40 ms hit.
+
+   The rules that decide what may be shared live in `lib/http/edge-cache.ts`
+   and are unit-tested there; this file only wires them into the request flow.
+   A stored copy keeps the security headers applied below, so a hit is
+   identical to a miss in every respect except speed. */
+
 export const onRequest = defineMiddleware(async (context, next) => {
   const { pathname } = context.url;
   const token = readSessionCookie(context.request);
@@ -80,9 +99,26 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   context.locals.auth = auth;
 
+  /* Read path: serve an anonymous page straight from the edge cache. The read
+     happens before `next()`, so a hit skips SSR and every D1 query behind it. */
+  const cache =
+    !token && isEdgeCacheable(context.request, pathname) ? getEdgeCacheStore() : null;
+  if (cache) {
+    const hit = await readEdgeCache(cache, context.url);
+    if (hit) {
+      const replayed = new Response(hit.body, hit);
+      replayed.headers.set('x-edge-cache', 'HIT');
+      applySecurityHeaders(replayed);
+      return replayed;
+    }
+  }
+
   const response = await next();
   applySecurityHeaders(response);
   // A session cookie on a public route can still mean a personalized render: never cache it.
   if (!token) applyPublicCache(response, context.request, pathname);
+
+  if (cache) await writeEdgeCache(cache, context.url, response);
+
   return response;
 });
