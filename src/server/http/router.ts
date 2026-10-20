@@ -86,7 +86,8 @@ import {
   resetModule,
 } from '../features';
 import { isKnownModuleKey } from '../../domain/features/registry';
-import { publicModules } from '../../domain/features/state';
+import { mergeModuleStates, publicModules } from '../../domain/features/state';
+import type { ModuleState } from '../../domain/features/registry';
 import { calculateAvailability } from '../../domain/schedule/availability';
 import {
   isPrivateSettingKey,
@@ -398,7 +399,17 @@ export async function handleApiRequest(
     /* Only enabled, public modules are listed; disabled ones must not be
        discoverable via the API (same reason their markup is not rendered). */
     if (pathname === '/api/v1/features' && method === 'GET') {
-      const states = await listModuleStates(env.DB);
+      /* Contract: the endpoint describes what the site renders, so a storage
+         problem must not turn it into a 5xx. Falling back to registry defaults
+         is the same answer the pages give in that situation — the caller sees
+         a consistent site instead of an outage. */
+      let states: ModuleState[];
+      try {
+        states = await listModuleStates(env.DB);
+      } catch (error) {
+        console.error('[FEATURE-STATE] falling back to registry defaults:', error);
+        states = mergeModuleStates([]);
+      }
       return ok(publicModules(states));
     }
 
