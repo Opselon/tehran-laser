@@ -106,33 +106,58 @@ function faDigits(value: string): string {
        image twice (measured: 110 KB of 1600w fetched for a 390 px viewport
        while the element went on to use the 800w file). */
     {
-      href: '/images/facial-treatment-800.avif',
+      href: '/images/hero-laser-700.avif',
       as: 'image',
       type: 'image/avif',
       media: '(max-width: 767px)',
-      imagesrcset: '/images/facial-treatment-560.avif 560w, /images/facial-treatment-800.avif 800w',
+      imagesrcset: '/images/hero-laser-700.avif 700w',
       imagesizes: '96vw',
     },
     {
-      href: '/images/facial-treatment-800.avif',
+      href: '/images/hero-laser-1400.avif',
       as: 'image',
       type: 'image/avif',
       media: '(min-width: 768px) and (max-width: 1023px)',
-      imagesrcset: '/images/facial-treatment-800.avif 800w, /images/facial-treatment.avif 1600w',
+      imagesrcset: '/images/hero-laser-700.avif 700w, /images/hero-laser-1400.avif 1400w',
       imagesizes: '96vw',
     },
     {
-      href: '/images/facial-treatment.avif',
+      href: '/images/hero-laser-1400.avif',
       as: 'image',
       type: 'image/avif',
       media: '(min-width: 1024px)',
-      imagesrcset: '/images/facial-treatment.avif 1600w',
+      imagesrcset: '/images/hero-laser-700.avif 700w, /images/hero-laser-1400.avif 1400w',
       imagesizes: '46vw',
     },
   ]}
 >
   <!-- Hero Section (§38) -->
   <section class="hero-section">
+    <!-- The stage: three light sources, a hairline grid and one gold beam.
+         Decorative only — nothing here is announced, focusable or measureable. -->
+    <div class="hero-stage" aria-hidden="true">
+      <span class="hero-aura hero-aura-gold"></span>
+      <span class="hero-aura hero-aura-emerald"></span>
+      <span class="hero-grid-lines"></span>
+      <span class="hero-noise"></span>
+      <svg class="hero-beam" viewBox="0 0 1200 620" preserveAspectRatio="none" focusable="false">
+        <defs>
+          <linearGradient id="beam-gold" x1="1" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#e8cb8f" stop-opacity="0.5" />
+            <stop offset="0.55" stop-color="#e8cb8f" stop-opacity="0.12" />
+            <stop offset="1" stop-color="#e8cb8f" stop-opacity="0" />
+          </linearGradient>
+          <linearGradient id="beam-emerald" x1="1" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#3bd9a4" stop-opacity="0.28" />
+            <stop offset="1" stop-color="#3bd9a4" stop-opacity="0" />
+          </linearGradient>
+        </defs>
+        <path class="hero-beam-line" d="M1180 12 C 900 120, 660 300, 360 600" stroke="url(#beam-gold)" />
+        <path class="hero-beam-line hero-beam-line-2" d="M1100 0 C 840 150, 640 330, 430 620" stroke="url(#beam-emerald)" />
+        <path class="hero-beam-line hero-beam-line-3" d="M1240 60 C 980 170, 760 330, 540 620" stroke="url(#beam-gold)" />
+      </svg>
+    </div>
+
     <div class="container hero-container">
       <div class="hero-content">
         <div class="hero-badge">
@@ -167,64 +192,92 @@ function faDigits(value: string): string {
       </div>
 
       <!-- Hero visual (Lane L2): imagery-led, decorative ambience only.
-           Photo is licensed stock art of a skincare treatment — NOT a photo of
-           this clinic or of the Rado Plus device, so the alt text and caption
-           describe ambience only and make no equipment/facility claim. -->
+           Photo is licensed stock art of a laser hair-removal session — NOT a
+           photo of this clinic or of the Rado Plus device, so the alt text and
+           caption describe ambience only and make no equipment/facility claim. -->
       <figure class="hero-visual">
+        <div class="hero-visual-stage">
         <div class="hero-visual-frame">
           <picture>
             <!-- Mobile (<768px): a phone shows this band at ≤96vw (≈400 CSS px).
-                 Capping the candidate list at 800w keeps DPR-3 phones from
-                 pulling the 1600w file (~110 KB) for a ~400 px box; 800w at
-                 2.05× is visually identical. -->
+                 Capping the candidate list at 700w keeps DPR-3 phones from
+                 pulling the 1400w file (~97 KB) for a ~400 px box. -->
             <source
               type="image/avif"
               media="(max-width: 767px)"
-              srcset="/images/facial-treatment-560.avif 560w, /images/facial-treatment-800.avif 800w"
+              srcset="/images/hero-laser-700.avif 700w"
               sizes="96vw"
             />
             <source
               type="image/webp"
               media="(max-width: 767px)"
-              srcset="/images/facial-treatment-800.webp 800w"
+              srcset="/images/hero-laser-700.webp 700w"
               sizes="96vw"
             />
             <source
               type="image/avif"
-              srcset="/images/facial-treatment-800.avif 800w, /images/facial-treatment.avif 1600w"
+              srcset="/images/hero-laser-700.avif 700w, /images/hero-laser-1400.avif 1400w"
               sizes="(min-width: 1024px) 46vw, 96vw"
             />
             <source
               type="image/webp"
-              srcset="/images/facial-treatment-800.webp 800w, /images/facial-treatment.webp 1600w"
+              srcset="/images/hero-laser-700.webp 700w, /images/hero-laser-1400.webp 1400w"
               sizes="(min-width: 1024px) 46vw, 96vw"
             />
             <img
               class="hero-visual-img"
-              src="/images/facial-treatment.jpg"
-              alt="مراقبت تخصصی پوست توسط کارشناس در فضایی آرام و حرفه‌ای"
-              width="1600"
-              height="1067"
+              src="/images/hero-laser-1400.jpg"
+              alt="جلسه لیزر موهای زائد با دستگاه تماسی روی پوست پا در فضایی آرام و استریل"
+              width="1400"
+              height="933"
               loading="eager"
               fetchpriority="high"
               decoding="async"
             />
           </picture>
           <div class="hero-visual-overlay" aria-hidden="true"></div>
-          <div class="hero-visual-chips">
-            <span class="hvc-item">
-              <Icon name="lightning" size={14} />
-              <span>توان ۱۶۰۰ وات</span>
-            </span>
-            <span class="hvc-item">
-              <Icon name="target" size={14} />
-              <span><bdi>۷۵۵ / ۸۰۸ / ۱۰۶۴</bdi> نانومتر</span>
-            </span>
-            <span class="hvc-item">
-              <Icon name="snowflake" size={14} />
-              <span>سرمایش TEC Double</span>
-            </span>
-          </div>
+          <span class="hero-corner hero-corner-1" aria-hidden="true"></span>
+          <span class="hero-corner hero-corner-2" aria-hidden="true"></span>
+          <span class="hero-corner hero-corner-3" aria-hidden="true"></span>
+          <span class="hero-corner hero-corner-4" aria-hidden="true"></span>
+        </div>
+
+        <!-- Device seal: a slow-turning spec ring breaking the photo's frame.
+             Decorative, so it is hidden from AT and from reduced-motion users. -->
+        <div class="hero-seal" aria-hidden="true">
+          <svg viewBox="0 0 100 100" class="hero-seal-ring" focusable="false">
+            <defs>
+              <path id="seal-path" d="M50,50 m-37,0 a37,37 0 1,1 74,0 a37,37 0 1,1 -74,0" />
+            </defs>
+            <text>
+              <textPath href="#seal-path" startOffset="0%">RADO PLUS · CONTACT LASER · </textPath>
+            </text>
+          </svg>
+          <span class="hero-seal-core"><Icon name="sparkles" size={17} /></span>
+        </div>
+
+        <!-- Spec panel — the device numbers, read as instrumentation instead of
+             three glass chips floating on the photo's scrim. -->
+        <div class="hero-spec-card">
+          <span class="hero-spec-head">
+            <Icon name="target" size={13} />
+            <span>مشخصات دستگاه رادو پلاس</span>
+          </span>
+          <dl class="hero-spec-list">
+            <div class="hero-spec-row">
+              <dt>طول موج</dt>
+              <dd><bdi dir="ltr">۷۵۵ · ۸۰۸ · ۱۰۶۴</bdi> <span>نانومتر</span></dd>
+            </div>
+            <div class="hero-spec-row">
+              <dt>سرمایش</dt>
+              <dd>TEC Double</dd>
+            </div>
+            <div class="hero-spec-row">
+              <dt>توان</dt>
+              <dd><bdi>۱۶۰۰</bdi> <span>وات</span></dd>
+            </div>
+          </dl>
+        </div>
         </div>
         <figcaption class="hero-visual-caption">
           لیزر تماسی رادو پلاس با تست شات رایگان پیش از شروع دوره — پاسداران، خیابان پایدارفرد
@@ -253,9 +306,9 @@ function faDigits(value: string): string {
         <div class="metric-item">
           <div class="metric-top">
             <Icon name="target" size={16} class="metric-icon" />
-            <span class="metric-val"><bdi>۷۵۵</bdi> + <bdi>۱۰۶۴</bdi></span>
+            <span class="metric-val"><bdi dir="ltr">۷۵۵ · ۸۰۸ · ۱۰۶۴</bdi></span>
           </div>
-          <span class="metric-label">طول موج دوگانه الکس و یاگ برای انواع تیپ پوست</span>
+          <span class="metric-label">سه طول موج الکس، دایود و یاگ برای همه تیپ‌های پوستی</span>
         </div>
 
         <div class="metric-item">
@@ -372,8 +425,8 @@ function faDigits(value: string): string {
           <thead>
             <tr>
               <th scope="col" class="gpt-th-zone">ناحیه خدمت</th>
-              <th scope="col" class="gpt-th-female">تعرفه بانوان</th>
-              <th scope="col" class="gpt-th-male">تعرفه آقایان</th>
+              <th scope="col" class="gpt-th-female">تعرفه بانوان <span class="gpt-th-unit">(تومان)</span></th>
+              <th scope="col" class="gpt-th-male">تعرفه آقایان <span class="gpt-th-unit">(تومان)</span></th>
               <th scope="col" class="gpt-th-action">رزرو</th>
             </tr>
           </thead>
