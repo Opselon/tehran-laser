@@ -1458,7 +1458,7 @@ body.theme-dark-obsidian .gpt-book-btn:hover {
   body.theme-dark-obsidian .gpt-cell-male::before {
     content: attr(data-label);
     color: var(--v2-dim);
-    font-size: 10.5px;
+    font-size: 11px;
     font-weight: 600;
   }
 
@@ -1538,7 +1538,7 @@ body.theme-dark-obsidian .badge {
   gap: 6px;
   padding: 5px 10px;
   border-radius: 999px;
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 700;
 }
 
@@ -1706,7 +1706,7 @@ body.theme-dark-obsidian .author-name {
 
 body.theme-dark-obsidian .author-tag {
   color: var(--v2-dim);
-  font-size: 10.5px;
+  font-size: 11px;
 }
 
 @media (min-width: 700px) {
@@ -2329,7 +2329,7 @@ body.theme-dark-obsidian .footer-bottom {
 
 body.theme-dark-obsidian .copyright {
   color: var(--v2-dim);
-  font-size: 10.5px;
+  font-size: 11px;
   margin: 0;
 }
 
@@ -2338,7 +2338,7 @@ body.theme-dark-obsidian .legal-links {
   flex-wrap: wrap;
   gap: 4px 14px;
   align-items: center;
-  font-size: 10.5px;
+  font-size: 11px;
 }
 
 body.theme-dark-obsidian .legal-links a {
@@ -2355,7 +2355,7 @@ body.theme-dark-obsidian .legal-links a:hover {
 
 body.theme-dark-obsidian .admin-entry-link {
   color: var(--v2-dim);
-  font-size: 10.5px;
+  font-size: 11px;
 }
 
 body.theme-dark-obsidian .sep {
@@ -2426,7 +2426,7 @@ body.theme-dark-obsidian .bottom-nav-link {
   min-height: 60px;
   color: var(--v2-dim);
   text-decoration: none;
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 600;
   position: relative;
   transition: color 0.2s var(--v2-ease);
@@ -2736,7 +2736,7 @@ body.theme-dark-obsidian .announcement-text {
      the offer, and the arrow alone already reads as "go". */
   body.theme-dark-obsidian .announcement-link {
     padding: 0 9px;
-    min-height: 32px;
+    min-height: 44px;
     font-size: 11px;
   }
 }
@@ -2791,7 +2791,7 @@ body.theme-dark-obsidian .hero-visual-note {
   body.theme-dark-obsidian .gpt-cell-male::before {
     content: attr(data-label);
     color: var(--v2-dim);
-    font-size: 10.5px;
+    font-size: 11px;
     font-weight: 600;
     letter-spacing: 0.02em;
   }
@@ -2811,7 +2811,7 @@ body.theme-dark-obsidian .hero-visual-note {
   }
 
   body.theme-dark-obsidian .gpt-unit {
-    font-size: 10.5px;
+    font-size: 11px;
   }
 
   body.theme-dark-obsidian .gpt-cell-female .gpt-amount {
@@ -2832,7 +2832,7 @@ body.theme-dark-obsidian .hero-visual-note {
 
   body.theme-dark-obsidian .gpt-book-btn {
     width: 100%;
-    min-height: 40px;
+    min-height: 44px;
     font-size: 12px;
     background: rgba(232, 203, 143, 0.06);
     border: 1px solid rgba(232, 203, 143, 0.22);
@@ -2942,8 +2942,11 @@ body.theme-dark-obsidian .trust-title {
    half-covered with no way to scroll them clear. This reserves the same
    height as real space at the end of every public page. */
 @media (max-width: 900px) {
-  body.theme-dark-obsidian main {
-    padding-bottom: calc(58px + 46px + 16px + env(safe-area-inset-bottom, 0px));
+  /* On <body>, not <main>: the footer sits outside <main>, so reserving the
+     space on main left the last footer rows (the service links and the legal
+     line) permanently trapped under the dock at maximum scroll. */
+  body.theme-dark-obsidian {
+    padding-bottom: calc(58px + 46px + 12px + env(safe-area-inset-bottom, 0px));
   }
 }
 
