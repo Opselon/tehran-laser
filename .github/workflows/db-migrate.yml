@@ -51,6 +51,21 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Diagnostics first: the token must be able to see the account and the D1
+      # database before any migration runs. A 7403 here means the token is scoped
+      # to the wrong account or lacks D1:Edit — far clearer than a failed apply.
+      - name: Show token identity
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx wrangler whoami
+
+      - name: List D1 databases
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx wrangler d1 list
+
       - name: Show pending migrations
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
