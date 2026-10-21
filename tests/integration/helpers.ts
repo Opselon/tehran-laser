@@ -9,6 +9,7 @@ import m7 from '../../migrations/0007_advanced_crm_suite.sql?raw';
 import m9 from '../../migrations/0009_male_prices.sql?raw';
 import m10 from '../../migrations/0010_device_content_refresh.sql?raw';
 import m11 from '../../migrations/0011_feature_modules.sql?raw';
+import m12 from '../../migrations/0012_operators.sql?raw';
 import { hashPassword } from '../../src/lib/security/password';
 
 let migrated = false;
@@ -99,6 +100,7 @@ export async function ensureMigrated(): Promise<void> {
   await runMigration(m9);
   await runMigration(m10);
   await runMigration(m11);
+  await runMigration(m12);
 
   // Seed a test super_admin for admin integration tests
   const adminId = 'usr_test_superadmin';

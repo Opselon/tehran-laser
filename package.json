@@ -21,7 +21,7 @@
     "cf:deploy": "astro build && wrangler deploy",
     "db:migrate:local": "wrangler d1 migrations apply tehran-laser-db --local",
     "db:migrate:remote": "wrangler d1 migrations apply tehran-laser-db --remote",
-    "db:seed:admin": "wrangler d1 execute tehran-laser-db --local --file scripts/seed-dev-admin.sql",
+    "db:seed:admin": "node scripts/seed-dev-admin.mjs",
     "hash:password": "node scripts/hash-password.mjs"
   },
   "dependencies": {

@@ -8,7 +8,11 @@ import '../styles/admin/responsive.css';
 // Premium layer — loaded LAST, refines the three sheets above (nav groups,
 // switch/hub styles, focus rings). Append new shared admin rules there.
 import '../styles/admin/premium.css';
+// Team/Operators module shell — owns its own design tokens under .ops-shell.
+import '../styles/admin/operators.css';
 import Icon from '../components/ui/Icon.astro';
+import { hasPermission } from '../domain/rbac/rbac.types';
+import type { Permission } from '../domain/rbac/rbac.types';
 
 interface Props {
   title?: string;
@@ -24,11 +28,22 @@ const auth = Astro.locals.auth || {
   permissions: ['booking.read', 'settings.read', 'customer.read', 'audit.read'],
 };
 
-const navItems = [
+interface NavItem {
+  id: string;
+  label: string;
+  href: string;
+  icon: string;
+  group: string;
+  /** When set, the link only renders for sessions holding this permission. */
+  permission?: Permission | undefined;
+}
+
+const navItems: NavItem[] = [
   { id: 'dashboard', label: 'داشبورد و امروز', href: '/admin', icon: 'dashboard', group: 'فرماندهی' },
   { id: 'plugins', label: 'افزونه‌ها و بخش‌های سایت', href: '/admin/plugins', icon: 'puzzle', group: 'فرماندهی' },
   { id: 'walkin', label: 'پذیرش فوری و جلسه بعد', href: '/admin/walkin', icon: 'walkin', group: 'عملیات' },
   { id: 'bookings', label: 'مدیریت نوبت‌ها', href: '/admin/bookings', icon: 'bookings', group: 'عملیات' },
+  { id: 'operators', label: 'تیم و اپراتورها', href: '/admin/operators', icon: 'users', group: 'عملیات', permission: 'operator.read' },
   { id: 'calendar', label: 'تقویم نوبت‌ها', href: '/admin/calendar', icon: 'calendar', group: 'عملیات' },
   { id: 'crm', label: 'پرونده بالینی و CRM', href: '/admin/crm', icon: 'crm', group: 'عملیات' },
   { id: 'customers', label: 'بانک مراجعین', href: '/admin/customers', icon: 'customers', group: 'عملیات' },
@@ -46,7 +61,8 @@ const navItems = [
 
 /* Sidebar renders one quiet group heading when the group changes, so 17 links
    read as four short clusters instead of one wall (see admin/premium.css). */
-const navGroups = navItems.reduce<Array<{ group: string; items: typeof navItems }>>((acc, item) => {
+const visibleNav = navItems.filter((item) => !item.permission || hasPermission(auth, item.permission));
+const navGroups = visibleNav.reduce<Array<{ group: string; items: typeof navItems }>>((acc, item) => {
   const last = acc[acc.length - 1];
   if (last && last.group === item.group) last.items.push(item);
   else acc.push({ group: item.group, items: [item] });

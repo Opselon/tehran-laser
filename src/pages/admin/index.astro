@@ -5,6 +5,9 @@ import { AdminDashboard } from '../../components/admin/AdminDashboard';
 import { env } from 'cloudflare:workers';
 import { getAdminDashboard, getPublicSettings } from '../../server/repositories';
 import { listAdminModules } from '../../server/features';
+import { listOperators } from '../../server/operators';
+import { hasPermission } from '../../domain/rbac/rbac.types';
+import { todayWeekday } from '../../domain/operators/operators';
 import type { AdminModuleView } from '../../domain/features/registry';
 import { localDateOf } from '../../lib/datetime/timezone';
 
@@ -28,6 +31,48 @@ const enabledModules = modules.filter((m) => m.enabled).length;
 const todayStr = localDateOf(new Date().toISOString(), tz);
 const todayStartIso = `${todayStr}T00:00:00.000Z`;
 const todayEndIso = `${todayStr}T23:59:59.999Z`;
+
+// Team strip — only for sessions that may read the roster. If nobody is on
+// shift yet, the strip becomes the onboarding door to /admin/operators instead
+// of an empty box.
+const auth = Astro.locals.auth;
+const canReadTeam = Boolean(auth && hasPermission(auth, 'operator.read'));
+const weekday = todayWeekday(tz, new Date());
+let team: {
+  total: number;
+  onShift: Array<{
+    id: string;
+    displayName: string;
+    initials: string;
+    avatarColor: string;
+    roleLabel: string;
+    shiftStart: string;
+    shiftEnd: string;
+  }>;
+} | null = null;
+
+if (canReadTeam) {
+  try {
+    const operators = await listOperators(env.DB, {}, new Date());
+    team = {
+      total: operators.filter((operator) => !operator.archivedAt).length,
+      onShift: operators
+        .filter((operator) => operator.active && operator.workdays.includes(weekday))
+        .slice(0, 4)
+        .map((operator) => ({
+          id: operator.id,
+          displayName: operator.displayName,
+          initials: operator.initials,
+          avatarColor: operator.avatarColor,
+          roleLabel: operator.roleLabel,
+          shiftStart: operator.shiftStart,
+          shiftEnd: operator.shiftEnd,
+        })),
+    };
+  } catch (error) {
+    console.error('Failed to load the team strip:', error);
+  }
+}
 
 let initialDashboard: Awaited<ReturnType<typeof getAdminDashboard>> | undefined = undefined;
 try {
@@ -67,6 +112,53 @@ try {
         ))}
       </ul>
     </section>
+
+
+    <!-- Team strip — who is actually here today, server-rendered from the
+         operators module. Doubles as the entry point for adding a profile. -->
+    {canReadTeam && team && (
+      <section class="dashboard-team-strip" aria-labelledby="team-strip-title">
+        <div class="dashboard-team-strip__head">
+          <div class="dashboard-team-strip__title">
+            <span class="dashboard-team-strip__icon"><Icon name="users" size={18} /></span>
+            <div>
+              <h2 id="team-strip-title">تیم امروز</h2>
+              <p>
+                {team.onShift.length === 0
+                  ? 'امروز هیچ اپراتوری شیفت ندارد — می‌توانید شیفت‌ها را برای همین هفته تنظیم کنید.'
+                  : `${team.onShift.length} نفر امروز شیفت دارند، از مجموع ${team.total} پروفایل تیم.`}
+              </p>
+            </div>
+          </div>
+          <a class="dashboard-team-strip__cta" href="/admin/operators">
+            <span>{team.total === 0 ? 'افزودن اولین اپراتور' : 'مدیریت تیم'}</span>
+            <Icon name="arrowLeft" size={15} />
+          </a>
+        </div>
+
+        {team.onShift.length > 0 && (
+          <ul class="team-chips" role="list">
+            {team.onShift.map((member) => (
+              <li class="team-chip">
+                <a class="team-chip__link" href={`/admin/operators/${member.id}`}>
+                  <span
+                    class="team-chip__avatar"
+                    style={`background: linear-gradient(150deg, ${member.avatarColor}, rgba(10, 16, 24, 0.9));`}
+                    aria-hidden="true"
+                  >
+                    {member.initials}
+                  </span>
+                  <span class="team-chip__body">
+                    <span class="team-chip__name">{member.displayName}</span>
+                    <span class="team-chip__meta">{member.roleLabel} · {member.shiftStart}–{member.shiftEnd}</span>
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    )}
 
     <AdminDashboard client:load initialData={initialDashboard} />
   </div>

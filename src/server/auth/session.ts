@@ -2,6 +2,7 @@
  *  only ever holds sha256(token), so a DB leak cannot be replayed as a live session. */
 
 import type { AuthUser } from '../../domain/rbac/rbac.types';
+import type { Queryable } from '../../db/query';
 import { randomToken, sha256Hex } from '../../lib/security/session-cookie';
 
 export interface CreatedSession {
@@ -110,7 +111,7 @@ export async function revokeSession(db: D1Database, token: string, now: Date = n
 
 /** Used on password change / forced logout. */
 export async function revokeAllSessionsForUser(
-  db: D1Database,
+  db: Queryable,
   userId: string,
   now: Date = new Date(),
 ): Promise<void> {
