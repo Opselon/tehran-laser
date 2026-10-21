@@ -14,6 +14,7 @@ try {
 }
 if (!blogEnabled) return Astro.redirect('/', 307);
 import { formatJalaliDate, toPersianDigits } from '../../lib/datetime/jalali';
+import { cspSafeCover, readingMinutes } from '../../lib/content/blog-presenter';
 import { createBreadcrumbSchema } from '../../lib/seo';
 import Icon from '../../components/ui/Icon.astro';
 
@@ -25,32 +26,6 @@ try {
 }
 
 const allPosts = postsPage.items;
-
-/**
- * The public image CSP is `img-src 'self' data: blob:`, so an off-site cover
- * is refused before it ever loads: that logs a CSP error in the console and
- * leaves a broken image behind. Treat covers the CSP would reject as absent so
- * the built-in CSS fallback renders instead.
- */
-function cspSafeCover(url: string | null | undefined): string | undefined {
-  if (!url) return undefined;
-  const value = url.trim();
-  if (!value) return undefined;
-  if (value.startsWith('data:') || value.startsWith('blob:')) return value;
-  if (value.startsWith('/') && !value.startsWith('//')) return value;
-  try {
-    if (new URL(value, Astro.url.origin).origin === Astro.url.origin) return value;
-  } catch {
-    // Unparsable reference — never emit it.
-  }
-  return undefined;
-}
-
-
-function getReadingTime(text: string): number {
-  const words = (text || '').trim().split(/\s+/).filter(Boolean).length;
-  return Math.max(3, Math.ceil(words / 150));
-}
 
 function getCategory(title: string, excerpt: string): { id: string; label: string; icon: string } {
   const combined = (title + ' ' + excerpt).toLowerCase();
@@ -68,7 +43,7 @@ function getCategory(title: string, excerpt: string): { id: string; label: strin
 
 const featuredPost = allPosts.length > 0 ? allPosts[0] : null;
 const regularPosts = allPosts.length > 1 ? allPosts.slice(1) : [];
-const featuredCover = cspSafeCover(featuredPost?.coverImage);
+const featuredCover = cspSafeCover(featuredPost?.coverImage, Astro.url.origin);
 
 const categories = [
   { id: 'all', label: 'همه مقالات', icon: 'list' },
@@ -212,7 +187,7 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
                     </span>
                     <span class="meta-tag meta-time">
                       <Icon name="clock" size={13} />
-                      <span>{toPersianDigits(getReadingTime(featuredPost.excerpt))} دقیقه مطالعه</span>
+                      <span>{toPersianDigits(readingMinutes(featuredPost.excerpt))} دقیقه مطالعه</span>
                     </span>
                     {featuredPost.publishedAt && (
                       <span class="meta-tag meta-date">
@@ -251,8 +226,8 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
             <div class="blog-grid" id="articlesGrid">
               {(regularPosts.length > 0 ? regularPosts : allPosts).map((post) => {
                 const cat = getCategory(post.title, post.excerpt);
-                const readMinutes = getReadingTime(post.excerpt);
-                const postCover = cspSafeCover(post.coverImage);
+                const readMinutes = readingMinutes(post.excerpt);
+                const postCover = cspSafeCover(post.coverImage, Astro.url.origin);
                 return (
                   <article class="article-card-3d" data-category={cat.id}>
                     <div class="article-card-img-wrap">

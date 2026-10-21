@@ -16,11 +16,23 @@ import {
   clearSessionCookie,
   isSecureRequest,
 } from '../../lib/security/session-cookie';
-import { peekRateLimit, consumeRateLimit, resetRateLimit, parseRateLimitPolicy } from '../../lib/security/rate-limit';
+import {
+  peekRateLimit,
+  consumeRateLimit,
+  resetRateLimit,
+  parseRateLimitPolicy,
+} from '../../lib/security/rate-limit';
 import { verifyPassword } from '../../lib/security/password';
 import { resolveCanonicalOrigin } from '../../lib/seo/canonical';
 import { zonedTimeToUtc } from '../../lib/datetime/timezone';
-import { getSearchParams, handleRoute, ok, okWithStatus, parseBody, parseValue } from '../../lib/api/respond';
+import {
+  getSearchParams,
+  handleRoute,
+  ok,
+  okWithStatus,
+  parseBody,
+  parseValue,
+} from '../../lib/api/respond';
 import { ApiError } from '../../lib/api/errors';
 import {
   createBookingSchema,
@@ -80,13 +92,8 @@ import {
   writeAuditLog,
 } from '../repositories';
 import { createBooking, rescheduleBooking, transitionBooking } from '../booking';
-import { purgeEdgeRoutes } from '../../lib/http/edge-cache';
-import {
-  listAdminModules,
-  listModuleStates,
-  persistModule,
-  resetModule,
-} from '../features';
+import { PUBLIC_CACHE_PURGE_PATHS, purgeEdgeRoutes } from '../../lib/http/edge-cache';
+import { listAdminModules, listModuleStates, persistModule, resetModule } from '../features';
 import { isKnownModuleKey } from '../../domain/features/registry';
 import { mergeModuleStates, publicModules } from '../../domain/features/state';
 import type { ModuleState } from '../../domain/features/registry';
@@ -101,8 +108,15 @@ import { dispatchNotification } from '../notifications';
 import { all, one, run } from '../../db/query';
 import { localDateOf } from '../../lib/datetime/timezone';
 
-/** Public pages whose edge cache must refresh when a plugin state changes. */
-const PUBLIC_CACHE_PURGE_PATHS = ['/', '/booking', '/blog'] as const;
+/**
+ * Refresh the shared cache for every public surface a content write can change:
+ * the SSR pages AND the public JSON copies (both now live in `caches.default`).
+ * Detail routes are appended by a caller that knows the slug.
+ */
+async function purgePublicContent(request: Request, extra: readonly string[] = []): Promise<void> {
+  const paths = [...new Set([...PUBLIC_CACHE_PURGE_PATHS, ...extra])];
+  await purgeEdgeRoutes(new URL(request.url).origin, paths);
+}
 
 export async function handleApiRequest(
   request: Request,
@@ -141,7 +155,10 @@ export async function handleApiRequest(
          below, and resetRateLimit runs on success. */
       const rl = await peekRateLimit(env.DB, rlKey, rlPolicy, new Date());
       if (!rl.allowed) {
-        throw new ApiError('RATE_LIMITED', 'تعداد تلاش‌های ناموفق بیش از حد مجاز است. لطفاً بعداً امتحان کنید.');
+        throw new ApiError(
+          'RATE_LIMITED',
+          'تعداد تلاش‌های ناموفق بیش از حد مجاز است. لطفاً بعداً امتحان کنید.',
+        );
       }
 
       const body = await parseBody(request, loginSchema);
@@ -249,7 +266,11 @@ export async function handleApiRequest(
     /* ── Public: Availability (§16, §17) ─────────────────────── */
     if (pathname === '/api/v1/availability' && method === 'GET') {
       const q = getSearchParams(request);
-      const category = parseValue(pricingCategorySchema, q.category, 'دسته قیمتی انتخاب‌شده معتبر نیست.');
+      const category = parseValue(
+        pricingCategorySchema,
+        q.category,
+        'دسته قیمتی انتخاب‌شده معتبر نیست.',
+      );
       const localDate = parseValue(localDateSchema, q.date, 'تاریخ انتخاب‌شده معتبر نیست.');
       const staffId = typeof q.staffId === 'string' && q.staffId ? q.staffId.slice(0, 64) : null;
 
@@ -259,7 +280,10 @@ export async function handleApiRequest(
           : typeof q.service === 'string'
             ? q.service
             : '';
-      const rawSlugs = servicesParam.split(',').map((s) => s.trim()).filter(Boolean);
+      const rawSlugs = servicesParam
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
       if (rawSlugs.length === 0) {
         throw new ApiError('VALIDATION_ERROR', 'حداقل یک خدمت برای استعلام الزامی است.');
       }
@@ -269,7 +293,9 @@ export async function handleApiRequest(
       /* De-duplicate: a repeated slug would otherwise be summed twice into
          durationMinutes and produce slots of the wrong length. */
       const slugs = [
-        ...new Set(rawSlugs.map((s) => parseValue(slugSchema, s, 'نام خدمت انتخاب‌شده معتبر نیست.'))),
+        ...new Set(
+          rawSlugs.map((s) => parseValue(slugSchema, s, 'نام خدمت انتخاب‌شده معتبر نیست.')),
+        ),
       ];
 
       const placeholders = slugs.map(() => '?').join(',');
@@ -339,7 +365,10 @@ export async function handleApiRequest(
       const rlPolicy = parseRateLimitPolicy(rlPolicyRaw, { limit: 20, windowSeconds: 600 });
       const rl = await consumeRateLimit(env.DB, `booking:${clientIp}`, rlPolicy, new Date());
       if (!rl.allowed) {
-        throw new ApiError('RATE_LIMITED', 'تعداد درخواست‌ها بیش از حد مجاز است. لطفاً چند دقیقه صبر کنید.');
+        throw new ApiError(
+          'RATE_LIMITED',
+          'تعداد درخواست‌ها بیش از حد مجاز است. لطفاً چند دقیقه صبر کنید.',
+        );
       }
 
       const body = await parseBody(request, createBookingSchema);
@@ -572,6 +601,10 @@ export async function handleApiRequest(
       );
 
       await writeAuditLog(env.DB, auth.id, 'service.created', 'service', id);
+      await purgePublicContent(request, [
+        `/services/${body.slug}`,
+        `/api/v1/services/${body.slug}`,
+      ]);
       return okWithStatus({ id }, 201);
     }
 
@@ -609,6 +642,10 @@ export async function handleApiRequest(
       );
 
       await writeAuditLog(env.DB, auth.id, 'service.updated', 'service', id);
+      await purgePublicContent(
+        request,
+        body.slug ? [`/services/${body.slug}`, `/api/v1/services/${body.slug}`] : [],
+      );
       return ok({ id, updated: true });
     }
 
@@ -651,6 +688,7 @@ export async function handleApiRequest(
       }
 
       await writeAuditLog(env.DB, auth.id, 'pricing.updated', 'service_price', serviceId);
+      await purgePublicContent(request);
       return ok({ serviceId, updated: true });
     }
 
@@ -815,6 +853,7 @@ export async function handleApiRequest(
       );
 
       await writeAuditLog(env.DB, auth.id, 'blog.created', 'blog_post', id);
+      await purgePublicContent(request, [`/blog/${body.slug}`, `/api/v1/blog/${body.slug}`]);
       return okWithStatus({ id }, 201);
     }
 
@@ -823,6 +862,14 @@ export async function handleApiRequest(
       const id = pathname.slice('/api/v1/admin/blog/'.length);
       const body = await parseBody(request, updateBlogPostSchema);
       const nowIso = new Date().toISOString();
+      /* The slug may itself change in this write, so the old detail route needs
+         purging too — otherwise /blog/<old-slug> serves a cached copy of a post
+         that no longer exists at that URL. */
+      const previous = await one<{ slug: string }>(
+        env.DB,
+        `SELECT slug FROM blog_posts WHERE id = ?`,
+        id,
+      );
 
       await run(
         env.DB,
@@ -862,6 +909,11 @@ export async function handleApiRequest(
       );
 
       await writeAuditLog(env.DB, auth.id, 'blog.updated', 'blog_post', id);
+      const slugs = [...new Set([previous?.slug, body.slug].filter(Boolean))] as string[];
+      await purgePublicContent(
+        request,
+        slugs.flatMap((slug) => [`/blog/${slug}`, `/api/v1/blog/${slug}`]),
+      );
       return ok({ id, updated: true });
     }
 
@@ -869,8 +921,21 @@ export async function handleApiRequest(
       const auth = requirePermission(locals, 'blog.write');
       const id = pathname.slice('/api/v1/admin/blog/'.length);
 
+      const previous = await one<{ slug: string }>(
+        env.DB,
+        `SELECT slug FROM blog_posts WHERE id = ?`,
+        id,
+      );
       await run(env.DB, `DELETE FROM blog_posts WHERE id = ?`, id);
       await writeAuditLog(env.DB, auth.id, 'blog.deleted', 'blog_post', id);
+      if (previous?.slug) {
+        await purgePublicContent(request, [
+          `/blog/${previous.slug}`,
+          `/api/v1/blog/${previous.slug}`,
+        ]);
+      } else {
+        await purgePublicContent(request);
+      }
       return ok({ id, deleted: true });
     }
 
@@ -900,6 +965,7 @@ export async function handleApiRequest(
       );
 
       await writeAuditLog(env.DB, auth.id, 'faq.created', 'faq', id);
+      await purgePublicContent(request);
       return okWithStatus({ id }, 201);
     }
 
@@ -928,6 +994,7 @@ export async function handleApiRequest(
       );
 
       await writeAuditLog(env.DB, auth.id, 'faq.updated', 'faq', id);
+      await purgePublicContent(request);
       return ok({ id, updated: true });
     }
 
@@ -953,6 +1020,7 @@ export async function handleApiRequest(
       }
 
       await writeAuditLog(env.DB, auth.id, 'schedule.updated', 'business_hours', String(weekday));
+      await purgePublicContent(request);
       return ok({ weekday, updated: true });
     }
 
@@ -976,6 +1044,7 @@ export async function handleApiRequest(
       );
 
       await writeAuditLog(env.DB, auth.id, 'schedule_exception.created', 'schedule_exception', id);
+      await purgePublicContent(request);
       return okWithStatus({ id }, 201);
     }
 
@@ -985,6 +1054,7 @@ export async function handleApiRequest(
 
       await run(env.DB, `DELETE FROM schedule_exceptions WHERE id = ?`, id);
       await writeAuditLog(env.DB, auth.id, 'schedule_exception.deleted', 'schedule_exception', id);
+      await purgePublicContent(request);
       return ok({ id, deleted: true });
     }
 
@@ -1007,7 +1077,9 @@ export async function handleApiRequest(
       const unknown = Object.keys(body).filter((key) => !isSettingKey(key));
       if (unknown.length > 0) {
         throw new ApiError('VALIDATION_ERROR', 'کلید تنظیمات ناشناخته است.', {
-          fields: Object.fromEntries(unknown.map((key) => [key, ['این کلید تنظیمات شناخته‌شده نیست.']])),
+          fields: Object.fromEntries(
+            unknown.map((key) => [key, ['این کلید تنظیمات شناخته‌شده نیست.']]),
+          ),
         });
       }
 
@@ -1027,6 +1099,9 @@ export async function handleApiRequest(
       }
 
       await writeAuditLog(env.DB, auth.id, 'settings.updated', 'settings', null);
+      /* Phone numbers, address, hours and social links all render in the public
+         chrome — every page's cached copy is potentially stale. */
+      await purgePublicContent(request);
       return ok({ updated: true });
     }
 
@@ -1299,7 +1374,13 @@ export async function handleApiRequest(
 
       /* Clinical writes are the highest-liability records in the system: an
          operator session must be attributable months later. */
-      await writeAuditLog(env.DB, auth.id, 'clinical_record.created', 'customer_clinical_record', id);
+      await writeAuditLog(
+        env.DB,
+        auth.id,
+        'clinical_record.created',
+        'customer_clinical_record',
+        id,
+      );
       return okWithStatus({ id, success: true }, 201);
     }
 
@@ -1327,7 +1408,9 @@ export async function handleApiRequest(
       const nextMonthStartLocal =
         month === 12 ? `${year + 1}-01-01` : `${year}-${pad(month + 1)}-01`;
       const monthStartUtc = zonedTimeToUtc(monthStartLocal, '00:00', tz);
-      const monthEndUtc = new Date(Date.parse(zonedTimeToUtc(nextMonthStartLocal, '00:00', tz)) - 1).toISOString();
+      const monthEndUtc = new Date(
+        Date.parse(zonedTimeToUtc(nextMonthStartLocal, '00:00', tz)) - 1,
+      ).toISOString();
 
       const [todayRow, monthRow, expenseRow, recentRows] = await Promise.all([
         one<{ total: number }>(
@@ -1449,7 +1532,10 @@ export async function handleApiRequest(
     /* ── Admin: Lottery & Lucky Draw ──────────────────────────── */
     if (pathname === '/api/v1/admin/lottery' && method === 'GET') {
       requirePermission(locals, 'settings.read');
-      const campaigns = await all(env.DB, `SELECT * FROM lottery_campaigns ORDER BY created_at DESC`);
+      const campaigns = await all(
+        env.DB,
+        `SELECT * FROM lottery_campaigns ORDER BY created_at DESC`,
+      );
       return ok(campaigns);
     }
 
@@ -1607,13 +1693,15 @@ export async function handleApiRequest(
       }
 
       await writeAuditLog(env.DB, auth.id, 'instagram.updated', 'settings', null);
+      await purgePublicContent(request);
 
       /* Keep the module override in sync with the legacy screen: the hub reads
          `feature_modules.config`, and one input must never produce two truths. */
       const moduleConfig: Record<string, string | number> = {};
       if (body.username !== undefined) moduleConfig.handle = body.username;
       if (body.promoCode !== undefined) moduleConfig.promoCode = body.promoCode;
-      if (body.discountPercent !== undefined) moduleConfig.promoDiscountPercent = body.discountPercent;
+      if (body.discountPercent !== undefined)
+        moduleConfig.promoDiscountPercent = body.discountPercent;
       if (body.bioLink !== undefined) moduleConfig.bioLink = body.bioLink;
       if (body.latestReel !== undefined) moduleConfig.latestReelUrl = body.latestReel;
       if (Object.keys(moduleConfig).length > 0) {
@@ -1650,7 +1738,7 @@ export async function handleApiRequest(
         });
       }
       await writeAuditLog(env.DB, auth.id, 'feature.reordered', 'feature_module', null);
-      await purgeEdgeRoutes(new URL(request.url).origin, PUBLIC_CACHE_PURGE_PATHS);
+      await purgePublicContent(request);
       return ok(await listAdminModules(env.DB));
     }
 
@@ -1684,7 +1772,10 @@ export async function handleApiRequest(
             cfg.promoDiscountPercent !== undefined ? String(cfg.promoDiscountPercent) : undefined,
           ],
           ['instagram_bio_link', cfg.bioLink !== undefined ? String(cfg.bioLink) : undefined],
-          ['instagram_latest_reel_url', cfg.latestReelUrl !== undefined ? String(cfg.latestReelUrl) : undefined],
+          [
+            'instagram_latest_reel_url',
+            cfg.latestReelUrl !== undefined ? String(cfg.latestReelUrl) : undefined,
+          ],
         ];
         for (const [settingKey, value] of mirror) {
           if (value === undefined) continue;
@@ -1701,7 +1792,7 @@ export async function handleApiRequest(
       }
 
       await writeAuditLog(env.DB, auth.id, 'feature.updated', 'feature_module', key);
-      await purgeEdgeRoutes(new URL(request.url).origin, PUBLIC_CACHE_PURGE_PATHS);
+      await purgePublicContent(request);
       return ok(state);
     }
 
@@ -1712,7 +1803,7 @@ export async function handleApiRequest(
 
       const removed = await resetModule(env.DB, key);
       await writeAuditLog(env.DB, auth.id, 'feature.reset', 'feature_module', key);
-      await purgeEdgeRoutes(new URL(request.url).origin, PUBLIC_CACHE_PURGE_PATHS);
+      await purgePublicContent(request);
       return ok({ key, reset: true, removedOverride: removed });
     }
 

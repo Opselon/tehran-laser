@@ -5,10 +5,11 @@ import DeviceShowcase from '../components/public/DeviceShowcase.astro';
 import ProtocolSection from '../components/public/ProtocolSection.astro';
 import TestimonialsSection from '../components/public/TestimonialsSection.astro';
 import ClinicGallery from '../components/public/ClinicGallery.astro';
+import JournalStrip from '../components/public/JournalStrip.astro';
 import { defaultFaqs } from '../data/faqs';
 import { MENS_ONLY_SLUG_SET } from '../data/male-pricing';
 import { env } from 'cloudflare:workers';
-import { listPublicServices, listFaqItems, getPublicSettings } from '../server/repositories';
+import { listPublicServices, listFaqItems, getPublicSettings, listPublicBlogPosts } from '../server/repositories';
 import { getModuleStateMap } from '../server/features';
 import { enabledConfig, isModuleOn, mergeModuleStates, resolveInstagram, toStateMap } from '../domain/features/state';
 import { createFAQPageSchema, createBreadcrumbSchema } from '../lib/seo';
@@ -49,6 +50,19 @@ const igModuleCfg = enabledConfig(moduleStates, 'instagram-hub');
 
 const str = (value: unknown, fallback = ''): string =>
   typeof value === 'string' && value.trim() !== '' ? value : fallback;
+
+/* ── Journal strip data (module `content-blog`) ──────────────────────────────
+   Read only when the module is on: a disabled blog must not pay a D1 query, and
+   a read failure renders no strip rather than a section of empty cards. */
+let journalPosts: Awaited<ReturnType<typeof listPublicBlogPosts>>['items'] = [];
+if (isModuleOn(moduleStates, 'content-blog')) {
+  try {
+    const page = await listPublicBlogPosts(env.DB, 3);
+    journalPosts = page.items.slice(0, 3);
+  } catch (e) {
+    console.error('SSR homepage journal fetch failure:', e);
+  }
+}
 
 // Fallback FAQs if database is empty
 const activeFaqs = faqs && faqs.length > 0 ? faqs : defaultFaqs;
@@ -575,6 +589,10 @@ function faDigits(value: string): string {
       </div>
     </section>
   )}
+
+  <!-- Journal strip — latest published posts, module `content-blog`. Renders
+       nothing at all when the module is off or the table is empty. -->
+  {isOn('content-blog') && <JournalStrip posts={journalPosts} />}
 
   <!-- FAQ Section (§31, §256) -->
 {isOn('faq') && (

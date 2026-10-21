@@ -11,6 +11,55 @@
 /** Anonymous pages may sit at the edge for a minute (see SECURITY.md §64). */
 export const EDGE_TTL_S = 60;
 
+/**
+ * Public JSON reads that are byte-identical for every anonymous caller.
+ *
+ * The site is SSR-first, so these routes mainly serve API clients and the
+ * contract tests — but they were `no-store`, which made every read pay a Worker
+ * boot plus the D1 queries behind it. Caching them is the same bet the HTML
+ * cache already makes, and the same rules decide who may read a shared copy.
+ *
+ * Deliberately absent: `/api/v1/availability` (date + service + staff specific,
+ * real-time by definition), `/api/health`, and everything under `/api/v1/admin`.
+ */
+export const PUBLIC_API_CACHE_PATHS: readonly string[] = [
+  '/api/v1/services',
+  '/api/v1/faq',
+  '/api/v1/blog',
+  '/api/v1/clinic',
+  '/api/v1/settings/public',
+  '/api/v1/features',
+];
+
+/** Single-resource reads: `/api/v1/services/<slug>`, `/api/v1/blog/<slug>`. */
+const PUBLIC_API_DETAIL_PATHS: readonly RegExp[] = [
+  /^\/api\/v1\/services\/[^/]+$/,
+  /^\/api\/v1\/blog\/[^/]+$/,
+];
+
+/** Is this an anonymous, publicly cacheable JSON route? */
+export function isPublicApiCachePath(pathname: string): boolean {
+  return (
+    PUBLIC_API_CACHE_PATHS.includes(pathname) ||
+    PUBLIC_API_DETAIL_PATHS.some((pattern) => pattern.test(pathname))
+  );
+}
+
+/**
+ * Public paths that must be purged whenever DB-backed marketing content changes.
+ * Detail routes are appended by the writer when it knows the slug.
+ */
+export const PUBLIC_CACHE_PURGE_PATHS: readonly string[] = [
+  '/',
+  '/booking',
+  '/blog',
+  '/services',
+  '/faq',
+  '/clinic',
+  '/contact',
+  ...PUBLIC_API_CACHE_PATHS,
+];
+
 /** The subset of the Workers `Cache` API this module needs. */
 export interface EdgeCacheStore {
   match(request: Request): Promise<Response | undefined>;
@@ -24,7 +73,16 @@ export interface EdgeCacheStore {
  */
 export function isEdgeCacheable(request: Request, pathname: string): boolean {
   if (request.method !== 'GET') return false;
-  if (pathname.startsWith('/api') || pathname.startsWith('/admin')) return false;
+  if (pathname.startsWith('/admin')) return false;
+  const isApi = pathname.startsWith('/api');
+  if (isApi) {
+    // Only the JSON allowlist above is ever shared; everything else (health,
+    // availability, mutations, admin) still goes straight to its handler.
+    if (!isPublicApiCachePath(pathname)) return false;
+    // A query string produces a cache key no write can enumerate for purge —
+    // only the canonical (search-less) form of a public list is cached.
+    if (new URL(request.url).search !== '') return false;
+  }
   // A session cookie means the render can be personalised (the clinic greeting,
   // the basket, an admin preview) — never share it.
   if (request.headers.has('cookie') || request.headers.has('authorization')) return false;
@@ -36,13 +94,23 @@ export function isEdgeCacheable(request: Request, pathname: string): boolean {
 
 /**
  * May this response be written to the shared cache? Only a complete, anonymous,
- * successful HTML render is safe to store.
+ * successful render — or, for an allowlisted public JSON route, its payload —
+ * is safe to store.
  */
-export function isStorableResponse(response: Response): boolean {
+export function isStorableResponse(response: Response, url?: URL | string): boolean {
   if (response.status !== 200) return false;
   if (response.headers.has('set-cookie')) return false;
   const type = response.headers.get('content-type') || '';
-  return type.includes('text/html');
+  if (type.includes('text/html')) return true;
+  if (!url) return false;
+  let pathname: string;
+  try {
+    pathname =
+      typeof url === 'string' ? new URL(url, 'https://invalid.local').pathname : url.pathname;
+  } catch {
+    return false;
+  }
+  return type.includes('application/json') && isPublicApiCachePath(pathname);
 }
 
 /** `caches.default` is absent outside the Workers runtime (plain `astro dev`,
@@ -75,7 +143,7 @@ export async function writeEdgeCache(
   url: URL,
   response: Response,
 ): Promise<void> {
-  if (!isStorableResponse(response)) return;
+  if (!isStorableResponse(response, url)) return;
   try {
     // Awaited rather than streamed: a Workers cache write must own a complete
     // body, and a stream still being teed from the live response can land

@@ -49,19 +49,50 @@ describe('isEdgeCacheable', () => {
     }
   });
 
-  it('refuses the API and the admin surface', () => {
-    expect(isEdgeCacheable(new Request(url), '/api/v1/services')).toBe(false);
+  it('refuses the admin surface', () => {
     expect(isEdgeCacheable(new Request(url), '/admin')).toBe(false);
     expect(isEdgeCacheable(new Request(url), '/admin/login')).toBe(false);
+  });
+
+  it('allows only the public JSON allowlist', () => {
+    for (const path of [
+      '/api/v1/services',
+      '/api/v1/services/full-body',
+      '/api/v1/faq',
+      '/api/v1/blog',
+      '/api/v1/blog/some-post',
+      '/api/v1/clinic',
+      '/api/v1/settings/public',
+      '/api/v1/features',
+    ]) {
+      expect(isEdgeCacheable(new Request(`https://x.example${path}`), path), path).toBe(true);
+    }
+    for (const path of [
+      '/api/health',
+      '/api/v1/availability',
+      '/api/v1/bookings',
+      '/api/v1/me',
+      '/api/v1/admin/dashboard',
+      '/api/v1/services/full-body/extra',
+    ]) {
+      expect(isEdgeCacheable(new Request(`https://x.example${path}`), path), path).toBe(false);
+    }
+  });
+
+  it('does not cache a public JSON read carrying a query string', () => {
+    const path = '/api/v1/blog';
+    expect(isEdgeCacheable(new Request('https://x.example/api/v1/blog?limit=5'), path)).toBe(false);
+    // …while the canonical, query-less form is shared.
+    expect(isEdgeCacheable(new Request('https://x.example/api/v1/blog'), path)).toBe(true);
   });
 
   it('refuses requests carrying a session cookie or an Authorization header', () => {
     expect(isEdgeCacheable(new Request(url, { headers: { cookie: 'tl_session=abc' } }), '/')).toBe(
       false,
     );
-    expect(
-      isEdgeCacheable(new Request(url, { headers: { authorization: 'Bearer t' } }), '/'),
-    ).toBe(false);
+    expect(isEdgeCacheable(new Request(url, { headers: { authorization: 'Bearer t' } }), '/')).toBe(
+      false,
+    );
   });
 
   it('bypasses the cache for a hard reload', () => {
@@ -72,6 +103,12 @@ describe('isEdgeCacheable', () => {
 });
 
 describe('isStorableResponse', () => {
+  const json = (headers: Record<string, string> = {}) =>
+    new Response('{"ok":true}', {
+      status: 200,
+      headers: { 'content-type': 'application/json; charset=utf-8', ...headers },
+    });
+
   it('stores a plain 200 HTML render', () => {
     expect(isStorableResponse(html())).toBe(true);
   });
@@ -88,6 +125,17 @@ describe('isStorableResponse', () => {
       ),
     ).toBe(false);
   });
+
+  it('stores public JSON only when the URL is on the allowlist', () => {
+    const allowed = new URL('https://x.example/api/v1/faq');
+    expect(isStorableResponse(json(), allowed)).toBe(true);
+    expect(isStorableResponse(json(), 'https://x.example/api/v1/services/x')).toBe(true);
+    // an admin or realtime payload is never shared
+    expect(isStorableResponse(json(), '/api/v1/admin/dashboard')).toBe(false);
+    expect(isStorableResponse(json(), '/api/v1/availability')).toBe(false);
+    // and a JSON payload is not stored without a URL to judge it by
+    expect(isStorableResponse(json())).toBe(false);
+  });
 });
 
 describe('writeEdgeCache / readEdgeCache', () => {
@@ -102,6 +150,38 @@ describe('writeEdgeCache / readEdgeCache', () => {
     expect(hit!.headers.get('x-edge-cache')).toBe('MISS');
     expect(hit!.headers.get('cache-control')).toContain('max-age=60');
     expect(await hit!.text()).toContain('ok');
+  });
+
+  it('stores a public JSON read with the shared TTL', async () => {
+    const { store, map } = fakeStore();
+    const url = new URL('https://tehran-laser.example/api/v1/faq');
+    const res = new Response('{"data":[]}', {
+      status: 200,
+      headers: { 'content-type': 'application/json', 'cache-control': 'no-store' },
+    });
+
+    await writeEdgeCache(store, url, res);
+    const hit = await readEdgeCache(store, url);
+
+    expect(map.size).toBe(1);
+    expect(hit!.headers.get('cache-control')).toContain('max-age=60');
+    expect(hit!.headers.get('x-edge-cache')).toBe('MISS');
+    expect(await hit!.text()).toBe('{"data":[]}');
+  });
+
+  it('does not store a JSON payload from a non-public API route', async () => {
+    const { store, map } = fakeStore();
+    const url = new URL('https://tehran-laser.example/api/v1/availability?date=2026-10-21');
+
+    await writeEdgeCache(
+      store,
+      url,
+      new Response('{"data":{}}', {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      }),
+    );
+    expect(map.size).toBe(0);
   });
 
   it('does not store a response that must not be shared', async () => {

@@ -107,8 +107,24 @@ const { items = [], class: className = '' } = Astro.props;
     color: var(--color-on-ink-muted, #94a3b8);
     text-decoration: none;
     transition: color 0.15s ease;
+    /* inline-flex + a 24px box clears WCAG 2.5.8 (24×24) on a fine pointer;
+       the coarse-pointer rule below raises it to the 44px touch floor. */
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
     padding: 2px 4px;
     border-radius: 4px;
+  }
+
+  @media (pointer: coarse), (max-width: 768px) {
+    .tl-breadcrumbs-link {
+      min-height: 44px;
+      padding: 4px 6px;
+    }
+
+    .tl-breadcrumbs {
+      padding: 4px 0;
+    }
   }
 
   .tl-breadcrumbs-link:hover {
