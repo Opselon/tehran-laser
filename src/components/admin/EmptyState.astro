@@ -1,0 +1,51 @@
+---
+/**
+ * EmptyState — the one console empty/error pattern.
+ *
+ * Before this: 5 of 19 screens had an empty-state card and the other 14
+ * rendered a bare table header with no body, or — worse — silently rendered
+ * nothing after a failed fetch. A screen that shows "nothing" for "the server
+ * answered 500" is lying to the operator.
+ *
+ * Two modes:
+ *   - empty:  the data genuinely has no rows          → `variant="empty"`
+ *   - error:  the fetch failed and a retry may help   → `variant="error"`
+ *     plus an optional retry button target.
+ *
+ * Usage:
+ *   <EmptyState icon="bookings" title="نوبتی ثبت نشده" variant="empty"
+ *               body="اولین نوبت را ثبت کنید." />
+ *
+ *   <EmptyState icon="warning" title="بارگذاری ناموفق" variant="error"
+ *               body="خطا در ارتباط با سرور." retryLabel="تلاش دوباره" />
+ */
+import Icon from '../ui/Icon.astro';
+
+interface Props {
+  icon: string;
+  title: string;
+  body?: string;
+  /** 'empty' = calm dashed card with guidance; 'error' = red-accented card
+   *  that signals a retry is meaningful. */
+  variant?: 'empty' | 'error';
+  replaceIcon?: string;
+  retryLabel?: string;
+  /** Renders an action button area (slot) below the copy. */
+}
+
+const { icon, title, body, variant = 'empty', replaceIcon, retryLabel } = Astro.props;
+const shownIcon = replaceIcon ?? icon;
+const hasAction = Astro.slots.has('actions');
+const isError = variant === 'error';
+---
+
+<div class={`tl-empty ${isError ? 'tl-empty--error' : ''}`} role={isError ? 'alert' : 'status'}>
+  <span class="tl-empty__icon"><Icon name={shownIcon} size={24} aria-hidden /></span>
+  <h2 class="tl-empty__title">{title}</h2>
+  {body && <p class="tl-empty__body">{body}</p>}
+  {(hasAction || (isError && retryLabel)) && (
+    <div class="tl-empty__action">
+      {hasAction ? <slot name="actions" /> : <button type="button" class="btn-3d-gold" data-tl-retry>{retryLabel}</button>}
+    </div>
+  )}
+</div>

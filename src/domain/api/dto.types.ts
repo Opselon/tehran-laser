@@ -319,6 +319,25 @@ export type AdminStaffDto = StaffDto;
 export type AuditLogRowDto = AuditLogDto;
 export type NotificationEventRowDto = NotificationEventDto;
 
+/** ── Admin search (command palette) ─────────────────────────── */
+
+/** One palette hit. `kind` drives the icon and the target URL client-side,
+ *  so the palette never has to guess what a row is. */
+export interface AdminSearchHitDto {
+  kind: 'booking' | 'customer' | 'service' | 'page';
+  id: string;
+  /** Primary line: reference, name, or screen title. */
+  title: string;
+  /** Secondary line: phone, service name, status, or group label. */
+  subtitle: string | null;
+  /** Absolute in-console href the palette navigates to. */
+  href: string;
+  /** Machine status for the badge, when the kind has one. */
+  status: string | null;
+  /** 0–1 relevance used for stable ordering. */
+  score: number;
+}
+
 /** ── Health ─────────────────────────────────────────────────── */
 
 export interface HealthDto {

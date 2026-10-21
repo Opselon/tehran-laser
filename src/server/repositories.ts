@@ -21,11 +21,16 @@ import type {
   AdminServiceDto,
   AdminStaffDto,
   AdminBlogPostDto,
+  AdminPriceDto,
+  AdminSearchHitDto,
   AuditLogRowDto,
+  BookingTimelineDto,
+  CustomerDetailDto,
   NotificationEventRowDto,
   AdminDashboardDto,
   FaqItemDto,
   PublicSettingsDto,
+  SeoMetadataDto,
 } from '../domain/api/dto.types';
 import type { PricingCategory, BookingStatus } from '../domain/booking/booking.types';
 import type { PriceRow } from '../domain/pricing/pricing';
@@ -924,3 +929,298 @@ export async function writeAuditLog(
     createdAt,
   );
 }
+
+/* ── Wave W4 admin contracts ─────────────────────────────────────
+   The detail/timeline/seo/search reads the console always needed but the
+   list endpoints could not answer. All bounded, all explicit columns,
+   all single queries — a drawer must not cost N+1. */
+
+/** One booking with its joined customer/service/staff shapes, or null. */
+export async function findAdminBooking(db: Queryable, id: string): Promise<AdminBookingDto | null> {
+  const rows = await all<RawAdminBookingDbRow>(
+    db,
+    `SELECT b.id, b.reference, b.customer_id AS customerId,
+            c.name AS customerName, c.phone AS customerPhone,
+            b.service_id AS serviceId, s.name AS serviceName,
+            s.slug AS serviceSlug, s.duration_minutes AS serviceDurationMinutes,
+            b.staff_id AS staffId, st.name AS staffName,
+            b.pricing_category AS pricingCategory,
+            b.starts_at AS startsAt, b.ends_at AS endsAt,
+            b.status, b.quoted_amount AS quotedAmount,
+            b.discount_amount AS discountAmount, b.currency,
+            b.customer_note AS customerNote, b.admin_note AS adminNote,
+            b.rejection_reason AS rejectionReason,
+            b.created_at AS createdAt, b.updated_at AS updatedAt
+       FROM bookings b
+       JOIN customers c ON c.id = b.customer_id
+       JOIN services s ON s.id = b.service_id
+  LEFT JOIN staff st ON st.id = b.staff_id
+      WHERE b.id = ?
+      LIMIT 1`,
+    id,
+  );
+  return rows.length > 0 ? mapRawToAdminBookingDto(rows[0]!) : null;
+}
+
+/** The event history of one booking, oldest-first, newest-first?  Newest first:
+ *  the drawer shows "what just happened" at the top. Bounded by the FK side. */
+export async function findBookingTimeline(
+  db: Queryable,
+  bookingId: string,
+): Promise<BookingTimelineDto | null> {
+  const booking = await one<{ id: string; reference: string }>(
+    db,
+    `SELECT id, reference FROM bookings WHERE id = ?`,
+    bookingId,
+  );
+  if (!booking) return null;
+
+  const rows = await all<{
+    id: string;
+    eventType: string;
+    actorId: string | null;
+    actorName: string | null;
+    detail: string | null;
+    createdAt: string;
+  }>(
+    db,
+    `SELECT e.id, e.event_type AS eventType, e.actor_id AS actorId,
+            u.display_name AS actorName, e.detail, e.created_at AS createdAt
+       FROM booking_events e
+  LEFT JOIN users u ON u.id = e.actor_id
+      WHERE e.booking_id = ?
+   ORDER BY e.created_at DESC, e.id DESC
+      LIMIT 100`,
+    bookingId,
+  );
+
+  return {
+    bookingId: booking.id,
+    reference: booking.reference,
+    events: rows.map((e) => ({
+      id: e.id,
+      eventType: e.eventType as BookingTimelineDto['events'][number]['eventType'],
+      actor: e.actorName ?? e.actorId,
+      detail: e.detail,
+      createdAt: e.createdAt,
+    })),
+  };
+}
+
+/** Customer + their booking history (bounded, one query each). */
+export async function findAdminCustomer(
+  db: Queryable,
+  id: string,
+): Promise<CustomerDetailDto | null> {
+  const customer = await one<{
+    id: string;
+    name: string;
+    phone: string;
+    email: string | null;
+    pricingCategory: PricingCategory;
+    note: string | null;
+    createdAt: string;
+    updatedAt: string;
+  }>(
+    db,
+    `SELECT c.id, c.name, c.phone, c.email,
+            c.pricing_category AS pricingCategory, c.note,
+            c.created_at AS createdAt, c.updated_at AS updatedAt
+       FROM customers c
+      WHERE c.id = ?
+      LIMIT 1`,
+    id,
+  );
+  if (!customer) return null;
+
+  const bookings = await all<RawAdminBookingDbRow>(
+    db,
+    `SELECT b.id, b.reference, b.customer_id AS customerId,
+            c.name AS customerName, c.phone AS customerPhone,
+            b.service_id AS serviceId, s.name AS serviceName,
+            s.slug AS serviceSlug, s.duration_minutes AS serviceDurationMinutes,
+            b.staff_id AS staffId, st.name AS staffName,
+            b.pricing_category AS pricingCategory,
+            b.starts_at AS startsAt, b.ends_at AS endsAt,
+            b.status, b.quoted_amount AS quotedAmount,
+            b.discount_amount AS discountAmount, b.currency,
+            b.customer_note AS customerNote, b.admin_note AS adminNote,
+            b.rejection_reason AS rejectionReason,
+            b.created_at AS createdAt, b.updated_at AS updatedAt
+       FROM bookings b
+       JOIN customers c ON c.id = b.customer_id
+       JOIN services s ON s.id = b.service_id
+  LEFT JOIN staff st ON st.id = b.staff_id
+      WHERE b.customer_id = ?
+   ORDER BY b.starts_at DESC, b.id DESC
+      LIMIT 50`,
+    id,
+  );
+
+  return {
+    id: customer.id,
+    name: customer.name,
+    phone: customer.phone,
+    pricingCategory: customer.pricingCategory,
+    bookingsCount: bookings.length,
+    lastBookingAt: bookings.length > 0 ? bookings[0]!.startsAt : null,
+    email: customer.email,
+    note: customer.note,
+    createdAt: customer.createdAt,
+    updatedAt: customer.updatedAt,
+    bookings: bookings.map(mapRawToAdminBookingDto),
+  };
+}
+
+/** All price rows across all services, for the pricing ledger screen. */
+export async function listAdminPrices(db: Queryable): Promise<AdminPriceDto[]> {
+  const rows = await all<AdminPriceDto>(
+    db,
+    `SELECT p.id, p.service_id AS serviceId, p.pricing_category AS pricingCategory,
+            p.amount, p.currency
+       FROM service_prices p
+   ORDER BY p.service_id ASC, p.pricing_category ASC`,
+  );
+  return rows;
+}
+
+/** SEO overrides. Listed without a filter for the ledger, by entity for the
+ *  per-object panels; both bounded. */
+export async function listSeoOverrides(db: Queryable): Promise<SeoMetadataDto[]> {
+  const rows = await all<{
+    id: string;
+    entityType: 'page' | 'service' | 'post';
+    entityId: string;
+    title: string;
+    description: string;
+    canonicalUrl: string | null;
+    ogImage: string | null;
+    noindex: number;
+    updatedAt: string;
+  }>(
+    db,
+    `SELECT id, entity_type AS entityType, entity_id AS entityId, title, description,
+            canonical_url AS canonicalUrl, og_image AS ogImage, noindex,
+            updated_at AS updatedAt
+       FROM seo_metadata
+   ORDER BY updated_at DESC
+      LIMIT 200`,
+  );
+  return rows.map((r) => ({ ...r, noindex: r.noindex === 1 }));
+}
+
+export async function findSeoOverridesFor(
+  db: Queryable,
+  entityType: 'page' | 'service' | 'post',
+  entityId: string,
+): Promise<SeoMetadataDto | null> {
+  const row = await one<{
+    id: string;
+    entityType: 'page' | 'service' | 'post';
+    entityId: string;
+    title: string;
+    description: string;
+    canonicalUrl: string | null;
+    ogImage: string | null;
+    noindex: number;
+    updatedAt: string;
+  }>(
+    db,
+    `SELECT id, entity_type AS entityType, entity_id AS entityId, title, description,
+            canonical_url AS canonicalUrl, og_image AS ogImage, noindex,
+            updated_at AS updatedAt
+       FROM seo_metadata
+      WHERE entity_type = ? AND entity_id = ?
+      LIMIT 1`,
+    entityType,
+    entityId,
+  );
+  return row ? { ...row, noindex: row.noindex === 1 } : null;
+}
+
+/* ── Admin command-palette search ──────────────────────────────── */
+
+/** Bounded union search for the palette. Each branch is a prefix/exact match
+ *  on an indexed column (never a leading-wildcard scan, contract §28), and the
+ *  whole thing is clamped so a wide query still answers in one tick. */
+export async function adminQuickSearch(
+  db: Queryable,
+  query: string,
+  limit = 8,
+): Promise<AdminSearchHitDto[]> {
+  const q = query.trim();
+  if (q.length < 2) return [];
+  const safeLimit = clampLimit(limit, 1, 20);
+  const like = `${q}%`;
+  const out: AdminSearchHitDto[] = [];
+
+  const [bookings, customers, services] = await Promise.all([
+    all<{ id: string; reference: string; status: string; startsAt: string; name: string }>(
+      db,
+      `SELECT b.id, b.reference, b.status, b.starts_at AS startsAt, c.name
+         FROM bookings b JOIN customers c ON c.id = b.customer_id
+        WHERE b.reference LIKE ?
+        ORDER BY b.starts_at DESC
+        LIMIT ?`,
+      like,
+      safeLimit,
+    ),
+    all<{ id: string; name: string; phone: string }>(
+      db,
+      `SELECT id, name, phone FROM customers
+        WHERE phone LIKE ? OR name LIKE ?
+        ORDER BY created_at DESC
+        LIMIT ?`,
+      like,
+      like,
+      safeLimit,
+    ),
+    all<{ id: string; name: string; slug: string }>(
+      db,
+      `SELECT id, name, slug FROM services
+        WHERE name LIKE ? OR slug LIKE ?
+        ORDER BY display_order ASC
+        LIMIT ?`,
+      like,
+      like,
+      safeLimit,
+    ),
+  ]);
+
+  for (const b of bookings) {
+    out.push({
+      kind: 'booking',
+      id: b.id,
+      title: b.reference,
+      subtitle: b.name,
+      href: `/admin/bookings?status=${encodeURIComponent(b.status)}`,
+      status: b.status,
+      score: 1,
+    });
+  }
+  for (const c of customers) {
+    out.push({
+      kind: 'customer',
+      id: c.id,
+      title: c.name,
+      subtitle: c.phone,
+      href: `/admin/customers?q=${encodeURIComponent(c.phone)}`,
+      status: null,
+      score: 0.9,
+    });
+  }
+  for (const s of services) {
+    out.push({
+      kind: 'service',
+      id: s.id,
+      title: s.name,
+      subtitle: s.slug,
+      href: `/admin/services?q=${encodeURIComponent(s.name)}`,
+      status: null,
+      score: 0.8,
+    });
+  }
+
+  return out.sort((a, b) => b.score - a.score || a.title.localeCompare(b.title)).slice(0, safeLimit);
+}
+

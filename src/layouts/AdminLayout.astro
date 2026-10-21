@@ -13,9 +13,13 @@ import '../styles/admin/operators.css';
 // v3 admin pass — LAST: type/tap floors, table + chip + focus language across
 // all 19 console screens. Refines the four sheets above, overrides nothing else.
 import '../styles/admin/ux-v3-admin.css';
+// W4 primitives — toast, page header, empty state, palette, skip link. Loaded
+// last so it can refine the v3 pass.
+import '../styles/admin/primitives.css';
 import Icon from '../components/ui/Icon.astro';
-import { hasPermission } from '../domain/rbac/rbac.types';
-import type { Permission } from '../domain/rbac/rbac.types';
+import CommandPalette from '../components/admin/CommandPalette.astro';
+import { hasPermission, ROLE_LABELS } from '../domain/rbac/rbac.types';
+import type { Permission, RoleKey } from '../domain/rbac/rbac.types';
 
 interface Props {
   title?: string;
@@ -27,9 +31,16 @@ const auth = Astro.locals.auth || {
   id: 'usr_admin_live',
   email: 'admin@tehranlaser.ir',
   displayName: 'مدیر ارشد کلینیک',
-  role: 'SUPER_ADMIN',
+  roles: ['SUPER_ADMIN'] as RoleKey[],
   permissions: ['booking.read', 'settings.read', 'customer.read', 'audit.read'],
 };
+
+/* The badge showed a hardcoded "SUPER ADMIN" for every session, including
+   STAFF and EDITOR — a lie, not a fallback. Show the real primary role, with
+   the Persian label from the RBAC registry so a new role never renders as a
+   raw key. */
+const primaryRole: RoleKey = auth.roles[0] ?? 'STAFF';
+const roleLabel = ROLE_LABELS[primaryRole]?.fa ?? primaryRole;
 
 interface NavItem {
   id: string;
@@ -84,6 +95,9 @@ const navGroups = visibleNav.reduce<Array<{ group: string; items: typeof navItem
   </head>
   <body class="admin-body">
     <div class="admin-shell">
+      <!-- Keyboard users land here first: 17 sidebar links sit between them and
+           the screen they opened. -->
+      <a href="#adminMain" class="admin-skip-link">پرش به محتوای اصلی</a>
       <!-- 3D High-Tech Topbar -->
       <header class="admin-topbar">
         <div class="admin-topbar__brand">
@@ -124,7 +138,7 @@ const navGroups = visibleNav.reduce<Array<{ group: string; items: typeof navItem
             </div>
             <div style="display: flex; flex-direction: column; gap: 2px;">
               <span class="user-name">{auth.displayName || auth.email}</span>
-              <span class="badge-role-gold">SUPER ADMIN</span>
+              <span class="badge-role-gold">{roleLabel}</span>
             </div>
           </div>
 
@@ -174,10 +188,25 @@ const navGroups = visibleNav.reduce<Array<{ group: string; items: typeof navItem
       <div class="admin-sidebar-overlay" id="adminSidebarOverlay" hidden></div>
 
       <!-- Main Content Area -->
-      <main class="admin-main">
+      <main class="admin-main" id="adminMain" tabindex="-1">
         <slot />
       </main>
     </div>
+
+    <!-- Command palette (Cmd/Ctrl+K): the console has 19 screens and no global
+         search — this is how a receptionist finds a booking reference without
+         knowing which page it lives on. -->
+    <CommandPalette />
+
+    <!-- Toast host: created lazily by TLToast so screens that never toast pay
+         nothing. -->
+    <script>
+      import { TLToast } from '../lib/admin/ui';
+      // Expose ONE implementation to every inline script on every screen.
+      // Pages keep their own `showToast` copies until they migrate; this is
+      // the contract they migrate to.
+      (window as unknown as { TLToast: typeof TLToast }).TLToast = TLToast;
+    </script>
 
     <!-- Script for Clock & Logout -->
     <script>
@@ -185,11 +214,24 @@ const navGroups = visibleNav.reduce<Array<{ group: string; items: typeof navItem
       const menuBtn = document.getElementById('adminMenuBtn');
       const sidebar = document.getElementById('adminSidebar');
       const overlay = document.getElementById('adminSidebarOverlay');
+      // Focus restore: the drawer opens from the hamburger, so closing it must
+      // hand focus back instead of stranding a keyboard user at the top of the
+      // document.
+      let lastTrigger: HTMLElement | null = null;
 
       function setMenu(open: boolean) {
         document.body.classList.toggle('sidebar-open', open);
         if (menuBtn) menuBtn.setAttribute('aria-expanded', String(open));
         if (overlay) overlay.hidden = !open;
+        if (sidebar) sidebar.classList.toggle('is-open', open);
+        if (open) {
+          lastTrigger = document.activeElement as HTMLElement | null;
+          const first = sidebar?.querySelector<HTMLAnchorElement>('a[href]');
+          first?.focus();
+        } else if (lastTrigger) {
+          lastTrigger.focus();
+          lastTrigger = null;
+        }
       }
 
       menuBtn?.addEventListener('click', () => {
@@ -197,8 +239,32 @@ const navGroups = visibleNav.reduce<Array<{ group: string; items: typeof navItem
       });
       overlay?.addEventListener('click', () => setMenu(false));
       sidebar?.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => setMenu(false)));
+
+      // Focus trap + Esc: Tab cycles inside the drawer while it is open,
+      // instead of escaping behind the overlay where the links are unreachable.
+      const FOCUSABLE = 'a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])';
       document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') setMenu(false);
+        if (!sidebar?.classList.contains('is-open')) {
+          if (e.key === 'Escape') setMenu(false);
+          return;
+        }
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          setMenu(false);
+          return;
+        }
+        if (e.key !== 'Tab') return;
+        const items = Array.from(sidebar.querySelectorAll<HTMLElement>(FOCUSABLE));
+        if (items.length === 0) return;
+        const first = items[0]!;
+        const last = items[items.length - 1]!;
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
       });
 
       // Live Tehran Time Clock

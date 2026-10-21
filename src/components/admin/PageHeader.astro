@@ -1,0 +1,44 @@
+---
+/**
+ * PageHeader — the one console page header.
+ *
+ * Replaces 16 hand-built header rows that each re-declared the same icon box,
+ * title row, subtitle and actions cluster in page-level CSS. One component
+ * means one rhythm, one focus order, and a title that can never drift to a
+ * different size on one screen.
+ *
+ * Usage:
+ *   <PageHeader icon="bookings" title="مدیریت نوبت‌ها" subtitle="…">
+ *     <span slot="actions">…</span>
+ *   </PageHeader>
+ */
+import Icon from '../ui/Icon.astro';
+
+interface Props {
+  /** Icon name from the shared Icon map. */
+  icon: string;
+  title: string;
+  subtitle?: string;
+  /** Optional count/status pill rendered after the title. */
+  meta?: string;
+}
+
+const { icon, title, subtitle, meta } = Astro.props;
+const hasActions = Astro.slots.has('actions');
+---
+
+<header class="tl-page-header">
+  <div class="tl-page-header__texts">
+    <h1 class="tl-page-header__title">
+      <span class="tl-page-header__icon"><Icon name={icon} size={26} aria-hidden /></span>
+      <span>{title}</span>
+      {meta && <span class="tl-page-header__meta">{meta}</span>}
+    </h1>
+    {subtitle && <p class="tl-page-header__sub">{subtitle}</p>}
+  </div>
+  {hasActions && (
+    <div class="tl-page-header__actions">
+      <slot name="actions" />
+    </div>
+  )}
+</header>
