@@ -1,6 +1,7 @@
 ---
 import PublicLayout from '../layouts/PublicLayout.astro';
 import Icon from '../components/ui/Icon.astro';
+import Breadcrumbs from '../components/ui/Breadcrumbs.astro';
 import { createBreadcrumbSchema, resolveCanonicalOrigin } from '../lib/seo';
 
 // ContactPage entity + breadcrumbs. The clinic node itself is emitted once by
@@ -21,10 +22,12 @@ const contactJsonLd = {
   isPartOf: { '@id': `${origin}/#website` },
 };
 
-const breadcrumbJsonLd = createBreadcrumbSchema([
+const breadcrumbItems = [
   { name: 'صفحه اصلی', url: '/' },
   { name: 'تماس و آدرس', url: '/contact' },
-]);
+];
+
+const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
 ---
 
 <PublicLayout
@@ -41,6 +44,7 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
   theme="dark"
 >
   <div class="contact-page-wrapper">
+    <Breadcrumbs items={breadcrumbItems} />
     <!-- Header Hero -->
     <div class="contact-hero-strip">
       <div class="container text-center">
