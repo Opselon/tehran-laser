@@ -1,0 +1,373 @@
+---
+/**
+ * Journal strip — the homepage's window into the blog.
+ *
+ * Renders strictly from the DB: no posts ⇒ no section (never a placeholder,
+ * never hard-coded fake content). Gating is the same as every other homepage
+ * block: `content-blog` off ⇒ nothing is emitted, not even an empty shell, so
+ * the plugin hub state stays the single source of truth for what the site shows.
+ */
+import Icon from '../ui/Icon.astro';
+import { formatJalaliDate, toPersianDigits } from '../../lib/datetime/jalali';
+import { cspSafeCover, readingMinutes } from '../../lib/content/blog-presenter';
+
+export interface JournalPost {
+  slug: string;
+  title: string;
+  excerpt: string;
+  coverImage: string | null;
+  author: string | null;
+  publishedAt: string | null;
+}
+
+interface Props {
+  posts: JournalPost[];
+}
+
+const { posts } = Astro.props;
+
+/* Explicit class strings rather than an interpolated template literal: with
+   fewer posts than columns the grid must not leave a dead third column. */
+const gridClass =
+  posts.length >= 3
+    ? 'journal-grid journal-grid--3'
+    : posts.length === 2
+      ? 'journal-grid journal-grid--2'
+      : 'journal-grid journal-grid--1';
+
+---
+
+{
+  posts.length > 0 && (
+    <section class="section journal-section" aria-labelledby="journal-title">
+      <div class="container">
+        <header class="section-header text-center">
+          <span class="section-subtitle">مجله آموزشی کلینیک</span>
+          <h2 class="section-title" id="journal-title">
+            آخرین مقالات و راهنماهای لیزر
+          </h2>
+          <p class="section-desc">
+            مطالبی که مراجعین ما قبل از اولین جلسه می‌خوانند — از آمادگی پوست تا فواصل جلسات.
+          </p>
+        </header>
+
+        <div class={gridClass}>
+          {posts.map((post) => {
+            const cover = cspSafeCover(post.coverImage, Astro.url.origin);
+            return (
+              <article class="journal-card">
+                {cover && (
+                  <div class="journal-media">
+                    <img
+                      src={cover}
+                      alt={`تصویر شاخص مقاله ${post.title}`}
+                      class="journal-img"
+                      width="800"
+                      height="500"
+                      loading="lazy"
+                      decoding="async"
+                      /* A cover that fails to decode takes its whole slot with
+                         it — an empty 8:5 box reads as a broken image, while a
+                         text-first card reads as a deliberate design. */
+                      onerror="this.parentElement.style.display='none'"
+                    />
+                  </div>
+                )}
+                <div class="journal-body">
+                  <div class="journal-meta">
+                    <span class="journal-meta-item">
+                      <Icon name="calendar" size={13} />
+                      {post.publishedAt && (
+                        <time datetime={post.publishedAt}>
+                          {formatJalaliDate(post.publishedAt.slice(0, 10))}
+                        </time>
+                      )}
+                    </span>
+                    <span class="journal-meta-item">
+                      <Icon name="clock" size={13} />
+                      {toPersianDigits(readingMinutes(post.excerpt))} دقیقه مطالعه
+                    </span>
+                  </div>
+                  <h3 class="journal-title">
+                    <a href={`/blog/${post.slug}`}>{post.title}</a>
+                  </h3>
+                  <p class="journal-excerpt">{post.excerpt}</p>
+                  <div class="journal-foot">
+                    <span class="journal-author">
+                      <Icon name="users" size={13} />
+                      {post.author || 'تهران لیزر'}
+                    </span>
+                    <a class="journal-link" href={`/blog/${post.slug}`}>
+                      ادامه مطلب
+                      <Icon name="arrowLeft" size={14} />
+                    </a>
+                  </div>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+
+        <div class="journal-cta">
+          <a class="journal-cta-btn" href="/blog">
+            مشاهده همه مقالات
+            <Icon name="arrowLeft" size={16} />
+          </a>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+<style>
+  /* Persian is a joined script — the shared sheet's positive tracking on the
+     eyebrow opens gaps between joined glyphs. */
+  .section-subtitle {
+    letter-spacing: normal;
+  }
+
+  .journal-section {
+    padding: clamp(48px, 7vw, 88px) 0;
+  }
+
+  .journal-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 22px;
+    margin-top: 34px;
+  }
+
+  .journal-card {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    background: rgba(16, 20, 24, 0.72);
+    border: 1px solid rgba(232, 203, 143, 0.14);
+    border-radius: 18px;
+    overflow: hidden;
+    transition:
+      transform 0.28s ease,
+      border-color 0.28s ease,
+      box-shadow 0.28s ease;
+  }
+
+  .journal-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(232, 203, 143, 0.42);
+    box-shadow: 0 18px 42px -18px rgba(0, 0, 0, 0.75);
+  }
+
+  .journal-media {
+    position: relative;
+    aspect-ratio: 8 / 5;
+    background: #10151a;
+    overflow: hidden;
+  }
+
+
+  .journal-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s ease;
+  }
+
+  .journal-card:hover .journal-img {
+    transform: scale(1.045);
+  }
+
+
+  .journal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 18px 18px 16px;
+    flex: 1 1 auto;
+  }
+
+  .journal-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    color: rgba(154, 163, 178, 0.96);
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .journal-meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .journal-title {
+    margin: 0;
+    font-size: 1.02rem;
+    line-height: 1.75;
+    font-weight: 700;
+  }
+
+  .journal-title a {
+    color: #f4f7f6;
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .journal-title a:hover,
+  .journal-title a:focus-visible {
+    color: #e8cb8f;
+  }
+
+  .journal-title a:focus-visible {
+    outline: 2px solid #e8cb8f;
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  .journal-excerpt {
+    margin: 0;
+    color: rgba(200, 209, 220, 0.9);
+    font-size: 13px;
+    line-height: 2;
+    /* clamp to a preview so the three cards stay the same height */
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .journal-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: auto;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+  }
+
+  .journal-author {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: rgba(154, 163, 178, 0.96);
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .journal-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: #e8cb8f;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    /* hit area, not just the text glyphs */
+    min-height: 24px;
+    padding: 2px 4px;
+    margin: -2px -4px;
+  }
+
+  .journal-link:hover,
+  .journal-link:focus-visible {
+    color: #f4e3c0;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  .journal-link:focus-visible {
+    outline: 2px solid #e8cb8f;
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  .journal-cta {
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+  }
+
+  .journal-cta-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 12px 26px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #e8cb8f 0%, #c9a45c 100%);
+    color: #121417;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    box-shadow: 0 12px 28px -14px rgba(201, 164, 92, 0.7);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .journal-cta-btn:hover,
+  .journal-cta-btn:focus-visible {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 34px -14px rgba(201, 164, 92, 0.85);
+  }
+
+  .journal-cta-btn:focus-visible {
+    outline: 2px solid #e8cb8f;
+    outline-offset: 3px;
+  }
+
+  /* Fewer cards than columns: centre them instead of leaving a dead column. */
+  .journal-grid--2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-width: 860px;
+    margin-inline: auto;
+  }
+
+  .journal-grid--1 {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 460px;
+    margin-inline: auto;
+  }
+
+  /* Two-up on small laptops and large tablets */
+  @media (max-width: 1100px) {
+    .journal-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  /* One-up on phones — a 3-across strip at 320px is unreadable */
+  @media (max-width: 768px) {
+    .journal-grid {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 16px;
+    }
+
+    .journal-card:hover {
+      transform: none;
+    }
+
+    .journal-card:hover .journal-img {
+      transform: none;
+    }
+
+    .journal-body {
+      padding: 16px 16px 14px;
+    }
+
+    .journal-excerpt {
+      -webkit-line-clamp: 4;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .journal-card,
+    .journal-img,
+    .journal-cta-btn {
+      transition: none;
+    }
+  }
+</style>

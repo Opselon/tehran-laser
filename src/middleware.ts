@@ -4,11 +4,18 @@ import { loadAuthUser } from './server/auth/session';
 import { readSessionCookie } from './lib/security/session-cookie';
 import { fail } from './lib/api/respond';
 import {
+  EDGE_TTL_S,
   getEdgeCacheStore,
   isEdgeCacheable,
   readEdgeCache,
   writeEdgeCache,
 } from './lib/http/edge-cache';
+import {
+  REQUEST_ID_HEADER,
+  logRequest,
+  resolveRequestId,
+  serverTimingHeader,
+} from './lib/http/observability';
 import type { AuthUser } from './domain/rbac/rbac.types';
 
 /** Routes that must never render or respond before authentication is established (§326).
@@ -76,8 +83,28 @@ function applyPublicCache(response: Response, request: Request, pathname: string
    identical to a miss in every respect except speed. */
 
 export const onRequest = defineMiddleware(async (context, next) => {
+  const startedAt = Date.now();
   const { pathname } = context.url;
+  const requestId = resolveRequestId(context.request);
   const token = readSessionCookie(context.request);
+
+  /** Stamp the correlation headers on every exit path (hit, block, render). */
+  const finish = (response: Response, cache?: 'HIT' | 'MISS'): Response => {
+    const durationMs = Date.now() - startedAt;
+    response.headers.set(REQUEST_ID_HEADER, requestId);
+    response.headers.set('server-timing', serverTimingHeader(durationMs));
+    if (cache) response.headers.set('x-edge-cache', cache);
+    logRequest({
+      requestId,
+      method: context.request.method,
+      pathname,
+      status: response.status,
+      durationMs,
+      ...(cache ? { cache } : {}),
+      ...(context.locals.auth ? { userId: context.locals.auth.id } : {}),
+    });
+    return response;
+  };
 
   const auth: AuthUser | null = token ? await loadAuthUser(env.DB, token) : null;
 
@@ -94,31 +121,41 @@ export const onRequest = defineMiddleware(async (context, next) => {
           302,
         );
     applySecurityHeaders(blocked);
-    return blocked;
+    return finish(blocked);
   }
 
   context.locals.auth = auth;
 
   /* Read path: serve an anonymous page straight from the edge cache. The read
      happens before `next()`, so a hit skips SSR and every D1 query behind it. */
-  const cache =
-    !token && isEdgeCacheable(context.request, pathname) ? getEdgeCacheStore() : null;
+  const cache = !token && isEdgeCacheable(context.request, pathname) ? getEdgeCacheStore() : null;
   if (cache) {
     const hit = await readEdgeCache(cache, context.url);
     if (hit) {
       const replayed = new Response(hit.body, hit);
-      replayed.headers.set('x-edge-cache', 'HIT');
       applySecurityHeaders(replayed);
-      return replayed;
+      return finish(replayed, 'HIT');
     }
   }
 
   const response = await next();
   applySecurityHeaders(response);
-  // A session cookie on a public route can still mean a personalized render: never cache it.
+  /* A session cookie on a public route can still mean a personalized render: never cache it. */
   if (!token) applyPublicCache(response, context.request, pathname);
 
-  if (cache) await writeEdgeCache(cache, context.url, response);
+  if (cache) {
+    /* A stored copy must carry the shared-cache TTL; the API envelope's
+       `no-store` is right for a personal response but would make the whole
+       public-JSON cache pointless. Errors keep their own headers so a blip is
+       never cached by a browser or an intermediate proxy. */
+    if (response.status === 200) {
+      response.headers.set(
+        'cache-control',
+        `public, max-age=${EDGE_TTL_S}, stale-while-revalidate=300`,
+      );
+    }
+    await writeEdgeCache(cache, context.url, response);
+  }
 
-  return response;
+  return finish(response, cache ? 'MISS' : undefined);
 });
