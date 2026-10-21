@@ -1,0 +1,82 @@
+---
+/**
+ * /admin/operators — the team hub.
+ *
+ * SSR renders the roster, the catalog and today's shift coverage first, so the
+ * page is useful before the island hydrates and readable with JS disabled. The
+ * island then owns filtering/mutations and talks to /api/v1/admin/operators.
+ *
+ * Authorization is checked here as well as in the API: a user without
+ * operator.read gets an explanatory panel, never the roster payload.
+ */
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import Icon from '../../../components/ui/Icon.astro';
+import { OperatorsApp } from '../../../components/admin/operators/OperatorsApp';
+import { env } from 'cloudflare:workers';
+import { getPublicSettings } from '../../../server/repositories';
+import { buildRosterView, loadOperatorCatalog, loadServiceOptions } from '../../../server/operator-view';
+import { hasPermission } from '../../../domain/rbac/rbac.types';
+
+const auth = Astro.locals.auth;
+const allowed = Boolean(auth && hasPermission(auth, 'operator.read'));
+const canWrite = Boolean(auth && hasPermission(auth, 'operator.write'));
+const canManageAccounts = Boolean(auth && hasPermission(auth, 'operator.account'));
+
+let catalog: Awaited<ReturnType<typeof loadOperatorCatalog>> | null = null;
+let services: Array<{ id: string; name: string }> = [];
+let view: Awaited<ReturnType<typeof buildRosterView>> | null = null;
+
+if (allowed) {
+  let timezone = 'Asia/Tehran';
+  try {
+    timezone = (await getPublicSettings(env.DB)).timezone || timezone;
+  } catch {
+    /* settings unreadable — the API default is the same */
+  }
+
+  try {
+    [catalog, services] = await Promise.all([loadOperatorCatalog(env.DB), loadServiceOptions(env.DB)]);
+  } catch (error) {
+    console.error('[operators] failed to load the page vocabulary:', error);
+  }
+
+  view = await buildRosterView({
+    db: env.DB,
+    timezone,
+    canWrite,
+    canManageAccounts,
+    currentUserId: auth?.id ?? null,
+  });
+}
+---
+
+<AdminLayout title="تیم و اپراتورها" activeNav="operators">
+  <div class="admin-content-pad">
+    {allowed && catalog && view ? (
+      <OperatorsApp
+        client:load
+        initial={view.initial}
+        catalog={catalog}
+        services={services}
+        initialCoverage={view.initialCoverage}
+      />
+    ) : (
+      <section class="ops-shell" style="margin-top: 12px">
+        <div class="ops-empty">
+          <div class="ops-empty__icon">
+            <Icon name={allowed ? 'warning' : 'lock'} size={24} />
+          </div>
+          <h3>{allowed ? 'بارگذاری فهرست تیم ناموفق بود' : 'دسترسی به فهرست تیم ندارید'}</h3>
+          <p>
+            {allowed
+              ? 'پیکربندی تیم خوانده نشد. صفحه را دوباره بارگذاری کنید؛ اگر تکرار شد، وضعیت اتصال پایگاه‌داده را بررسی کنید.'
+              : 'برای مشاهده و مدیریت اپراتورها به مجوز «مشاهده تیم اپراتور» نیاز دارید. این محدودیت در سرور اعمال می‌شود، نه فقط در رابط کاربری.'}
+          </p>
+          <div class="ops-hero__actions" style="justify-content: center">
+            <a class="ops-btn" href="/admin">بازگشت به داشبورد</a>
+          </div>
+        </div>
+      </section>
+    )}
+  </div>
+</AdminLayout>

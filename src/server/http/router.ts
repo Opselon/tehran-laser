@@ -8,6 +8,7 @@
 
 import { env } from 'cloudflare:workers';
 import { requirePermission } from '../auth/guard';
+import { handleOperatorRoutes } from './operators.routes';
 import { createSession, revokeSession } from '../auth/session';
 import {
   buildSessionCookie,
@@ -212,6 +213,14 @@ export async function handleApiRequest(
         roles: locals.auth.roles,
         permissions: locals.auth.permissions,
       });
+    }
+
+    /* ── Team / operators (§ team module) ────────────────────────
+       Delegated so the team contract stays in one reviewable file. The handler
+       returns null for anything it does not own, leaving the table below flat. */
+    {
+      const operatorResponse = await handleOperatorRoutes(request, locals, pathname, method);
+      if (operatorResponse) return operatorResponse;
     }
 
     /* ── Public: Services & Pricing (§5) ─────────────────────── */
