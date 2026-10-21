@@ -742,7 +742,8 @@ body.theme-dark-obsidian .hero-title {
 
 body.theme-dark-obsidian .hero-title .gold-gradient-text,
 .gold-gradient-text {
-  background: linear-gradient(100deg, #f4e2b8 0%, var(--v2-gold) 40%, var(--v2-gold-deep) 100%);
+  /* ux-v3: one emphasis ramp — the emerald variants read as a second brand */
+  background: linear-gradient(135deg, #f4e2b8 0%, #e8cb8f 45%, #c9a45c 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -1149,7 +1150,7 @@ body.theme-dark-obsidian .metric-item::after {
   inset-block-start: 14px;
   inset-inline-end: 12px;
   color: var(--v2-gold);
-  font-size: 10px;
+  font-size: 11px; /* 11px floor */
   font-weight: 700;
   opacity: 0.5;
   font-variant-numeric: tabular-nums;
@@ -1721,7 +1722,7 @@ body.theme-dark-obsidian .gpt-mens-tag {
   border-radius: 999px;
   border: 1px solid rgba(59, 217, 164, 0.3);
   color: var(--v2-emerald);
-  font-size: 10px;
+  font-size: 11px; /* 11px floor */
   font-weight: 700;
   white-space: nowrap;
 }
@@ -2389,7 +2390,7 @@ body.theme-dark-obsidian .ig-reel-badge {
   border: 1px solid rgba(232, 203, 143, 0.3);
   background: rgba(232, 203, 143, 0.12);
   color: var(--v2-gold);
-  font-size: 10px;
+  font-size: 11px; /* 11px floor */
   font-weight: 700;
 }
 

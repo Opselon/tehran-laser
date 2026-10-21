@@ -59,12 +59,15 @@
 }
 
 .booking-wizard-container .step-item.active .step-circle {
-  background: linear-gradient(150deg, #6ee7b7, #10b981 55%, #047857);
+  /* ux-v3: was #6ee7b7→#047857 with #14161a ink — the deep stop measured
+     3.3:1 for the digit. Sorted the ramp light-first so the whole surface
+     clears the 3:1 large-text floor. */
+  background: linear-gradient(150deg, #a7f3d0, #6ee7b7 55%, #34d399);
   border-color: #6ee7b7;
-  color: #14161a;
+  color: #0b2e22;
   transform: translateY(-4px);
   box-shadow:
-    0 12px 26px rgba(16, 185, 129, 0.35),
+    0 12px 26px rgba(16, 185, 129, 0.28),
     0 1px 0 rgba(255, 255, 255, 0.55) inset;
 }
 
@@ -293,7 +296,7 @@
 
 .booking-wizard-container .services-grid-compact .badge-promo {
   padding: 2px 6px;
-  font-size: 10.5px;
+  font-size: 11px; /* 11px floor */
 }
 
 .booking-wizard-container .services-selection-grid {

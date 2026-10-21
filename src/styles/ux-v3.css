@@ -1,0 +1,1036 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   UX V3 — "OBSIDIAN ATELIER" SYSTEM PASS
+   ═══════════════════════════════════════════════════════════════════════════
+   One coherent layer on top of site-v2.css. It does not restyle every page:
+   it fixes the system underneath them, so all 25 public routes inherit the
+   same rhythm, control geometry, card language, focus treatment and motion.
+
+   Rules of this file:
+   · Scoped to `body.theme-dark-obsidian` — the public site's only theme.
+   · One accent (champagne) for ACTION, one signal (emerald) for VERIFIED.
+     Gold is never used for "success", emerald is never used for "click me".
+   · Floors: type ≥11px, touch targets ≥44px, no horizontal overflow 320–1440.
+   · Persian typography: zero letter-spacing on Persian copy, line-height
+     ≥1.45 for display and ≥1.8 for body.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. TOKENS ──────────────────────────────────────────────────────────── */
+body.theme-dark-obsidian {
+  /* Action accent (champagne) — buttons, links, active nav, emphasis */
+  --ux-accent: #e8cb8f;
+  --ux-accent-hi: #f4e2b8;
+  --ux-accent-deep: #c9a45c;
+  --ux-accent-ink: #171104; /* text ON accent fills (≈10.4:1) */
+  --ux-accent-soft: rgba(232, 203, 143, 0.1);
+  --ux-accent-line: rgba(232, 203, 143, 0.28);
+
+  /* Signal (emerald) — only for verified / success / "included" semantics */
+  --ux-signal: #34d399;
+  --ux-signal-soft: rgba(52, 211, 153, 0.12);
+  --ux-signal-line: rgba(52, 211, 153, 0.34);
+
+  /* Surfaces */
+  --ux-canvas: #080b0d;
+  --ux-surface: #0c1215;
+  --ux-surface-2: #10171a;
+  --ux-surface-3: #141d21;
+  --ux-line: rgba(255, 255, 255, 0.085);
+  --ux-line-soft: rgba(255, 255, 255, 0.055);
+  --ux-line-strong: rgba(255, 255, 255, 0.14);
+
+  /* Ink */
+  --ux-ink: #f4f7f6;
+  --ux-ink-soft: #cfd8d6;
+  --ux-muted: #a3b0ae; /* 7.4:1 on --ux-surface */
+  --ux-faint: #8b9997; /* 5.6:1 — the floor for secondary copy */
+
+  /* Accessibility floors kept beside the geometry they constrain */
+  --tap-target-min: 44px;
+  --tap-target-comfortable: 48px;
+
+  /* Geometry */
+  --ux-r-card: 20px;
+  --ux-r-ctl: 14px;
+  --ux-r-sm: 10px;
+  --ux-r-pill: 999px;
+
+  /* Rhythm */
+  --ux-pad-section: clamp(56px, 6.2vw, 92px);
+  --ux-pad-gutter: clamp(16px, 4vw, 24px);
+  --ux-gap-stack: clamp(14px, 2vw, 20px);
+
+  /* Elevation — warm shadow + a single top highlight, never a glow soup */
+  --ux-shadow-1: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 10px 30px -18px rgba(0, 0, 0, 0.9);
+  --ux-shadow-2:
+    0 1px 0 rgba(255, 255, 255, 0.06) inset, 0 22px 48px -26px rgba(0, 0, 0, 0.95),
+    0 0 0 1px rgba(232, 203, 143, 0.06);
+  --ux-ring: 0 0 0 2px var(--ux-canvas), 0 0 0 4px var(--ux-accent);
+}
+
+/* ── 2. CHROME ──────────────────────────────────────────────────────────── */
+
+/* Header: condense and harden once the page moves. The old rule only toggled
+   a class with no visual state, so the bar never actually changed. */
+body.theme-dark-obsidian .site-header {
+  transition:
+    height var(--motion-normal) var(--ease-out),
+    background-color var(--motion-normal) var(--ease-out),
+    border-color var(--motion-normal) var(--ease-out),
+    box-shadow var(--motion-normal) var(--ease-out);
+}
+
+body.theme-dark-obsidian .site-header.is-scrolled,
+body.theme-dark-obsidian .site-header:focus-within {
+  background-color: rgba(6, 9, 11, 0.92);
+  border-bottom-color: var(--ux-line);
+  box-shadow: 0 14px 34px -26px rgba(0, 0, 0, 1);
+}
+
+@media (min-width: 993px) {
+  body.theme-dark-obsidian .site-header.is-scrolled .header-inner {
+    min-height: 64px;
+  }
+}
+
+/* Desktop nav: the active route was completely indistinguishable from the
+   rest (measured: identical colour, background and border). Give the current
+   page a persistent marker, and every link a real hover surface. */
+body.theme-dark-obsidian .desktop-nav .nav-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding-inline: 13px;
+  border-radius: var(--ux-r-pill);
+  color: var(--ux-ink-soft);
+  font-weight: 600;
+  transition:
+    color var(--motion-fast) var(--ease-out),
+    background-color var(--motion-fast) var(--ease-out);
+}
+
+body.theme-dark-obsidian .desktop-nav .nav-link:hover {
+  color: var(--ux-ink);
+  background-color: rgba(255, 255, 255, 0.045);
+}
+
+body.theme-dark-obsidian .desktop-nav .nav-link.active {
+  color: var(--ux-accent);
+  background-color: var(--ux-accent-soft);
+  font-weight: 700;
+}
+
+body.theme-dark-obsidian .desktop-nav .nav-link.active::after {
+  content: '';
+  position: absolute;
+  inset-inline: 13px;
+  inset-block-end: 5px;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, var(--ux-accent), transparent);
+}
+
+/* Mobile drawer: a proper sheet — brand context, generous rows, real actions. */
+body.theme-dark-obsidian .mobile-drawer {
+  border-top: 1px solid var(--ux-line);
+  background: linear-gradient(180deg, rgba(10, 14, 17, 0.99), rgba(6, 9, 11, 0.99));
+  box-shadow: 0 30px 60px -30px #000;
+}
+
+body.theme-dark-obsidian .drawer-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 52px;
+  padding-inline: 14px;
+  border-radius: var(--ux-r-ctl);
+  color: var(--ux-ink-soft);
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+
+body.theme-dark-obsidian .drawer-link + .drawer-link {
+  margin-top: 4px;
+}
+
+body.theme-dark-obsidian .drawer-link:hover,
+body.theme-dark-obsidian .drawer-link:focus-visible {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: var(--ux-line);
+  color: var(--ux-ink);
+}
+
+body.theme-dark-obsidian .drawer-link.active {
+  color: var(--ux-accent);
+  background: var(--ux-accent-soft);
+  border-color: var(--ux-accent-line);
+}
+
+body.theme-dark-obsidian .drawer-link.active::after {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ux-accent);
+}
+
+/* ── 3. RHYTHM & SECTION HEADERS ────────────────────────────────────────── */
+
+/* One rhythm token instead of eleven hand-set 84px blocks. Sections that are
+   purely visual (gallery, Instagram) can still opt into a tighter cadence. */
+body.theme-dark-obsidian main > .section,
+body.theme-dark-obsidian main > section.section,
+body.theme-dark-obsidian .site-main > .section {
+  padding-block: var(--ux-pad-section);
+}
+
+body.theme-dark-obsidian .section--tight {
+  padding-block: calc(var(--ux-pad-section) * 0.62);
+}
+
+/* A hairline between stacked sections gives the long mobile page joints
+   without adding a hard full-width rule. */
+@media (max-width: 768px) {
+  body.theme-dark-obsidian .section + .section {
+    border-top: 1px solid var(--ux-line-soft);
+  }
+}
+
+body.theme-dark-obsidian .section-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: clamp(26px, 3.4vw, 40px);
+}
+
+body.theme-dark-obsidian .section-header.text-center {
+  align-items: center;
+}
+
+body.theme-dark-obsidian .section-title {
+  color: var(--ux-ink);
+  line-height: 1.42;
+  text-wrap: balance;
+  max-width: 30ch;
+  margin: 0;
+}
+
+body.theme-dark-obsidian .section-desc,
+body.theme-dark-obsidian .section-lead {
+  color: var(--ux-muted);
+  line-height: 1.9;
+  text-wrap: pretty;
+  max-width: 62ch;
+  margin: 0;
+}
+
+/* Eyebrow. Persian is a joined script: no letter-spacing, ever. The gold
+   hairline + dot does the "label" work that tracking does in Latin. */
+body.theme-dark-obsidian .section-subtitle,
+body.theme-dark-obsidian .section-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 22px;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0;
+  color: var(--ux-accent);
+  margin: 0;
+}
+
+body.theme-dark-obsidian .section-subtitle::before,
+body.theme-dark-obsidian .section-eyebrow::before {
+  content: '';
+  width: 22px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--ux-accent-line));
+}
+
+body.theme-dark-obsidian .section-subtitle::after,
+body.theme-dark-obsidian .section-eyebrow::after {
+  content: '';
+  width: 22px;
+  height: 1px;
+  background: linear-gradient(90deg, var(--ux-accent-line), transparent);
+}
+
+/* Page hero strips (FAQ, contact, privacy, terms) share one header voice. */
+body.theme-dark-obsidian .faq-hero-strip,
+body.theme-dark-obsidian .contact-hero-strip {
+  padding-block: clamp(40px, 6vw, 72px) clamp(24px, 3vw, 40px);
+}
+
+body.theme-dark-obsidian .page-subtitle {
+  color: var(--ux-muted);
+  line-height: 1.9;
+  text-wrap: pretty;
+}
+
+/* Anchor targets: the sticky header must never cover the heading you jumped
+   to. `.scroll-margin-top` was already set on three ids only. */
+body.theme-dark-obsidian [id] {
+  scroll-margin-top: calc(var(--header-height) + 18px);
+}
+
+/* Hero: kill the void between the CTA stack and the media card, and let the
+   proof row breathe. Measured before: 44px margin + 64px padding = 108px. */
+body.theme-dark-obsidian .hero-cta-group {
+  margin-bottom: clamp(20px, 3vw, 32px);
+  gap: 10px;
+}
+
+body.theme-dark-obsidian .hero-trust-metrics {
+  margin-top: clamp(18px, 2.6vw, 28px);
+}
+
+body.theme-dark-obsidian .hero-subtitle {
+  max-width: 52ch;
+  text-wrap: pretty;
+  color: var(--ux-muted);
+}
+
+/* ── 4. BUTTONS & CONTROLS ────────────────────────────────────────────────
+   Every button family on the site (btn, btn-3d-*, gpt-book-btn, chips) is
+   mapped onto ONE geometry: same height, radius, weight, focus ring, press. */
+
+body.theme-dark-obsidian .btn,
+body.theme-dark-obsidian .btn-3d-gold,
+body.theme-dark-obsidian .btn-3d-primary-sm,
+body.theme-dark-obsidian .btn-3d-outline-sm,
+body.theme-dark-obsidian .btn-3d-secondary,
+body.theme-dark-obsidian .btn-3d-complete,
+body.theme-dark-obsidian .btn-3d-reject,
+body.theme-dark-obsidian .gpt-book-btn,
+body.theme-dark-obsidian .btn-table-book,
+body.theme-dark-obsidian .btn-contact-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 46px;
+  padding-inline: 18px;
+  border-radius: var(--ux-r-ctl);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    transform var(--motion-fast) var(--ease-out),
+    box-shadow var(--motion-fast) var(--ease-out),
+    background-color var(--motion-fast) var(--ease-out),
+    border-color var(--motion-fast) var(--ease-out),
+    color var(--motion-fast) var(--ease-out);
+}
+
+body.theme-dark-obsidian .btn:active,
+body.theme-dark-obsidian .btn-3d-gold:active,
+body.theme-dark-obsidian .btn-3d-primary-sm:active,
+body.theme-dark-obsidian .btn-3d-outline-sm:active,
+body.theme-dark-obsidian .btn-3d-secondary:active,
+body.theme-dark-obsidian .gpt-book-btn:active,
+body.theme-dark-obsidian .btn-table-book:active {
+  transform: translateY(1px) scale(0.995);
+}
+
+body.theme-dark-obsidian .btn:focus-visible,
+body.theme-dark-obsidian .btn-3d-gold:focus-visible,
+body.theme-dark-obsidian .btn-3d-primary-sm:focus-visible,
+body.theme-dark-obsidian .btn-3d-outline-sm:focus-visible,
+body.theme-dark-obsidian .btn-3d-secondary:focus-visible,
+body.theme-dark-obsidian .btn-3d-complete:focus-visible,
+body.theme-dark-obsidian .btn-3d-reject:focus-visible,
+body.theme-dark-obsidian .gpt-book-btn:focus-visible,
+body.theme-dark-obsidian .btn-table-book:focus-visible,
+body.theme-dark-obsidian .filter-chip-btn:focus-visible,
+body.theme-dark-obsidian .category-chip:focus-visible,
+body.theme-dark-obsidian .cat-pill:focus-visible {
+  outline: 2px solid var(--ux-accent);
+  outline-offset: 2px;
+}
+
+/* Outline/secondary: enough surface to read as tappable, quiet enough that
+   it never competes with the gold primary. */
+body.theme-dark-obsidian .btn-outline,
+body.theme-dark-obsidian .btn-3d-outline-sm,
+body.theme-dark-obsidian .btn-3d-secondary,
+body.theme-dark-obsidian .btn-contact-outline {
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid var(--ux-line-strong);
+  color: var(--ux-ink);
+}
+
+body.theme-dark-obsidian .btn-outline:hover,
+body.theme-dark-obsidian .btn-3d-outline-sm:hover,
+body.theme-dark-obsidian .btn-3d-secondary:hover,
+body.theme-dark-obsidian .btn-contact-outline:hover {
+  background: rgba(232, 203, 143, 0.08);
+  border-color: var(--ux-accent-line);
+  color: var(--ux-accent-hi);
+}
+
+body.theme-dark-obsidian .btn-primary,
+body.theme-dark-obsidian .btn-3d-gold,
+body.theme-dark-obsidian .btn-3d-primary-sm,
+body.theme-dark-obsidian .btn-table-book {
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  color: var(--ux-accent-ink);
+  background: linear-gradient(135deg, #f6e3ba 0%, #e8cb8f 46%, #c9a45c 100%);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.5) inset,
+    0 10px 24px -14px rgba(232, 203, 143, 0.55);
+}
+
+body.theme-dark-obsidian .btn-primary:hover,
+body.theme-dark-obsidian .btn-3d-gold:hover,
+body.theme-dark-obsidian .btn-3d-primary-sm:hover,
+body.theme-dark-obsidian .btn-table-book:hover {
+  background: linear-gradient(135deg, #fbeecd 0%, #f0d9a4 46%, #d6b273 100%);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 16px 34px -16px rgba(232, 203, 143, 0.7);
+  transform: translateY(-1px);
+}
+
+body.theme-dark-obsidian .btn-sm,
+body.theme-dark-obsidian .btn-3d-primary-sm,
+body.theme-dark-obsidian .btn-3d-outline-sm,
+body.theme-dark-obsidian .btn-3d-secondary,
+body.theme-dark-obsidian .btn-table-book,
+body.theme-dark-obsidian .gpt-book-btn {
+  min-height: 40px;
+  font-size: 12.5px;
+  padding-inline: 14px;
+  border-radius: var(--ux-r-sm);
+}
+
+/* The large CTA tier keeps its presence (hero, promo, closing CTA): the
+   measured 46px default would have flattened the page's primary affordance. */
+body.theme-dark-obsidian .btn-lg,
+body.theme-dark-obsidian .hero-btn-book,
+body.theme-dark-obsidian .hero-btn-services {
+  min-height: 55px;
+  font-size: 15px;
+  font-weight: 800;
+  padding-inline: 26px;
+}
+
+@media (max-width: 768px) {
+  body.theme-dark-obsidian .btn-lg,
+  body.theme-dark-obsidian .hero-btn-book,
+  body.theme-dark-obsidian .hero-btn-services {
+    min-height: 54px;
+  }
+}
+
+/* Chips / filter pills: the small-control family, floored at 11px type and
+   36px desktop / 44px touch. */
+body.theme-dark-obsidian .filter-chip-btn,
+body.theme-dark-obsidian .category-chip,
+body.theme-dark-obsidian .cat-pill,
+body.theme-dark-obsidian .category-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding-inline: 14px;
+  border-radius: var(--ux-r-pill);
+  border: 1px solid var(--ux-line);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--ux-ink-soft);
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition:
+    background-color var(--motion-fast) var(--ease-out),
+    border-color var(--motion-fast) var(--ease-out),
+    color var(--motion-fast) var(--ease-out);
+}
+
+body.theme-dark-obsidian .filter-chip-btn:hover,
+body.theme-dark-obsidian .category-chip:hover,
+body.theme-dark-obsidian .cat-pill:hover {
+  border-color: var(--ux-accent-line);
+  color: var(--ux-ink);
+}
+
+body.theme-dark-obsidian .filter-chip-btn.active,
+body.theme-dark-obsidian .category-chip.active,
+body.theme-dark-obsidian .cat-pill.active {
+  background: var(--ux-accent-soft);
+  border-color: var(--ux-accent-line);
+  color: var(--ux-accent);
+  font-weight: 700;
+}
+
+/* ── 5. CARDS ─────────────────────────────────────────────────────────────
+   Six card families shipped with six different borders, radii and hover
+   behaviours. This unifies the surface language and gives each one a real
+   focus state, so keyboard and touch users see the same affordance. */
+
+body.theme-dark-obsidian .trust-card,
+body.theme-dark-obsidian .benefit-card-3d,
+body.theme-dark-obsidian .rado-card-3d,
+body.theme-dark-obsidian .package-card,
+body.theme-dark-obsidian .stat-box,
+body.theme-dark-obsidian .stat-band-card,
+body.theme-dark-obsidian .contact-glass-card,
+body.theme-dark-obsidian .guidance-box,
+body.theme-dark-obsidian .article-card-3d,
+body.theme-dark-obsidian .service-detail-card,
+body.theme-dark-obsidian .care-card,
+body.theme-dark-obsidian .pricing-tier-card,
+body.theme-dark-obsidian .sessions-card,
+body.theme-dark-obsidian .certifications-card,
+body.theme-dark-obsidian .faq-obsidian-card,
+body.theme-dark-obsidian .testimonial-card {
+  position: relative;
+  border-radius: var(--ux-r-card);
+  border: 1px solid var(--ux-line);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0) 42%),
+    var(--ux-surface);
+  box-shadow: var(--ux-shadow-1);
+  transition:
+    transform var(--motion-normal) var(--ease-out),
+    border-color var(--motion-normal) var(--ease-out),
+    box-shadow var(--motion-normal) var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  body.theme-dark-obsidian .trust-card:hover,
+  body.theme-dark-obsidian .benefit-card-3d:hover,
+  body.theme-dark-obsidian .rado-card-3d:hover,
+  body.theme-dark-obsidian .package-card:hover,
+  body.theme-dark-obsidian .stat-box:hover,
+  body.theme-dark-obsidian .stat-band-card:hover,
+  body.theme-dark-obsidian .article-card-3d:hover,
+  body.theme-dark-obsidian .service-detail-card:hover,
+  body.theme-dark-obsidian .care-card:hover,
+  body.theme-dark-obsidian .pricing-tier-card:hover,
+  body.theme-dark-obsidian .testimonial-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--ux-accent-line);
+    box-shadow: var(--ux-shadow-2);
+  }
+}
+
+body.theme-dark-obsidian .trust-card:focus-within,
+body.theme-dark-obsidian .benefit-card-3d:focus-within,
+body.theme-dark-obsidian .rado-card-3d:focus-within,
+body.theme-dark-obsidian .package-card:focus-within,
+body.theme-dark-obsidian .article-card-3d:focus-within,
+body.theme-dark-obsidian .service-detail-card:focus-within,
+body.theme-dark-obsidian .care-card:focus-within,
+body.theme-dark-obsidian .pricing-tier-card:focus-within,
+body.theme-dark-obsidian .testimonial-card:focus-within {
+  border-color: var(--ux-accent-line);
+  box-shadow: var(--ux-shadow-2);
+}
+
+/* Card typography: title/body separation was flat (12.5px title next to
+   12.5px body). Titles are now a step up and body copy keeps the 1.85 lead. */
+body.theme-dark-obsidian .trust-title,
+body.theme-dark-obsidian .benefit-title,
+body.theme-dark-obsidian .guidance-title,
+body.theme-dark-obsidian .card-title,
+body.theme-dark-obsidian .package-title,
+body.theme-dark-obsidian .care-title,
+body.theme-dark-obsidian .sessions-card-head,
+body.theme-dark-obsidian .article-card-title {
+  font-size: 14.5px;
+  font-weight: 700;
+  line-height: 1.5;
+  color: var(--ux-ink);
+}
+
+body.theme-dark-obsidian .trust-desc,
+body.theme-dark-obsidian .benefit-body,
+body.theme-dark-obsidian .guidance-subtitle,
+body.theme-dark-obsidian .package-subtitle,
+body.theme-dark-obsidian .care-subtitle,
+body.theme-dark-obsidian .article-card-excerpt {
+  font-size: 13px;
+  line-height: 1.85;
+  color: var(--ux-muted);
+  text-wrap: pretty;
+}
+
+/* Imagery inside cards: one radius, one hover motion, no double borders. */
+body.theme-dark-obsidian .article-card-img-wrap,
+body.theme-dark-obsidian .service-card-media,
+body.theme-dark-obsidian .hero-visual-frame {
+  border-radius: calc(var(--ux-r-card) - 4px);
+  overflow: hidden;
+}
+
+body.theme-dark-obsidian .article-card-img-wrap img {
+  transition: transform var(--motion-slow) var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  body.theme-dark-obsidian .article-card-3d:hover .article-card-img-wrap img {
+    transform: scale(1.04);
+  }
+}
+
+/* ── 6. TABLES ────────────────────────────────────────────────────────────
+   The tariff table is the highest-intent surface on the site. It gets a
+   sticky, opaque head; zebra rows; tabular figures; a row hover that does not
+   fight the sticky header; and a booking control that is a real target. */
+
+body.theme-dark-obsidian .gender-price-table {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+  font-variant-numeric: tabular-nums;
+}
+
+body.theme-dark-obsidian .gender-price-table thead th {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 2;
+  background: #0b1013;
+  border-bottom: 1px solid var(--ux-line-strong);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ux-ink);
+  padding-block: 14px;
+}
+
+body.theme-dark-obsidian .gender-price-table tbody tr {
+  background: transparent;
+}
+
+body.theme-dark-obsidian .gender-price-table tbody tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.014);
+}
+
+body.theme-dark-obsidian .gender-price-table tbody tr:hover {
+  background: rgba(232, 203, 143, 0.055);
+}
+
+body.theme-dark-obsidian .gender-price-table tbody td {
+  border-bottom: 1px solid var(--ux-line-soft);
+  padding-block: 12px;
+}
+
+body.theme-dark-obsidian .gender-price-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+body.theme-dark-obsidian .gpt-zone-name {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ux-ink);
+}
+
+body.theme-dark-obsidian .gpt-amount {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ux-accent-hi);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Measured 4.36:1 — just under AA for 11px text. */
+body.theme-dark-obsidian .gpt-unit {
+  color: #9fadaa;
+  font-size: 11px;
+}
+
+body.theme-dark-obsidian .gpt-book-btn {
+  border: 1px solid var(--ux-line-strong);
+  color: var(--ux-ink);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+body.theme-dark-obsidian .gpt-book-btn:hover {
+  border-color: var(--ux-accent-line);
+  background: var(--ux-accent-soft);
+  color: var(--ux-accent-hi);
+}
+
+/* Generic data tables (admin-adjacent public tables, spec sheets). */
+body.theme-dark-obsidian table.data-table tbody tr:nth-child(even),
+body.theme-dark-obsidian .spec-table tbody tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.014);
+}
+
+/* ── 7. FORMS ─────────────────────────────────────────────────────────────
+   16px inputs (iOS zooms the whole page below that), 48px controls, one
+   focus treatment. Booking is the conversion surface — it must feel exact. */
+
+body.theme-dark-obsidian
+  input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='hidden']),
+body.theme-dark-obsidian select,
+body.theme-dark-obsidian textarea {
+  min-height: 48px;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--ux-ink);
+  background-color: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--ux-line-strong);
+  border-radius: 12px;
+  padding: 10px 14px;
+  transition:
+    border-color var(--motion-fast) var(--ease-out),
+    background-color var(--motion-fast) var(--ease-out),
+    box-shadow var(--motion-fast) var(--ease-out);
+}
+
+body.theme-dark-obsidian textarea {
+  min-height: 112px;
+  padding-block: 12px;
+  resize: vertical;
+}
+
+body.theme-dark-obsidian input::placeholder,
+body.theme-dark-obsidian textarea::placeholder {
+  color: #8b9997;
+  opacity: 1;
+}
+
+body.theme-dark-obsidian input:not([type='checkbox']):hover,
+body.theme-dark-obsidian select:hover,
+body.theme-dark-obsidian textarea:hover {
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+body.theme-dark-obsidian input:not([type='checkbox']):focus,
+body.theme-dark-obsidian select:focus,
+body.theme-dark-obsidian textarea:focus {
+  outline: none;
+  border-color: var(--ux-accent);
+  background-color: rgba(232, 203, 143, 0.045);
+  box-shadow: 0 0 0 3px rgba(232, 203, 143, 0.16);
+}
+
+body.theme-dark-obsidian label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ux-ink-soft);
+}
+
+body.theme-dark-obsidian .form-hint,
+body.theme-dark-obsidian .field-hint,
+body.theme-dark-obsidian .input-hint {
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--ux-muted);
+}
+
+/* Invalid / valid states: colour + icon-free border weight, so it survives
+   colour-blindness and does not rely on hue alone. */
+body.theme-dark-obsidian [aria-invalid='true'],
+body.theme-dark-obsidian .is-invalid {
+  border-color: #f87171 !important;
+  box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.14) !important;
+}
+
+body.theme-dark-obsidian .is-valid {
+  border-color: var(--ux-signal) !important;
+}
+
+/* Booking gender cards: the selected title was #735824 on a near-black card
+   (measured 2.43:1) — a leftover from the old warm palette. */
+body.theme-dark-obsidian .gender-card {
+  border-radius: var(--ux-r-card);
+  transition:
+    transform var(--motion-fast) var(--ease-out),
+    border-color var(--motion-fast) var(--ease-out),
+    box-shadow var(--motion-fast) var(--ease-out);
+}
+
+body.theme-dark-obsidian .gender-card.selected .gender-title {
+  color: var(--ux-ink);
+}
+
+body.theme-dark-obsidian .gender-card.selected .gender-price-preview {
+  background: var(--ux-accent);
+  color: var(--ux-accent-ink);
+}
+
+body.theme-dark-obsidian .gender-title {
+  font-size: 15px;
+  font-weight: 800;
+}
+
+/* ── 8. ACCORDIONS / FAQ ────────────────────────────────────────────────── */
+
+body.theme-dark-obsidian .faq-summary {
+  min-height: 60px;
+  padding-block: 14px;
+  cursor: pointer;
+  border-radius: inherit;
+}
+
+body.theme-dark-obsidian .faq-summary:hover .faq-q-text {
+  color: var(--ux-accent-hi);
+}
+
+body.theme-dark-obsidian .faq-q-text {
+  color: var(--ux-ink);
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+
+body.theme-dark-obsidian .faq-toggle-circle {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  color: var(--ux-accent);
+}
+
+body.theme-dark-obsidian .faq-obsidian-card[open] {
+  border-color: var(--ux-accent-line);
+  background:
+    linear-gradient(180deg, rgba(232, 203, 143, 0.05), rgba(255, 255, 255, 0) 40%),
+    var(--ux-surface);
+}
+
+body.theme-dark-obsidian .faq-obsidian-card[open] .faq-toggle-circle {
+  transform: rotate(45deg);
+  background: var(--ux-accent-soft);
+}
+
+body.theme-dark-obsidian .faq-cat-tag {
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.8;
+  color: var(--ux-accent);
+  background: var(--ux-accent-soft);
+  border: 1px solid var(--ux-accent-line);
+}
+
+body.theme-dark-obsidian .answer-text {
+  color: var(--ux-ink-soft);
+  font-size: 14px;
+  line-height: 1.95;
+  text-wrap: pretty;
+}
+
+body.theme-dark-obsidian .takeaway-box {
+  border-radius: var(--ux-r-sm);
+  border: 1px solid var(--ux-signal-line);
+  background: var(--ux-signal-soft);
+  color: var(--ux-ink);
+}
+
+body.theme-dark-obsidian .takeaway-box strong {
+  color: var(--ux-signal);
+}
+
+/* ── 9. FOOTER ──────────────────────────────────────────────────────────── */
+
+body.theme-dark-obsidian .site-footer {
+  border-top: 1px solid var(--ux-line);
+  background:
+    radial-gradient(1200px 300px at 50% -10%, rgba(232, 203, 143, 0.06), transparent 65%), #050708;
+}
+
+body.theme-dark-obsidian .footer-heading {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--ux-accent);
+  margin-bottom: 14px;
+}
+
+body.theme-dark-obsidian .footer-link,
+body.theme-dark-obsidian .footer-phone-link,
+body.theme-dark-obsidian .legal-links a {
+  color: var(--ux-muted);
+  transition:
+    color var(--motion-fast) var(--ease-out),
+    transform var(--motion-fast) var(--ease-out);
+}
+
+body.theme-dark-obsidian .footer-link:hover,
+body.theme-dark-obsidian .footer-phone-link:hover,
+body.theme-dark-obsidian .legal-links a:hover {
+  color: var(--ux-accent-hi);
+}
+
+body.theme-dark-obsidian .footer-desc,
+body.theme-dark-obsidian .footer-hours {
+  color: var(--ux-muted);
+  line-height: 1.9;
+}
+
+body.theme-dark-obsidian .footer-bottom {
+  border-top: 1px solid var(--ux-line-soft);
+}
+
+body.theme-dark-obsidian .footer-cta-box {
+  border: 1px solid var(--ux-accent-line);
+  border-radius: var(--ux-r-ctl);
+  background: var(--ux-accent-soft);
+  padding: 12px;
+}
+
+/* ── 10. MOBILE CHROME ──────────────────────────────────────────────────── */
+
+body.theme-dark-obsidian .bottom-nav {
+  border-top: 1px solid var(--ux-line);
+  background: rgba(6, 9, 11, 0.96);
+  backdrop-filter: blur(18px) saturate(1.4);
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+body.theme-dark-obsidian .bottom-nav-link {
+  border-radius: 12px;
+  color: var(--ux-faint);
+  transition:
+    color var(--motion-fast) var(--ease-out),
+    background-color var(--motion-fast) var(--ease-out);
+}
+
+body.theme-dark-obsidian .bottom-nav-link.active {
+  color: var(--ux-accent);
+  background: var(--ux-accent-soft);
+}
+
+body.theme-dark-obsidian .bottom-nav-label {
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+body.theme-dark-obsidian .mobile-sticky-bar {
+  border-top: 1px solid var(--ux-line);
+  background: rgba(6, 9, 11, 0.96);
+  backdrop-filter: blur(18px) saturate(1.4);
+  padding-bottom: calc(8px + env(safe-area-inset-bottom, 0));
+}
+
+/* Mobile control floors — the WCAG 2.5.8 minimum applies at touch widths. */
+@media (max-width: 768px) {
+  body.theme-dark-obsidian .btn,
+  body.theme-dark-obsidian .btn-3d-gold,
+  body.theme-dark-obsidian .btn-3d-primary-sm,
+  body.theme-dark-obsidian .btn-3d-outline-sm,
+  body.theme-dark-obsidian .btn-3d-secondary,
+  body.theme-dark-obsidian .btn-sm,
+  body.theme-dark-obsidian .btn-block,
+  body.theme-dark-obsidian .gpt-book-btn,
+  body.theme-dark-obsidian .btn-table-book,
+  body.theme-dark-obsidian .filter-chip-btn,
+  body.theme-dark-obsidian .category-chip,
+  body.theme-dark-obsidian .cat-pill,
+  body.theme-dark-obsidian .category-tab-btn {
+    min-height: 44px;
+  }
+
+  /* Full-width primary CTA inside a card is easier to hit than a 120px pill. */
+  body.theme-dark-obsidian .service-card-footer,
+  body.theme-dark-obsidian .package-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  body.theme-dark-obsidian .service-card-footer > *,
+  body.theme-dark-obsidian .package-actions > * {
+    width: 100%;
+  }
+}
+
+/* ── 11. UTILITIES & A11Y ───────────────────────────────────────────────── */
+
+/* Text selection reads as part of the brand, not the OS default blue. */
+body.theme-dark-obsidian ::selection {
+  background: rgba(232, 203, 143, 0.28);
+  color: #fff;
+}
+
+/* One focus ring for everything that is focusable but not a button/chip. */
+body.theme-dark-obsidian a:focus-visible,
+body.theme-dark-obsidian button:focus-visible,
+body.theme-dark-obsidian summary:focus-visible,
+body.theme-dark-obsidian [tabindex]:not([tabindex='-1']):focus-visible {
+  outline: 2px solid var(--ux-accent);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* Anything clickable inside a card should show the card's hover state too. */
+body.theme-dark-obsidian .sr-only,
+body.theme-dark-obsidian .visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* Discount / promo micro-tags were 10.4–10.8px (below the 11px floor). */
+body.theme-dark-obsidian .promo-tag-mini,
+body.theme-dark-obsidian .promo-tag,
+body.theme-dark-obsidian .badge-promo,
+body.theme-dark-obsidian .discount-tag,
+body.theme-dark-obsidian .gpt-mens-tag {
+  font-size: 11px;
+  line-height: 1.6;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+/* Scrollbars: dark, thin, only where a scroll container actually exists. */
+@supports (scrollbar-width: thin) {
+  body.theme-dark-obsidian * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(232, 203, 143, 0.28) transparent;
+  }
+}
+
+/* ── 12. MOTION ─────────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  body.theme-dark-obsidian *,
+  body.theme-dark-obsidian *::before,
+  body.theme-dark-obsidian *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── 13. INLINE TARGET FLOORS ───────────────────────────────────────────── */
+
+/* ux-v3: even inline phone links clear the WCAG 2.5.8 24px floor — the old
+   18px line-box was the site's only sub-24px target on desktop. `inline-block`
+   keeps the link inside the sentence's line rhythm while giving it height. */
+a.loc-phone-link,
+span.loc-phone-link,
+.footer-phone-link {
+  display: inline-block;
+  min-height: 24px;
+}
+
+/* ── 14. PRINT ──────────────────────────────────────────────────────────── */
+@media print {
+  body.theme-dark-obsidian {
+    background: #fff;
+    color: #000;
+  }
+
+  body.theme-dark-obsidian .site-header,
+  body.theme-dark-obsidian .bottom-nav,
+  body.theme-dark-obsidian .mobile-sticky-bar,
+  body.theme-dark-obsidian .wa-float,
+  body.theme-dark-obsidian .basket-fab,
+  body.theme-dark-obsidian .announcement-strip {
+    display: none !important;
+  }
+
+  body.theme-dark-obsidian a[href^='http']::after {
+    content: ' (' attr(href) ')';
+    font-size: 10pt;
+  }
+}

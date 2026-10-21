@@ -2074,9 +2074,12 @@ body.theme-dark-obsidian .section-subtitle {
 }
 
 .gender-card.selected {
+  /* ux-v3: this used to fade to #ffffff — on the obsidian theme that renders
+     as a white slab under light-ink text (measured 1.08:1). The selected
+     state now reads as the same dark card with a signal border. */
   border-color: #0f766e !important;
-  background: linear-gradient(135deg, rgba(45, 212, 191, 0.12) 0%, #ffffff 100%) !important;
-  box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.3), 0 8px 24px rgba(45, 212, 191, 0.2) !important;
+  background: linear-gradient(135deg, rgba(45, 212, 191, 0.14) 0%, rgba(255, 255, 255, 0.03) 100%) !important;
+  box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.22), 0 8px 24px rgba(45, 212, 191, 0.12) !important;
   transform: translateY(-2px);
 }
 
@@ -3338,7 +3341,7 @@ body.theme-dark-obsidian .hero-title {
 }
 
 .gold-gradient-text {
-  background: linear-gradient(135deg, #6ee7b7 0%, #34d399 35%, #34d399 70%, #10b981 100%);
+  background: linear-gradient(135deg, #f4e2b8 0%, #e8cb8f 45%, #c9a45c 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   display: inline;

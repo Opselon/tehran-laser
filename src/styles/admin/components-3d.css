@@ -362,8 +362,10 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%);
-  color: #ffffff;
+  /* ux-v3: white on #0284c7 measured 2.14:1 — the "send SMS" action was
+     unreadable. Dark ink on the lit end of the ramp, same blue identity. */
+  background: linear-gradient(180deg, #7cc7fa 0%, #2f9be0 100%);
+  color: #06202f;
   border: none;
   border-radius: 13px;
   padding: 11px 20px;
@@ -374,12 +376,12 @@
   cursor: pointer;
   white-space: nowrap;
   box-shadow: 0 4px 0 #075985, 0 10px 22px rgba(56, 189, 248, 0.3);
-  transition: all 0.15s ease;
+  transition: filter 0.15s ease, transform 0.15s ease;
 }
 
 .btn-3d-complete:hover:not(:disabled) {
   transform: translateY(-2px);
-  filter: brightness(1.08);
+  filter: brightness(1.06);
 }
 
 .btn-3d-complete:active:not(:disabled) {

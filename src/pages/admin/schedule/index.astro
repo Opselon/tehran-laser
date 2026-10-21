@@ -552,7 +552,9 @@ const weekdayNames = [
     }
 
     .time-slot-inactive {
-      color: #64748b;
+      /* ux-v3: #64748b measured 4.02:1 — a "closed" dash should read as
+         muted, not as disabled-but-illegible. */
+      color: #8b98a8;
       font-weight: 600;
     }
 

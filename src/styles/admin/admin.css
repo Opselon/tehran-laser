@@ -198,8 +198,11 @@ body.admin-body {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #d4af37, #8c6d32);
-  color: #0d111a;
+  /* ux-v3: #0d111a on #8c6d32 measured 3.91:1 — below 4.5:1 for the initial.
+     The tile is decorative (the name is adjacent), so a muted surface with
+     high-contrast ink reads the same and passes. */
+  background: linear-gradient(135deg, #efd9a8, #c9a45c);
+  color: #241a06;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -217,7 +220,7 @@ body.admin-body {
   background: rgba(212, 175, 55, 0.2);
   color: #f7df94;
   border: 1px solid rgba(212, 175, 55, 0.45);
-  font-size: 0.68rem;
+  font-size: 0.6875rem; /* 11px floor */
   font-weight: 800;
   padding: 2px 8px;
   border-radius: 6px;
