@@ -1,0 +1,86 @@
+name: DB Bootstrap (remote)
+
+# One-off bridge for the case where CLOUDFLARE_API_TOKEN can deploy Workers but
+# cannot touch D1 (Cloudflare answers 7403). It deploys scripts/d1-bootstrap as a
+# throwaway Worker with a D1 binding, calls it once with a per-run key, prints
+# what exists afterwards, and deletes the Worker in the same job (always()).
+#
+# Scope: migrations/0012_operators.sql, hardcoded in the runner. This is NOT a
+# general SQL endpoint — nothing takes SQL as input, and the Worker is deleted
+# before the job ends. Prefer the DB Migrate workflow once the token has D1:Edit.
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "bootstrap" to run the one-off migration through a temporary Worker'
+        required: true
+        type: string
+
+concurrency:
+  group: d1-bootstrap-remote
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  bootstrap:
+    name: Apply 0012 through a temporary Worker
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: github.event.inputs.confirm == 'bootstrap'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Mint a per-run key
+        run: echo "BOOTSTRAP_KEY=$(openssl rand -hex 24)" >> "$GITHUB_ENV"
+
+      - name: Deploy the temporary runner
+        id: deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          npx wrangler deploy --config scripts/d1-bootstrap/wrangler.jsonc \
+            --var BOOTSTRAP_KEY:"$BOOTSTRAP_KEY" 2>&1 | tee deploy.log
+          url=$(grep -oE 'https://[a-z0-9.-]+\.workers\.dev' deploy.log | head -1)
+          if [ -z "$url" ]; then
+            echo "::error title=No URL::wrangler did not print a workers.dev URL"
+            exit 1
+          fi
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "runner: $url"
+
+      - name: Apply the migration
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          for attempt in 1 2 3 4 5 6; do
+            if out=$(curl -sS --max-time 60 -H "x-bootstrap-key: $BOOTSTRAP_KEY" \
+                       "${{ steps.deploy.outputs.url }}/apply"); then
+              echo "$out"; echo "$out" | grep -q '"applied":true' && exit 0
+            fi
+            echo "attempt $attempt: not ready yet"; sleep 10
+          done
+          echo "::error title=Bootstrap failed::the runner never reported applied:true"
+          exit 1
+
+      - name: Delete the temporary runner
+        if: always()
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx wrangler delete tl-migration-runner --force
