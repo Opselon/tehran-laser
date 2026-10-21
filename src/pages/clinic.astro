@@ -1,6 +1,7 @@
 ---
 import PublicLayout from '../layouts/PublicLayout.astro';
 import Icon from '../components/ui/Icon.astro';
+import Breadcrumbs from '../components/ui/Breadcrumbs.astro';
 import { createBreadcrumbSchema, resolveCanonicalOrigin } from '../lib/seo';
 
 // The layout already emits the canonical MedicalClinic entity (with geo, hours,
@@ -22,10 +23,12 @@ const aboutJsonLd = {
   isPartOf: { '@id': `${origin}/#website` },
 };
 
-const breadcrumbJsonLd = createBreadcrumbSchema([
+const breadcrumbItems = [
   { name: 'صفحه اصلی', url: '/' },
   { name: 'درباره کلینیک', url: '/clinic' },
-]);
+];
+
+const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
 ---
 
 <PublicLayout
@@ -42,6 +45,7 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
   bodyClass="clinic-obsidian-root"
 >
   <div class="clinic-page-wrapper">
+    <Breadcrumbs items={breadcrumbItems} />
     <!-- Hero / Header Showcase -->
     <header class="clinic-hero">
       <div class="container">

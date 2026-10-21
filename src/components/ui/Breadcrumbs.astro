@@ -1,0 +1,141 @@
+---
+/**
+ * Breadcrumbs — accessible hierarchical navigation for public pages.
+ *
+ * Implements W3C Breadcrumb Pattern + Schema.org BreadcrumbList Microdata:
+ * - Semantic <nav aria-label="مسیر راهنما">
+ * - <ol> list structure with schema.org/ListItem metadata
+ * - Left-pointing chevron for Persian (RTL) flow
+ * - Last item is aria-current="page" and non-interactive
+ * - Matches the dark obsidian-emerald design tokens
+ */
+import Icon from './Icon.astro';
+
+export interface BreadcrumbCrumb {
+  name: string;
+  url: string;
+}
+
+export interface Props {
+  items: BreadcrumbCrumb[];
+  class?: string;
+}
+
+const { items = [], class: className = '' } = Astro.props;
+---
+
+{items.length > 1 && (
+  <nav aria-label="مسیر راهنما" class={`tl-breadcrumbs ${className}`.trim()}>
+    <div class="tl-breadcrumbs-inner">
+      <ol class="tl-breadcrumbs-list" itemscope itemtype="https://schema.org/BreadcrumbList">
+        {items.map((crumb, idx) => {
+          const isLast = idx === items.length - 1;
+          const position = idx + 1;
+          return (
+            <li
+              class={`tl-breadcrumbs-item ${isLast ? 'is-active' : ''}`.trim()}
+              itemprop="itemListElement"
+              itemscope
+              itemtype="https://schema.org/ListItem"
+            >
+              {isLast ? (
+                <span
+                  class="tl-breadcrumbs-link is-current"
+                  aria-current="page"
+                  itemprop="name"
+                >
+                  {crumb.name}
+                </span>
+              ) : (
+                <a
+                  href={crumb.url}
+                  class="tl-breadcrumbs-link"
+                  itemprop="item"
+                >
+                  <span itemprop="name">{crumb.name}</span>
+                </a>
+              )}
+              <meta itemprop="position" content={String(position)} />
+              {!isLast && (
+                <span class="tl-breadcrumbs-separator" aria-hidden="true">
+                  <Icon name="chevronLeft" size={13} />
+                </span>
+              )}
+            </li>
+          );
+        })}
+      </ol>
+    </div>
+  </nav>
+)}
+
+<style>
+  .tl-breadcrumbs {
+    padding: 12px 0;
+    font-size: 0.8125rem;
+    line-height: 1.4;
+    color: var(--color-on-ink-muted, #94a3b8);
+    position: relative;
+    z-index: 10;
+  }
+
+  .tl-breadcrumbs-inner {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    box-sizing: border-box;
+  }
+
+  .tl-breadcrumbs-list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .tl-breadcrumbs-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .tl-breadcrumbs-link {
+    color: var(--color-on-ink-muted, #94a3b8);
+    text-decoration: none;
+    transition: color 0.15s ease;
+    padding: 2px 4px;
+    border-radius: 4px;
+  }
+
+  .tl-breadcrumbs-link:hover {
+    color: var(--gold-400, #34d399);
+  }
+
+  .tl-breadcrumbs-link:focus-visible {
+    outline: 2px solid var(--gold-400, #34d399);
+    outline-offset: 2px;
+  }
+
+  .tl-breadcrumbs-link.is-current {
+    color: var(--gold-300, #6ee7b7);
+    font-weight: 500;
+    pointer-events: none;
+  }
+
+  .tl-breadcrumbs-separator {
+    display: inline-flex;
+    align-items: center;
+    color: rgba(148, 163, 184, 0.45);
+  }
+
+  @media (max-width: 640px) {
+    .tl-breadcrumbs {
+      padding: 8px 0;
+      font-size: 0.75rem;
+    }
+  }
+</style>
