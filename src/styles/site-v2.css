@@ -186,7 +186,9 @@ body.theme-dark-obsidian .site-header {
   border-bottom: 1px solid var(--v2-line);
   box-shadow: none;
   color: var(--v2-ink);
-  transition: background 0.25s var(--v2-ease), border-color 0.25s var(--v2-ease);
+  transition:
+    background 0.25s var(--v2-ease),
+    border-color 0.25s var(--v2-ease);
 }
 
 body.theme-dark-obsidian .site-header::before {
@@ -232,14 +234,15 @@ body.theme-dark-obsidian .logo-mark {
   border-radius: 12px;
   border: 1px solid rgba(232, 203, 143, 0.38);
   background:
-    radial-gradient(120% 120% at 15% 0%, rgba(232, 203, 143, 0.22), transparent 60%),
-    #0b1013;
+    radial-gradient(120% 120% at 15% 0%, rgba(232, 203, 143, 0.22), transparent 60%), #0b1013;
   color: var(--v2-gold);
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset;
   display: grid;
   place-items: center;
   font-size: 0;
-  transition: transform 0.25s var(--v2-ease), border-color 0.25s var(--v2-ease);
+  transition:
+    transform 0.25s var(--v2-ease),
+    border-color 0.25s var(--v2-ease);
 }
 
 @media (min-width: 992px) {
@@ -589,9 +592,16 @@ body.theme-dark-obsidian .hero-aura-gold {
   width: 520px;
   height: 520px;
   background:
-    radial-gradient(circle, rgba(232, 203, 143, 0.16) 0%, rgba(232, 203, 143, 0.05) 45%, transparent 68%),
+    radial-gradient(
+      circle,
+      rgba(232, 203, 143, 0.16) 0%,
+      rgba(232, 203, 143, 0.05) 45%,
+      transparent 68%
+    ),
     radial-gradient(circle, transparent 62%, rgba(232, 203, 143, 0.09) 63%, transparent 66%);
-  box-shadow: 0 0 0 70px rgba(232, 203, 143, 0.02), 0 0 0 160px rgba(59, 217, 164, 0.015);
+  box-shadow:
+    0 0 0 70px rgba(232, 203, 143, 0.02),
+    0 0 0 160px rgba(59, 217, 164, 0.015);
 }
 
 body.theme-dark-obsidian .hero-aura-emerald {
@@ -599,7 +609,12 @@ body.theme-dark-obsidian .hero-aura-emerald {
   inset-inline-start: -180px;
   width: 460px;
   height: 460px;
-  background: radial-gradient(circle, rgba(59, 217, 164, 0.1) 0%, rgba(59, 217, 164, 0.03) 48%, transparent 70%);
+  background: radial-gradient(
+    circle,
+    rgba(59, 217, 164, 0.1) 0%,
+    rgba(59, 217, 164, 0.03) 48%,
+    transparent 70%
+  );
 }
 
 /* Perspective grid floor — the "clinical surface". Two layered grids so the
@@ -614,7 +629,11 @@ body.theme-dark-obsidian .hero-grid-lines {
     linear-gradient(to bottom, rgba(255, 255, 255, 0.045) 1px, transparent 1px),
     linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
-  background-size: 96px 96px, 96px 96px, 24px 24px, 24px 24px;
+  background-size:
+    96px 96px,
+    96px 96px,
+    24px 24px,
+    24px 24px;
   transform: perspective(680px) rotateX(64deg);
   transform-origin: top;
   mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.85), transparent 78%);
@@ -630,8 +649,12 @@ body.theme-dark-obsidian .hero-noise {
   background-image:
     radial-gradient(rgba(255, 255, 255, 0.7) 0.5px, transparent 0.5px),
     radial-gradient(rgba(255, 255, 255, 0.5) 0.5px, transparent 0.5px);
-  background-size: 7px 7px, 11px 11px;
-  background-position: 0 0, 4px 6px;
+  background-size:
+    7px 7px,
+    11px 11px;
+  background-position:
+    0 0,
+    4px 6px;
   mix-blend-mode: overlay;
 }
 
@@ -660,7 +683,11 @@ body.theme-dark-obsidian .hero-beam-line-3 {
 
 @media (max-width: 767px) {
   body.theme-dark-obsidian .hero-grid-lines {
-    background-size: 64px 64px, 64px 64px, 16px 16px, 16px 16px;
+    background-size:
+      64px 64px,
+      64px 64px,
+      16px 16px,
+      16px 16px;
     opacity: 0.4;
   }
 
@@ -689,8 +716,13 @@ body.theme-dark-obsidian .hero-beam-line-3 {
   }
 
   @keyframes hero-beam-pulse {
-    0%, 100% { opacity: 0.55; }
-    50% { opacity: 0.85; }
+    0%,
+    100% {
+      opacity: 0.55;
+    }
+    50% {
+      opacity: 0.85;
+    }
   }
 }
 
@@ -1057,9 +1089,15 @@ body.theme-dark-obsidian .hero-seal {
   width: 92px;
   height: 92px;
   border-radius: 50%;
-  background: radial-gradient(circle at 32% 26%, rgba(232, 203, 143, 0.16), rgba(5, 7, 9, 0.97) 62%);
+  background: radial-gradient(
+    circle at 32% 26%,
+    rgba(232, 203, 143, 0.16),
+    rgba(5, 7, 9, 0.97) 62%
+  );
   border: 1.5px solid rgba(232, 203, 143, 0.42);
-  box-shadow: 0 16px 34px -18px #000, 0 0 0 1px rgba(0, 0, 0, 0.4);
+  box-shadow:
+    0 16px 34px -18px #000,
+    0 0 0 1px rgba(0, 0, 0, 0.4);
   color: var(--v2-gold);
   pointer-events: none;
 }
@@ -1096,7 +1134,9 @@ body.theme-dark-obsidian .hero-seal-core {
   }
 
   @keyframes hero-seal-turn {
-    to { transform: rotate(360deg); }
+    to {
+      transform: rotate(360deg);
+    }
   }
 }
 
@@ -1235,7 +1275,9 @@ body.theme-dark-obsidian .metric-label {
     background: linear-gradient(160deg, rgba(20, 26, 30, 0.92), rgba(8, 12, 15, 0.96));
     -webkit-backdrop-filter: blur(14px) saturate(140%);
     backdrop-filter: blur(14px) saturate(140%);
-    box-shadow: 0 28px 60px -30px #000, 0 1px 0 rgba(255, 255, 255, 0.06) inset;
+    box-shadow:
+      0 28px 60px -30px #000,
+      0 1px 0 rgba(255, 255, 255, 0.06) inset;
   }
 
   body.theme-dark-obsidian .hero-seal {
@@ -1283,13 +1325,14 @@ body.theme-dark-obsidian .trust-grid {
 
 body.theme-dark-obsidian .trust-card {
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0)) ,
-    var(--v2-surface);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0)), var(--v2-surface);
   border: 1px solid var(--v2-line);
   border-radius: var(--v2-r-md);
   padding: 16px 14px;
   box-shadow: none;
-  transition: border-color 0.25s var(--v2-ease), transform 0.25s var(--v2-ease);
+  transition:
+    border-color 0.25s var(--v2-ease),
+    transform 0.25s var(--v2-ease);
 }
 
 body.theme-dark-obsidian .trust-icon {
@@ -1538,8 +1581,7 @@ body.theme-dark-obsidian .featured-promo-card {
   border-radius: var(--v2-r-lg);
   border: 1px solid rgba(232, 203, 143, 0.28);
   background:
-    radial-gradient(120% 140% at 100% 0%, rgba(232, 203, 143, 0.12), transparent 55%),
-    #0b1013;
+    radial-gradient(120% 140% at 100% 0%, rgba(232, 203, 143, 0.12), transparent 55%), #0b1013;
   padding: 20px 16px;
   box-shadow: var(--v2-shadow-card);
 }
@@ -1871,8 +1913,7 @@ body.theme-dark-obsidian .male-strip-inner {
   border-radius: var(--v2-r-lg);
   border: 1px solid var(--v2-line);
   background:
-    radial-gradient(120% 120% at 0% 0%, rgba(59, 217, 164, 0.1), transparent 55%),
-    var(--v2-surface);
+    radial-gradient(120% 120% at 0% 0%, rgba(59, 217, 164, 0.1), transparent 55%), var(--v2-surface);
 }
 
 body.theme-dark-obsidian .male-title {
@@ -2010,9 +2051,7 @@ body.theme-dark-obsidian .testimonial-card {
   padding: 16px;
   border-radius: var(--v2-r-md);
   border: 1px solid var(--v2-line);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent),
-    var(--v2-surface);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent), var(--v2-surface);
   box-shadow: none;
 }
 
@@ -2096,7 +2135,9 @@ body.theme-dark-obsidian .faq-card {
   border-radius: var(--v2-r-md);
   background: var(--v2-surface);
   overflow: hidden;
-  transition: border-color 0.25s var(--v2-ease), background 0.25s var(--v2-ease);
+  transition:
+    border-color 0.25s var(--v2-ease),
+    background 0.25s var(--v2-ease);
 }
 
 body.theme-dark-obsidian .faq-card[open] {
@@ -2134,7 +2175,9 @@ body.theme-dark-obsidian .faq-toggle-icon {
   border: 1px solid var(--v2-line);
   background: rgba(255, 255, 255, 0.03);
   color: var(--v2-gold);
-  transition: transform 0.25s var(--v2-ease), background 0.25s var(--v2-ease);
+  transition:
+    transform 0.25s var(--v2-ease),
+    background 0.25s var(--v2-ease);
 }
 
 body.theme-dark-obsidian .faq-card[open] .faq-toggle-icon {
@@ -2304,8 +2347,7 @@ body.theme-dark-obsidian .ig-avatar {
   display: grid;
   place-items: center;
   background:
-    radial-gradient(circle at 30% 25%, rgba(232, 203, 143, 0.35), transparent 60%),
-    #131a1f;
+    radial-gradient(circle at 30% 25%, rgba(232, 203, 143, 0.35), transparent 60%), #131a1f;
   border: 1px solid rgba(232, 203, 143, 0.3);
   color: var(--v2-gold);
 }
@@ -2344,6 +2386,9 @@ body.theme-dark-obsidian .ig-follow-btn {
 }
 
 body.theme-dark-obsidian .ig-vip-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px; /* ux-v3: WCAG 2.5.8 floor — was a 21px line-box */
   color: var(--v2-gold);
   font-size: 11.5px;
   font-weight: 600;
@@ -2364,8 +2409,7 @@ body.theme-dark-obsidian .ig-reel {
   color: var(--v2-ink);
   background:
     radial-gradient(120% 120% at 85% 0%, rgba(232, 203, 143, 0.18), transparent 55%),
-    radial-gradient(90% 90% at 10% 100%, rgba(59, 217, 164, 0.16), transparent 60%),
-    #0a0f12;
+    radial-gradient(90% 90% at 10% 100%, rgba(59, 217, 164, 0.16), transparent 60%), #0a0f12;
 }
 
 body.theme-dark-obsidian .ig-reel::before {
@@ -2839,7 +2883,9 @@ body.theme-dark-obsidian .mobile-sticky-bar {
   transform: translateY(140%);
   opacity: 0;
   pointer-events: none;
-  transition: transform 0.3s var(--v2-ease), opacity 0.3s var(--v2-ease);
+  transition:
+    transform 0.3s var(--v2-ease),
+    opacity 0.3s var(--v2-ease);
 }
 
 body.theme-dark-obsidian.chrome-docked .mobile-sticky-bar {
@@ -3423,7 +3469,8 @@ body.theme-dark-obsidian .ig-handle {
   color: #171104;
 }
 
-body.theme-dark-obsidian :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+body.theme-dark-obsidian
+  :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
   outline: 2px solid var(--v2-gold);
   outline-offset: 3px;
   border-radius: 6px;
@@ -3459,7 +3506,9 @@ body.theme-dark-obsidian .announcement-strip::after {
   body.theme-dark-obsidian .nav-link {
     padding-inline: 12px;
     border-radius: 10px;
-    transition: background-color 0.2s var(--v2-ease), color 0.2s var(--v2-ease);
+    transition:
+      background-color 0.2s var(--v2-ease),
+      color 0.2s var(--v2-ease);
   }
 
   body.theme-dark-obsidian .nav-link:hover {
@@ -3515,9 +3564,17 @@ body.theme-dark-obsidian .hero-btn-book::after {
   }
 
   @keyframes v3-sheen {
-    0% { opacity: 0; transform: translateX(0) skewX(-18deg); }
-    25% { opacity: 1; }
-    100% { opacity: 0; transform: translateX(320%) skewX(-18deg); }
+    0% {
+      opacity: 0;
+      transform: translateX(0) skewX(-18deg);
+    }
+    25% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      transform: translateX(320%) skewX(-18deg);
+    }
   }
 }
 
@@ -3574,7 +3631,9 @@ body.theme-dark-obsidian .trust-card:hover,
 body.theme-dark-obsidian .candela-feature-card:hover,
 body.theme-dark-obsidian .testimonial-card:hover {
   border-color: rgba(232, 203, 143, 0.34);
-  box-shadow: 0 26px 50px -40px #000, 0 0 0 1px rgba(232, 203, 143, 0.08) inset;
+  box-shadow:
+    0 26px 50px -40px #000,
+    0 0 0 1px rgba(232, 203, 143, 0.08) inset;
 }
 
 body.theme-dark-obsidian .trust-card:hover .trust-icon,
@@ -3591,8 +3650,7 @@ body.theme-dark-obsidian .candela-feature-card:hover .candela-feat-icon {
     border-radius: 22px;
     border: 1px solid var(--v2-line-strong);
     background:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 140px),
-      var(--v2-surface);
+      linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 140px), var(--v2-surface);
     /* A 27-row ledger read edge-to-edge needs a 1200px eye sweep from zone to
        action; 1000px keeps the row readable and the table deliberate. */
     max-width: 1000px;
@@ -3603,10 +3661,18 @@ body.theme-dark-obsidian .candela-feature-card:hover .candela-feat-icon {
     table-layout: fixed;
   }
 
-  body.theme-dark-obsidian .gender-price-table .gpt-th-zone { width: 34%; }
-  body.theme-dark-obsidian .gender-price-table .gpt-th-female { width: 27%; }
-  body.theme-dark-obsidian .gender-price-table .gpt-th-male { width: 27%; }
-  body.theme-dark-obsidian .gender-price-table .gpt-th-action { width: 12%; }
+  body.theme-dark-obsidian .gender-price-table .gpt-th-zone {
+    width: 34%;
+  }
+  body.theme-dark-obsidian .gender-price-table .gpt-th-female {
+    width: 27%;
+  }
+  body.theme-dark-obsidian .gender-price-table .gpt-th-male {
+    width: 27%;
+  }
+  body.theme-dark-obsidian .gender-price-table .gpt-th-action {
+    width: 12%;
+  }
 
   body.theme-dark-obsidian .gender-price-table thead th {
     background: #0a0f12;
@@ -3717,23 +3783,43 @@ body.theme-dark-obsidian .bottom-nav-link[aria-current='page'] svg {
     animation: v3-hero-rise 0.72s var(--v2-ease) both;
   }
 
-  body.theme-dark-obsidian .hero-content > :nth-child(1) { animation-delay: 0.02s; }
-  body.theme-dark-obsidian .hero-content > :nth-child(2) { animation-delay: 0.1s; }
-  body.theme-dark-obsidian .hero-content > :nth-child(3) { animation-delay: 0.18s; }
-  body.theme-dark-obsidian .hero-content > :nth-child(4) { animation-delay: 0.26s; }
+  body.theme-dark-obsidian .hero-content > :nth-child(1) {
+    animation-delay: 0.02s;
+  }
+  body.theme-dark-obsidian .hero-content > :nth-child(2) {
+    animation-delay: 0.1s;
+  }
+  body.theme-dark-obsidian .hero-content > :nth-child(3) {
+    animation-delay: 0.18s;
+  }
+  body.theme-dark-obsidian .hero-content > :nth-child(4) {
+    animation-delay: 0.26s;
+  }
 
   body.theme-dark-obsidian .hero-visual-stage {
     animation: v3-hero-frame 1s var(--v2-ease) 0.14s both;
   }
 
   @keyframes v3-hero-rise {
-    from { opacity: 0; transform: translateY(16px); }
-    to { opacity: 1; transform: none; }
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
   }
 
   @keyframes v3-hero-frame {
-    from { opacity: 0; transform: translateY(22px) scale(0.985); }
-    to { opacity: 1; transform: none; }
+    from {
+      opacity: 0;
+      transform: translateY(22px) scale(0.985);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
   }
 
   /* The headline's gold phrase breathes once every 9s — a foil glint, not a
@@ -3744,8 +3830,14 @@ body.theme-dark-obsidian .bottom-nav-link[aria-current='page'] svg {
   }
 
   @keyframes v3-gold-glint {
-    0%, 62%, 100% { background-position: 100% 0; }
-    78% { background-position: 0 0; }
+    0%,
+    62%,
+    100% {
+      background-position: 100% 0;
+    }
+    78% {
+      background-position: 0 0;
+    }
   }
 }
 
@@ -3866,7 +3958,9 @@ body.theme-dark-obsidian .stat-band-label {
     inset 0 1px 0 rgba(255, 255, 255, 0.4);
   font-size: 0.82rem;
   font-weight: 800;
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
 }
 
 .wa-float:hover {
