@@ -1,0 +1,52 @@
+/**
+ * One-off D1 bootstrap runner.
+ *
+ * WHY THIS EXISTS: the repository's CLOUDFLARE_API_TOKEN carries Workers:Edit
+ * (CD deploys fine) but not D1:Edit, so `wrangler d1 migrations apply --remote`
+ * fails with 7403. This Worker is a temporary bridge: it is deployed by
+ * .github/workflows/db-bootstrap.yml, runs migrations/0012_operators.sql
+ * through the Worker's own D1 binding, reports what exists, and is deleted in
+ * the same job. Additive DDL only (CREATE TABLE IF NOT EXISTS + INSERT OR
+ * IGNORE), so a re-run is a no-op.
+ *
+ * It never reads application data and refuses to run without the per-run key.
+ */
+import migrationSql from '../../migrations/0012_operators.sql';
+
+export default {
+  async fetch(request, env) {
+    const url = new URL(request.url);
+    if (url.pathname !== '/apply') return new Response('not found', { status: 404 });
+
+    const key = request.headers.get('x-bootstrap-key') ?? '';
+    if (!env.BOOTSTRAP_KEY || key !== env.BOOTSTRAP_KEY) {
+      return new Response('forbidden', { status: 403 });
+    }
+
+    const startedAt = Date.now();
+    let applied = true;
+    let applyError = null;
+    try {
+      // exec() runs the whole migration text; every statement in it is idempotent.
+      await env.DB.exec(migrationSql);
+    } catch (error) {
+      applied = false;
+      applyError = String(error && error.message ? error.message : error);
+    }
+
+    const tables = await env.DB.prepare(
+      "SELECT name FROM sqlite_master WHERE type = 'table' AND name LIKE 'operator%' ORDER BY name",
+    ).all();
+    const permissions = await env.DB.prepare(
+      "SELECT name FROM permissions WHERE name LIKE 'operator.%' ORDER BY name",
+    ).all();
+
+    return Response.json({
+      applied,
+      error: applyError,
+      ms: Date.now() - startedAt,
+      tables: (tables.results ?? []).map((row) => row.name),
+      permissions: (permissions.results ?? []).map((row) => row.name),
+    });
+  },
+};
