@@ -861,7 +861,7 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
   }
 
   .gold-gradient-text {
-    background: linear-gradient(135deg, #ecfdf5 0%, #34d399 45%, #10b981 100%);
+    background: linear-gradient(135deg, #f4e2b8 0%, #e8cb8f 45%, #c9a45c 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     display: inline-block;
@@ -966,15 +966,17 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
   }
 
   .hero-cta-primary {
-    background: linear-gradient(180deg, #34d399 0%, #10b981 50%, #047857 100%);
-    color: #0b0f0d;
-    box-shadow: 0 8px 26px rgba(16, 185, 129, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.45);
+    /* ux-v3: emerald is the "verified" signal, not the "book" action — and
+       #0b0f0d on #047857 measured 3.52:1. One accent for action. */
+    background: linear-gradient(180deg, #f6e3ba 0%, #e8cb8f 50%, #c9a45c 100%);
+    color: #171104;
+    box-shadow: 0 8px 26px rgba(232, 203, 143, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.45);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
 
   .hero-cta-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 32px rgba(16, 185, 129, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.55);
+    box-shadow: 0 12px 32px rgba(232, 203, 143, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.55);
   }
 
   .hero-cta-secondary {
@@ -1123,11 +1125,11 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: thin;
-    scrollbar-color: rgba(16, 185, 129, 0.5) transparent;
+    scrollbar-color: rgba(232, 203, 143, 0.4) transparent;
   }
 
   .spec-table-wrap:focus-visible {
-    outline: 2px solid var(--gold-primary, #34d399);
+    outline: 2px solid var(--ux-accent, #e8cb8f);
     outline-offset: 4px;
   }
 
@@ -1181,26 +1183,29 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
   .spec-table td {
     padding: 12px 14px;
     text-align: right;
-    border-bottom: 1px solid rgba(16, 185, 129, 0.14);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   }
 
+  /* ux-v3: head and label cells inherited the LIGHT-page palette
+     (#e5ded5/#c4bcb0 on a near-white row = 1.29:1 measured). The datasheet
+     is a dark card, so the ink comes from the dark-theme ramp instead. */
   .spec-table thead th {
-    background: rgba(16, 185, 129, 0.1);
-    color: #6ee7b7;
+    background: #0b1013;
+    color: #f2f6f5;
     font-size: 0.78rem;
     font-weight: 800;
     /* No letter-spacing on Persian column labels. */
-    border-bottom: 1px solid rgba(16, 185, 129, 0.35);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.16);
   }
 
   .spec-table tbody th {
-    color: #e5ded5;
+    color: #f2f6f5;
     font-weight: 700;
     font-size: 0.85rem;
   }
 
   .spec-table tbody td {
-    color: #c4bcb0;
+    color: #c6cfc9;
     font-variant-numeric: tabular-nums;
   }
 

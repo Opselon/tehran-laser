@@ -59,7 +59,8 @@ INSERT OR REPLACE INTO blog_posts (
   <strong>💡 فواصل ایده‌آل بین جلسات:</strong>
   برای نواحی صورت ۴ الی ۶ هفته، و برای نواحی بدن ۶ الی ۸ هفته فاصله میان جلسات به منظور هماهنگی با فاز رشد فعال مو (آناژن) بهترین چرخه اثربخشی را ایجاد می‌کند.
 </div>',
-  'https://images.unsplash.com/photo-1512290900672-1f55a1532be6?auto=format&fit=crop&w=1200&q=80',
+  -- was photo-1512290900672 (now 404 at Unsplash) — replaced with a live asset
+  'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=1200&q=80',
   'دکتر مشاور کلینیک',
   'published',
   strftime('%Y-%m-%dT%H:%M:%fZ', 'now'),
