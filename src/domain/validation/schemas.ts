@@ -458,3 +458,30 @@ export const featureReorderSchema = z
   })
   .strict();
 export type FeatureReorderInput = z.infer<typeof featureReorderSchema>;
+
+/* ── SEO overrides (wave W4) ─────────────────────────────────────────────
+   The upsert mirrors the seo_metadata table: entity (type+id) is the natural
+   key, the fields are the editable surface. `url` accepts only http(s) so a
+   stray admin entry can never inject a `javascript:` or relative href into
+   a canonical/OG tag served to the public. */
+const httpsUrlSchema = z
+  .string()
+  .trim()
+  .max(500)
+  .refine((value) => /^https?:\/\/.+\..+/i.test(value), {
+    message: 'آدرس باید یک URL معتبر http(s) باشد.',
+  });
+
+export const seoUpsertSchema = z
+  .object({
+    entityType: z.enum(['page', 'service', 'post']),
+    entityId: z.string().trim().min(1).max(120),
+    title: z.string().trim().min(3, 'عنوان سئو الزامی است.').max(120),
+    description: z.string().trim().min(3, 'توضیحات سئو الزامی است.').max(300),
+    canonicalUrl: httpsUrlSchema.nullable().optional(),
+    ogImage: httpsUrlSchema.nullable().optional(),
+    noindex: z.boolean().optional(),
+  })
+  .strict();
+export type SeoUpsertInput = z.infer<typeof seoUpsertSchema>;
+

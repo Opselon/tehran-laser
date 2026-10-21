@@ -9,6 +9,7 @@
 import { env } from 'cloudflare:workers';
 import { requirePermission } from '../auth/guard';
 import { handleOperatorRoutes } from './operators.routes';
+import { handleWaveW4Routes } from './wave-w4.routes';
 import { createSession, revokeSession } from '../auth/session';
 import {
   buildSessionCookie,
@@ -221,6 +222,15 @@ export async function handleApiRequest(
     {
       const operatorResponse = await handleOperatorRoutes(request, locals, pathname, method);
       if (operatorResponse) return operatorResponse;
+    }
+
+    /* ── Wave W4 admin contracts (§ detail/SEO/search) ───────────
+       Same delegation pattern: detail/timeline/SEO/search/pricing reads in one
+       file. Must run BEFORE the legacy `startsWith` matches below, otherwise
+       `GET /admin/bookings/:id` is swallowed by the list route's prefix check. */
+    {
+      const w4Response = await handleWaveW4Routes(request, locals, pathname, method);
+      if (w4Response) return w4Response;
     }
 
     /* ── Public: Services & Pricing (§5) ─────────────────────── */
@@ -1227,6 +1237,9 @@ export async function handleApiRequest(
         nowIso,
       );
 
+      /* Walk-in intake creates three records at once (booking + money + clinical),
+         all attributed to one operator action — one audit row ties them together. */
+      await writeAuditLog(env.DB, auth.id, 'walkin.booked', 'booking', bookingId);
       return ok({
         bookingId,
         nextBookingId,
@@ -1243,7 +1256,7 @@ export async function handleApiRequest(
       let sql = `SELECT r.*, c.name AS customerName, c.phone AS customerPhone
                    FROM customer_clinical_records r
                    JOIN customers c ON c.id = r.customer_id`;
-      const params: any[] = [];
+      const params: (string | number)[] = [];
       if (custId) {
         sql += ` WHERE r.customer_id = ?`;
         params.push(custId);
@@ -1284,30 +1297,59 @@ export async function handleApiRequest(
         nowIso,
       );
 
+      /* Clinical writes are the highest-liability records in the system: an
+         operator session must be attributable months later. */
+      await writeAuditLog(env.DB, auth.id, 'clinical_record.created', 'customer_clinical_record', id);
       return okWithStatus({ id, success: true }, 201);
     }
 
     /* ── Admin: Accounting & Transactions ─────────────────────── */
     if (pathname === '/api/v1/admin/accounting/summary' && method === 'GET') {
       requirePermission(locals, 'settings.read');
-      const todayIso = new Date().toISOString().slice(0, 10);
-      const monthIso = new Date().toISOString().slice(0, 7);
+      /* Clinic-local "today"/"this month", not UTC: `toISOString().slice(0,10)`
+         attributes the first 3.5h of every Tehran day to yesterday — the same
+         bug class the dashboard already fixed (§22). transactions store their
+         UTC instant in `created_at`, so we build the Tehran day window in UTC
+         and range on it instead of a string prefix. */
+      const rawSettings = await getPublicSettings(env.DB);
+      const tz = rawSettings.timezone ?? 'Asia/Tehran';
+      const todayLocal = localDateOf(new Date().toISOString(), tz);
+      const dayStartUtc = zonedTimeToUtc(todayLocal, '00:00', tz);
+      const dayEndUtc = new Date(Date.parse(dayStartUtc) + 86_400_000 - 1).toISOString();
+
+      /* Month window as [first day 00:00 local, first day of NEXT month 00:00
+         local). Computing the next month explicitly keeps December → January
+         correct; a `+31 days` shortcut would not. */
+      const year = Number(todayLocal.slice(0, 4));
+      const month = Number(todayLocal.slice(5, 7));
+      const pad = (n: number) => String(n).padStart(2, '0');
+      const monthStartLocal = `${year}-${pad(month)}-01`;
+      const nextMonthStartLocal =
+        month === 12 ? `${year + 1}-01-01` : `${year}-${pad(month + 1)}-01`;
+      const monthStartUtc = zonedTimeToUtc(monthStartLocal, '00:00', tz);
+      const monthEndUtc = new Date(Date.parse(zonedTimeToUtc(nextMonthStartLocal, '00:00', tz)) - 1).toISOString();
 
       const [todayRow, monthRow, expenseRow, recentRows] = await Promise.all([
         one<{ total: number }>(
           env.DB,
-          `SELECT COALESCE(SUM(amount), 0) AS total FROM accounting_transactions WHERE type = 'income' AND created_at LIKE ?`,
-          `${todayIso}%`,
+          `SELECT COALESCE(SUM(amount), 0) AS total FROM accounting_transactions
+            WHERE type = 'income' AND created_at >= ? AND created_at <= ?`,
+          dayStartUtc,
+          dayEndUtc,
         ),
         one<{ total: number }>(
           env.DB,
-          `SELECT COALESCE(SUM(amount), 0) AS total FROM accounting_transactions WHERE type = 'income' AND created_at LIKE ?`,
-          `${monthIso}%`,
+          `SELECT COALESCE(SUM(amount), 0) AS total FROM accounting_transactions
+            WHERE type = 'income' AND created_at >= ? AND created_at <= ?`,
+          monthStartUtc,
+          monthEndUtc,
         ),
         one<{ total: number }>(
           env.DB,
-          `SELECT COALESCE(SUM(amount), 0) AS total FROM accounting_transactions WHERE type = 'expense' AND created_at LIKE ?`,
-          `${monthIso}%`,
+          `SELECT COALESCE(SUM(amount), 0) AS total FROM accounting_transactions
+            WHERE type = 'expense' AND created_at >= ? AND created_at <= ?`,
+          monthStartUtc,
+          monthEndUtc,
         ),
         all(
           env.DB,
@@ -1332,7 +1374,7 @@ export async function handleApiRequest(
     }
 
     if (pathname === '/api/v1/admin/accounting/transactions' && method === 'POST') {
-      requirePermission(locals, 'settings.write');
+      const auth = requirePermission(locals, 'settings.write');
       const body = await parseBody(request, accountingTransactionSchema);
       const id = crypto.randomUUID();
       const ref = 'TX-' + Math.random().toString(36).substring(2, 7).toUpperCase();
@@ -1356,6 +1398,15 @@ export async function handleApiRequest(
         nowIso,
       );
 
+      /* Money in/out without an audit row cannot be reconciled against the
+         ledger later — the reference alone says nothing about who typed it. */
+      await writeAuditLog(
+        env.DB,
+        auth.id,
+        body.type === 'expense' ? 'accounting.expense_created' : 'accounting.income_created',
+        'accounting_transaction',
+        id,
+      );
       return okWithStatus({ id, reference: ref, success: true }, 201);
     }
 
@@ -1372,7 +1423,7 @@ export async function handleApiRequest(
     }
 
     if (pathname === '/api/v1/admin/sms/send' && method === 'POST') {
-      requirePermission(locals, 'settings.write');
+      const auth = requirePermission(locals, 'settings.write');
       const body = await parseBody(request, sendSmsSchema);
       const id = crypto.randomUUID();
       const nowIso = new Date().toISOString();
@@ -1389,6 +1440,9 @@ export async function handleApiRequest(
         nowIso,
       );
 
+      /* Outbound messages to real numbers are a spend + consent trail; log the
+         entity, never the message body (it can carry clinical detail). */
+      await writeAuditLog(env.DB, auth.id, 'sms.sent', 'sms_log', id);
       return ok({ id, success: true, status: 'delivered' });
     }
 
@@ -1400,7 +1454,7 @@ export async function handleApiRequest(
     }
 
     if (pathname === '/api/v1/admin/lottery/draw' && method === 'POST') {
-      requirePermission(locals, 'settings.write');
+      const auth = requirePermission(locals, 'settings.write');
       const body = await parseBody(request, lotteryDrawSchema);
       const campaignId = body.campaignId;
 
@@ -1441,6 +1495,9 @@ export async function handleApiRequest(
         nowIso,
       );
 
+      /* A draw is a money-adjacent decision about one customer — who pressed
+         the button must be reconstructible from the audit trail alone. */
+      await writeAuditLog(env.DB, auth.id, 'lottery.draw', 'lottery_campaign', campaignId);
       return ok({
         winner: candidate,
         success: true,
@@ -1448,7 +1505,7 @@ export async function handleApiRequest(
     }
 
     if (pathname === '/api/v1/admin/lottery' && method === 'POST') {
-      requirePermission(locals, 'settings.write');
+      const auth = requirePermission(locals, 'settings.write');
       const body = await parseBody(request, lotteryCampaignSchema);
       const id = crypto.randomUUID();
       const nowIso = new Date().toISOString();
@@ -1465,6 +1522,7 @@ export async function handleApiRequest(
         nowIso,
       );
 
+      await writeAuditLog(env.DB, auth.id, 'lottery.created', 'lottery_campaign', id);
       return okWithStatus({ id, success: true }, 201);
     }
 
