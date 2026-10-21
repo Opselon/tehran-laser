@@ -44,6 +44,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Inline the migration SQL
+        run: node scripts/d1-bootstrap/inline-sql.mjs
+
       - name: Mint a per-run key
         run: echo "BOOTSTRAP_KEY=$(openssl rand -hex 24)" >> "$GITHUB_ENV"
 

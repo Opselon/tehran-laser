@@ -12,3 +12,4 @@ test-results/
 playwright-report/
 .qa/
 dist-probe/
+scripts/d1-bootstrap/migration.mjs
