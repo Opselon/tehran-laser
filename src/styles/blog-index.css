@@ -1,0 +1,935 @@
+/* Page-local styles extracted from blog-index.astro (wave W5).
+ * Scoped under the page's own content wrapper so specificity and
+ * cascade match the Astro-scoped <style> block they replace.
+ * Selectors are verbatim; page self-cascades are preserved in source order. */
+
+/* Dark 3D Obsidian-Gold Stylesheet */
+body.blog-page-obsidian {
+      background-color: #0a0b0d !important;
+      color: #f1f5f9;
+      overflow-x: hidden;
+    }
+
+main .blog-obsidian-wrapper {
+      background-color: #0a0b0d;
+      background-image: 
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(16, 185, 129, 0.12) 0%, transparent 70%),
+        radial-gradient(ellipse 60% 40% at 90% 40%, rgba(16, 185, 129, 0.04) 0%, transparent 60%);
+      min-height: 100vh;
+      padding-bottom: 70px;
+      overflow-x: hidden;
+      width: 100%;
+    }
+
+main .blog-hero-section {
+      padding: 44px 16px 28px;
+      border-bottom: 1px solid rgba(16, 185, 129, 0.18);
+      position: relative;
+    }
+
+main .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: #34d399;
+      font-size: 0.82rem;
+      font-weight: 700;
+      padding: 6px 16px;
+      border-radius: 999px;
+      margin-bottom: 18px;
+      box-shadow: 0 4px 16px rgba(16, 185, 129, 0.1);
+    }
+
+main .badge-icon {
+      color: #34d399;
+    }
+
+main .blog-hero-title {
+      font-size: clamp(1.8rem, 4vw, 2.75rem);
+      font-weight: 900;
+      color: #ffffff;
+      line-height: 1.35;
+      margin-bottom: 14px;
+      /* No letter-spacing on Persian headings. */
+      text-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+    }
+
+main .blog-hero-desc {
+      font-size: clamp(0.95rem, 2vw, 1.1rem);
+      color: #cbd5e1;
+      max-width: 740px;
+      margin: 0 auto 34px;
+      line-height: 1.9;
+    }
+
+/* Patient Guides Strip */
+main .patient-guides-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      max-width: 1100px;
+      margin: 0 auto;
+      text-align: right;
+    }
+
+main .patient-guide-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      background: linear-gradient(145deg, rgba(20, 24, 33, 0.85) 0%, rgba(13, 16, 23, 0.95) 100%);
+      border: 1px solid rgba(16, 185, 129, 0.22);
+      border-radius: 16px;
+      padding: 16px 18px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+      transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;
+    }
+
+main .patient-guide-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(16, 185, 129, 0.5);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6), 0 0 16px rgba(16, 185, 129, 0.12);
+    }
+
+main .guide-icon-box {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: #34d399;
+      flex-shrink: 0;
+    }
+
+main .guide-title {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #34d399;
+      margin-bottom: 4px;
+    }
+
+main .guide-sub {
+      font-size: 0.82rem;
+      color: #94a3b8;
+      line-height: 1.6;
+    }
+
+/* Main Container & Category Bar */
+main .blog-main-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 34px 16px 0;
+      overflow-x: hidden;
+      width: 100%;
+    }
+
+main .blog-category-bar {
+      margin-bottom: 32px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(16, 185, 129, 0.3) transparent;
+    }
+
+main .category-chips-list {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+main .category-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(18, 22, 31, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #cbd5e1;
+      padding: 9px 18px;
+      border-radius: 999px;
+      font-size: 0.86rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+main .category-chip:hover {
+      border-color: rgba(16, 185, 129, 0.4);
+      color: #34d399;
+      background: rgba(16, 185, 129, 0.1);
+    }
+
+main .category-chip.active {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.25) 0%, rgba(16, 185, 129, 0.12) 100%);
+      border-color: #10b981;
+      color: #34d399;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.2);
+    }
+
+/* Featured Article 3D Card */
+main .featured-article-section {
+      margin-bottom: 40px;
+    }
+
+main .featured-card-3d {
+      display: grid;
+      grid-template-columns: 1.15fr 1fr;
+      background: linear-gradient(160deg, rgba(21, 26, 38, 0.95) 0%, rgba(13, 16, 23, 0.95) 100%);
+      border: 1px solid rgba(16, 185, 129, 0.32);
+      border-radius: 22px;
+      overflow: hidden;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+      transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+main .featured-card-3d:hover {
+      transform: translateY(-4px);
+      border-color: rgba(16, 185, 129, 0.6);
+      box-shadow: 0 28px 60px rgba(0, 0, 0, 0.75), 0 0 26px rgba(16, 185, 129, 0.18);
+    }
+
+main .featured-image-col {
+      position: relative;
+      min-height: 290px;
+      overflow: hidden;
+      background: #0d111a;
+    }
+
+main .featured-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+
+main .featured-card-3d:hover .featured-img {
+      transform: scale(1.04);
+    }
+
+main .featured-img-fallback {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(16, 185, 129, 0.4);
+      background: linear-gradient(160deg, #14161a 0%, #0a0b0d 70%);
+    }
+
+main .img-failed-layer {
+      display: none;
+      position: absolute;
+      inset: 0;
+    }
+
+main .featured-image-col.img-load-failed .img-failed-layer,
+  main .article-card-img-wrap.img-load-failed .img-failed-layer {
+      display: flex;
+    }
+
+main .featured-badge-pill {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(10, 12, 18, 0.85);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #34d399;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    }
+
+main .featured-content-col {
+      padding: 32px 30px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+main .card-meta-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+main .meta-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #94a3b8;
+    }
+
+main .meta-category {
+      color: #34d399;
+      background: rgba(16, 185, 129, 0.12);
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+
+main .featured-title {
+      font-size: clamp(1.2rem, 2.5vw, 1.6rem);
+      font-weight: 900;
+      line-height: 1.5;
+      margin-bottom: 14px;
+    }
+
+main .featured-title a {
+      color: #ffffff;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+main .featured-title a:hover {
+      color: #34d399;
+    }
+
+main .featured-excerpt {
+      font-size: 0.95rem;
+      color: #cbd5e1;
+      line-height: 1.85;
+      margin-bottom: 24px;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+main .featured-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+      padding-top: 18px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+main .author-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      color: #cbd5e1;
+    }
+
+main .author-avatar-mini {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(16, 185, 129, 0.2);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #34d399;
+    }
+
+main .btn-read-featured {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, #10b981 0%, #aa8421 100%);
+      color: #0b0e14;
+      font-size: 0.88rem;
+      font-weight: 800;
+      padding: 10px 22px;
+      border-radius: 12px;
+      text-decoration: none;
+      box-shadow: 0 6px 18px rgba(16, 185, 129, 0.35);
+      transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
+    }
+
+main .btn-read-featured:hover {
+      transform: translateX(-4px);
+      box-shadow: 0 8px 24px rgba(16, 185, 129, 0.5);
+      filter: brightness(1.08);
+    }
+
+/* Regular Articles Grid */
+main .blog-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 24px;
+      margin-bottom: 50px;
+    }
+
+main .article-card-3d {
+      background: linear-gradient(165deg, rgba(20, 25, 36, 0.95) 0%, rgba(12, 15, 22, 0.95) 100%);
+      border: 1px solid rgba(16, 185, 129, 0.22);
+      border-radius: 18px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+      transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+
+main .article-card-3d:hover {
+      transform: translateY(-5px);
+      border-color: rgba(16, 185, 129, 0.55);
+      box-shadow: 0 20px 42px rgba(0, 0, 0, 0.65), 0 0 20px rgba(16, 185, 129, 0.12);
+    }
+
+main .article-card-img-wrap {
+      position: relative;
+      height: 200px;
+      width: 100%;
+      overflow: hidden;
+      background: #0d1017;
+    }
+
+main .article-card-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s ease;
+    }
+
+main .article-card-3d:hover .article-card-img {
+      transform: scale(1.06);
+    }
+
+main .article-card-img-fallback {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(16, 185, 129, 0.35);
+    }
+
+main .card-category-tag {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(10, 13, 20, 0.88);
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: #34d399;
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 0.74rem;
+      font-weight: 700;
+    }
+
+main .article-card-body {
+      padding: 22px 20px;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+    }
+
+main .meta-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.78rem;
+      color: #94a3b8;
+    }
+
+main .article-card-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      line-height: 1.6;
+      margin-bottom: 10px;
+      color: #ffffff;
+    }
+
+main .article-card-title a {
+      color: #ffffff;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+main .article-card-title a:hover {
+      color: #34d399;
+    }
+
+main .article-card-excerpt {
+      font-size: 0.88rem;
+      color: #94a3b8;
+      line-height: 1.8;
+      margin-bottom: 20px;
+      flex-grow: 1;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+main .article-card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+main .author-inline {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      color: #94a3b8;
+    }
+
+main .read-link-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #34d399;
+      font-size: 0.82rem;
+      font-weight: 800;
+      text-decoration: none;
+      transition: transform 0.2s, color 0.2s;
+    }
+
+main .read-link-action:hover {
+      transform: translateX(-4px);
+      color: #ffffff;
+    }
+
+/* Consultation CTA Banner */
+main .blog-cta-banner {
+      background: linear-gradient(145deg, rgba(26, 32, 48, 0.9) 0%, rgba(13, 16, 24, 0.95) 100%);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      border-radius: 22px;
+      padding: 36px 32px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+      margin-top: 30px;
+    }
+
+main .cta-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 28px;
+      flex-wrap: wrap;
+    }
+
+main .cta-text-col {
+      max-width: 650px;
+    }
+
+main .cta-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #34d399;
+      font-size: 0.82rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+main .cta-title {
+      font-size: clamp(1.3rem, 2.5vw, 1.7rem);
+      font-weight: 900;
+      color: #ffffff;
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+
+main .cta-sub {
+      font-size: 0.92rem;
+      color: #cbd5e1;
+      line-height: 1.8;
+      margin: 0;
+    }
+
+main .cta-actions-col {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+main .btn-cta-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, #10b981 0%, #aa8421 100%);
+      color: #0b0e14;
+      font-weight: 800;
+      font-size: 0.9rem;
+      padding: 12px 24px;
+      border-radius: 12px;
+      text-decoration: none;
+      box-shadow: 0 6px 18px rgba(16, 185, 129, 0.35);
+      transition: all 0.2s;
+    }
+
+main .btn-cta-primary:hover {
+      filter: brightness(1.1);
+      transform: translateY(-2px);
+    }
+
+main .btn-cta-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #34d399;
+      font-weight: 700;
+      font-size: 0.9rem;
+      padding: 12px 22px;
+      border-radius: 12px;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+main .btn-cta-secondary:hover {
+      background: rgba(16, 185, 129, 0.15);
+      color: #ffffff;
+    }
+
+/* Empty state */
+main .empty-state-3d {
+      padding: 60px 20px;
+      background: rgba(18, 22, 32, 0.6);
+      border: 1px dashed rgba(16, 185, 129, 0.3);
+      border-radius: 20px;
+      margin: 30px 0;
+    }
+
+main .empty-icon-wrap {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #34d399;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+    }
+
+main .empty-title {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 8px;
+    }
+
+main .empty-desc {
+      color: #94a3b8;
+      font-size: 0.92rem;
+    }
+
+@media (max-width: 992px) {
+  main .featured-card-3d {
+        grid-template-columns: 1fr;
+      }
+  main .featured-image-col {
+        min-height: 240px;
+      }
+  main .featured-content-col {
+        padding: 24px 20px;
+      }
+}
+
+@media (max-width: 768px) {
+  main .blog-hero-section {
+        padding: 30px 14px 20px;
+      }
+  main .blog-main-container {
+        padding: 24px 14px 0;
+      }
+  main .blog-grid {
+        grid-template-columns: 1fr;
+        gap: 18px;
+      }
+  main .patient-guides-grid {
+        grid-template-columns: 1fr;
+      }
+  main .blog-cta-banner {
+        padding: 24px 18px;
+      }
+  main .cta-actions-col {
+        width: 100%;
+        flex-direction: column;
+      }
+  main .btn-cta-primary,
+    main .btn-cta-secondary {
+        width: 100%;
+        justify-content: center;
+      }
+}
+
+@media (max-width: 390px) {
+  main .hero-badge {
+        font-size: 0.76rem;
+        padding: 4px 12px;
+      }
+  main .blog-hero-title {
+        font-size: 1.5rem;
+      }
+  main .category-chip {
+        padding: 7px 12px;
+        font-size: 0.78rem;
+      }
+  main .featured-footer {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+  main .btn-read-featured {
+        width: 100%;
+        justify-content: center;
+      }
+}
+
+@media (max-width: 320px) {
+  main .blog-hero-section,
+    main .blog-main-container {
+        padding-left: 10px;
+        padding-right: 10px;
+      }
+  main .featured-content-col,
+    main .article-card-body {
+        padding: 16px 12px;
+      }
+}
+
+/* ── Announcement strip (lane h1 fix ported to /blog): public.css clamps
+       the festival message to ONE ellipsis line at ≤768px
+       (`.announcement-inner span { white-space: nowrap; }`), so the ~62-char
+       sentence (~345px) lost its tail ("در رزرو آنلاین") at 320/390px —
+       measured: span.scrollWidth 345 vs clientWidth 189/259. Let the message
+       wrap and let the row wrap so the booking pill can never force the strip
+       wider than the viewport. Page-scoped: no shared stylesheet or layout
+       file is touched. */
+.announcement-strip .announcement-inner {
+      flex-wrap: wrap;
+      row-gap: 6px;
+    }
+
+.announcement-strip .announcement-inner > span {
+      white-space: normal;
+      overflow: hidden;
+      text-overflow: clip;
+      line-height: 1.6;
+    }
+
+/* Icon.astro renders `display: block`, so the glyph would claim a line of
+       its own; keep it inline with the first line of the message. */
+.announcement-strip .announcement-inner > span svg {
+      display: inline-block;
+      vertical-align: -2px;
+    }
+
+/* ═════════════════════════════════════════════════════════════
+     SITE-CHROME TOUCH TARGETS (page-scoped).
+     The header/footer are rendered by PublicLayout, so these rules
+     must use . Measured before: .announcement-link 34px,
+     .footer-phone-link 26px, .legal-links a 24px, .admin-entry-link
+     24px, .footer-social-link 42px, .sticky-book 36px — all below
+     the 44px WCAG 2.5.8 minimum.
+     ═════════════════════════════════════════════════════════════ */
+.announcement-link,
+  .footer-phone-link,
+  .clinic-direct-contact a,
+  .footer-social-link,
+  .legal-links a,
+  .admin-entry-link,
+  .sticky-book,
+  .mobile-menu-btn,
+  .header-phone {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+.mobile-menu-btn,
+  .header-phone {
+    min-width: 44px;
+    justify-content: center;
+  }
+
+.legal-links {
+    align-items: center;
+    flex-wrap: wrap;
+    row-gap: 0;
+  }
+
+/* ═══════════════════════════════════════════════════════════
+       MODERNIZATION LAYER — rhythm, Persian measure, modern cards.
+       The homepage blog CSS includes this file's styles inside
+       `body.blog-page-obsidian`, so every rule here is also written
+       against that scope in public.css; only page-local additions
+       are safe to append.
+       ═══════════════════════════════════════════════════════════ */
+main .blog-hero-title,
+  main .featured-title,
+  main .article-card-title,
+  main .cta-title,
+  main .guide-title,
+  main .empty-title {
+      letter-spacing: normal;
+      line-height: 1.5;
+    }
+
+main .blog-hero-desc,
+  main .featured-excerpt,
+  main .article-card-excerpt,
+  main .cta-sub,
+  main .guide-sub,
+  main .empty-desc {
+      line-height: 1.95;
+    }
+
+main .blog-hero-desc {
+      max-width: 46rem;
+    }
+
+main .featured-excerpt,
+  main .article-card-excerpt {
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      max-width: 58ch;
+    }
+
+main .blog-hero-section {
+      padding-block: clamp(48px, 6vw, 84px) clamp(32px, 4.5vw, 56px);
+    }
+
+main .featured-article-section,
+  main .articles-grid-section {
+      margin-bottom: clamp(36px, 5vw, 60px);
+    }
+
+main .blog-cta-banner {
+      padding-block: clamp(32px, 4.5vw, 56px);
+      border-radius: 20px;
+    }
+
+main .articles-grid-section > * + * {
+      margin-top: clamp(20px, 3vw, 32px);
+    }
+
+main .article-card-3d,
+  main .featured-card-3d,
+  main .patient-guide-card {
+      border-radius: 18px;
+      border: 1px solid rgba(148, 163, 184, 0.16);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0) 40%),
+        linear-gradient(165deg, #161a23 0%, #0d0f15 100%);
+      box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.05) inset,
+        0 18px 38px -24px rgba(0, 0, 0, 0.85);
+    }
+
+main .article-card-3d {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+main .article-card-body {
+      display: flex;
+      flex-direction: column;
+      flex: 1 1 auto;
+    }
+
+main .article-card-footer {
+      margin-top: auto;
+    }
+
+main .blog-grid,
+  main .patient-guides-grid {
+      gap: clamp(16px, 2.2vw, 26px);
+      align-items: stretch;
+    }
+
+main .related-title,
+  main .related-date,
+  main .meta-item,
+  main .meta-tag {
+      letter-spacing: normal;
+    }
+
+/* Card titles are the primary link into an article: they measured
+       29-30px tall at 768px, under the 44px target minimum. Grow the
+       hit area without disturbing the type. */
+main .featured-title a,
+  main .article-card-title a {
+      display: flex;
+      align-items: center;
+      min-height: 44px;
+      line-height: 1.45;
+    }
+
+main .read-link-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 44px;
+      padding-block: 8px;
+    }
+
+main .btn-cta-primary,
+  main .btn-cta-secondary,
+  main .btn-read-featured,
+  main .category-chips-list button {
+      min-height: 44px;
+      letter-spacing: normal;
+    }
+
+main .category-chips-list {
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+main .article-card-img-wrap,
+  main .featured-image-col {
+      overflow: hidden;
+      border-start-start-radius: 18px;
+      border-start-end-radius: 18px;
+    }
+
+main .article-card-img,
+  main .featured-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+@media (max-width: 480px) {
+  main .featured-excerpt,
+    main .article-card-excerpt {
+        -webkit-line-clamp: 4;
+      }
+  main .category-chips-list button {
+        flex: 1 1 auto;
+      }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  main .article-card-3d,
+    main .featured-card-3d {
+        transition: none;
+      }
+}

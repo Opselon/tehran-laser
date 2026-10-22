@@ -1,0 +1,1734 @@
+/* Page-local styles extracted from clinic.astro (wave W5).
+ * Scoped under the page's own content wrapper so specificity and
+ * cascade match the Astro-scoped <style> block they replace.
+ * Selectors are verbatim; page self-cascades are preserved in source order. */
+
+/* ── 3D Obsidian-Gold Design Tokens & Scoped Styles ── */
+.clinic-page-wrapper .clinic-page-wrapper {
+    background-color: #0a0b0d;
+    color: #f7f3ec;
+    overflow-x: clip;
+    width: 100%;
+    box-sizing: border-box;
+    font-family: inherit;
+  }
+
+/* Containers & Max Width Guards (0px horizontal overflow across all viewports) */
+.clinic-page-wrapper .container {
+    width: 100%;
+    max-width: 1200px;
+    margin-inline: auto;
+    padding-inline: 20px;
+    box-sizing: border-box;
+  }
+
+.clinic-page-wrapper .container-narrow {
+    max-width: 860px;
+  }
+
+.clinic-page-wrapper .section {
+    padding-block: 64px;
+    width: 100%;
+    box-sizing: border-box;
+    overflow-x: clip;
+  }
+
+/* Text & Pill Utilities */
+.clinic-page-wrapper .gold-icon {
+    color: #10b981;
+  }
+
+.clinic-page-wrapper .gold-gradient-text {
+    background: linear-gradient(135deg, #f4e2b8 0%, #e8cb8f 45%, #c9a45c 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: inline-block;
+  }
+
+.clinic-page-wrapper .pill-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 16px;
+    border-radius: 999px;
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    color: #34d399;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+
+.clinic-page-wrapper .section-heading {
+    margin-bottom: 48px;
+  }
+
+.clinic-page-wrapper .section-title {
+    font-size: clamp(1.6rem, 3.2vw, 2.3rem);
+    font-weight: 800;
+    color: #ffffff;
+    line-height: 1.4;
+    margin: 0 0 16px;
+  }
+
+.clinic-page-wrapper .section-lead {
+    color: #b5ada0;
+    font-size: clamp(0.95rem, 1.8vw, 1.08rem);
+    line-height: 1.85;
+    max-width: 760px;
+    margin-inline: auto;
+  }
+
+/* Hero Section */
+.clinic-page-wrapper .clinic-hero {
+    padding-top: 56px;
+    padding-bottom: 64px;
+    background: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(16, 185, 129, 0.15) 0%, rgba(10, 11, 13, 0) 70%), #0a0b0d;
+    border-bottom: 1px solid rgba(16, 185, 129, 0.2);
+    text-align: center;
+    box-sizing: border-box;
+  }
+
+.clinic-page-wrapper .hero-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 18px;
+    border-radius: 999px;
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: #34d399;
+    font-size: 0.88rem;
+    font-weight: 600;
+    margin-bottom: 24px;
+  }
+
+.clinic-page-wrapper .hero-title {
+    font-size: clamp(1.85rem, 4.2vw, 3rem);
+    font-weight: 900;
+    line-height: 1.35;
+    color: #ffffff;
+    max-width: 980px;
+    margin: 0 auto 20px;
+  }
+
+.clinic-page-wrapper .hero-desc {
+    color: #c9c1b4;
+    font-size: clamp(1rem, 2vw, 1.15rem);
+    line-height: 1.9;
+    max-width: 820px;
+    margin: 0 auto 36px;
+  }
+
+.clinic-page-wrapper .hero-cta-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 48px;
+  }
+
+.clinic-page-wrapper .hero-cta-primary,
+  .clinic-page-wrapper .hero-cta-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 15px 30px;
+    border-radius: 14px;
+    font-weight: 800;
+    font-size: 1rem;
+    text-decoration: none;
+    max-width: 100%;
+  }
+
+.clinic-page-wrapper .hero-cta-primary {
+    /* ux-v3: emerald is the "verified" signal, not the "book" action — and
+       #0b0f0d on #047857 measured 3.52:1. One accent for action. */
+    background: linear-gradient(180deg, #f6e3ba 0%, #e8cb8f 50%, #c9a45c 100%);
+    color: #171104;
+    box-shadow: 0 8px 26px rgba(232, 203, 143, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.45);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+.clinic-page-wrapper .hero-cta-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(232, 203, 143, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  }
+
+.clinic-page-wrapper .hero-cta-secondary {
+    background: rgba(16, 185, 129, 0.08);
+    border: 1px solid rgba(16, 185, 129, 0.45);
+    color: #6ee7b7;
+    transition: all 0.2s ease;
+  }
+
+.clinic-page-wrapper .hero-cta-secondary:hover {
+    background: rgba(16, 185, 129, 0.16);
+    border-color: #10b981;
+    color: #ffffff;
+  }
+
+.hero-cta-primary svg,
+  .hero-cta-secondary svg {
+    flex-shrink: 0;
+  }
+
+.clinic-page-wrapper .hero-badges-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+    text-align: right;
+  }
+
+.clinic-page-wrapper .hero-badge-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 20px;
+    background: linear-gradient(135deg, rgba(22, 25, 31, 0.9) 0%, rgba(14, 16, 20, 0.85) 100%);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(110, 231, 183, 0.15);
+  }
+
+.clinic-page-wrapper .badge-icon-box {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #34d399;
+    flex-shrink: 0;
+  }
+
+.clinic-page-wrapper .badge-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 2px;
+  }
+
+.clinic-page-wrapper .badge-sub {
+    font-size: 0.8rem;
+    color: #a39c8e;
+  }
+
+/* Wavelength Explorer Card */
+.clinic-page-wrapper .tech-explorer-card {
+    background: linear-gradient(180deg, #13161c 0%, #0d0f14 100%);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-radius: 24px;
+    padding: 32px;
+    margin-bottom: 40px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(110, 231, 183, 0.18);
+  }
+
+.clinic-page-wrapper .wavelength-tabs {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+
+.clinic-page-wrapper .wl-tab {
+    flex: 1 1 240px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 20px;
+    background: rgba(20, 24, 32, 0.7);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    border-radius: 14px;
+    color: #a89f90;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    font-family: inherit;
+  }
+
+.clinic-page-wrapper .wl-tab:hover {
+    color: #ffffff;
+    border-color: rgba(16, 185, 129, 0.45);
+    background: rgba(30, 35, 48, 0.7);
+  }
+
+.clinic-page-wrapper .wl-tab.active {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.25) 0%, rgba(4, 120, 87, 0.18) 100%);
+    border-color: #10b981;
+    color: #34d399;
+    box-shadow: 0 4px 18px rgba(16, 185, 129, 0.2), inset 0 1px 0 rgba(110, 231, 183, 0.3);
+  }
+
+.clinic-page-wrapper .wavelength-panel {
+    display: none;
+  }
+
+.clinic-page-wrapper .wavelength-panel.active {
+    display: block;
+    animation: fadeIn 0.35s ease;
+  }
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+/* Rado Plus Technical Datasheet */
+.clinic-page-wrapper .spec-datasheet {
+    background: linear-gradient(180deg, #13161c 0%, #0d0f14 100%);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-radius: 24px;
+    padding: 28px;
+    margin-bottom: 40px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(110, 231, 183, 0.18);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+/* The focusable region (tabindex=0, role=region) must itself be the scroll
+     container: on the markup side `.spec-table-wrap` carries the keyboard focus
+     while the `overflow-x: auto` lived only on `.spec-datasheet`, so arrow keys
+     moved nothing (scrollLeft stayed 0) and keyboard users could not reach the
+     table's left-hand columns. Giving the wrap its own overflow makes the
+     focused element the scroller; `.spec-datasheet` then has nothing left to
+     scroll and its rule goes inert. */
+.clinic-page-wrapper .spec-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(232, 203, 143, 0.4) transparent;
+  }
+
+.clinic-page-wrapper .spec-table-wrap:focus-visible {
+    outline: 2px solid var(--ux-accent, #e8cb8f);
+    outline-offset: 4px;
+  }
+
+.clinic-page-wrapper .spec-datasheet-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(16, 185, 129, 0.2);
+  }
+
+.clinic-page-wrapper .spec-datasheet-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #ffffff;
+    font-size: 1.1rem;
+    font-weight: 800;
+  }
+
+.clinic-page-wrapper .spec-datasheet-model {
+    color: #6ee7b7;
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    white-space: nowrap;
+  }
+
+.clinic-page-wrapper .spec-caption {
+    caption-side: top;
+    text-align: right;
+    color: #a39c8f;
+    font-size: 0.8rem;
+    padding-bottom: 10px;
+  }
+
+.clinic-page-wrapper .spec-table {
+    width: 100%;
+    min-width: 560px;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+
+.clinic-page-wrapper .spec-table th,
+  .clinic-page-wrapper .spec-table td {
+    padding: 12px 14px;
+    text-align: right;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+/* ux-v3: head and label cells inherited the LIGHT-page palette
+     (#e5ded5/#c4bcb0 on a near-white row = 1.29:1 measured). The datasheet
+     is a dark card, so the ink comes from the dark-theme ramp instead. */
+.clinic-page-wrapper .spec-table thead th {
+    background: #0b1013;
+    color: #f2f6f5;
+    font-size: 0.78rem;
+    font-weight: 800;
+    /* No letter-spacing on Persian column labels. */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+  }
+
+.clinic-page-wrapper .spec-table tbody th {
+    color: #f2f6f5;
+    font-weight: 700;
+    font-size: 0.85rem;
+  }
+
+.clinic-page-wrapper .spec-table tbody td {
+    color: #c6cfc9;
+    font-variant-numeric: tabular-nums;
+  }
+
+.clinic-page-wrapper .spec-table tbody tr:last-child th,
+  .clinic-page-wrapper .spec-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+.clinic-page-wrapper .spec-table tbody tr:hover th,
+  .clinic-page-wrapper .spec-table tbody tr:hover td {
+    background: rgba(16, 185, 129, 0.05);
+  }
+
+.clinic-page-wrapper .wl-grid {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 32px;
+    align-items: center;
+  }
+
+.clinic-page-wrapper .wl-pill {
+    display: inline-block;
+    padding: 4px 12px;
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    border-radius: 8px;
+    color: #34d399;
+    font-size: 0.82rem;
+    font-weight: 700;
+    margin-bottom: 14px;
+  }
+
+.clinic-page-wrapper .wl-pill.yag {
+    background: rgba(85, 130, 200, 0.15);
+    border-color: rgba(120, 160, 230, 0.35);
+    color: #a8c7fa;
+  }
+
+.clinic-page-wrapper .wl-title {
+    font-size: 1.45rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0 0 14px;
+    line-height: 1.4;
+  }
+
+.clinic-page-wrapper .wl-text {
+    color: #c4bcb0;
+    line-height: 1.9;
+    margin: 0 0 20px;
+    font-size: 0.98rem;
+  }
+
+.clinic-page-wrapper .spec-checks {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+.clinic-page-wrapper .spec-checks li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #e5ded5;
+    font-size: 0.92rem;
+  }
+
+.spec-checks li svg {
+    color: #10b981;
+    flex-shrink: 0;
+  }
+
+.clinic-page-wrapper .wl-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-width: 180px;
+  }
+
+.clinic-page-wrapper .stat-box {
+    background: rgba(15, 18, 24, 0.9);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    border-radius: 16px;
+    padding: 18px;
+    text-align: center;
+    box-shadow: inset 0 1px 0 rgba(110, 231, 183, 0.1);
+  }
+
+.clinic-page-wrapper .stat-num {
+    display: block;
+    font-size: 1.85rem;
+    font-weight: 900;
+    color: #34d399;
+    line-height: 1.1;
+  }
+
+.clinic-page-wrapper .stat-unit {
+    display: block;
+    font-size: 0.8rem;
+    color: #ffffff;
+    font-weight: 700;
+    margin-top: 2px;
+  }
+
+.clinic-page-wrapper .stat-desc {
+    display: block;
+    font-size: 0.76rem;
+    color: #a39c8f;
+    margin-top: 6px;
+  }
+
+/* 3D Features Dual Grid (TEC Double Cooling & FHR Speed) */
+.clinic-page-wrapper .features-dual-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+    margin-bottom: 40px;
+  }
+
+.clinic-page-wrapper .feature-card-3d {
+    background: linear-gradient(145deg, #151821 0%, #0e1016 100%);
+    border: 1px solid rgba(16, 185, 129, 0.28);
+    border-radius: 20px;
+    padding: 32px 28px;
+    position: relative;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(110, 231, 183, 0.15);
+    transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+.clinic-page-wrapper .feature-card-3d:hover {
+    transform: translateY(-4px);
+    border-color: rgba(16, 185, 129, 0.6);
+    box-shadow: 0 20px 44px rgba(0, 0, 0, 0.6), 0 0 24px rgba(16, 185, 129, 0.2);
+  }
+
+.clinic-page-wrapper .card-icon-accent {
+    width: 60px;
+    height: 60px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.25) 0%, rgba(4, 120, 87, 0.1) 100%);
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #34d399;
+    margin-bottom: 22px;
+  }
+
+.clinic-page-wrapper .card-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0 0 14px;
+    line-height: 1.4;
+  }
+
+.clinic-page-wrapper .card-body {
+    color: #bdb5a8;
+    font-size: 0.95rem;
+    line-height: 1.85;
+    margin: 0 0 20px;
+  }
+
+.clinic-page-wrapper .card-metric-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 10px;
+    background: rgba(16, 185, 129, 0.08);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    color: #34d399;
+    font-size: 0.82rem;
+    font-weight: 600;
+  }
+
+/* Contact Laser Benefits grid */
+.clinic-page-wrapper .benefits-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+  }
+
+.clinic-page-wrapper .benefit-card-3d {
+    position: relative;
+    background: linear-gradient(145deg, #151821 0%, #0e1016 100%);
+    border: 1px solid rgba(16, 185, 129, 0.28);
+    border-radius: 18px;
+    padding: 26px 24px 22px;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(110, 231, 183, 0.12);
+    transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+.clinic-page-wrapper .benefit-card-3d:hover {
+    transform: translateY(-4px);
+    border-color: rgba(16, 185, 129, 0.6);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55), 0 0 22px rgba(16, 185, 129, 0.18);
+  }
+
+.clinic-page-wrapper .benefit-index {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.28) 0%, rgba(4, 120, 87, 0.12) 100%);
+    border: 1px solid rgba(16, 185, 129, 0.45);
+    color: #6ee7b7;
+    font-size: 1.05rem;
+    font-weight: 800;
+    margin-bottom: 16px;
+  }
+
+.clinic-page-wrapper .benefit-title {
+    font-size: 1.08rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0 0 10px;
+    line-height: 1.5;
+  }
+
+.clinic-page-wrapper .benefit-body {
+    color: #bdb5a8;
+    font-size: 0.92rem;
+    line-height: 1.85;
+    margin: 0;
+  }
+
+/* Why Rado Plus grid */
+.clinic-page-wrapper .rado-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+  }
+
+.clinic-page-wrapper .rado-card-3d {
+    background: rgba(16, 19, 26, 0.85);
+    border: 1px solid rgba(16, 185, 129, 0.24);
+    border-radius: 18px;
+    padding: 26px 24px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.38);
+    transition: transform 0.3s ease, border-color 0.3s ease;
+  }
+
+.clinic-page-wrapper .rado-card-3d:hover {
+    transform: translateY(-4px);
+    border-color: rgba(16, 185, 129, 0.55);
+  }
+
+.clinic-page-wrapper .rado-card-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+
+.clinic-page-wrapper .rado-card-head .card-icon-accent {
+    width: 52px;
+    height: 52px;
+    margin-bottom: 0;
+    flex-shrink: 0;
+  }
+
+.clinic-page-wrapper .rado-title {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0;
+    line-height: 1.5;
+  }
+
+.clinic-page-wrapper .rado-body {
+    color: #bdb5a8;
+    font-size: 0.93rem;
+    line-height: 1.85;
+    margin: 0;
+  }
+
+.clinic-page-wrapper .rado-card-wide {
+    grid-column: 1 / -1;
+  }
+
+/* Metrics Grid */
+.clinic-page-wrapper .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+  }
+
+.clinic-page-wrapper .metric-card {
+    background: rgba(16, 19, 26, 0.85);
+    border: 1px solid rgba(16, 185, 129, 0.22);
+    border-radius: 18px;
+    padding: 22px 18px;
+    text-align: center;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  }
+
+.clinic-page-wrapper .m-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(16, 185, 129, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #34d399;
+    margin: 0 auto 12px;
+  }
+
+.clinic-page-wrapper .m-val {
+    font-size: 1.45rem;
+    font-weight: 900;
+    color: #ffffff;
+    margin-bottom: 4px;
+  }
+
+.clinic-page-wrapper .m-label {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #34d399;
+    margin-bottom: 4px;
+  }
+
+.clinic-page-wrapper .m-sub {
+    font-size: 0.78rem;
+    color: #9c9486;
+    line-height: 1.4;
+  }
+
+/* Team Section */
+.clinic-page-wrapper .team-section {
+    background: #0d0f14;
+    border-block: 1px solid rgba(16, 185, 129, 0.15);
+  }
+
+.clinic-page-wrapper .team-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+  }
+
+/* Featured lead physician — صدف مظفری */
+.clinic-page-wrapper .lead-doctor-card {
+    position: relative;
+    background:
+      radial-gradient(circle at 100% 0%, rgba(16, 185, 129, 0.14) 0%, rgba(10, 11, 13, 0) 55%),
+      linear-gradient(160deg, #171b24 0%, #0f1218 100%);
+    border: 1px solid rgba(16, 185, 129, 0.45);
+    border-radius: 24px;
+    padding: 32px 30px;
+    margin-bottom: 32px;
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(110, 231, 183, 0.2);
+  }
+
+.clinic-page-wrapper .lead-doctor-card::before {
+    content: '';
+    position: absolute;
+    inset-inline-start: 0;
+    top: 24px;
+    bottom: 24px;
+    width: 4px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #34d399 0%, #047857 100%);
+  }
+
+.clinic-page-wrapper .lead-doctor-main {
+    display: flex;
+    align-items: flex-start;
+    gap: 28px;
+  }
+
+.clinic-page-wrapper .lead-doctor-avatar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+
+.lead-doctor-avatar svg {
+    width: 96px;
+    height: 96px;
+    padding: 20px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.25) 0%, rgba(4, 120, 87, 0.1) 100%);
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    color: #34d399;
+    box-sizing: border-box;
+  }
+
+.clinic-page-wrapper .lead-doctor-badge {
+    padding: 5px 14px;
+    border-radius: 999px;
+    background: rgba(16, 185, 129, 0.16);
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    color: #6ee7b7;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+.clinic-page-wrapper .lead-doctor-info {
+    min-width: 0;
+    flex: 1;
+  }
+
+.clinic-page-wrapper .lead-doctor-name-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 6px;
+  }
+
+.clinic-page-wrapper .lead-doctor-name {
+    font-size: clamp(1.4rem, 3vw, 1.9rem);
+    font-weight: 900;
+    color: #ffffff;
+    margin: 0;
+    line-height: 1.3;
+  }
+
+.clinic-page-wrapper .lead-doctor-verified {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    color: #34d399;
+    font-size: 0.72rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+.clinic-page-wrapper .lead-doctor-role {
+    color: #10b981;
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+
+.clinic-page-wrapper .lead-doctor-desc {
+    color: #c4bcb0;
+    font-size: 0.98rem;
+    line-height: 1.9;
+    margin: 0 0 22px;
+  }
+
+.clinic-page-wrapper .lead-doctor-facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 4px;
+  }
+
+.clinic-page-wrapper .fact-item {
+    flex: 1 1 170px;
+    min-width: 0;
+    background: rgba(10, 12, 16, 0.7);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    border-radius: 14px;
+    padding: 14px 16px;
+    text-align: center;
+  }
+
+.clinic-page-wrapper .fact-num {
+    display: block;
+    font-size: 1.35rem;
+    font-weight: 900;
+    color: #34d399;
+    line-height: 1.2;
+    margin-bottom: 4px;
+  }
+
+.clinic-page-wrapper .fact-label {
+    display: block;
+    font-size: 0.78rem;
+    color: #a39c8f;
+    line-height: 1.5;
+  }
+
+.clinic-page-wrapper .team-card {
+    background: #141720;
+    border: 1px solid rgba(16, 185, 129, 0.22);
+    border-radius: 20px;
+    padding: 28px 24px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+.clinic-page-wrapper .team-avatar-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+  }
+
+.clinic-page-wrapper .team-badge {
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: rgba(16, 185, 129, 0.14);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: #34d399;
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+
+.clinic-page-wrapper .team-name {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0 0 6px;
+  }
+
+.clinic-page-wrapper .team-role {
+    color: #10b981;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 14px;
+  }
+
+.clinic-page-wrapper .team-desc {
+    color: #bcb4a6;
+    font-size: 0.92rem;
+    line-height: 1.8;
+    margin: 0 0 20px;
+  }
+
+.clinic-page-wrapper .team-skills {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+.clinic-page-wrapper .skill-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #e5ded5;
+    font-size: 0.78rem;
+  }
+
+/* Hygiene & Certification Layout */
+.clinic-page-wrapper .hygiene-layout {
+    display: grid;
+    grid-template-columns: 1.2fr 0.9fr;
+    gap: 36px;
+    align-items: start;
+  }
+
+.clinic-page-wrapper .hygiene-list {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    margin-top: 28px;
+  }
+
+.clinic-page-wrapper .hygiene-item {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    background: #141720;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    border-radius: 16px;
+    padding: 18px 20px;
+  }
+
+.clinic-page-wrapper .h-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #34d399;
+    flex-shrink: 0;
+  }
+
+.clinic-page-wrapper .h-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0 0 4px;
+  }
+
+.clinic-page-wrapper .h-desc {
+    color: #a89f91;
+    font-size: 0.88rem;
+    line-height: 1.7;
+    margin: 0;
+  }
+
+.clinic-page-wrapper .certifications-card {
+    background: linear-gradient(160deg, #161922 0%, #0f1218 100%);
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    border-radius: 24px;
+    padding: 32px 28px;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(110, 231, 183, 0.15);
+  }
+
+.clinic-page-wrapper .cert-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0 0 24px;
+    line-height: 1.4;
+  }
+
+.clinic-page-wrapper .cert-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+.clinic-page-wrapper .cert-item {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+
+.clinic-page-wrapper .cert-check {
+    color: #10b981;
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+
+.clinic-page-wrapper .cert-item strong {
+    display: block;
+    color: #ffffff;
+    font-size: 0.95rem;
+    margin-bottom: 2px;
+  }
+
+.clinic-page-wrapper .cert-item span {
+    display: block;
+    color: #a39c8f;
+    font-size: 0.82rem;
+    line-height: 1.6;
+  }
+
+/* Authenticity & calibration guarantees strip */
+.clinic-page-wrapper .authenticity-strip {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 16px;
+    margin-top: 36px;
+  }
+
+.clinic-page-wrapper .auth-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: linear-gradient(150deg, rgba(19, 22, 28, 0.95) 0%, rgba(13, 15, 20, 0.9) 100%);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    border-radius: 16px;
+    padding: 16px 18px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  }
+
+.clinic-page-wrapper .auth-icon {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    border-radius: 12px;
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #34d399;
+  }
+
+.clinic-page-wrapper .auth-body {
+    min-width: 0;
+  }
+
+.clinic-page-wrapper .auth-title {
+    color: #ffffff;
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-bottom: 3px;
+    line-height: 1.5;
+  }
+
+.clinic-page-wrapper .auth-sub {
+    color: #a39c8f;
+    font-size: 0.78rem;
+    line-height: 1.6;
+  }
+
+/* Location Card 3D */
+.clinic-page-wrapper .location-card-3d {
+    background: #13161d;
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    border-radius: 24px;
+    padding: 36px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+  }
+
+.clinic-page-wrapper .loc-grid {
+    display: grid;
+    grid-template-columns: 1.3fr 0.9fr;
+    gap: 36px;
+    align-items: center;
+  }
+
+.clinic-page-wrapper .loc-title {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0 0 12px;
+  }
+
+.clinic-page-wrapper .loc-desc {
+    color: #bcb4a6;
+    font-size: 0.95rem;
+    line-height: 1.85;
+    margin: 0 0 24px;
+  }
+
+.clinic-page-wrapper .loc-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+.clinic-page-wrapper .meta-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #e5ded5;
+    font-size: 0.92rem;
+  }
+
+.clinic-page-wrapper .meta-row a {
+    color: #34d399;
+    text-decoration: none;
+    font-weight: 700;
+    padding-block: 11px;
+  }
+
+.clinic-page-wrapper .amenities-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0 0 16px;
+  }
+
+.clinic-page-wrapper .amenities-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+.clinic-page-wrapper .amenities-list li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #c9c1b3;
+    font-size: 0.9rem;
+  }
+
+.amenities-list li svg {
+    color: #10b981;
+    flex-shrink: 0;
+  }
+
+/* FAQ Accordion */
+.clinic-page-wrapper .faq-accordion {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+.clinic-page-wrapper .faq-section {
+    background: #0d0f14;
+    border-block: 1px solid rgba(16, 185, 129, 0.15);
+  }
+
+.clinic-page-wrapper .faq-section .section-title {
+    color: #ffffff;
+  }
+
+.clinic-page-wrapper .faq-item {
+    background: #141720;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: border-color 0.25s ease;
+  }
+
+.clinic-page-wrapper .faq-item[open] {
+    border-color: rgba(16, 185, 129, 0.45);
+  }
+
+.clinic-page-wrapper .faq-summary {
+    padding: 20px 22px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
+    gap: 12px;
+  }
+
+.clinic-page-wrapper .faq-summary::-webkit-details-marker {
+    display: none;
+  }
+
+.clinic-page-wrapper .faq-q {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1.5;
+  }
+
+.clinic-page-wrapper .faq-arrow {
+    color: #10b981;
+    transition: transform 0.25s ease;
+    flex-shrink: 0;
+  }
+
+.clinic-page-wrapper .faq-item[open] .faq-arrow {
+    transform: rotate(180deg);
+  }
+
+.clinic-page-wrapper .faq-answer {
+    padding: 0 22px 20px;
+    color: #bcb4a6;
+    font-size: 0.94rem;
+    line-height: 1.85;
+  }
+
+/* 3D Obsidian-Gold Booking CTA */
+.clinic-page-wrapper .obsidian-cta-card {
+    background: radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.22) 0%, rgba(18, 21, 28, 0.95) 70%), #101319;
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    border-radius: 28px;
+    padding: 56px 32px;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(110, 231, 183, 0.25);
+    max-width: 920px;
+    margin-inline: auto;
+  }
+
+.clinic-page-wrapper .cta-sparkle-decor {
+    color: #34d399;
+    margin-bottom: 18px;
+    display: inline-block;
+    filter: drop-shadow(0 0 12px rgba(16, 185, 129, 0.5));
+  }
+
+.clinic-page-wrapper .cta-title {
+    font-size: clamp(1.6rem, 3.4vw, 2.2rem);
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0 0 16px;
+    line-height: 1.35;
+  }
+
+.clinic-page-wrapper .cta-desc {
+    color: #d4ccbf;
+    font-size: 1.05rem;
+    line-height: 1.85;
+    max-width: 680px;
+    margin: 0 auto 36px;
+  }
+
+.clinic-page-wrapper .cta-actions {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+.clinic-page-wrapper .btn-3d-gold {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 16px 32px;
+    background: linear-gradient(180deg, #34d399 0%, #10b981 50%, #047857 100%);
+    color: #16130f;
+    font-weight: 800;
+    font-size: 1rem;
+    border-radius: 14px;
+    text-decoration: none;
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+.btn-3d-gold svg,
+  .btn-obsidian-outline svg {
+    flex-shrink: 0;
+  }
+
+.clinic-page-wrapper .btn-3d-gold:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(16, 185, 129, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  }
+
+.clinic-page-wrapper .btn-obsidian-outline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 16px 28px;
+    background: rgba(14, 16, 22, 0.7);
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    color: #f7f3ec;
+    font-weight: 700;
+    font-size: 1rem;
+    border-radius: 14px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+
+.clinic-page-wrapper .btn-obsidian-outline:hover {
+    background: rgba(16, 185, 129, 0.15);
+    border-color: #10b981;
+    color: #ffffff;
+  }
+
+@media (max-width: 992px) {
+  .clinic-page-wrapper .hygiene-layout,
+    .clinic-page-wrapper .loc-grid,
+    .clinic-page-wrapper .wl-grid {
+      grid-template-columns: 1fr;
+      gap: 28px;
+    }
+  .clinic-page-wrapper .wl-stats {
+      flex-direction: row;
+      min-width: 0;
+    }
+  .clinic-page-wrapper .stat-box {
+      flex: 1;
+    }
+  .clinic-page-wrapper .lead-doctor-main {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+  .clinic-page-wrapper .lead-doctor-name-row {
+      justify-content: center;
+    }
+  .clinic-page-wrapper .lead-doctor-card::before {
+      inset-inline-start: auto;
+      inset-inline-end: 0;
+    }
+}
+
+@media (max-width: 640px) {
+  .clinic-page-wrapper .container {
+      padding-inline: 16px;
+    }
+  .clinic-page-wrapper .section {
+      padding-block: 48px;
+    }
+  .clinic-page-wrapper .hero-cta-row {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 12px;
+    }
+  .clinic-page-wrapper .hero-cta-primary,
+    .clinic-page-wrapper .hero-cta-secondary {
+      width: 100%;
+      padding: 14px 18px;
+      font-size: 0.95rem;
+    }
+  .clinic-page-wrapper .lead-doctor-card {
+      padding: 24px 18px;
+    }
+  .clinic-page-wrapper .lead-doctor-avatar {
+      flex-direction: row;
+      align-items: center;
+      gap: 14px;
+    }
+  .lead-doctor-avatar svg {
+      width: 72px;
+      height: 72px;
+      padding: 16px;
+    }
+  .clinic-page-wrapper .fact-item {
+      flex: 1 1 100%;
+    }
+  .clinic-page-wrapper .spec-datasheet {
+      padding: 20px 16px;
+      border-radius: 20px;
+    }
+  .clinic-page-wrapper .spec-datasheet-model {
+      white-space: normal;
+    }
+  .clinic-page-wrapper .tech-explorer-card,
+    .clinic-page-wrapper .obsidian-cta-card,
+    .clinic-page-wrapper .location-card-3d,
+    .clinic-page-wrapper .certifications-card {
+      padding: 24px 18px;
+      border-radius: 20px;
+    }
+  .clinic-page-wrapper .wl-tab {
+      flex: 1 1 100%;
+      font-size: 0.88rem;
+      padding: 12px 14px;
+    }
+  .clinic-page-wrapper .btn-3d-gold,
+    .clinic-page-wrapper .btn-obsidian-outline {
+      width: 100%;
+    }
+  .clinic-page-wrapper .stat-box {
+      padding: 14px 10px;
+    }
+  .clinic-page-wrapper .stat-num {
+      font-size: 1.5rem;
+    }
+  .clinic-page-wrapper .hero-badge-card {
+      padding: 12px 14px;
+    }
+}
+
+@media (max-width: 360px) {
+  .clinic-page-wrapper .container {
+      padding-inline: 12px;
+    }
+  .clinic-page-wrapper .hero-title {
+      font-size: 1.6rem;
+    }
+  .clinic-page-wrapper .section-title {
+      font-size: 1.4rem;
+    }
+  .clinic-page-wrapper .wl-stats {
+      flex-direction: column;
+    }
+}
+
+/* ═════════════════════════════════════════════════════════════
+     SITE-CHROME TOUCH TARGETS (page-scoped).
+     The header/footer are rendered by PublicLayout, so these rules
+     must use . Measured before: .announcement-link 34px,
+     .footer-phone-link 26px, .legal-links a 24px, .admin-entry-link
+     24px, .footer-social-link 42px, .sticky-book 36px — all below
+     the 44px WCAG 2.5.8 minimum.
+     ═════════════════════════════════════════════════════════════ */
+.announcement-link,
+  .footer-phone-link,
+  .clinic-direct-contact a,
+  .footer-social-link,
+  .legal-links a,
+  .admin-entry-link,
+  .sticky-book,
+  .mobile-menu-btn,
+  .header-phone {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+.mobile-menu-btn,
+  .header-phone {
+    min-width: 44px;
+    justify-content: center;
+  }
+
+.legal-links {
+    align-items: center;
+    flex-wrap: wrap;
+    row-gap: 0;
+  }
+
+/* ═════════════════════════════════════════════════════════════
+     MODERNIZATION LAYER — section rhythm, readable Persian
+     measure, modern datasheet table, 44px controls.
+     ═════════════════════════════════════════════════════════════ */
+/* ── One consistent vertical rhythm across every section ────── */
+.clinic-page-wrapper .tech-section,
+  .clinic-page-wrapper .benefits-section,
+  .clinic-page-wrapper .rado-section,
+  .clinic-page-wrapper .team-section,
+  .clinic-page-wrapper .hygiene-section,
+  .clinic-page-wrapper .location-info-section,
+  .clinic-page-wrapper .faq-section,
+  .clinic-page-wrapper .cta-section {
+    padding-block: clamp(48px, 6vw, 88px);
+  }
+
+.clinic-page-wrapper .faq-section {
+    padding-block: clamp(44px, 5.5vw, 80px);
+  }
+
+.clinic-page-wrapper .clinic-hero {
+    padding-block: clamp(48px, 7vw, 96px) clamp(36px, 5vw, 64px);
+  }
+
+.clinic-page-wrapper .section-heading {
+    margin-bottom: clamp(24px, 3.5vw, 40px);
+  }
+
+/* ── Persian typography: no negative tracking, generous leading ─ */
+.clinic-page-wrapper .hero-title,
+  .clinic-page-wrapper .section-title,
+  .clinic-page-wrapper .wl-title,
+  .clinic-page-wrapper .card-title,
+  .clinic-page-wrapper .benefit-title,
+  .clinic-page-wrapper .team-name,
+  .clinic-page-wrapper .rado-title,
+  .clinic-page-wrapper .spec-datasheet-title,
+  .clinic-page-wrapper .cta-title,
+  .clinic-page-wrapper .loc-title {
+    letter-spacing: normal;
+    line-height: 1.5;
+  }
+
+.clinic-page-wrapper .hero-desc,
+  .clinic-page-wrapper .section-lead,
+  .clinic-page-wrapper .wl-text,
+  .clinic-page-wrapper .card-body,
+  .clinic-page-wrapper .benefit-body,
+  .clinic-page-wrapper .team-desc,
+  .clinic-page-wrapper .hygiene-item,
+  .clinic-page-wrapper .rado-body,
+  .clinic-page-wrapper .loc-desc,
+  .clinic-page-wrapper .faq-answer {
+    line-height: 2;
+  }
+
+.clinic-page-wrapper .hero-desc {
+    max-width: 44rem;
+  }
+
+.clinic-page-wrapper .section-lead {
+    max-width: 48rem;
+  }
+
+/* ── Deep-dive prose must not run edge-to-edge on wide screens ─ */
+.clinic-page-wrapper .rado-body,
+  .clinic-page-wrapper .card-body,
+  .clinic-page-wrapper .hygiene-content p,
+  .clinic-page-wrapper .loc-desc {
+    max-width: 62ch;
+  }
+
+.clinic-page-wrapper .stat-num,
+  .clinic-page-wrapper .fact-num,
+  .clinic-page-wrapper .m-val,
+  .clinic-page-wrapper .spec-table tbody td,
+  .clinic-page-wrapper .wl-stats {
+    font-variant-numeric: tabular-nums;
+  }
+
+/* ── Modern datasheet table ──────────────────────────────────
+     Was a flat grid with a faint tinted header; give it an anchored
+     sticky header, zebra separation and a proper surface. */
+.clinic-page-wrapper .spec-table-wrap {
+    border-radius: 16px;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    background: linear-gradient(180deg, #101319 0%, #0b0d12 100%);
+    box-shadow: 0 22px 44px -26px rgba(0, 0, 0, 0.9);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+.clinic-page-wrapper .spec-table {
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+.clinic-page-wrapper .spec-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: linear-gradient(180deg, #1b2130 0%, #141922 100%);
+    color: #d1fae5;
+    padding: 14px;
+    border-bottom: 1px solid rgba(52, 211, 153, 0.38);
+    white-space: nowrap;
+  }
+
+.clinic-page-wrapper .spec-table tbody th,
+  .clinic-page-wrapper .spec-table tbody td {
+    padding: 13px 14px;
+    line-height: 1.8;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+  }
+
+.clinic-page-wrapper .spec-table tbody tr:nth-child(even) th,
+  .clinic-page-wrapper .spec-table tbody tr:nth-child(even) td {
+    background: rgba(148, 163, 184, 0.045);
+  }
+
+.clinic-page-wrapper .spec-table tbody tr:hover th,
+  .clinic-page-wrapper .spec-table tbody tr:hover td {
+    background: rgba(16, 185, 129, 0.09);
+  }
+
+/* ── Cards: layered obsidian surface + emerald hairline ─────── */
+.clinic-page-wrapper .rado-card-3d,
+  .clinic-page-wrapper .benefit-card-3d,
+  .clinic-page-wrapper .feature-card-3d,
+  .clinic-page-wrapper .team-card,
+  .clinic-page-wrapper .location-card-3d,
+  .clinic-page-wrapper .certifications-card,
+  .clinic-page-wrapper .tech-explorer-card {
+    border-radius: 18px;
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0) 40%),
+      linear-gradient(165deg, #161a23 0%, #0d0f15 100%);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.05) inset,
+      0 18px 38px -24px rgba(0, 0, 0, 0.85);
+    transition:
+      transform var(--motion-fast) var(--ease-out),
+      border-color var(--motion-fast) var(--ease-out);
+  }
+
+.clinic-page-wrapper .rado-card-3d:hover,
+  .clinic-page-wrapper .benefit-card-3d:hover,
+  .clinic-page-wrapper .feature-card-3d:hover,
+  .clinic-page-wrapper .team-card:hover,
+  .clinic-page-wrapper .location-card-3d:hover {
+    transform: translateY(-3px);
+    border-color: rgba(52, 211, 153, 0.42);
+  }
+
+.clinic-page-wrapper .metrics-grid,
+  .clinic-page-wrapper .benefits-grid,
+  .clinic-page-wrapper .features-dual-grid,
+  .clinic-page-wrapper .team-grid,
+  .clinic-page-wrapper .hygiene-layout,
+  .clinic-page-wrapper .rado-grid {
+    gap: clamp(16px, 2.2vw, 26px);
+  }
+
+/* ── FAQ accordion inside the clinic page ──────────────────── */
+.clinic-page-wrapper .faq-item {
+    border-radius: 14px;
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+
+.clinic-page-wrapper .faq-summary,
+  .clinic-page-wrapper .faq-q {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    font-weight: 700;
+    line-height: 1.7;
+    cursor: pointer;
+  }
+
+.clinic-page-wrapper .faq-answer {
+    padding: 0 16px 16px;
+    max-width: 68ch;
+  }
+
+/* ── Touch targets ≥44px ───────────────────────────────────── */
+.clinic-page-wrapper .btn-3d-gold,
+  .clinic-page-wrapper .btn-obsidian-outline,
+  .clinic-page-wrapper .hero-cta-primary,
+  .clinic-page-wrapper .hero-cta-secondary,
+  .clinic-page-wrapper .wl-tab,
+  .clinic-page-wrapper .wavelength-tabs .wl-tab {
+    min-height: 44px;
+    padding-block: 11px;
+  }
+
+.clinic-page-wrapper .pill-label,
+  .clinic-page-wrapper .skill-tag,
+  .clinic-page-wrapper .benefit-index,
+  .clinic-page-wrapper .gold-icon {
+    letter-spacing: normal;
+  }
+
+@media (max-width: 768px) {
+  .clinic-page-wrapper .spec-table thead th,
+    .clinic-page-wrapper .spec-table tbody th,
+    .clinic-page-wrapper .spec-table tbody td {
+      padding: 11px 12px;
+    }
+  .clinic-page-wrapper .wl-grid {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+  .clinic-page-wrapper .hero-cta-row {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  .clinic-page-wrapper .hygiene-layout,
+    .clinic-page-wrapper .features-dual-grid {
+      grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 380px) {
+  .clinic-page-wrapper .spec-table {
+      min-width: 520px;
+    }
+  .clinic-page-wrapper .spec-datasheet-head {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
+  .clinic-page-wrapper .spec-datasheet-model {
+      white-space: normal;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clinic-page-wrapper .rado-card-3d,
+    .clinic-page-wrapper .benefit-card-3d,
+    .clinic-page-wrapper .feature-card-3d,
+    .clinic-page-wrapper .team-card,
+    .clinic-page-wrapper .location-card-3d {
+      transition: none;
+      transform: none;
+    }
+}
