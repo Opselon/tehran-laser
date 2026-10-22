@@ -1,0 +1,1085 @@
+/* Page-local styles extracted from contact.astro (wave W5).
+ * Scoped under the page's own content wrapper so specificity and
+ * cascade match the Astro-scoped <style> block they replace.
+ * Selectors are verbatim; page self-cascades are preserved in source order. */
+
+/* ─────────────────────────────────────────────────────────────
+     Dark 3D Obsidian-Gold Design Theme for Contact Hub
+     Background: #0a0b0d / #121417 | Accents: #10b981 / #34d399
+     ───────────────────────────────────────────────────────────── */
+body.theme-dark-obsidian {
+    background-color: #0a0b0d !important;
+    color: #e5ded3;
+  }
+
+.contact-page-wrapper {
+    background-color: #0a0b0d;
+    background-image: 
+      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(16, 185, 129, 0.15), transparent 70%),
+      radial-gradient(ellipse 60% 40% at 50% 100%, rgba(16, 185, 129, 0.08), transparent 70%);
+    min-height: 100vh;
+    padding-bottom: 80px;
+    overflow-x: hidden;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+.contact-page-wrapper .container-contact {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 16px;
+    box-sizing: border-box;
+    width: 100%;
+  }
+
+/* Hero Strip */
+.contact-page-wrapper .contact-hero-strip {
+    padding: 56px 16px 36px;
+    text-align: center;
+    position: relative;
+    box-sizing: border-box;
+  }
+
+.contact-page-wrapper .luxury-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    padding: 6px 16px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #34d399;
+    box-shadow: 0 2px 12px rgba(16, 185, 129, 0.12), inset 0 1px 0 rgba(110, 231, 183, 0.2);
+    margin-bottom: 18px;
+  }
+
+.contact-page-wrapper .badge-icon {
+    color: #34d399;
+  }
+
+.contact-page-wrapper .page-title {
+    font-size: clamp(1.8rem, 4vw, 2.75rem);
+    font-weight: 800;
+    /* ux-v3: gradient clip measured 1.08:1 — solid ink instead. */
+    color: #f4f7f6;
+    margin: 0 0 14px;
+    /* No letter-spacing on Persian headings. */
+    line-height: 1.5;
+  }
+
+.contact-page-wrapper .page-subtitle {
+    font-size: clamp(0.95rem, 2vw, 1.1rem);
+    color: #a8a296;
+    max-width: 680px;
+    margin: 0 auto 22px;
+    line-height: 1.8;
+  }
+
+/* Live status pill */
+.contact-page-wrapper .live-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(18, 20, 24, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 999px;
+    padding: 6px 18px;
+    font-size: 0.875rem;
+    color: #c9c3b8;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+.contact-page-wrapper .status-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #10b981;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+.contact-page-wrapper .live-status-pill.status-open .status-dot {
+    background: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+    animation: statusPulse 2s infinite ease-in-out;
+  }
+
+.contact-page-wrapper .live-status-pill.status-open {
+    border-color: rgba(16, 185, 129, 0.35);
+    color: #e2fbeb;
+  }
+
+.contact-page-wrapper .live-status-pill.status-closed .status-dot {
+    background: #f59e0b;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+  }
+
+@keyframes statusPulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.25); opacity: 0.75; }
+  }
+
+/* 3D Glass Cards Grid */
+.contact-page-wrapper .contact-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+    margin-top: 10px;
+  }
+
+@media (max-width: 900px) {
+  .contact-page-wrapper .contact-cards-grid {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+}
+
+.contact-page-wrapper .contact-glass-card {
+    background: linear-gradient(145deg, #151821 0%, #0d1015 100%);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    border-radius: 20px;
+    padding: 28px 24px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 
+      0 12px 28px -10px rgba(0, 0, 0, 0.7),
+      inset 0 1px 0 rgba(16, 185, 129, 0.2);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    box-sizing: border-box;
+    width: 100%;
+  }
+
+.contact-page-wrapper .contact-glass-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(16, 185, 129, 0.45);
+    box-shadow: 
+      0 16px 36px -8px rgba(0, 0, 0, 0.85),
+      0 0 20px rgba(16, 185, 129, 0.12),
+      inset 0 1px 0 rgba(110, 231, 183, 0.35);
+  }
+
+.contact-page-wrapper .card-icon-wrap {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 18px;
+    background: #11141a;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: #34d399;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+    flex-shrink: 0;
+  }
+
+.contact-page-wrapper .card-icon-wrap.sm {
+    width: 44px;
+    height: 44px;
+    margin-bottom: 0;
+  }
+
+.contact-page-wrapper .card-icon-wrap.gold-glow {
+    border-color: rgba(16, 185, 129, 0.4);
+    box-shadow: 0 0 16px rgba(16, 185, 129, 0.2), inset 0 1px 0 rgba(110, 231, 183, 0.3);
+  }
+
+.contact-page-wrapper .card-icon-wrap.emerald-glow {
+    border-color: rgba(16, 185, 129, 0.4);
+    color: #34d399;
+    box-shadow: 0 0 16px rgba(16, 185, 129, 0.2), inset 0 1px 0 rgba(52, 211, 153, 0.3);
+  }
+
+.contact-page-wrapper .card-icon-wrap.sapphire-glow {
+    border-color: rgba(56, 189, 248, 0.4);
+    color: #38bdf8;
+    box-shadow: 0 0 16px rgba(56, 189, 248, 0.2), inset 0 1px 0 rgba(56, 189, 248, 0.3);
+  }
+
+.contact-page-wrapper .card-badge-instant {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.725rem;
+    font-weight: 700;
+    color: #34d399;
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    padding: 3px 10px;
+    border-radius: 999px;
+  }
+
+.contact-page-wrapper .card-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0 0 8px;
+    line-height: 1.4;
+  }
+
+.contact-page-wrapper .card-desc {
+    font-size: 0.88rem;
+    color: #9ea4b0;
+    line-height: 1.7;
+    margin: 0 0 20px;
+    flex-grow: 1;
+  }
+
+.contact-page-wrapper .card-actions-box {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+/* Buttons */
+.contact-page-wrapper .btn-contact-gold {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #10b981 0%, #aa8728 100%);
+    color: #0b0d11;
+    font-weight: 700;
+    font-size: 0.95rem;
+    padding: 12px 18px;
+    border-radius: 12px;
+    text-decoration: none;
+    border: 1px solid #34d399;
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+    box-sizing: border-box;
+    width: 100%;
+  }
+
+.contact-page-wrapper .btn-contact-gold:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.45);
+    color: #000000;
+  }
+
+.contact-page-wrapper .btn-contact-outline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: rgba(18, 22, 30, 0.7);
+    color: #e5ded3;
+    font-weight: 600;
+    font-size: 0.875rem;
+    padding: 10px 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    box-sizing: border-box;
+    width: 100%;
+  }
+
+.contact-page-wrapper .btn-contact-outline:hover {
+    background: rgba(16, 185, 129, 0.12);
+    border-color: rgba(16, 185, 129, 0.5);
+    color: #34d399;
+  }
+
+.contact-page-wrapper .btn-contact-outline.copied-success,
+  .contact-page-wrapper .btn-copy-chip.copied-success {
+    background: rgba(16, 185, 129, 0.2) !important;
+    border-color: #10b981 !important;
+    color: #34d399 !important;
+  }
+
+.contact-page-wrapper .card-footer-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 16px;
+    font-size: 0.78rem;
+    color: #7d8492;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+/* WhatsApp specifics */
+.contact-page-wrapper .whatsapp-triggers-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+.contact-page-wrapper .wa-main-btn {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border-color: #34d399;
+    /* white on this gradient measures 2.5:1 — dark ink clears WCAG AA (5.2:1 worst stop) */
+    color: #0b0d11;
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+
+.contact-page-wrapper .wa-main-btn:hover {
+    color: #0b0d11;
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.45);
+  }
+
+.contact-page-wrapper .quick-wa-chips {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+.contact-page-wrapper .wa-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 12px;
+    background: rgba(16, 185, 129, 0.08);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    border-radius: 8px;
+    font-size: 0.8rem;
+    color: #a7f3d0;
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+
+.contact-page-wrapper .wa-chip:hover {
+    background: rgba(16, 185, 129, 0.16);
+    border-color: rgba(16, 185, 129, 0.4);
+    transform: translateX(-3px);
+  }
+
+/* Social links */
+.contact-page-wrapper .social-links-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+.contact-page-wrapper .social-link-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+.contact-page-wrapper .social-btn-inner {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+.contact-page-wrapper .ext-icon {
+    opacity: 0.6;
+  }
+
+/* Location Hub Card */
+.contact-page-wrapper .location-hub-card {
+    padding: 36px 30px;
+    margin-top: 28px;
+  }
+
+@media (max-width: 480px) {
+  .contact-page-wrapper .container-contact {
+      padding: 0 12px;
+    }
+  .contact-page-wrapper .contact-hero-strip {
+      padding: 40px 12px 28px;
+    }
+  .contact-page-wrapper .contact-glass-card {
+      padding: 20px 14px;
+      border-radius: 16px;
+    }
+  .contact-page-wrapper .nav-apps-grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+  .contact-page-wrapper .nav-app-btn {
+      padding: 8px 6px;
+      font-size: 0.78rem;
+    }
+  .contact-page-wrapper .sheba-details-card {
+      padding: 18px 12px;
+    }
+  .contact-page-wrapper .sheba-value-display {
+      font-size: 0.88rem;
+    }
+  .contact-page-wrapper .sheba-code {
+      font-size: 0.78rem;
+    }
+}
+
+.contact-page-wrapper .location-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+
+.contact-page-wrapper .location-title-group {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+.contact-page-wrapper .location-card-title {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0 0 4px;
+    line-height: 1.3;
+  }
+
+.contact-page-wrapper .location-card-subtitle {
+    font-size: 0.875rem;
+    color: #9ea4b0;
+    margin: 0;
+  }
+
+.contact-page-wrapper .copy-address-btn {
+    width: auto;
+    padding: 8px 18px;
+  }
+
+.contact-page-wrapper .address-highlight-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(16, 185, 129, 0.08);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    border-radius: 14px;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    box-sizing: border-box;
+  }
+
+/* [W5 revival-suppressed] rule was DEAD under Astro scoping (Icon child); reviving it changed rendering. Kept for future UX wave.
+   .contact-page-wrapper .pin-gold {
+       color: #34d399;
+       flex-shrink: 0;
+     }
+ */
+.contact-page-wrapper .address-main-text {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1.7;
+    word-break: break-word;
+  }
+
+/* Navigation apps */
+.contact-page-wrapper .navigation-apps-container {
+    margin-bottom: 28px;
+  }
+
+.contact-page-wrapper .nav-apps-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #a8a296;
+    margin-bottom: 12px;
+  }
+
+.contact-page-wrapper .nav-apps-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+@media (max-width: 640px) {
+  .contact-page-wrapper .nav-apps-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.contact-page-wrapper .nav-app-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: #11141b;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    color: #e5ded3;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 10px 12px;
+    border-radius: 10px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+.contact-page-wrapper .nav-app-btn:hover {
+    background: rgba(16, 185, 129, 0.15);
+    border-color: rgba(16, 185, 129, 0.5);
+    color: #34d399;
+    transform: translateY(-2px);
+  }
+
+/* Visual Map Container */
+.contact-page-wrapper .map-visual-container {
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    margin-bottom: 28px;
+    background: #080a0e;
+    position: relative;
+    box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.8);
+  }
+
+.contact-page-wrapper .map-visual-bg {
+    height: 180px;
+    width: 100%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: 
+      radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.12) 0%, transparent 60%),
+      linear-gradient(rgba(16, 185, 129, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(16, 185, 129, 0.05) 1px, transparent 1px);
+    background-size: 100% 100%, 28px 28px, 28px 28px;
+  }
+
+.contact-page-wrapper .map-grid-overlay {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, transparent 30%, #080a0e 90%);
+  }
+
+.contact-page-wrapper .map-pin-pulse {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+.contact-page-wrapper .pin-marker {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #10b981, #987820);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0b0d11;
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.6);
+    z-index: 3;
+  }
+
+.contact-page-wrapper .pulse-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 2px solid rgba(16, 185, 129, 0.5);
+    animation: mapPulse 2.4s infinite ease-out;
+    z-index: 1;
+  }
+
+.contact-page-wrapper .pulse-ring.delay {
+    animation-delay: 1.2s;
+  }
+
+@keyframes mapPulse {
+    0% { transform: translate(-50%, -50%) scale(0.6); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(2.2); opacity: 0; }
+  }
+
+.contact-page-wrapper .pin-popup {
+    margin-top: 8px;
+    background: rgba(14, 18, 25, 0.95);
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    border-radius: 8px;
+    padding: 4px 12px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    z-index: 3;
+  }
+
+.contact-page-wrapper .pin-popup strong {
+    display: block;
+    font-size: 0.825rem;
+    color: #34d399;
+  }
+
+.contact-page-wrapper .pin-popup span {
+    font-size: 0.725rem;
+    color: #a8a296;
+  }
+
+.contact-page-wrapper .map-coords-badge {
+    position: absolute;
+    bottom: 10px;
+    left: 12px;
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-size: 0.7rem;
+    color: #8e95a3;
+    font-family: monospace;
+    z-index: 2;
+  }
+
+/* Access guide */
+.contact-page-wrapper .access-guide-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding-top: 24px;
+  }
+
+@media (max-width: 768px) {
+  .contact-page-wrapper .access-guide-grid {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+}
+
+.contact-page-wrapper .access-guide-item {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+
+.contact-page-wrapper .access-icon-col {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(16, 185, 129, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+.contact-page-wrapper .text-gold {
+    color: #047857;
+  }
+
+.contact-page-wrapper .access-item-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0 0 6px;
+  }
+
+.contact-page-wrapper .access-item-desc {
+    font-size: 0.85rem;
+    color: #9ea4b0;
+    line-height: 1.8;
+    margin: 0;
+  }
+
+.contact-page-wrapper .access-item-desc strong {
+    color: #e5ded3;
+  }
+
+/* Sheba / Settlement Card */
+.contact-page-wrapper .sheba-details-card {
+    padding: 32px 28px;
+  }
+
+@media (max-width: 640px) {
+  .contact-page-wrapper .sheba-details-card {
+      padding: 22px 16px;
+    }
+}
+
+.contact-page-wrapper .sheba-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 22px;
+  }
+
+.contact-page-wrapper .sheba-title-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+.contact-page-wrapper .sheba-card-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0 0 4px;
+  }
+
+.contact-page-wrapper .sheba-card-subtitle {
+    font-size: 0.85rem;
+    color: #9ea4b0;
+    margin: 0;
+  }
+
+.contact-page-wrapper .sheba-security-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-radius: 999px;
+    padding: 4px 12px;
+    font-size: 0.775rem;
+    font-weight: 700;
+    color: #34d399;
+  }
+
+.contact-page-wrapper .sheba-items-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+@media (max-width: 768px) {
+  .contact-page-wrapper .sheba-items-grid {
+      grid-template-columns: 1fr;
+    }
+}
+
+.contact-page-wrapper .sheba-item {
+    background: #0f1218;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    border-radius: 12px;
+    padding: 16px 18px;
+    box-sizing: border-box;
+    width: 100%;
+  }
+
+.contact-page-wrapper .sheba-item-full {
+    grid-column: 1 / -1;
+  }
+
+.contact-page-wrapper .sheba-item-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+.contact-page-wrapper .sheba-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #8e95a3;
+  }
+
+.contact-page-wrapper .btn-copy-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #34d399;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+.contact-page-wrapper .btn-copy-chip:hover {
+    background: rgba(16, 185, 129, 0.25);
+    border-color: rgba(16, 185, 129, 0.5);
+  }
+
+.contact-page-wrapper .sheba-value-display {
+    font-size: 0.975rem;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+.contact-page-wrapper .bank-name {
+    font-size: 0.8rem;
+    color: #10b981;
+    background: rgba(16, 185, 129, 0.08);
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+
+.contact-page-wrapper .code-font {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    /* Latin/digit-only run — tracking is safe here, but keep it subtle. */
+    letter-spacing: 0.02em;
+    font-variant-numeric: tabular-nums;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #34d399;
+    word-break: break-all;
+  }
+
+.contact-page-wrapper .sheba-code {
+    font-size: clamp(0.85rem, 2.5vw, 1.1rem);
+  }
+
+.contact-page-wrapper .sheba-notice-box {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: rgba(245, 158, 11, 0.08);
+    border: 1px solid rgba(245, 158, 11, 0.25);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 0.825rem;
+    color: #fef3c7;
+    line-height: 1.7;
+    box-sizing: border-box;
+  }
+
+/* [W5 revival-suppressed] rule was DEAD under Astro scoping (Icon child); reviving it changed rendering. Kept for future UX wave.
+   .contact-page-wrapper .info-icon {
+       color: #f59e0b;
+       flex-shrink: 0;
+       margin-top: 2px;
+     }
+ */
+/* Bottom CTA Banner */
+.contact-page-wrapper .contact-bottom-cta {
+    background: linear-gradient(135deg, #181d26 0%, #101319 100%);
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    border-radius: 20px;
+    padding: 32px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(16, 185, 129, 0.3);
+    box-sizing: border-box;
+    width: 100%;
+  }
+
+@media (max-width: 640px) {
+  .contact-page-wrapper .contact-bottom-cta {
+      padding: 24px 18px;
+    }
+}
+
+.contact-page-wrapper .cta-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+.contact-page-wrapper .cta-title {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0 0 6px;
+  }
+
+.contact-page-wrapper .cta-desc {
+    font-size: 0.9rem;
+    color: #a8a296;
+    margin: 0;
+  }
+
+.contact-page-wrapper .cta-buttons {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+  }
+
+@media (max-width: 640px) {
+  .contact-page-wrapper .cta-buttons {
+      width: 100%;
+      flex-direction: column;
+    }
+}
+
+.contact-page-wrapper .cta-book-btn {
+    width: auto;
+    padding: 12px 24px;
+  }
+
+@media (max-width: 640px) {
+  .contact-page-wrapper .cta-book-btn {
+      width: 100%;
+    }
+}
+
+/* ═════════════════════════════════════════════════════════════
+     SITE-CHROME TOUCH TARGETS (page-scoped).
+     The header/footer are rendered by PublicLayout, so these rules
+     must use . Measured before: .announcement-link 34px,
+     .footer-phone-link 26px, .legal-links a 24px, .admin-entry-link
+     24px, .footer-social-link 42px, .sticky-book 36px — all below
+     the 44px WCAG 2.5.8 minimum.
+     ═════════════════════════════════════════════════════════════ */
+.announcement-link,
+  .footer-phone-link,
+  .clinic-direct-contact a,
+  .footer-social-link,
+  .legal-links a,
+  .admin-entry-link,
+  .sticky-book,
+  .mobile-menu-btn,
+  .header-phone {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+.mobile-menu-btn,
+  .header-phone {
+    min-width: 44px;
+    justify-content: center;
+  }
+
+.legal-links {
+    align-items: center;
+    flex-wrap: wrap;
+    row-gap: 0;
+  }
+
+/* ═════════════════════════════════════════════════════════════
+     MODERNIZATION LAYER — rhythm, Persian measure, modern cards.
+     ═════════════════════════════════════════════════════════════ */
+.contact-page-wrapper {
+    padding-block: clamp(32px, 5vw, 64px);
+  }
+
+.contact-page-wrapper .contact-main-section > .container > section,
+  .contact-page-wrapper .contact-main-section > section {
+    margin-bottom: clamp(40px, 5.5vw, 76px);
+  }
+
+.contact-page-wrapper .contact-main-section > *:last-child {
+    margin-bottom: 0;
+  }
+
+.contact-page-wrapper .page-title {
+    letter-spacing: normal;
+    line-height: 1.45;
+  }
+
+.contact-page-wrapper .page-title,
+  .contact-page-wrapper .card-title,
+  .contact-page-wrapper .location-card-title,
+  .contact-page-wrapper .sheba-card-title,
+  .contact-page-wrapper .cta-title,
+  .contact-page-wrapper .access-item-title {
+    line-height: 1.5;
+  }
+
+.contact-page-wrapper .page-subtitle,
+  .contact-page-wrapper .card-desc,
+  .contact-page-wrapper .location-card-subtitle,
+  .contact-page-wrapper .access-item-desc,
+  .contact-page-wrapper .sheba-card-subtitle,
+  .contact-page-wrapper .cta-desc {
+    line-height: 1.95;
+  }
+
+.contact-page-wrapper .page-subtitle {
+    max-width: 44rem;
+    margin-inline: auto;
+  }
+
+.contact-page-wrapper .card-desc,
+  .contact-page-wrapper .access-item-desc {
+    max-width: 46ch;
+  }
+
+/* ── Modern card treatment ─────────────────────────────────── */
+.contact-page-wrapper .contact-glass-card,
+  .contact-page-wrapper .location-hub-card,
+  .contact-page-wrapper .sheba-details-card,
+  .contact-page-wrapper .social-card,
+  .contact-page-wrapper .phone-card {
+    border-radius: 20px;
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0) 40%),
+      linear-gradient(165deg, #161a23 0%, #0d0f15 100%);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.05) inset,
+      0 18px 38px -24px rgba(0, 0, 0, 0.85);
+    transition:
+      transform var(--motion-fast) var(--ease-out),
+      border-color var(--motion-fast) var(--ease-out);
+  }
+
+.contact-page-wrapper .contact-glass-card:hover,
+  .contact-page-wrapper .phone-card:hover,
+  .contact-page-wrapper .social-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(52, 211, 153, 0.42);
+  }
+
+.contact-page-wrapper .contact-cards-grid,
+  .contact-page-wrapper .access-guide-grid,
+  .contact-page-wrapper .sheba-items-grid {
+    gap: clamp(16px, 2.2vw, 24px);
+  }
+
+.contact-page-wrapper .contact-glass-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+.contact-page-wrapper .sheba-code,
+  .contact-page-wrapper .map-coords-badge,
+  .contact-page-wrapper .code-font {
+    font-variant-numeric: tabular-nums;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+
+/* ── Touch targets ≥44px ───────────────────────────────────── */
+.contact-page-wrapper .wa-chip,
+  .contact-page-wrapper .btn-copy-chip,
+  .contact-page-wrapper .copy-trigger-btn,
+  .contact-page-wrapper .copy-address-btn,
+  .contact-page-wrapper .social-link-item,
+  .contact-page-wrapper .nav-app-btn,
+  .contact-page-wrapper .sheet,
+  .contact-page-wrapper .btn-contact-gold,
+  .contact-page-wrapper .btn-contact-outline,
+  .contact-page-wrapper .cta-book-btn {
+    min-height: 44px;
+  }
+
+.contact-page-wrapper .wa-chip,
+  .contact-page-wrapper .nav-app-btn,
+  .contact-page-wrapper .social-link-item {
+    display: inline-flex;
+    align-items: center;
+    padding-block: 10px;
+  }
+
+@media (max-width: 768px) {
+  .contact-page-wrapper .contact-main-section > .container > section {
+      margin-bottom: 40px;
+    }
+  .contact-page-wrapper .access-guide-grid,
+    .contact-page-wrapper .contact-cards-grid,
+    .contact-page-wrapper .sheba-items-grid {
+      grid-template-columns: 1fr;
+    }
+}

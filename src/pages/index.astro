@@ -13,6 +13,7 @@ import { listPublicServices, listFaqItems, getPublicSettings, listPublicBlogPost
 import { getModuleStateMap } from '../server/features';
 import { enabledConfig, isModuleOn, mergeModuleStates, resolveInstagram, toStateMap } from '../domain/features/state';
 import { createFAQPageSchema, createBreadcrumbSchema } from '../lib/seo';
+import '../styles/index.css';
 
 // Fetch public services and FAQs server-side for instant SEO & zero JS dependence (§3, §31, §191)
 let services: Awaited<ReturnType<typeof listPublicServices>> = [];
@@ -817,26 +818,6 @@ function faDigits(value: string): string {
     });
   })();
 </script>
-
-<style>
-  /* ── Homepage-local refinements only ─────────────────────────────────
-     This block used to carry ~940 lines of a second, page-scoped design
-     system (hero visual, gender price table, Instagram hub, closing CTA,
-     promo card) that fought the shared sheets on specificity and hid large
-     parts of the page below 768px behind a self-imposed "height budget" —
-     no subtitle, no hero photo, two of four trust cards, two of four
-     protocol steps, and the FAQ cut to three items, all on the breakpoint
-     that carries almost all of this clinic's traffic.
-
-     Those decisions now live in ONE place: `src/styles/site-v2.css`, which
-     is mobile-first, loads after public.css, and ships to every public
-     route. What remains here is genuinely page-local: the two tariff
-     columns hold different product lines, so the men-only rows keep a
-     neutral tint that is neither a gold nor an emerald fill. */
-  .gpt-row-mens {
-    background: rgba(30, 36, 48, 0.35);
-  }
-</style>
 
 <script is:inline>
   // Keep the sticky table header clear of the (also sticky) site header by

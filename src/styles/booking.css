@@ -1,0 +1,193 @@
+/* Page-local styles extracted from booking.astro (wave W5).
+ * Scoped under the page's own content wrapper so specificity and
+ * cascade match the Astro-scoped <style> block they replace.
+ * Selectors are verbatim; page self-cascades are preserved in source order. */
+
+/* Dark 3D Obsidian-Gold page chrome for the booking funnel.
+     The shared stylesheet has no theme-dark-obsidian rules for these
+     header elements, so they are themed here (Astro scopes them to this page). */
+main .booking-page-header {
+    background:
+      radial-gradient(circle at 82% 18%, rgba(16, 185, 129, 0.16) 0%, transparent 45%),
+      radial-gradient(circle at 15% 90%, rgba(180, 140, 45, 0.1) 0%, transparent 45%),
+      linear-gradient(180deg, #121417 0%, #0a0b0d 100%);
+    border-bottom: 1px solid rgba(16, 185, 129, 0.22);
+    padding: 52px 0 40px;
+  }
+
+main .booking-page-header .page-title {
+    color: #34d399;
+    text-shadow: 0 0 34px rgba(110, 231, 183, 0.28);
+  }
+
+main .booking-page-header .page-subtitle {
+    color: #9aa3b2;
+  }
+
+main .booking-trust-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px 26px;
+    margin: 22px 0 0;
+    padding: 0;
+    list-style: none;
+    color: rgba(110, 231, 183, 0.94);
+    font-size: 0.86rem;
+    font-weight: 600;
+  }
+
+main .booking-trust-row li {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+/* [W5 revival-suppressed] rule was DEAD under Astro scoping (Icon child); reviving it changed rendering. Kept for future UX wave.
+   main .trust-ico {
+       flex: 0 0 auto;
+       color: #10b981;
+       filter: drop-shadow(0 0 6px rgba(110, 231, 183, 0.45));
+     }
+ */
+@media (max-width: 576px) {
+  main .booking-page-header {
+      padding: 38px 0 30px;
+    }
+  main .booking-trust-row {
+      gap: 8px 14px;
+      font-size: 0.78rem;
+    }
+}
+
+/* public.css themes .section-subtitle for light surfaces
+     (--color-accent-on-light); on this dark header it measured 3.31:1.
+     Accent-on-dark restores AA (9.45:1 on the obsidian background). */
+main .booking-page-header .section-subtitle {
+    color: var(--gold-400);
+  }
+
+/* ═════════════════════════════════════════════════════════════
+     SITE-CHROME TOUCH TARGETS (page-scoped).
+     The header/footer are rendered by PublicLayout, so these rules
+     must use . Measured before: .announcement-link 34px,
+     .footer-phone-link 26px, .legal-links a 24px, .admin-entry-link
+     24px, .footer-social-link 42px, .sticky-book 36px — all below
+     the 44px WCAG 2.5.8 minimum.
+     ═════════════════════════════════════════════════════════════ */
+.announcement-link,
+  .footer-phone-link,
+  .clinic-direct-contact a,
+  .footer-social-link,
+  .legal-links a,
+  .admin-entry-link,
+  .sticky-book,
+  .mobile-menu-btn,
+  .header-phone {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+.mobile-menu-btn,
+  .header-phone {
+    min-width: 44px;
+    justify-content: center;
+  }
+
+.legal-links {
+    align-items: center;
+    flex-wrap: wrap;
+    row-gap: 0;
+  }
+
+/* ═════════════════════════════════════════════════════════════
+     MODERNIZATION LAYER — consistent rhythm + Persian typography.
+     The booking funnel itself lives in the shared BookingWizard
+     component (out of this lane's scope); this only shapes the page
+     chrome around it.
+     ═════════════════════════════════════════════════════════════ */
+main .booking-page-header {
+    padding: clamp(44px, 6vw, 76px) 0 clamp(32px, 4.5vw, 56px);
+    border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+  }
+
+main .booking-page-header .section-subtitle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 16px;
+    margin-bottom: 18px;
+    border-radius: 999px;
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(52, 211, 153, 0.4);
+    font-size: 0.82rem;
+    font-weight: 700;
+  }
+
+main .booking-page-section {
+    padding-block: clamp(28px, 4vw, 48px) clamp(48px, 6vw, 80px);
+  }
+
+main .booking-page-header .page-title {
+    letter-spacing: normal;
+    line-height: 1.45;
+  }
+
+main .booking-page-header .page-subtitle {
+    line-height: 2;
+    max-width: 42rem;
+    margin-inline: auto;
+  }
+
+/* public.css tracks .section-subtitle; on this dark header the text is
+     Persian, where letter-spacing breaks glyph joining. */
+main .booking-page-header .section-subtitle,
+  main .section-subtitle {
+    letter-spacing: normal;
+  }
+
+main .booking-trust-row {
+    gap: 12px 28px;
+    margin-top: clamp(20px, 3vw, 28px);
+    line-height: 1.9;
+  }
+
+main .booking-trust-row li {
+    min-height: 32px;
+  }
+
+@media (max-width: 576px) {
+  main .booking-page-header {
+      padding: 36px 0 30px;
+    }
+  main .booking-trust-row {
+      gap: 10px 16px;
+    }
+}
+
+/* ─────────────────────────────────────────────────────────────
+     The shared booking wizard renders on this route. These scoped
+     rules only tighten the controls that measured under the 44px
+     minimum on /booking; component markup is untouched.
+     ───────────────────────────────────────────────────────────── */
+.btn-advance,
+  .btn,
+  .date-slot-card,
+  .gender-card,
+  .card-radio,
+  .chip-remove-btn,
+  .basket-close {
+    min-height: 44px;
+  }
+
+.step-desc,
+  .form-hint,
+  .card-desc {
+    line-height: 1.95;
+  }
+
+.stepper-counter {
+    font-variant-numeric: tabular-nums;
+  }
+
