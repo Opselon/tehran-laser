@@ -43,12 +43,13 @@ main .booking-trust-row li {
     gap: 7px;
   }
 
-main .trust-ico {
-    flex: 0 0 auto;
-    color: #10b981;
-    filter: drop-shadow(0 0 6px rgba(110, 231, 183, 0.45));
-  }
-
+/* [W5 revival-suppressed] rule was DEAD under Astro scoping (Icon child); reviving it changed rendering. Kept for future UX wave.
+   main .trust-ico {
+       flex: 0 0 auto;
+       color: #10b981;
+       filter: drop-shadow(0 0 6px rgba(110, 231, 183, 0.45));
+     }
+ */
 @media (max-width: 576px) {
   main .booking-page-header {
       padding: 38px 0 30px;

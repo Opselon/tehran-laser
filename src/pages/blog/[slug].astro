@@ -15,7 +15,7 @@ if (!blogEnabled) return Astro.redirect('/', 307);
 import { formatJalaliDate, toPersianDigits } from '../../lib/datetime/jalali';
 import { createArticleSchema, createBreadcrumbSchema } from '../../lib/seo';
 import Icon from '../../components/ui/Icon.astro';
-import '../styles/blog-slug.css';
+import '../../styles/blog-slug.css';
 
 const { slug } = Astro.params;
 if (!slug) return Astro.redirect('/blog');

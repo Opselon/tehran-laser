@@ -4,7 +4,7 @@
  * Selectors are verbatim; page self-cascades are preserved in source order. */
 
 /* ── 3D Obsidian-Gold Design Tokens & Scoped Styles ── */
-.clinic-page-wrapper .clinic-page-wrapper {
+.clinic-page-wrapper {
     background-color: #0a0b0d;
     color: #f7f3ec;
     overflow-x: clip;
@@ -34,10 +34,11 @@
   }
 
 /* Text & Pill Utilities */
-.clinic-page-wrapper .gold-icon {
-    color: #10b981;
-  }
-
+/* [W5 revival-suppressed] rule was DEAD under Astro scoping (Icon child); reviving it changed rendering. Kept for future UX wave.
+   .clinic-page-wrapper .gold-icon {
+       color: #10b981;
+     }
+ */
 .clinic-page-wrapper .gold-gradient-text {
     background: linear-gradient(135deg, #f4e2b8 0%, #e8cb8f 45%, #c9a45c 100%);
     -webkit-background-clip: text;

@@ -1,11 +1,11 @@
 ---
+import '../../styles/services-slug.css';
 import PublicLayout from '../../layouts/PublicLayout.astro';
 import { env } from 'cloudflare:workers';
 import { findPublicServiceBySlug } from '../../server/repositories';
 import { toPersianDigits } from '../../lib/datetime/jalali';
 import Icon from '../../components/ui/Icon.astro';
 import {
-import '../styles/services-slug.css';
   createMedicalProcedureSchema,
   createBreadcrumbSchema,
 } from '../../lib/seo';

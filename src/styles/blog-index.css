@@ -892,7 +892,7 @@ main .read-link-action {
 main .btn-cta-primary,
   main .btn-cta-secondary,
   main .btn-read-featured,
-  main .category-chips-list button {
+  main .category-chips-list.category-chips-list button {
       min-height: 44px;
       letter-spacing: normal;
     }
@@ -922,7 +922,7 @@ main .article-card-img,
     main .article-card-excerpt {
         -webkit-line-clamp: 4;
       }
-  main .category-chips-list button {
+  main .category-chips-list.category-chips-list button {
         flex: 1 1 auto;
       }
 }

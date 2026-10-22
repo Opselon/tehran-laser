@@ -12,7 +12,7 @@ body.theme-dark-obsidian {
     color: #e5ded3;
   }
 
-.contact-page-wrapper .contact-page-wrapper {
+.contact-page-wrapper {
     background-color: #0a0b0d;
     background-image: 
       radial-gradient(ellipse 80% 50% at 50% -20%, rgba(16, 185, 129, 0.15), transparent 70%),
@@ -462,11 +462,12 @@ body.theme-dark-obsidian {
     box-sizing: border-box;
   }
 
-.contact-page-wrapper .pin-gold {
-    color: #34d399;
-    flex-shrink: 0;
-  }
-
+/* [W5 revival-suppressed] rule was DEAD under Astro scoping (Icon child); reviving it changed rendering. Kept for future UX wave.
+   .contact-page-wrapper .pin-gold {
+       color: #34d399;
+       flex-shrink: 0;
+     }
+ */
 .contact-page-wrapper .address-main-text {
     font-size: 1.05rem;
     font-weight: 700;
@@ -851,12 +852,13 @@ body.theme-dark-obsidian {
     box-sizing: border-box;
   }
 
-.contact-page-wrapper .info-icon {
-    color: #f59e0b;
-    flex-shrink: 0;
-    margin-top: 2px;
-  }
-
+/* [W5 revival-suppressed] rule was DEAD under Astro scoping (Icon child); reviving it changed rendering. Kept for future UX wave.
+   .contact-page-wrapper .info-icon {
+       color: #f59e0b;
+       flex-shrink: 0;
+       margin-top: 2px;
+     }
+ */
 /* Bottom CTA Banner */
 .contact-page-wrapper .contact-bottom-cta {
     background: linear-gradient(135deg, #181d26 0%, #101319 100%);
@@ -957,7 +959,7 @@ body.theme-dark-obsidian {
 /* ═════════════════════════════════════════════════════════════
      MODERNIZATION LAYER — rhythm, Persian measure, modern cards.
      ═════════════════════════════════════════════════════════════ */
-.contact-page-wrapper .contact-page-wrapper {
+.contact-page-wrapper {
     padding-block: clamp(32px, 5vw, 64px);
   }
 

@@ -12,7 +12,7 @@ body.theme-dark-obsidian {
     color: #e5ded3;
   }
 
-.faq-page-wrapper .faq-page-wrapper {
+.faq-page-wrapper {
     background-color: #0a0b0d;
     background-image: 
       radial-gradient(ellipse 80% 50% at 50% -15%, rgba(16, 185, 129, 0.15), transparent 70%),
@@ -111,12 +111,13 @@ body.theme-dark-obsidian {
       inset 0 1px 0 rgba(110, 231, 183, 0.3);
   }
 
-.faq-page-wrapper .search-icon {
-    color: #10b981;
-    margin-left: 12px;
-    flex-shrink: 0;
-  }
-
+/* [W5 revival-suppressed] rule was DEAD under Astro scoping (Icon child); reviving it changed rendering. Kept for future UX wave.
+   .faq-page-wrapper .search-icon {
+       color: #10b981;
+       margin-left: 12px;
+       flex-shrink: 0;
+     }
+ */
 .faq-page-wrapper .faq-search-input {
     width: 100%;
     background: transparent;
@@ -396,12 +397,13 @@ body.theme-dark-obsidian {
     box-sizing: border-box;
   }
 
-.faq-page-wrapper .takeaway-icon {
-    color: #34d399;
-    flex-shrink: 0;
-    margin-top: 2px;
-  }
-
+/* [W5 revival-suppressed] rule was DEAD under Astro scoping (Icon child); reviving it changed rendering. Kept for future UX wave.
+   .faq-page-wrapper .takeaway-icon {
+       color: #34d399;
+       flex-shrink: 0;
+       margin-top: 2px;
+     }
+ */
 /* Empty State */
 .faq-page-wrapper .faq-empty-state {
     display: flex;
@@ -644,7 +646,7 @@ body.theme-dark-obsidian {
      MODERNIZATION LAYER — rhythm, readable Persian measure,
      modern accordion cards, 44px search + controls.
      ═════════════════════════════════════════════════════════════ */
-.faq-page-wrapper .faq-page-wrapper {
+.faq-page-wrapper {
     padding-block: clamp(32px, 5vw, 64px);
   }
 

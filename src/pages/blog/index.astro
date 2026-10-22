@@ -16,7 +16,7 @@ if (!blogEnabled) return Astro.redirect('/', 307);
 import { formatJalaliDate, toPersianDigits } from '../../lib/datetime/jalali';
 import { createBreadcrumbSchema } from '../../lib/seo';
 import Icon from '../../components/ui/Icon.astro';
-import '../styles/blog-index.css';
+import '../../styles/blog-index.css';
 
 let postsPage: Awaited<ReturnType<typeof listPublicBlogPosts>> = { items: [], nextCursor: null };
 try {
