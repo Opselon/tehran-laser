@@ -293,8 +293,7 @@ body.theme-dark-obsidian {
     color: #34d399;
   }
 
-.contact-page-wrapper .btn-contact-outline.copied-success,
-  .contact-page-wrapper .btn-copy-chip.copied-success {
+.contact-page-wrapper .btn-contact-outline.copied-success {
     background: rgba(16, 185, 129, 0.2) !important;
     border-color: #10b981 !important;
     color: #34d399 !important;
@@ -403,15 +402,6 @@ body.theme-dark-obsidian {
     }
   .contact-page-wrapper .nav-app-btn {
       padding: 8px 6px;
-      font-size: 0.78rem;
-    }
-  .contact-page-wrapper .sheba-details-card {
-      padding: 18px 12px;
-    }
-  .contact-page-wrapper .sheba-value-display {
-      font-size: 0.88rem;
-    }
-  .contact-page-wrapper .sheba-code {
       font-size: 0.78rem;
     }
 }
@@ -694,126 +684,297 @@ body.theme-dark-obsidian {
     color: #e5ded3;
   }
 
-/* Sheba / Settlement Card */
-.contact-page-wrapper .sheba-details-card {
-    padding: 32px 28px;
+/* Deposit guidance card — no card / IBAN digits anywhere in the DOM */
+.contact-page-wrapper .payment-card {
+    padding: 28px;
   }
 
-@media (max-width: 640px) {
-  .contact-page-wrapper .sheba-details-card {
-      padding: 22px 16px;
-    }
-}
-
-.contact-page-wrapper .sheba-header-row {
+.contact-page-wrapper .payment-head {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    flex-wrap: wrap;
-    margin-bottom: 22px;
+    gap: 14px;
+    margin-bottom: 14px;
   }
 
-.contact-page-wrapper .sheba-title-group {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-.contact-page-wrapper .sheba-card-title {
+.contact-page-wrapper .payment-title {
     font-size: 1.25rem;
     font-weight: 800;
     color: #ffffff;
     margin: 0 0 4px;
   }
 
-.contact-page-wrapper .sheba-card-subtitle {
+.contact-page-wrapper .payment-subtitle {
     font-size: 0.85rem;
     color: #9ea4b0;
     margin: 0;
   }
 
-.contact-page-wrapper .sheba-security-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(16, 185, 129, 0.1);
-    border: 1px solid rgba(16, 185, 129, 0.3);
-    border-radius: 999px;
-    padding: 4px 12px;
-    font-size: 0.775rem;
-    font-weight: 700;
-    color: #34d399;
+.contact-page-wrapper .payment-body {
+    color: #c4bcb0;
+    font-size: 0.95rem;
+    line-height: 1.9;
+    margin: 0 0 16px;
   }
 
-.contact-page-wrapper .sheba-items-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px;
-    margin-bottom: 20px;
+.contact-page-wrapper .payment-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: rgba(245, 158, 11, 0.08);
+    border: 1px solid rgba(245, 158, 11, 0.25);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 0.825rem;
+    color: #fef3c7;
+    line-height: 1.7;
+    box-sizing: border-box;
   }
 
-@media (max-width: 768px) {
-  .contact-page-wrapper .sheba-items-grid {
-      grid-template-columns: 1fr;
+.contact-page-wrapper .payment-note .info-icon {
+    color: #f59e0b;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+@media (max-width: 640px) {
+  .contact-page-wrapper .payment-card {
+      padding: 20px 16px;
     }
 }
 
-.contact-page-wrapper .sheba-item {
-    background: #0f1218;
-    border: 1px solid rgba(16, 185, 129, 0.2);
-    border-radius: 12px;
-    padding: 16px 18px;
-    box-sizing: border-box;
-    width: 100%;
+/* [W5 revival-suppressed] rule was DEAD under Astro scoping (Icon child); reviving it changed rendering. Kept for future UX wave.
+   .contact-page-wrapper .pin-gold {
+       color: #34d399;
+       flex-shrink: 0;
+     }
+ */
+.contact-page-wrapper .address-main-text {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1.7;
+    word-break: break-word;
   }
 
-.contact-page-wrapper .sheba-item-full {
-    grid-column: 1 / -1;
+/* Navigation apps */
+.contact-page-wrapper .navigation-apps-container {
+    margin-bottom: 28px;
   }
 
-.contact-page-wrapper .sheba-item-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 8px;
-  }
-
-.contact-page-wrapper .sheba-label {
-    font-size: 0.8rem;
+.contact-page-wrapper .nav-apps-label {
+    display: block;
+    font-size: 0.875rem;
     font-weight: 600;
-    color: #8e95a3;
+    color: #a8a296;
+    margin-bottom: 12px;
   }
 
-.contact-page-wrapper .btn-copy-chip {
+.contact-page-wrapper .nav-apps-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+@media (max-width: 640px) {
+  .contact-page-wrapper .nav-apps-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.contact-page-wrapper .nav-app-btn {
     display: inline-flex;
     align-items: center;
-    gap: 5px;
-    background: rgba(16, 185, 129, 0.1);
-    border: 1px solid rgba(16, 185, 129, 0.25);
-    border-radius: 6px;
-    padding: 3px 8px;
-    font-size: 0.75rem;
+    justify-content: center;
+    gap: 8px;
+    background: #11141b;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    color: #e5ded3;
+    font-size: 0.85rem;
     font-weight: 600;
-    color: #34d399;
-    cursor: pointer;
+    padding: 10px 12px;
+    border-radius: 10px;
+    text-decoration: none;
     transition: all 0.2s ease;
+    box-sizing: border-box;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
-.contact-page-wrapper .btn-copy-chip:hover {
-    background: rgba(16, 185, 129, 0.25);
+.contact-page-wrapper .nav-app-btn:hover {
+    background: rgba(16, 185, 129, 0.15);
     border-color: rgba(16, 185, 129, 0.5);
+    color: #34d399;
+    transform: translateY(-2px);
   }
 
-.contact-page-wrapper .sheba-value-display {
-    font-size: 0.975rem;
-    color: #ffffff;
+/* Visual Map Container */
+.contact-page-wrapper .map-visual-container {
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    margin-bottom: 28px;
+    background: #080a0e;
+    position: relative;
+    box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.8);
+  }
+
+.contact-page-wrapper .map-visual-bg {
+    height: 180px;
+    width: 100%;
+    position: relative;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 8px;
+    justify-content: center;
+    background: 
+      radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.12) 0%, transparent 60%),
+      linear-gradient(rgba(16, 185, 129, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(16, 185, 129, 0.05) 1px, transparent 1px);
+    background-size: 100% 100%, 28px 28px, 28px 28px;
   }
+
+.contact-page-wrapper .map-grid-overlay {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, transparent 30%, #080a0e 90%);
+  }
+
+.contact-page-wrapper .map-pin-pulse {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+.contact-page-wrapper .pin-marker {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #10b981, #987820);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0b0d11;
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.6);
+    z-index: 3;
+  }
+
+.contact-page-wrapper .pulse-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 2px solid rgba(16, 185, 129, 0.5);
+    animation: mapPulse 2.4s infinite ease-out;
+    z-index: 1;
+  }
+
+.contact-page-wrapper .pulse-ring.delay {
+    animation-delay: 1.2s;
+  }
+
+@keyframes mapPulse {
+    0% { transform: translate(-50%, -50%) scale(0.6); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(2.2); opacity: 0; }
+  }
+
+.contact-page-wrapper .pin-popup {
+    margin-top: 8px;
+    background: rgba(14, 18, 25, 0.95);
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    border-radius: 8px;
+    padding: 4px 12px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    z-index: 3;
+  }
+
+.contact-page-wrapper .pin-popup strong {
+    display: block;
+    font-size: 0.825rem;
+    color: #34d399;
+  }
+
+.contact-page-wrapper .pin-popup span {
+    font-size: 0.725rem;
+    color: #a8a296;
+  }
+
+.contact-page-wrapper .map-coords-badge {
+    position: absolute;
+    bottom: 10px;
+    left: 12px;
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-size: 0.7rem;
+    color: #8e95a3;
+    font-family: monospace;
+    z-index: 2;
+  }
+
+/* Access guide */
+.contact-page-wrapper .access-guide-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding-top: 24px;
+  }
+
+@media (max-width: 768px) {
+  .contact-page-wrapper .access-guide-grid {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+}
+
+.contact-page-wrapper .access-guide-item {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+
+.contact-page-wrapper .access-icon-col {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(16, 185, 129, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+.contact-page-wrapper .text-gold {
+    color: #047857;
+  }
+
+.contact-page-wrapper .access-item-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0 0 6px;
+  }
+
+.contact-page-wrapper .access-item-desc {
+    font-size: 0.85rem;
+    color: #9ea4b0;
+    line-height: 1.8;
+    margin: 0;
+  }
+
+.contact-page-wrapper .access-item-desc strong {
+    color: #e5ded3;
+  }
+
+
 
 .contact-page-wrapper .bank-name {
     font-size: 0.8rem;
@@ -832,24 +993,6 @@ body.theme-dark-obsidian {
     font-weight: 700;
     color: #34d399;
     word-break: break-all;
-  }
-
-.contact-page-wrapper .sheba-code {
-    font-size: clamp(0.85rem, 2.5vw, 1.1rem);
-  }
-
-.contact-page-wrapper .sheba-notice-box {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    background: rgba(245, 158, 11, 0.08);
-    border: 1px solid rgba(245, 158, 11, 0.25);
-    border-radius: 10px;
-    padding: 12px 16px;
-    font-size: 0.825rem;
-    color: #fef3c7;
-    line-height: 1.7;
-    box-sizing: border-box;
   }
 
 /* [W5 revival-suppressed] rule was DEAD under Astro scoping (Icon child); reviving it changed rendering. Kept for future UX wave.
@@ -980,7 +1123,7 @@ body.theme-dark-obsidian {
 .contact-page-wrapper .page-title,
   .contact-page-wrapper .card-title,
   .contact-page-wrapper .location-card-title,
-  .contact-page-wrapper .sheba-card-title,
+  .contact-page-wrapper .payment-title,
   .contact-page-wrapper .cta-title,
   .contact-page-wrapper .access-item-title {
     line-height: 1.5;
@@ -990,7 +1133,7 @@ body.theme-dark-obsidian {
   .contact-page-wrapper .card-desc,
   .contact-page-wrapper .location-card-subtitle,
   .contact-page-wrapper .access-item-desc,
-  .contact-page-wrapper .sheba-card-subtitle,
+  .contact-page-wrapper .payment-subtitle,
   .contact-page-wrapper .cta-desc {
     line-height: 1.95;
   }
@@ -1008,7 +1151,7 @@ body.theme-dark-obsidian {
 /* ── Modern card treatment ─────────────────────────────────── */
 .contact-page-wrapper .contact-glass-card,
   .contact-page-wrapper .location-hub-card,
-  .contact-page-wrapper .sheba-details-card,
+  .contact-page-wrapper .payment-card,
   .contact-page-wrapper .social-card,
   .contact-page-wrapper .phone-card {
     border-radius: 20px;
@@ -1032,8 +1175,7 @@ body.theme-dark-obsidian {
   }
 
 .contact-page-wrapper .contact-cards-grid,
-  .contact-page-wrapper .access-guide-grid,
-  .contact-page-wrapper .sheba-items-grid {
+  .contact-page-wrapper .access-guide-grid {
     gap: clamp(16px, 2.2vw, 24px);
   }
 
@@ -1043,8 +1185,7 @@ body.theme-dark-obsidian {
     height: 100%;
   }
 
-.contact-page-wrapper .sheba-code,
-  .contact-page-wrapper .map-coords-badge,
+.contact-page-wrapper .map-coords-badge,
   .contact-page-wrapper .code-font {
     font-variant-numeric: tabular-nums;
     word-break: break-word;
@@ -1053,7 +1194,6 @@ body.theme-dark-obsidian {
 
 /* ── Touch targets ≥44px ───────────────────────────────────── */
 .contact-page-wrapper .wa-chip,
-  .contact-page-wrapper .btn-copy-chip,
   .contact-page-wrapper .copy-trigger-btn,
   .contact-page-wrapper .copy-address-btn,
   .contact-page-wrapper .social-link-item,
@@ -1078,8 +1218,7 @@ body.theme-dark-obsidian {
       margin-bottom: 40px;
     }
   .contact-page-wrapper .access-guide-grid,
-    .contact-page-wrapper .contact-cards-grid,
-    .contact-page-wrapper .sheba-items-grid {
+    .contact-page-wrapper .contact-cards-grid {
       grid-template-columns: 1fr;
     }
 }
