@@ -725,14 +725,8 @@
     border-block: 1px solid rgba(16, 185, 129, 0.15);
   }
 
-.clinic-page-wrapper .team-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 24px;
-  }
-
-/* Featured lead physician — صدف مظفری */
-.clinic-page-wrapper .lead-doctor-card {
+/* Management profile — صدف مظفری (founder/manager, no medical title) */
+.clinic-page-wrapper .lead-profile-card {
     position: relative;
     background:
       radial-gradient(circle at 100% 0%, rgba(16, 185, 129, 0.14) 0%, rgba(10, 11, 13, 0) 55%),
@@ -744,7 +738,7 @@
     box-shadow: 0 20px 48px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(110, 231, 183, 0.2);
   }
 
-.clinic-page-wrapper .lead-doctor-card::before {
+.clinic-page-wrapper .lead-profile-card::before {
     content: '';
     position: absolute;
     inset-inline-start: 0;
@@ -755,13 +749,13 @@
     background: linear-gradient(180deg, #34d399 0%, #047857 100%);
   }
 
-.clinic-page-wrapper .lead-doctor-main {
+.clinic-page-wrapper .lead-profile-main {
     display: flex;
     align-items: flex-start;
     gap: 28px;
   }
 
-.clinic-page-wrapper .lead-doctor-avatar {
+.clinic-page-wrapper .lead-profile-avatar {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -769,7 +763,7 @@
     flex-shrink: 0;
   }
 
-.lead-doctor-avatar svg {
+.lead-profile-avatar svg {
     width: 96px;
     height: 96px;
     padding: 20px;
@@ -780,7 +774,7 @@
     box-sizing: border-box;
   }
 
-.clinic-page-wrapper .lead-doctor-badge {
+.clinic-page-wrapper .lead-profile-badge {
     padding: 5px 14px;
     border-radius: 999px;
     background: rgba(16, 185, 129, 0.16);
@@ -792,12 +786,12 @@
     white-space: nowrap;
   }
 
-.clinic-page-wrapper .lead-doctor-info {
+.clinic-page-wrapper .lead-profile-info {
     min-width: 0;
     flex: 1;
   }
 
-.clinic-page-wrapper .lead-doctor-name-row {
+.clinic-page-wrapper .lead-profile-name-row {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
@@ -805,7 +799,7 @@
     margin-bottom: 6px;
   }
 
-.clinic-page-wrapper .lead-doctor-name {
+.clinic-page-wrapper .lead-profile-name {
     font-size: clamp(1.4rem, 3vw, 1.9rem);
     font-weight: 900;
     color: #ffffff;
@@ -813,7 +807,7 @@
     line-height: 1.3;
   }
 
-.clinic-page-wrapper .lead-doctor-verified {
+.clinic-page-wrapper .lead-profile-verified {
     display: inline-flex;
     align-items: center;
     gap: 6px;
@@ -827,21 +821,21 @@
     white-space: nowrap;
   }
 
-.clinic-page-wrapper .lead-doctor-role {
+.clinic-page-wrapper .lead-profile-role {
     color: #10b981;
     font-size: 0.95rem;
     font-weight: 700;
     margin-bottom: 12px;
   }
 
-.clinic-page-wrapper .lead-doctor-desc {
+.clinic-page-wrapper .lead-profile-desc {
     color: #c4bcb0;
     font-size: 0.98rem;
     line-height: 1.9;
     margin: 0 0 22px;
   }
 
-.clinic-page-wrapper .lead-doctor-facts {
+.clinic-page-wrapper .lead-profile-facts {
     display: flex;
     flex-wrap: wrap;
     gap: 14px;
@@ -872,73 +866,6 @@
     font-size: 0.78rem;
     color: #a39c8f;
     line-height: 1.5;
-  }
-
-.clinic-page-wrapper .team-card {
-    background: #141720;
-    border: 1px solid rgba(16, 185, 129, 0.22);
-    border-radius: 20px;
-    padding: 28px 24px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-  }
-
-.clinic-page-wrapper .team-avatar-box {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 18px;
-  }
-
-.clinic-page-wrapper .team-badge {
-    padding: 4px 12px;
-    border-radius: 999px;
-    background: rgba(16, 185, 129, 0.14);
-    border: 1px solid rgba(16, 185, 129, 0.3);
-    color: #34d399;
-    font-size: 0.8rem;
-    font-weight: 700;
-  }
-
-.clinic-page-wrapper .team-name {
-    font-size: 1.25rem;
-    font-weight: 800;
-    color: #ffffff;
-    margin: 0 0 6px;
-  }
-
-.clinic-page-wrapper .team-role {
-    color: #10b981;
-    font-size: 0.85rem;
-    font-weight: 600;
-    margin-bottom: 14px;
-  }
-
-.clinic-page-wrapper .team-desc {
-    color: #bcb4a6;
-    font-size: 0.92rem;
-    line-height: 1.8;
-    margin: 0 0 20px;
-  }
-
-.clinic-page-wrapper .team-skills {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-
-.clinic-page-wrapper .skill-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 4px 10px;
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: #e5ded5;
-    font-size: 0.78rem;
   }
 
 /* Hygiene & Certification Layout */
@@ -1351,15 +1278,15 @@
   .clinic-page-wrapper .stat-box {
       flex: 1;
     }
-  .clinic-page-wrapper .lead-doctor-main {
+  .clinic-page-wrapper .lead-profile-main {
       flex-direction: column;
       align-items: center;
       text-align: center;
     }
-  .clinic-page-wrapper .lead-doctor-name-row {
+  .clinic-page-wrapper .lead-profile-name-row {
       justify-content: center;
     }
-  .clinic-page-wrapper .lead-doctor-card::before {
+  .clinic-page-wrapper .lead-profile-card::before {
       inset-inline-start: auto;
       inset-inline-end: 0;
     }
@@ -1383,15 +1310,15 @@
       padding: 14px 18px;
       font-size: 0.95rem;
     }
-  .clinic-page-wrapper .lead-doctor-card {
+  .clinic-page-wrapper .lead-profile-card {
       padding: 24px 18px;
     }
-  .clinic-page-wrapper .lead-doctor-avatar {
+  .clinic-page-wrapper .lead-profile-avatar {
       flex-direction: row;
       align-items: center;
       gap: 14px;
     }
-  .lead-doctor-avatar svg {
+  .lead-profile-avatar svg {
       width: 72px;
       height: 72px;
       padding: 16px;
@@ -1516,7 +1443,6 @@
   .clinic-page-wrapper .wl-title,
   .clinic-page-wrapper .card-title,
   .clinic-page-wrapper .benefit-title,
-  .clinic-page-wrapper .team-name,
   .clinic-page-wrapper .rado-title,
   .clinic-page-wrapper .spec-datasheet-title,
   .clinic-page-wrapper .cta-title,
@@ -1530,7 +1456,6 @@
   .clinic-page-wrapper .wl-text,
   .clinic-page-wrapper .card-body,
   .clinic-page-wrapper .benefit-body,
-  .clinic-page-wrapper .team-desc,
   .clinic-page-wrapper .hygiene-item,
   .clinic-page-wrapper .rado-body,
   .clinic-page-wrapper .loc-desc,
@@ -1611,7 +1536,6 @@
 .clinic-page-wrapper .rado-card-3d,
   .clinic-page-wrapper .benefit-card-3d,
   .clinic-page-wrapper .feature-card-3d,
-  .clinic-page-wrapper .team-card,
   .clinic-page-wrapper .location-card-3d,
   .clinic-page-wrapper .certifications-card,
   .clinic-page-wrapper .tech-explorer-card {
@@ -1631,7 +1555,6 @@
 .clinic-page-wrapper .rado-card-3d:hover,
   .clinic-page-wrapper .benefit-card-3d:hover,
   .clinic-page-wrapper .feature-card-3d:hover,
-  .clinic-page-wrapper .team-card:hover,
   .clinic-page-wrapper .location-card-3d:hover {
     transform: translateY(-3px);
     border-color: rgba(52, 211, 153, 0.42);
@@ -1640,7 +1563,6 @@
 .clinic-page-wrapper .metrics-grid,
   .clinic-page-wrapper .benefits-grid,
   .clinic-page-wrapper .features-dual-grid,
-  .clinic-page-wrapper .team-grid,
   .clinic-page-wrapper .hygiene-layout,
   .clinic-page-wrapper .rado-grid {
     gap: clamp(16px, 2.2vw, 26px);
@@ -1683,7 +1605,6 @@
   }
 
 .clinic-page-wrapper .pill-label,
-  .clinic-page-wrapper .skill-tag,
   .clinic-page-wrapper .benefit-index,
   .clinic-page-wrapper .gold-icon {
     letter-spacing: normal;
@@ -1727,7 +1648,6 @@
   .clinic-page-wrapper .rado-card-3d,
     .clinic-page-wrapper .benefit-card-3d,
     .clinic-page-wrapper .feature-card-3d,
-    .clinic-page-wrapper .team-card,
     .clinic-page-wrapper .location-card-3d {
       transition: none;
       transform: none;

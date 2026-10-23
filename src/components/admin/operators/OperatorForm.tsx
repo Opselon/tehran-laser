@@ -123,7 +123,7 @@ export function OperatorForm({
               className="ops-input"
               value={draft.displayName}
               onChange={(event) => update('displayName', event.target.value)}
-              placeholder="مثلاً دکتر سارا محمدی"
+              placeholder="مثلاً سارا محمدی"
               maxLength={80}
               autoComplete="name"
               aria-invalid={showErrors && Boolean(errors.displayName)}

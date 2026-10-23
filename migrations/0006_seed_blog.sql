@@ -21,7 +21,7 @@ INSERT OR REPLACE INTO blog_posts (
 </ul>
 
 <div style="background: rgba(239, 68, 68, 0.12); border-right: 4px solid #ef4444; padding: 16px 20px; border-radius: 8px; margin: 20px 0; color: #fca5a5;">
-  <strong>⚠️ هشدار پزشکی مهم:</strong>
+  <strong>⚠️ هشدار مهم:</strong>
   حداقل ۳ الی ۴ هفته قبل از جلسه لیزر، از برنزه کردن پوست با آفتاب یا دستگاه سولاریوم جداً خودداری نمایید. وجود آفتاب‌سوختگی ریسک سوختگی سطح اپیدرم را افزایش می‌دهد.
 </div>
 
@@ -29,7 +29,7 @@ INSERT OR REPLACE INTO blog_posts (
 <p>پس از انجام لیزر، ایجاد مختصری قرمزی (اریتم) در اطراف ریشه موها واکنشی کاملاً طبیعی و نشان‌دهنده اثربخشی حرارتی بر فولیکول است. جهت بهبود سریع و حفظ شادابی پوست موارد زیر توصیه می‌گردد:</p>
 
 <div style="background: rgba(56, 189, 248, 0.12); border-right: 4px solid #38bdf8; padding: 16px 20px; border-radius: 8px; margin: 20px 0; color: #bae6fd;">
-  <strong>🩺 توصیه پزشک کلینیک:</strong>
+  <strong>🩺 توصیه کلینیک تهران لیزر:</strong>
   استفاده از کرم زینک اکساید و ژل ترمیم‌کننده آلوئه‌ورا به مدت ۲۴ ساعت اول توصیه می‌شود. همچنین تا ۲۴ ساعت از دوش آب گرم، استخر، سونا و ورزش‌های تعریق‌زا پرهیز فرمایید.
 </div>',
   'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=1200&q=80',
@@ -48,7 +48,7 @@ INSERT OR REPLACE INTO blog_posts (
 <p>موفقیت در جلسات لیزر تنها وابسته به توان دستگاه نیست، بلکه آمادگی اولیه مراجع بیش از ۵۰ درصد در نتایج نهایی و جلوگیری از عوارض جانبی نقش دارد.</p>
 
 <h3>تداخلات دارویی و سوابق پزشکی</h3>
-<p>برخی داروها حساسیت پوست به نور (Photosensitivity) را بالا می‌برند. در صورت مصرف موارد زیر حتماً پیش از نوبت به اپراتور یا پزشک کلینیک اطلاع دهید:</p>
+<p>برخی داروها حساسیت پوست به نور (Photosensitivity) را بالا می‌برند. در صورت مصرف موارد زیر حتماً پیش از نوبت به کارشناس کلینیک اطلاع دهید:</p>
 <ul>
   <li>راکوتان و مشتقات ایزوترتینوئین (باید حداقل ۶ ماه از قطع مصرف گذشته باشد)</li>
   <li>آنتی‌بیوتیک‌های گروه داکسی‌سایکلین یا تتراسایکلین</li>
@@ -61,7 +61,7 @@ INSERT OR REPLACE INTO blog_posts (
 </div>',
   -- was photo-1512290900672 (now 404 at Unsplash) — replaced with a live asset
   'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=1200&q=80',
-  'دکتر مشاور کلینیک',
+  'تیم محتوای تهران لیزر',
   'published',
   strftime('%Y-%m-%dT%H:%M:%fZ', 'now'),
   strftime('%Y-%m-%dT%H:%M:%fZ', 'now'),

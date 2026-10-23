@@ -2,11 +2,12 @@
 Self-hosted decorative imagery. **Every file in this directory was visually reviewed by the lead before shipping** — the alt text says only what the photo actually shows, and none of it is presented as the clinic's own room, device or staff.
 * Source: [Unsplash](https://unsplash.com/license) — free for commercial use, no attribution required (credited below as courtesy).
 * Never hot-link: the public CSP is `img-src 'self' data: blob:`.
-* Every image ships **AVIF + WebP + JPEG** at **1600w** and **800w**, each under 200 KB, plus an inline **LQIP** data-URI.
+* Every image ships **AVIF + WebP + JPEG** at **1600w**, **800w** and **560w**, each under 200 KB, plus an inline **LQIP** data-URI.
+* Regenerate the derived rungs with `npm run images:optimize` (`scripts/optimize-images.mjs`, sharp). The 1600w JPEG is the master; the hero also gets a 700w JPEG fallback because phones cap at 700w.
 
 ## `facial-treatment`  —  1600×1067 (3:2)
 * **Alt (fa):** انجام ماسک صورت توسط متخصص مراقبت پوست در فضایی آرام و حرفه‌ای
-* **Files:** `facial-treatment.avif` 109 KB, `facial-treatment.webp` 89 KB, `facial-treatment.jpg` 239 KB, `facial-treatment-800.avif` 24 KB, `facial-treatment-800.webp` 20 KB, `facial-treatment-800.jpg` 49 KB
+* **Files:** `facial-treatment.avif` 109 KB, `facial-treatment.webp` 89 KB, `facial-treatment.jpg` 239 KB, `facial-treatment-800.avif` 19 KB, `facial-treatment-800.webp` 19 KB, `facial-treatment-800.jpg` 37 KB, `facial-treatment-560.avif` 10 KB, `facial-treatment-560.webp` 11 KB, `facial-treatment-560.jpg` 20 KB
 * **LQIP (data-URI, 339 B):**
 
   ```
@@ -15,7 +16,7 @@ Self-hosted decorative imagery. **Every file in this directory was visually revi
 
 ## `facial-clay-mask`  —  1600×1067 (3:2)
 * **Alt (fa):** ماسک صورت رس‌دار سفید روی پوست به‌همراه هدبند بهداشتی
-* **Files:** `facial-clay-mask.avif` 67 KB, `facial-clay-mask.webp` 63 KB, `facial-clay-mask.jpg` 158 KB, `facial-clay-mask-800.avif` 24 KB, `facial-clay-mask-800.webp` 24 KB, `facial-clay-mask-800.jpg` 48 KB
+* **Files:** `facial-clay-mask.avif` 67 KB, `facial-clay-mask.webp` 63 KB, `facial-clay-mask.jpg` 158 KB, `facial-clay-mask-800.avif` 21 KB, `facial-clay-mask-800.webp` 22 KB, `facial-clay-mask-800.jpg` 37 KB, `facial-clay-mask-560.avif` 12 KB, `facial-clay-mask-560.webp` 13 KB, `facial-clay-mask-560.jpg` 21 KB
 * **LQIP (data-URI, 315 B):**
 
   ```
@@ -24,7 +25,7 @@ Self-hosted decorative imagery. **Every file in this directory was visually revi
 
 ## `facial-therapy`  —  1600×1067 (3:2)
 * **Alt (fa):** مراقبت تخصصی ناحیه دور چشم و صورت توسط کارشناس پوست
-* **Files:** `facial-therapy.avif` 72 KB, `facial-therapy.webp` 69 KB, `facial-therapy.jpg` 177 KB, `facial-therapy-800.avif` 29 KB, `facial-therapy-800.webp` 27 KB, `facial-therapy-800.jpg` 55 KB
+* **Files:** `facial-therapy.avif` 72 KB, `facial-therapy.webp` 69 KB, `facial-therapy.jpg` 177 KB, `facial-therapy-800.avif` 23 KB, `facial-therapy-800.webp` 25 KB, `facial-therapy-800.jpg` 43 KB, `facial-therapy-560.avif` 14 KB, `facial-therapy-560.webp` 15 KB, `facial-therapy-560.jpg` 25 KB
 * **LQIP (data-URI, 315 B):**
 
   ```
@@ -33,7 +34,7 @@ Self-hosted decorative imagery. **Every file in this directory was visually revi
 
 ## `spa-massage`  —  1600×1067 (3:2)
 * **Alt (fa):** ماساژ پشت و شانه در فضایی آرام با ملحفه تمیز
-* **Files:** `spa-massage.avif` 97 KB, `spa-massage.webp` 101 KB, `spa-massage.jpg` 198 KB, `spa-massage-800.avif` 32 KB, `spa-massage-800.webp` 33 KB, `spa-massage-800.jpg` 54 KB
+* **Files:** `spa-massage.avif` 97 KB, `spa-massage.webp` 101 KB, `spa-massage.jpg` 198 KB, `spa-massage-800.avif` 24 KB, `spa-massage-800.webp` 31 KB, `spa-massage-800.jpg` 44 KB, `spa-massage-560.avif` 13 KB, `spa-massage-560.webp` 18 KB, `spa-massage-560.jpg` 24 KB
 * **LQIP (data-URI, 287 B):**
 
   ```
@@ -42,7 +43,7 @@ Self-hosted decorative imagery. **Every file in this directory was visually revi
 
 ## `skin-closeup`  —  1600×1067 (3:2)
 * **Alt (fa):** چیدمان محصولات مراقبت از پوست روی سطح تیره
-* **Files:** `skin-closeup.avif` 39 KB, `skin-closeup.webp` 44 KB, `skin-closeup.jpg` 116 KB, `skin-closeup-800.avif` 19 KB, `skin-closeup-800.webp` 20 KB, `skin-closeup-800.jpg` 41 KB
+* **Files:** `skin-closeup.avif` 39 KB, `skin-closeup.webp` 44 KB, `skin-closeup.jpg` 116 KB, `skin-closeup-800.avif` 14 KB, `skin-closeup-800.webp` 17 KB, `skin-closeup-800.jpg` 31 KB, `skin-closeup-560.avif` 9 KB, `skin-closeup-560.webp` 11 KB, `skin-closeup-560.jpg` 18 KB
 * **LQIP (data-URI, 243 B):**
 
   ```
@@ -51,7 +52,7 @@ Self-hosted decorative imagery. **Every file in this directory was visually revi
 
 ## `spa-treatment-room`  —  1600×1067 (3:2)
 * **Alt (fa):** سنگ‌های گرم ماساژ و گل‌های سفید روی ملحفه تمیز در فضای اسپا
-* **Files:** `spa-treatment-room.avif` 44 KB, `spa-treatment-room.webp` 36 KB, `spa-treatment-room.jpg` 128 KB, `spa-treatment-room-800.avif` 16 KB, `spa-treatment-room-800.webp` 13 KB, `spa-treatment-room-800.jpg` 34 KB
+* **Files:** `spa-treatment-room.avif` 44 KB, `spa-treatment-room.webp` 36 KB, `spa-treatment-room.jpg` 128 KB, `spa-treatment-room-800.avif` 13 KB, `spa-treatment-room-800.webp` 13 KB, `spa-treatment-room-800.jpg` 27 KB, `spa-treatment-room-560.avif` 8 KB, `spa-treatment-room-560.webp` 8 KB, `spa-treatment-room-560.jpg` 16 KB
 * **LQIP (data-URI, 311 B):**
 
   ```

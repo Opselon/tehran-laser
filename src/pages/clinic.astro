@@ -18,7 +18,7 @@ const aboutJsonLd = {
   url: `${origin}/clinic`,
   name: 'درباره کلینیک تخصصی تهران لیزر پاسداران',
   description:
-    'مرکز تخصصی لیزر و زیبایی تهران لیزر در پاسداران با دستگاه لیزر تماسی رادو پلاس، سه طول موج ۷۵۵ و ۸۰۸ و ۱۰۶۴ نانومتر، سیستم خنک‌کننده TEC Double و کادر مجرب پزشکی.',
+    'مرکز تخصصی لیزر و زیبایی تهران لیزر در پاسداران با دستگاه لیزر تماسی رادو پلاس، سه طول موج ۷۵۵ و ۸۰۸ و ۱۰۶۴ نانومتر، سیستم خنک‌کننده TEC Double و کادر آموزش‌دیده.',
   inLanguage: 'fa-IR',
   mainEntity: { '@id': `${origin}/#clinic` },
   isPartOf: { '@id': `${origin}/#website` },
@@ -58,7 +58,7 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
           تکنولوژی لیزر تماسی <span class="gold-gradient-text">رادو پلاس</span> در تهران
         </h1>
         <p class="hero-desc">
-          لیزر تماسی (لمسی) با تلفیق سه طول موج الکساندرایت، دیود و ان‌دی‌یاگ، سرمایش پیوسته TEC Double و نظارت مستقیم پزشکان متخصص در محیطی آرام و استاندارد.
+          لیزر تماسی (لمسی) با تلفیق سه طول موج الکساندرایت، دیود و ان‌دی‌یاگ، سرمایش پیوسته TEC Double و پروتکل بهداشتی اختصاصی در محیطی آرام و استاندارد.
         </p>
 
         <div class="hero-cta-row">
@@ -96,10 +96,10 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
             </div>
           </div>
           <div class="hero-badge-card">
-            <div class="badge-icon-box"><Icon name="doctor" size={22} /></div>
+            <div class="badge-icon-box"><Icon name="shield" size={22} /></div>
             <div>
-              <div class="badge-title">تحت نظارت پزشک متخصص</div>
-              <div class="badge-sub">پرونده بالینی و اپراتورهای ارشد آموزش‌دیده</div>
+              <div class="badge-title">پروتکل بهداشتی اختصاصی</div>
+              <div class="badge-sub">پرونده هر مراجع و اپراتورهای آموزش‌دیده</div>
             </div>
           </div>
         </div>
@@ -456,102 +456,48 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
       </div>
     </section>
 
-    <!-- Medical Team & Supervision Section -->
+    <!-- Team — the only person introduced publicly is Sadaf Mozaffari (صدف مظفری).
+         Her role is stated as founder/manager only: no medical title, degree or
+         clinical qualification is claimed or implied. Men's services stay listed
+         below; only the male-operator persona was removed. -->
     <section class="section team-section">
       <div class="container">
         <div class="section-heading text-center">
-          <div class="pill-label"><Icon name="doctor" size={14} /> سرمایه انسانی متخصص</div>
-          <h2 class="section-title">تیم پزشکی و کادر درمانی تهران لیزر</h2>
+          <div class="pill-label"><Icon name="award" size={14} /> مدیریت کلینیک</div>
+          <h2 class="section-title">مدیریت و کادر تهران لیزر</h2>
           <p class="section-lead">
-            کیفیت نتایج لیزر به اندازه دستگاه، به مهارت و دانش اپراتور و پزشک وابسته است. در تهران لیزر هر شات بر اساس پروتکل پزشکی ثبت‌شده شلیک می‌شود.
+            تهران لیزر با مدیریت صدف مظفری و کادر آموزش‌دیده پذیرش و اپراتوری اداره می‌شود؛ هر جلسه بر اساس چک‌لیست بهداشتی و پروتکل ثبت‌شده همان ناحیه انجام می‌گیرد.
           </p>
         </div>
 
-        <!-- Lead physician: صدف مظفری -->
-        <div class="lead-doctor-card">
-          <div class="lead-doctor-main">
-            <div class="lead-doctor-avatar">
-              <Icon name="doctor" size={56} class="gold-icon" />
-              <span class="lead-doctor-badge">پزشک موسس و مسئول فنی</span>
+        <div class="lead-profile-card">
+          <div class="lead-profile-main">
+            <div class="lead-profile-avatar">
+              <Icon name="award" size={56} class="gold-icon" />
+              <span class="lead-profile-badge">بنیان‌گذار و مدیر</span>
             </div>
-            <div class="lead-doctor-info">
-              <div class="lead-doctor-name-row">
-                <h3 class="lead-doctor-name">دکتر صدف مظفری</h3>
-                <span class="lead-doctor-verified"><Icon name="checkCircle" size={14} /> مسئول فنی کلینیک صدف مظفری</span>
+            <div class="lead-profile-info">
+              <div class="lead-profile-name-row">
+                <h3 class="lead-profile-name">صدف مظفری</h3>
+                <span class="lead-profile-verified"><Icon name="checkCircle" size={14} /> مدیر کلینیک تهران لیزر</span>
               </div>
-              <div class="lead-doctor-role">پزشک پوست، مو و زیبایی — نظارت مستقیم بر پروتکل‌های درمانی</div>
-              <p class="lead-doctor-desc">
-                ارزیابی اولیه پوست، تعیین سطح ایمن انرژی و تایید پروتکل درمانی بر عهده پزشک ناظر است؛ هیچ شاتی بدون تایید ایشان شلیک نمی‌شود و پاسخ‌دهی هر جلسه در پرونده بالینی شما ثبت می‌گردد.
+              <div class="lead-profile-role">بنیان‌گذار و مدیر کلینیک — مسئول تجربه مراجعین</div>
+              <p class="lead-profile-desc">
+                صدف مظفری مدیریت تهران لیزر را بر عهده دارد: هماهنگی تیم پذیرش و اپراتورها، پیگیری بازخورد مراجعین و کنترل اجرای چک‌لیست بهداشتی هر جلسه. خدمات لیزر بانوان و آقایان در لاین‌های مجزا و با کادر آموزش‌دیده ارائه می‌شود.
               </p>
-              <div class="lead-doctor-facts">
+              <div class="lead-profile-facts">
                 <div class="fact-item">
-                  <span class="fact-num">ارزیابی اولیه</span>
-                  <span class="fact-label">تعیین تیپ پوستی و سطح ایمن فلوئنس پیش از شروع</span>
+                  <span class="fact-num">مدیریت</span>
+                  <span class="fact-label">هماهنگی پذیرش، نوبت‌دهی و تیم اپراتوری</span>
                 </div>
                 <div class="fact-item">
-                  <span class="fact-num">پروتکل شخصی</span>
-                  <span class="fact-label">دوز انرژی و فاصله جلسات متناسب با هر ناحیه</span>
+                  <span class="fact-num">مراجعین</span>
+                  <span class="fact-label">پیگیری بازخورد و کیفیت خدمات هر جلسه</span>
                 </div>
                 <div class="fact-item">
-                  <span class="fact-num">نظارت هر جلسه</span>
-                  <span class="fact-label">کنترل کیفیت شات‌ها و ثبت نتایج در پرونده بالینی</span>
+                  <span class="fact-num">بهداشت</span>
+                  <span class="fact-label">کنترل اجرای چک‌لیست بهداشتی و آماده‌سازی اتاق</span>
                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="team-grid">
-          <div class="team-card">
-            <div class="team-avatar-box">
-              <Icon name="doctor" size={44} class="gold-icon" />
-              <div class="team-badge">پزشک ناظر</div>
-            </div>
-            <div class="team-info">
-              <h3 class="team-name">دکتر مریم سلیمانی</h3>
-              <div class="team-role">پزشک پوست، مو و زیبایی — شماره نظام پزشکی ۱۲۸۴۷۱</div>
-              <p class="team-desc">
-                ویزیت اولیه و ارزیابی فیتزپاتریک پوستی مراجعین، تعیین سطح ایمن فلوئنس و نظارت مستمر بر روند پاسخ‌دهی فولیکول‌ها.
-              </p>
-              <div class="team-skills">
-                <span class="skill-tag"><Icon name="check" size={12} /> پچ‌تست حساسیت</span>
-                <span class="skill-tag"><Icon name="check" size={12} /> پروتکل درمانی شخصی</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="team-card">
-            <div class="team-avatar-box">
-              <Icon name="users" size={44} class="gold-icon" />
-              <div class="team-badge">لاین بانوان</div>
-            </div>
-            <div class="team-info">
-              <h3 class="team-name">اپراتورهای ارشد بانوان</h3>
-              <div class="team-role">دارای گواهینامه معتبر کاربری لیزرهای پزشکی</div>
-              <p class="team-desc">
-                بیش از ۵۰۰۰ ساعت تجربه بالینی در لاین اختصاصی بانوان با شات‌های دقیق بدون جاانداختگی، حفظ کامل حریم خصوصی و بهداشت فردی.
-              </p>
-              <div class="team-skills">
-                <span class="skill-tag"><Icon name="check" size={12} /> شات نامحدود دقیق</span>
-                <span class="skill-tag"><Icon name="check" size={12} /> محیط کاملاً محرمانه</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="team-card">
-            <div class="team-avatar-box">
-              <Icon name="shield" size={44} class="gold-icon" />
-              <div class="team-badge">لاین آقایان</div>
-            </div>
-            <div class="team-info">
-              <h3 class="team-name">اپراتور تخصصی آقایان</h3>
-              <div class="team-role">کادر مجرب در اتاق مجزا با تجهیزات بهداشتی یکبارمصرف</div>
-              <p class="team-desc">
-                تنظیم انرژی ویژه فولیکول‌های ضخیم آقایان (آنکارد ریش، خط گردن، کمر، ورزشکاران) با بالاترین سرعت و بدون سوزش.
-              </p>
-              <div class="team-skills">
-                <span class="skill-tag"><Icon name="check" size={12} /> لاین مستقل آقایان</span>
-                <span class="skill-tag"><Icon name="check" size={12} /> تنظیم ویژه ریش و گردن</span>
               </div>
             </div>
           </div>
