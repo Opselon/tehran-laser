@@ -23,8 +23,10 @@
   "vars": {
     "BUSINESS_TIMEZONE": "Asia/Tehran",
     // Public origin used for canonical/OG/sitemap URLs. Must be the LIVE origin.
-    // Do NOT set this to https://tehranlaser.ir until that domain actually serves
-    // this app — it currently answers with a domain-parking page.
-    "SITE_URL": "https://tehran-laser.opcelon.workers.dev",
+    // tehranlesar.ir is the clinic's custom domain, bound to this worker in the
+    // owner's Cloudflare account (TLS verified 2026-11-01). Do NOT set this to
+    // https://tehranlaser.ir — that different domain answers from a foreign
+    // nginx host and is not under this account's control.
+    "SITE_URL": "https://tehranlesar.ir",
   },
 }
