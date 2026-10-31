@@ -33,9 +33,15 @@ const JPEG = { quality: 78, mozjpeg: true, progressive: true };
 async function encode(source, width, name) {
   const resized = await sharp(source).resize({ width, withoutEnlargement: true }).toBuffer();
   await Promise.all([
-    sharp(resized).avif(AVIF).toFile(path.join(IMAGES, `${name}.avif`)),
-    sharp(resized).webp(WEBP).toFile(path.join(IMAGES, `${name}.webp`)),
-    sharp(resized).jpeg(JPEG).toFile(path.join(IMAGES, `${name}.jpg`)),
+    sharp(resized)
+      .avif(AVIF)
+      .toFile(path.join(IMAGES, `${name}.avif`)),
+    sharp(resized)
+      .webp(WEBP)
+      .toFile(path.join(IMAGES, `${name}.webp`)),
+    sharp(resized)
+      .jpeg(JPEG)
+      .toFile(path.join(IMAGES, `${name}.jpg`)),
   ]);
   return name;
 }

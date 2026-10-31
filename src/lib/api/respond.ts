@@ -9,7 +9,11 @@ export function ok<T>(data: T, meta: Record<string, unknown> = {}): Response {
   return json(body, 200);
 }
 
-export function okWithStatus<T>(data: T, status: number, meta: Record<string, unknown> = {}): Response {
+export function okWithStatus<T>(
+  data: T,
+  status: number,
+  meta: Record<string, unknown> = {},
+): Response {
   const body: ApiResponse<T> = { data, error: null, meta };
   return json(body, status);
 }
@@ -17,7 +21,11 @@ export function okWithStatus<T>(data: T, status: number, meta: Record<string, un
 export function fail(
   code: ApiErrorCode,
   message: string,
-  options: { fields?: Record<string, string[]>; meta?: Record<string, unknown>; status?: number } = {},
+  options: {
+    fields?: Record<string, string[]>;
+    meta?: Record<string, unknown>;
+    status?: number;
+  } = {},
 ): Response {
   const body: ApiResponse<null> = {
     data: null,
@@ -94,7 +102,9 @@ export function parseQuery<T>(source: Request | URL, schema: ZodType<T>): T {
   return result.data;
 }
 
-export function zodFieldErrors(issues: { path: PropertyKey[]; message: string }[]): Record<string, string[]> {
+export function zodFieldErrors(
+  issues: { path: PropertyKey[]; message: string }[],
+): Record<string, string[]> {
   const fields: Record<string, string[]> = {};
   for (const issue of issues) {
     const key = issue.path.length > 0 ? issue.path.join('.') : '_';

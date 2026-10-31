@@ -28,8 +28,14 @@ if (process.argv.includes('--remote')) {
 
 async function hash(value) {
   const salt = webcrypto.getRandomValues(new Uint8Array(16));
-  const key = await subtle.importKey('raw', new TextEncoder().encode(value), 'PBKDF2', false, ['deriveBits']);
-  const bits = await subtle.deriveBits({ name: 'PBKDF2', salt, iterations: ITERATIONS, hash: 'SHA-256' }, key, 256);
+  const key = await subtle.importKey('raw', new TextEncoder().encode(value), 'PBKDF2', false, [
+    'deriveBits',
+  ]);
+  const bits = await subtle.deriveBits(
+    { name: 'PBKDF2', salt, iterations: ITERATIONS, hash: 'SHA-256' },
+    key,
+    256,
+  );
   const b64 = (bytes) => Buffer.from(bytes).toString('base64');
   return `pbkdf2-sha256$${ITERATIONS}$${b64(salt)}$${b64(new Uint8Array(bits))}`;
 }

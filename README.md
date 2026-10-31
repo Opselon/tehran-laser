@@ -11,12 +11,12 @@
 
 یک سامانه دو بخشی:
 
-| بخش | مسیر | توضیح |
-| :--- | :--- | :--- |
+| بخش               | مسیر                                                                                       | توضیح                                                                                                     |
+| :---------------- | :----------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------- |
 | **وب‌سایت عمومی** | `/`, `/services`, `/booking`, `/clinic`, `/faq`, `/blog`, `/contact`, `/privacy`, `/terms` | کاتالوگ خدمات و تعرفه‌ها، جادوگر رزرو آنلاین، مجله، صفحات حقوقی. رندر کامل سمت سرور (HTML خالص برای سئو). |
-| **پنل مدیریت** | `/admin/**` (ورود از `/admin/login`) | نوبت‌ها، خدمات و تعرفه‌ها، تقویم، شیفت‌ها، مراجعین (CRM)، محتوا، تنظیمات. فقط پرسنل احراز هویت‌شده. |
-| **API** | `/api/v1/**` | قرارداد کامل: [`docs/API.md`](docs/API.md) |
-| **سلامت** | `/api/health` | پاسخ سبک بدون دیاگنوستیک سنگین |
+| **پنل مدیریت**    | `/admin/**` (ورود از `/admin/login`)                                                       | نوبت‌ها، خدمات و تعرفه‌ها، تقویم، شیفت‌ها، مراجعین (CRM)، محتوا، تنظیمات. فقط پرسنل احراز هویت‌شده.       |
+| **API**           | `/api/v1/**`                                                                               | قرارداد کامل: [`docs/API.md`](docs/API.md)                                                                |
+| **سلامت**         | `/api/health`                                                                              | پاسخ سبک بدون دیاگنوستیک سنگین                                                                            |
 
 - **برند:** «کلینیک تهران لیزر» — پاسداران، خیابان پایدارفرد، نبش بوستان هفتم — دستگاه **Candela GentleMax Pro 2024** (الکساندرایت ۷۵۵nm / Nd:YAG 1064nm).
 - **منطقه زمانی عملیاتی:** `Asia/Tehran` (`BUSINESS_TIMEZONE` در `wrangler.jsonc`).
@@ -27,31 +27,31 @@
 
 ## ۲. پشته فناوری
 
-| لایه | فناوری |
-| :--- | :--- |
-| Runtime | Cloudflare Workers (`workerd`) — بدون سرور دائمی |
-| Database | Cloudflare D1 (SQLite) — پرسمان‌های آماده، بدون `SELECT *` |
-| Framework | Astro 7 SSR (`output: 'server'`) |
-| Islands | React 19 (جادوگر رزرو، داشبورد) |
-| Validation | Zod v4 در مرزهای ورودی |
-| امنیت | WebCrypto PBKDF2-SHA256، سشن‌های D1 با هش SHA-256 |
-| تقویم | `jalaali-js` (نمایش جلالی، ذخیره‌سازی ISO) |
-| تست | Vitest + `@cloudflare/vitest-pool-workers` |
+| لایه       | فناوری                                                     |
+| :--------- | :--------------------------------------------------------- |
+| Runtime    | Cloudflare Workers (`workerd`) — بدون سرور دائمی           |
+| Database   | Cloudflare D1 (SQLite) — پرسمان‌های آماده، بدون `SELECT *` |
+| Framework  | Astro 7 SSR (`output: 'server'`)                           |
+| Islands    | React 19 (جادوگر رزرو، داشبورد)                            |
+| Validation | Zod v4 در مرزهای ورودی                                     |
+| امنیت      | WebCrypto PBKDF2-SHA256، سشن‌های D1 با هش SHA-256          |
+| تقویم      | `jalaali-js` (نمایش جلالی، ذخیره‌سازی ISO)                 |
+| تست        | Vitest + `@cloudflare/vitest-pool-workers`                 |
 
 ---
 
 ## ۳. راهنمای مستندات (Docs)
 
-| سند | موضوع |
-| :--- | :--- |
-| [`docs/DESIGN-SYSTEM.md`](docs/DESIGN-SYSTEM.md) | سیستم طراحی، توکن‌ها و **قانون رنگ** (کنتراست AA) |
-| [`docs/PRICING.md`](docs/PRICING.md) | **مدل قیمت‌گذاری دو جنسیتی** (بانوان/آقایان) و ویرایش از داشبورد |
-| [`docs/DATETIME-JALALI.md`](docs/DATETIME-JALALI.md) | **قرارداد تاریخ جلالی (شمسی)** |
-| [`docs/PWA-MOBILE.md`](docs/PWA-MOBILE.md) | **PWA، نصب اپلیکیشن و تجربه موبایل** |
-| [`docs/OPERATIONS.md`](docs/OPERATIONS.md) | **استقرار، مسیر ورود ادمین و نکات امنیتی** |
-| [`docs/FEATURE-MODULES.md`](docs/FEATURE-MODULES.md) | **سیستم افزونه‌ها (Plugin Hub)**: هر سکشن/قابلیت یک ماژول روشن/خاموش با تنظیمات اختصاصی |
-| [`docs/API.md`](docs/API.md) | قرارداد کامل `/api/v1` |
-| [`ARCHITECTURE.md`](ARCHITECTURE.md) · [`DATABASE.md`](DATABASE.md) · [`SECURITY.md`](SECURITY.md) · [`DEPLOYMENT.md`](DEPLOYMENT.md) | معماری، پایگاه‌داده، امنیت، استقرار |
+| سند                                                                                                                                   | موضوع                                                                                   |
+| :------------------------------------------------------------------------------------------------------------------------------------ | :-------------------------------------------------------------------------------------- |
+| [`docs/DESIGN-SYSTEM.md`](docs/DESIGN-SYSTEM.md)                                                                                      | سیستم طراحی، توکن‌ها و **قانون رنگ** (کنتراست AA)                                       |
+| [`docs/PRICING.md`](docs/PRICING.md)                                                                                                  | **مدل قیمت‌گذاری دو جنسیتی** (بانوان/آقایان) و ویرایش از داشبورد                        |
+| [`docs/DATETIME-JALALI.md`](docs/DATETIME-JALALI.md)                                                                                  | **قرارداد تاریخ جلالی (شمسی)**                                                          |
+| [`docs/PWA-MOBILE.md`](docs/PWA-MOBILE.md)                                                                                            | **PWA، نصب اپلیکیشن و تجربه موبایل**                                                    |
+| [`docs/OPERATIONS.md`](docs/OPERATIONS.md)                                                                                            | **استقرار، مسیر ورود ادمین و نکات امنیتی**                                              |
+| [`docs/FEATURE-MODULES.md`](docs/FEATURE-MODULES.md)                                                                                  | **سیستم افزونه‌ها (Plugin Hub)**: هر سکشن/قابلیت یک ماژول روشن/خاموش با تنظیمات اختصاصی |
+| [`docs/API.md`](docs/API.md)                                                                                                          | قرارداد کامل `/api/v1`                                                                  |
+| [`ARCHITECTURE.md`](ARCHITECTURE.md) · [`DATABASE.md`](DATABASE.md) · [`SECURITY.md`](SECURITY.md) · [`DEPLOYMENT.md`](DEPLOYMENT.md) | معماری، پایگاه‌داده، امنیت، استقرار                                                     |
 
 ---
 

@@ -19,7 +19,10 @@ export interface RateLimitResult {
   retryAfterSeconds: number;
 }
 
-export function parseRateLimitPolicy(raw: string | undefined, fallback: RateLimitPolicy): RateLimitPolicy {
+export function parseRateLimitPolicy(
+  raw: string | undefined,
+  fallback: RateLimitPolicy,
+): RateLimitPolicy {
   if (!raw) return fallback;
   const match = /^(\d{1,6})\/(\d{1,6})$/.exec(raw.trim());
   if (!match) return fallback;

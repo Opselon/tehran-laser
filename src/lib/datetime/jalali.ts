@@ -107,5 +107,7 @@ export function formatMoney(amount: number, currencyLabel: string): string {
 /** ISO instant → clinic-local 'HH:MM' (Persian digits). */
 export function formatInstantTimeFa(instantIso: string, timeZone: string): string {
   const wall = wallClockOf(instantIso, timeZone);
-  return toPersianDigits(`${String(wall.hour).padStart(2, '0')}:${String(wall.minute).padStart(2, '0')}`);
+  return toPersianDigits(
+    `${String(wall.hour).padStart(2, '0')}:${String(wall.minute).padStart(2, '0')}`,
+  );
 }

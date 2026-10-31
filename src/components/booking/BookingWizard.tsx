@@ -108,7 +108,9 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
     setSelectedSlot('');
 
     const slugsParam = encodeURIComponent(selectedServiceSlugs.join(','));
-    fetch(`/api/v1/availability?services=${slugsParam}&category=${pricingCategory}&date=${selectedDate}`)
+    fetch(
+      `/api/v1/availability?services=${slugsParam}&category=${pricingCategory}&date=${selectedDate}`,
+    )
       .then((res) => (res.ok ? res.json() : Promise.reject(new Error('availability'))))
       .then((raw: unknown) => {
         if (cancelled) return;
@@ -199,7 +201,8 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
 
   const validateStep = (current: number): string | null => {
     if (current === 1) {
-      if (selectedServiceSlugs.length === 0) return 'لطفاً حداقل یک ناحیه یا خدمت را انتخاب فرمایید.';
+      if (selectedServiceSlugs.length === 0)
+        return 'لطفاً حداقل یک ناحیه یا خدمت را انتخاب فرمایید.';
       if (pricingCategory === 'male' && quote.missingPrice) {
         return 'تعرفه خدمات آقایان نیازمند مشاوره تلفنی است. لطفاً با کلینیک تماس حاصل فرمایید.';
       }
@@ -286,7 +289,10 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
         }),
       });
 
-      const body = (await res.json()) as { data?: BookingSuccessResult; error?: { message?: string } };
+      const body = (await res.json()) as {
+        data?: BookingSuccessResult;
+        error?: { message?: string };
+      };
       if (res.status === 201 && body.data) {
         setSuccessResult(body.data);
         idempotencyKey.current = makeIdempotencyKey();
@@ -299,7 +305,9 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
         setStep(2);
         focusStep();
       } else if (res.status === 429) {
-        setErrorMessage('تعداد درخواست‌ها بیش از حد مجاز است. لطفاً چند لحظه بعد دوباره تلاش فرمایید.');
+        setErrorMessage(
+          'تعداد درخواست‌ها بیش از حد مجاز است. لطفاً چند لحظه بعد دوباره تلاش فرمایید.',
+        );
       } else {
         setErrorMessage(body.error?.message || 'خطا در ثبت نوبت. لطفاً دوباره تلاش فرمایید.');
       }
@@ -348,7 +356,11 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
               aria-current={step === s.num ? 'step' : undefined}
             >
               <div className="step-circle">
-                {step > s.num ? <IconReact name="check" size={16} strokeWidth={2.6} /> : toPersianDigits(s.num)}
+                {step > s.num ? (
+                  <IconReact name="check" size={16} strokeWidth={2.6} />
+                ) : (
+                  toPersianDigits(s.num)
+                )}
               </div>
               <span className="step-title">{s.title}</span>
             </li>
@@ -385,7 +397,14 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
                 </p>
               </div>
               <div className="quick-action-pills">
-                <button type="button" className="pill-quick-btn" onClick={() => { setSelectedServiceSlugs(['underarm', 'bikini', 'full-legs']); setErrorMessage(null); }}>
+                <button
+                  type="button"
+                  className="pill-quick-btn"
+                  onClick={() => {
+                    setSelectedServiceSlugs(['underarm', 'bikini', 'full-legs']);
+                    setErrorMessage(null);
+                  }}
+                >
                   <IconReact name="sparkles" size={14} />
                   پکیج محبوب (زیر بغل + بیکینی + پا)
                 </button>
@@ -393,7 +412,10 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
                   <button
                     type="button"
                     className="pill-quick-btn text-muted"
-                    onClick={() => { setSelectedServiceSlugs([]); setErrorMessage(null); }}
+                    onClick={() => {
+                      setSelectedServiceSlugs([]);
+                      setErrorMessage(null);
+                    }}
                   >
                     <IconReact name="close" size={14} />
                     پاک کردن ({selectedServiceSlugs.length.toLocaleString('fa-IR')})
@@ -407,16 +429,21 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
               role="radiogroup"
               aria-label="بخش پذیرش"
             >
-              {([
-                { key: 'female', title: 'بخش بانوان' },
-                { key: 'male', title: 'بخش آقایان' },
-              ] as const).map((g) => {
+              {(
+                [
+                  { key: 'female', title: 'بخش بانوان' },
+                  { key: 'male', title: 'بخش آقایان' },
+                ] as const
+              ).map((g) => {
                 const isSel = pricingCategory === g.key;
                 return (
                   <div
                     key={g.key}
                     className={`gender-card ${isSel ? 'selected' : ''}`}
-                    onClick={() => { setPricingCategory(g.key); setErrorMessage(null); }}
+                    onClick={() => {
+                      setPricingCategory(g.key);
+                      setErrorMessage(null);
+                    }}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
@@ -551,7 +578,9 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
               <div className="multi-service-summary-bar animate-fade-in mt-4">
                 <div className="summary-bar-header">
                   <div className="summary-bar-count">
-                    <span className="badge-count">{selectedServices.length.toLocaleString('fa-IR')}</span>
+                    <span className="badge-count">
+                      {selectedServices.length.toLocaleString('fa-IR')}
+                    </span>
                     <strong>نواحی انتخاب‌شده برای این جلسه ({categoryLabel}):</strong>
                   </div>
                   <div className="selected-chips-list">
@@ -578,11 +607,13 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
                   <div className="summary-stats">
                     <span className="stat-pill">
                       <IconReact name="clock" size={15} />
-                      مدت زمان کل: <strong>{totalDurationMinutes.toLocaleString('fa-IR')} دقیقه</strong>
+                      مدت زمان کل:{' '}
+                      <strong>{totalDurationMinutes.toLocaleString('fa-IR')} دقیقه</strong>
                     </span>
                     <span className="stat-pill">
                       <IconReact name="wallet" size={15} />
-                      برآورد تعرفه: <strong className="highlight-gold">{moneyFa(quote.final)}</strong>
+                      برآورد تعرفه:{' '}
+                      <strong className="highlight-gold">{moneyFa(quote.final)}</strong>
                     </span>
                   </div>
                 </div>
@@ -602,8 +633,9 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
 
             <div className="duration-info-notice mb-3">
               <IconReact name="info" size={16} />
-              جهت انجام <strong>{selectedServices.length.toLocaleString('fa-IR')} ناحیه انتخابی</strong>{' '}
-              ({selectedServices.map((s) => s.name).join('، ')})، نوبت متوالی به مدت{' '}
+              جهت انجام{' '}
+              <strong>{selectedServices.length.toLocaleString('fa-IR')} ناحیه انتخابی</strong> (
+              {selectedServices.map((s) => s.name).join('، ')})، نوبت متوالی به مدت{' '}
               <strong>{totalDurationMinutes.toLocaleString('fa-IR')} دقیقه</strong> تنظیم می‌شود.
             </div>
 
@@ -625,7 +657,9 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
                 </h4>
 
                 {!selectedDate ? (
-                  <p className="slots-hint">برای دیدن ساعت‌های خالی، ابتدا یک روز را از تقویم انتخاب کنید.</p>
+                  <p className="slots-hint">
+                    برای دیدن ساعت‌های خالی، ابتدا یک روز را از تقویم انتخاب کنید.
+                  </p>
                 ) : loadingSlots ? (
                   <div className="loading-state">
                     <div className="spinner" />
@@ -634,7 +668,10 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
                 ) : availableSlots.filter((s) => s.available).length === 0 ? (
                   <div className="empty-state">
                     <IconReact name="calendar" size={28} />
-                    <p>برای {totalDurationMinutes.toLocaleString('fa-IR')} دقیقه در این روز ظرفیت پیوسته وجود ندارد. روز دیگری را امتحان کنید.</p>
+                    <p>
+                      برای {totalDurationMinutes.toLocaleString('fa-IR')} دقیقه در این روز ظرفیت
+                      پیوسته وجود ندارد. روز دیگری را امتحان کنید.
+                    </p>
                   </div>
                 ) : (
                   <div className="slots-selection-grid">
@@ -848,7 +885,9 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
               </div>
               <div className="summary-row">
                 <span className="label">ساعت حضور</span>
-                <span className="value font-semibold">{selectedSlot ? timeFa(selectedSlot) : '-'}</span>
+                <span className="value font-semibold">
+                  {selectedSlot ? timeFa(selectedSlot) : '-'}
+                </span>
               </div>
               <div className="summary-row">
                 <span className="label">نام مراجع</span>
@@ -856,9 +895,7 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
               </div>
               <div className="summary-row">
                 <span className="label">شماره همراه</span>
-                <span className="value font-semibold">
-                  {toPersianPhone(customer.phone) || '-'}
-                </span>
+                <span className="value font-semibold">{toPersianPhone(customer.phone) || '-'}</span>
               </div>
 
               <hr className="summary-divider" />
@@ -894,8 +931,10 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
                 <strong>اطلاع‌رسانی پیامکی</strong>
                 <p>
                   پس از ثبت نوبت، پیامک تأیید حاوی کد رهگیری به شماره{' '}
-                  <strong className="text-gold" style={{ display: 'inline-block' }}>{toPersianPhone(customer.phone) || customer.phone}</strong> ارسال می‌شود.
-                  لطفاً آن را نزد خود نگه دارید.
+                  <strong className="text-gold" style={{ display: 'inline-block' }}>
+                    {toPersianPhone(customer.phone) || customer.phone}
+                  </strong>{' '}
+                  ارسال می‌شود. لطفاً آن را نزد خود نگه دارید.
                 </p>
               </div>
             </div>
@@ -905,7 +944,12 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
 
       <div className="wizard-footer">
         {step > 1 ? (
-          <button type="button" className="btn btn-outline" onClick={handleBack} disabled={submitting}>
+          <button
+            type="button"
+            className="btn btn-outline"
+            onClick={handleBack}
+            disabled={submitting}
+          >
             <IconReact name="arrowRight" size={16} />
             بازگشت
           </button>
@@ -973,7 +1017,9 @@ function BookingReceiptInline({
         </div>
         <div className="detail-row">
           <span className="detail-label">بخش پذیرش</span>
-          <span className="detail-value">{result.pricingCategory === 'female' ? 'بانوان' : 'آقایان'}</span>
+          <span className="detail-value">
+            {result.pricingCategory === 'female' ? 'بانوان' : 'آقایان'}
+          </span>
         </div>
         <div className="detail-row">
           <span className="detail-label">تاریخ مراجعه</span>
@@ -1005,7 +1051,10 @@ function BookingReceiptInline({
         <IconReact name="sms" size={20} />
         <div>
           <strong>پیامک تأیید در راه است</strong>
-          <p>جزئیات این نوبت به شماره {result.customerPhone} پیامک می‌شود. در صورت نیاز با کلینیک تماس بگیرید.</p>
+          <p>
+            جزئیات این نوبت به شماره {result.customerPhone} پیامک می‌شود. در صورت نیاز با کلینیک
+            تماس بگیرید.
+          </p>
         </div>
       </div>
 
@@ -1043,8 +1092,18 @@ function selectedDateLabel(isoDate: string): string {
     if (!y || !m || !d) return isoDate;
     const j = toJalaali(y, m, d);
     const months = [
-      'فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور',
-      'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'
+      'فروردین',
+      'اردیبهشت',
+      'خرداد',
+      'تیر',
+      'مرداد',
+      'شهریور',
+      'مهر',
+      'آبان',
+      'آذر',
+      'دی',
+      'بهمن',
+      'اسفند',
     ];
     const monthName = months[j.jm - 1] ?? '';
     const weekdays = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'];

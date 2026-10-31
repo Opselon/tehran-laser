@@ -8,29 +8,58 @@ let todayIncome = 0;
 let monthIncome = 0;
 let monthExpense = 0;
 let netProfit = 0;
-let transactions: any[] = [];
+
+/** Row shape of the transactions query below (table: migration 0007 + joined customer). */
+interface AccountingTransactionRow {
+  reference: string;
+  type: 'income' | 'expense' | 'refund';
+  method: 'pos' | 'card_to_card' | 'cash' | 'online';
+  category: string;
+  amount: number;
+  description: string | null;
+  tracking_number: string | null;
+  created_at: string;
+  customerName: string | null;
+  customerPhone: string | null;
+}
+
+let transactions: AccountingTransactionRow[] = [];
 
 try {
   const todayIso = new Date().toISOString().slice(0, 10);
   const monthIso = new Date().toISOString().slice(0, 7);
 
   const [tRow, mRow, eRow, txList] = await Promise.all([
-    env.DB.prepare(`SELECT COALESCE(SUM(amount), 0) AS total FROM accounting_transactions WHERE type = 'income' AND created_at LIKE ?`).bind(`${todayIso}%`).first<{ total: number }>(),
-    env.DB.prepare(`SELECT COALESCE(SUM(amount), 0) AS total FROM accounting_transactions WHERE type = 'income' AND created_at LIKE ?`).bind(`${monthIso}%`).first<{ total: number }>(),
-    env.DB.prepare(`SELECT COALESCE(SUM(amount), 0) AS total FROM accounting_transactions WHERE type = 'expense' AND created_at LIKE ?`).bind(`${monthIso}%`).first<{ total: number }>(),
-    env.DB.prepare(`
+    env.DB.prepare(
+      `SELECT COALESCE(SUM(amount), 0) AS total FROM accounting_transactions WHERE type = 'income' AND created_at LIKE ?`,
+    )
+      .bind(`${todayIso}%`)
+      .first<{ total: number }>(),
+    env.DB.prepare(
+      `SELECT COALESCE(SUM(amount), 0) AS total FROM accounting_transactions WHERE type = 'income' AND created_at LIKE ?`,
+    )
+      .bind(`${monthIso}%`)
+      .first<{ total: number }>(),
+    env.DB.prepare(
+      `SELECT COALESCE(SUM(amount), 0) AS total FROM accounting_transactions WHERE type = 'expense' AND created_at LIKE ?`,
+    )
+      .bind(`${monthIso}%`)
+      .first<{ total: number }>(),
+    env.DB.prepare(
+      `
       SELECT t.*, c.name AS customerName, c.phone AS customerPhone
         FROM accounting_transactions t
         LEFT JOIN customers c ON c.id = t.customer_id
        ORDER BY t.created_at DESC LIMIT 50
-    `).all(),
+    `,
+    ).all(),
   ]);
 
   todayIncome = tRow?.total ?? 0;
   monthIncome = mRow?.total ?? 0;
   monthExpense = eRow?.total ?? 0;
   netProfit = monthIncome - monthExpense;
-  transactions = txList.results as any[] || [];
+  transactions = (txList.results as unknown as AccountingTransactionRow[]) || [];
 } catch (e) {
   console.error('Failed to load accounting data:', e);
 }
@@ -45,7 +74,8 @@ try {
           <span>سامانه حسابداری، تراز مالی و چارت‌های تحلیلی</span>
         </h1>
         <p class="section-block-sub">
-          گزارش درآمدهای نوبت‌ها، تحلیل پوزهای بانکی، هزینه‌های اقلام مصرفی و سود خالص کلینیک (API First)
+          گزارش درآمدهای نوبت‌ها، تحلیل پوزهای بانکی، هزینه‌های اقلام مصرفی و سود خالص کلینیک (API
+          First)
         </p>
       </div>
       <div class="actions">
@@ -56,49 +86,72 @@ try {
     </div>
 
     <!-- KPI Grid -->
-    <div class="kpi-grid-3d" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); margin-bottom: 24px;">
+    <div
+      class="kpi-grid-3d"
+      style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); margin-bottom: 24px;"
+    >
       <div class="kpi-card-3d">
         <div class="kpi-header">
           <span class="kpi-title">درآمد امروز کلینیک</span>
-          <span class="kpi-icon" style="color: #34d399;"><Icon name="cash" size={20} /></span>
+          <span class="kpi-icon" style="color: #34d399;">
+            <Icon name="cash" size={20} />
+          </span>
         </div>
         <div class="kpi-value" style="color: #34d399;">
-          {(todayIncome).toLocaleString('fa-IR')} <span style="font-size: 0.9rem; color: #94a3b8;">هزار تومان</span>
+          {todayIncome.toLocaleString('fa-IR')}{' '}
+          <span style="font-size: 0.9rem; color: #94a3b8;">هزار تومان</span>
         </div>
-        <div class="kpi-footer" style="color: #34d399;">تسویه کامل پوزهای بانکی امروز</div>
+        <div class="kpi-footer" style="color: #34d399;">
+          تسویه کامل پوزهای بانکی امروز
+        </div>
       </div>
 
       <div class="kpi-card-3d">
         <div class="kpi-header">
           <span class="kpi-title">درآمد کل این ماه</span>
-          <span class="kpi-icon" style="color: #f5d77f;"><Icon name="chart" size={20} /></span>
+          <span class="kpi-icon" style="color: #f5d77f;">
+            <Icon name="chart" size={20} />
+          </span>
         </div>
         <div class="kpi-value" style="color: #f5d77f;">
-          {(monthIncome).toLocaleString('fa-IR')} <span style="font-size: 0.9rem; color: #94a3b8;">هزار تومان</span>
+          {monthIncome.toLocaleString('fa-IR')}{' '}
+          <span style="font-size: 0.9rem; color: #94a3b8;">هزار تومان</span>
         </div>
-        <div class="kpi-footer" style="color: #cbd5e1;">مجموع پذیرش‌های آنلاین و حضوری</div>
+        <div class="kpi-footer" style="color: #cbd5e1;">
+          مجموع پذیرش‌های آنلاین و حضوری
+        </div>
       </div>
 
       <div class="kpi-card-3d">
         <div class="kpi-header">
           <span class="kpi-title">هزینه‌ها و اقلام مصرفی</span>
-          <span class="kpi-icon" style="color: #f87171;"><Icon name="document" size={20} /></span>
+          <span class="kpi-icon" style="color: #f87171;">
+            <Icon name="document" size={20} />
+          </span>
         </div>
         <div class="kpi-value" style="color: #f87171;">
-          {(monthExpense).toLocaleString('fa-IR')} <span style="font-size: 0.9rem; color: #94a3b8;">هزار تومان</span>
+          {monthExpense.toLocaleString('fa-IR')}{' '}
+          <span style="font-size: 0.9rem; color: #94a3b8;">هزار تومان</span>
         </div>
-        <div class="kpi-footer" style="color: #f87171;">سرویس دستگاه، گاز کولینگ و ملزومات</div>
+        <div class="kpi-footer" style="color: #f87171;">
+          سرویس دستگاه، گاز کولینگ و ملزومات
+        </div>
       </div>
 
       <div class="kpi-card-3d">
         <div class="kpi-header">
           <span class="kpi-title">سود خالص عملیاتی</span>
-          <span class="kpi-icon" style="color: #38bdf8;"><Icon name="gem" size={20} /></span>
+          <span class="kpi-icon" style="color: #38bdf8;">
+            <Icon name="gem" size={20} />
+          </span>
         </div>
         <div class="kpi-value" style="color: #38bdf8;">
-          {(netProfit).toLocaleString('fa-IR')} <span style="font-size: 0.9rem; color: #94a3b8;">هزار تومان</span>
+          {netProfit.toLocaleString('fa-IR')}{' '}
+          <span style="font-size: 0.9rem; color: #94a3b8;">هزار تومان</span>
         </div>
-        <div class="kpi-footer" style="color: #38bdf8;">حاشیه سود خالص ۸۱.۵٪</div>
+        <div class="kpi-footer" style="color: #38bdf8;">
+          حاشیه سود خالص ۸۱.۵٪
+        </div>
       </div>
     </div>
 
@@ -106,16 +159,24 @@ try {
     <div class="g-21" style="display: grid; gap: 24px; margin-bottom: 24px">
       <!-- Weekly Revenue Bar Chart -->
       <div class="admin-section-block" style="padding: 24px;">
-        <h3 class="section-block-title" style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+        <h3
+          class="section-block-title"
+          style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;"
+        >
           <span style="display: flex; align-items: center; gap: 8px;">
             <Icon name="chart" size={18} />
             <span>نمودار روند درآمد ۷ روز اخیر (میلیون تومان)</span>
           </span>
-          <span style="font-size: 0.78rem; color: #34d399; background: rgba(16, 185, 129, 0.12); padding: 4px 10px; border-radius: 8px;">+۱۸٪ رشد نسبت به هفته گذشته</span>
+          <span style="font-size: 0.78rem; color: #34d399; background: rgba(16, 185, 129, 0.12); padding: 4px 10px; border-radius: 8px;">
+            +۱۸٪ رشد نسبت به هفته گذشته
+          </span>
         </h3>
 
         <!-- Responsive SVG Bar Chart -->
-        <div class="chart-bars" style="width: 100%; height: 220px; display: flex; align-items: flex-end; justify-content: space-between; gap: 14px; padding-top: 20px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+        <div
+          class="chart-bars"
+          style="width: 100%; height: 220px; display: flex; align-items: flex-end; justify-content: space-between; gap: 14px; padding-top: 20px; border-bottom: 1px solid rgba(255,255,255,0.1);"
+        >
           {[
             { day: 'شنبه', val: 14.8, height: 65 },
             { day: 'یکشنبه', val: 18.2, height: 78 },
@@ -140,7 +201,10 @@ try {
 
       <!-- Payment Method & Distribution Donut -->
       <div class="admin-section-block" style="padding: 24px;">
-        <h3 class="section-block-title" style="margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+        <h3
+          class="section-block-title"
+          style="margin-bottom: 20px; display: flex; align-items: center; gap: 8px;"
+        >
           <Icon name="card" size={18} />
           <span>تفکیک روش‌های پرداخت</span>
         </h3>
@@ -190,7 +254,10 @@ try {
 
     <!-- Transactions Table -->
     <div class="admin-section-block" style="padding: 24px;">
-      <h3 class="section-block-title" style="margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
+      <h3
+        class="section-block-title"
+        style="margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;"
+      >
         <span style="display: flex; align-items: center; gap: 8px;">
           <Icon name="document" size={18} />
           <span>ریز تراکنش‌ها و اسناد مالی کلینیک</span>
@@ -215,9 +282,15 @@ try {
           <tbody>
             {transactions.map((t) => (
               <tr>
-                <td style="font-family: monospace; font-weight: 700; color: #f5d77f;">{t.reference}</td>
+                <td style="font-family: monospace; font-weight: 700; color: #f5d77f;">
+                  {t.reference}
+                </td>
                 <td>
-                  <span class={t.type === 'income' ? 'badge-status-confirmed' : 'badge-status-cancelled'}>
+                  <span
+                    class={
+                      t.type === 'income' ? 'badge-status-confirmed' : 'badge-status-cancelled'
+                    }
+                  >
                     {t.type === 'income' ? 'درآمد' : 'هزینه'}
                   </span>
                 </td>
@@ -229,11 +302,30 @@ try {
                 </td>
                 <td>
                   <span style="font-size: 0.82rem; color: #cbd5e1;">
-                    <Icon name={t.method === 'pos' ? 'card' : t.method === 'card_to_card' ? 'mobile' : 'cash'} size={15} aria-hidden />{' '}{t.method === 'pos' ? 'کارت‌خوان' : t.method === 'card_to_card' ? 'کارت‌به‌کارت' : 'نقدی'}
+                    <Icon
+                      name={
+                        t.method === 'pos'
+                          ? 'card'
+                          : t.method === 'card_to_card'
+                            ? 'mobile'
+                            : 'cash'
+                      }
+                      size={15}
+                      aria-hidden
+                    />{' '}
+                    {t.method === 'pos'
+                      ? 'کارت‌خوان'
+                      : t.method === 'card_to_card'
+                        ? 'کارت‌به‌کارت'
+                        : 'نقدی'}
                   </span>
                 </td>
                 <td style="font-size: 0.82rem; color: #94a3b8;">
-                  {t.category === 'laser_service' ? 'خدمات لیزر' : t.category === 'device_maintenance' ? 'سرویس دستگاه' : 'سایر اقلام'}
+                  {t.category === 'laser_service'
+                    ? 'خدمات لیزر'
+                    : t.category === 'device_maintenance'
+                      ? 'سرویس دستگاه'
+                      : 'سایر اقلام'}
                 </td>
                 <td style="font-family: monospace; font-size: 0.82rem; color: #94a3b8;">
                   {t.tracking_number || '-'}
@@ -262,7 +354,9 @@ try {
           <Icon name="accounting" size={20} />
           <span>ثبت سند مالی (درآمد / هزینه)</span>
         </h3>
-        <button id="closeTxModalBtn" class="modal-close-btn">&times;</button>
+        <button id="closeTxModalBtn" class="modal-close-btn">
+          &times;
+        </button>
       </div>
 
       <form id="txForm" style="display: flex; flex-direction: column; gap: 16px;">
@@ -276,7 +370,13 @@ try {
           </div>
           <div>
             <label class="form-label-modal">مبلغ (هزار تومان):</label>
-            <input type="number" id="txAmount" class="form-control-modal" placeholder="مثال: ۱۲۰۰" required />
+            <input
+              type="number"
+              id="txAmount"
+              class="form-control-modal"
+              placeholder="مثال: ۱۲۰۰"
+              required
+            />
           </div>
         </div>
 
@@ -302,17 +402,32 @@ try {
 
         <div>
           <label class="form-label-modal">شرح سند:</label>
-          <input type="text" id="txDescription" class="form-control-modal" placeholder="توضیحات تراکنش..." />
+          <input
+            type="text"
+            id="txDescription"
+            class="form-control-modal"
+            placeholder="توضیحات تراکنش..."
+          />
         </div>
 
         <div>
           <label class="form-label-modal">شماره پیگیری / فیش بانکی:</label>
-          <input type="text" id="txTracking" dir="ltr" class="form-control-modal" placeholder="POS-998822" />
+          <input
+            type="text"
+            id="txTracking"
+            dir="ltr"
+            class="form-control-modal"
+            placeholder="POS-998822"
+          />
         </div>
 
         <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
-          <button type="button" id="cancelTxBtn" class="btn-3d-secondary">انصراف</button>
-          <button type="submit" id="saveTxSubmitBtn" class="btn-3d-accept">ثبت دائم در حسابداری</button>
+          <button type="button" id="cancelTxBtn" class="btn-3d-secondary">
+            انصراف
+          </button>
+          <button type="submit" id="saveTxSubmitBtn" class="btn-3d-accept">
+            ثبت دائم در حسابداری
+          </button>
         </div>
       </form>
     </div>

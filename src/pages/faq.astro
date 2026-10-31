@@ -199,7 +199,7 @@ if (dbFaqs && dbFaqs.length > 0) {
   dbFaqs.forEach((item) => {
     // Avoid duplicates if matching question already exists
     const exists = combinedFaqs.some(
-      (f) => f.question.trim().toLowerCase() === item.question.trim().toLowerCase()
+      (f) => f.question.trim().toLowerCase() === item.question.trim().toLowerCase(),
     );
     if (!exists) {
       combinedFaqs.push({
@@ -244,7 +244,8 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
         </div>
         <h1 class="page-title">سوالات متداول مراجعین تهران لیزر</h1>
         <p class="page-subtitle">
-          پاسخ‌های شفاف، علمی و تخصصی به پرسش‌های شما پیرامون آمادگی پیش از لیزر، موارد منع مصرف، تعداد جلسات و مراقبت‌ها
+          پاسخ‌های شفاف، علمی و تخصصی به پرسش‌های شما پیرامون آمادگی پیش از لیزر، موارد منع مصرف،
+          تعداد جلسات و مراقبت‌ها
         </p>
 
         <!-- Search Bar with 3D Obsidian-Gold styling -->
@@ -368,7 +369,9 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
                 {faq.keyTakeaway && (
                   <div class="takeaway-box">
                     <Icon name="check" size={16} class="takeaway-icon" />
-                    <span><strong>نکته کلیدی:</strong> {faq.keyTakeaway}</span>
+                    <span>
+                      <strong>نکته کلیدی:</strong> {faq.keyTakeaway}
+                    </span>
                   </div>
                 )}
               </div>
@@ -383,7 +386,8 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
           </div>
           <h2 class="empty-title">سوالی با این عبارت یافت نشد!</h2>
           <p class="empty-desc">
-            می‌توانید عبارت دیگری را جستجو کنید یا سوال خود را مستقیماً از کارشناسان پذیرش ما بپرسید.
+            می‌توانید عبارت دیگری را جستجو کنید یا سوال خود را مستقیماً از کارشناسان پذیرش ما
+            بپرسید.
           </p>
           <div class="empty-actions">
             <button type="button" id="emptyResetBtn" class="btn-faq-outline">
@@ -392,7 +396,9 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
             </button>
             <a href="tel:+989035555090" class="btn-faq-gold" aria-label="تماس با کلینیک">
               <Icon name="phone" size={16} />
-              <span><bdi dir="ltr">۰۹۰۳ ۵۵۵ ۵۰۹۰</bdi></span>
+              <span>
+                <bdi dir="ltr">۰۹۰۳ ۵۵۵ ۵۰۹۰</bdi>
+              </span>
             </a>
           </div>
         </div>
@@ -407,7 +413,8 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
               </div>
               <h2 class="cta-heading">پاسخ سوال خود را پیدا نکردید؟</h2>
               <p class="cta-sub">
-                تیم مشاورین پوست و پذیرش کلینیک تهران لیزر در ساعات کاری آماده پاسخگویی دقیق به تمامی سوالات شما هستند.
+                تیم مشاورین پوست و پذیرش کلینیک تهران لیزر در ساعات کاری آماده پاسخگویی دقیق به
+                تمامی سوالات شما هستند.
               </p>
             </div>
             <div class="cta-buttons-stack">
@@ -422,7 +429,9 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
               </a>
               <a href="tel:+989035555090" class="btn-faq-gold">
                 <Icon name="phone" size={16} />
-                <span>تماس مستقیم: <bdi dir="ltr">۰۹۰۳ ۵۵۵ ۵۰۹۰</bdi></span>
+                <span>
+                  تماس مستقیم: <bdi dir="ltr">۰۹۰۳ ۵۵۵ ۵۰۹۰</bdi>
+                </span>
               </a>
               <a href="/booking" class="btn-faq-outline">
                 <Icon name="calendar" size={16} />
@@ -437,31 +446,35 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
 
   <!-- Interactive Client-side Script: Real-time Search & Category Filtering -->
   <script is:inline>
-    (function() {
-      var FA_DIGITS = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
-      function toFa(n) { return String(n).replace(/\d/g, function (d) { return FA_DIGITS[+d]; }); }
+    (function () {
+      const FA_DIGITS = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+      function toFa(n) {
+        return String(n).replace(/\d/g, function (d) {
+          return FA_DIGITS[+d];
+        });
+      }
 
-      var searchInput = document.getElementById('faqSearchInput');
-      var searchClear = document.getElementById('faqSearchClear');
-      var counterText = document.getElementById('faqCounterText');
-      var emptyState = document.getElementById('faqEmptyState');
-      var emptyResetBtn = document.getElementById('emptyResetBtn');
-      var cards = Array.from(document.querySelectorAll('.faq-obsidian-card'));
-      var catPills = Array.from(document.querySelectorAll('.cat-pill'));
+      const searchInput = document.getElementById('faqSearchInput');
+      const searchClear = document.getElementById('faqSearchClear');
+      const counterText = document.getElementById('faqCounterText');
+      const emptyState = document.getElementById('faqEmptyState');
+      const emptyResetBtn = document.getElementById('emptyResetBtn');
+      const cards = Array.from(document.querySelectorAll('.faq-obsidian-card'));
+      const catPills = Array.from(document.querySelectorAll('.cat-pill'));
 
-      var activeCategory = 'all';
-      var searchQuery = '';
+      let activeCategory = 'all';
+      let searchQuery = '';
 
       function filterFaqs() {
-        var visibleCount = 0;
-        var query = searchQuery.trim().toLowerCase();
+        let visibleCount = 0;
+        const query = searchQuery.trim().toLowerCase();
 
-        cards.forEach(function(card) {
-          var cardCategory = card.getAttribute('data-category');
-          var cardSearchText = card.getAttribute('data-search') || '';
+        cards.forEach(function (card) {
+          const cardCategory = card.getAttribute('data-category');
+          const cardSearchText = card.getAttribute('data-search') || '';
 
-          var matchesCat = (activeCategory === 'all') || (cardCategory === activeCategory);
-          var matchesSearch = !query || cardSearchText.indexOf(query) !== -1;
+          const matchesCat = activeCategory === 'all' || cardCategory === activeCategory;
+          const matchesSearch = !query || cardSearchText.indexOf(query) !== -1;
 
           if (matchesCat && matchesSearch) {
             card.style.display = '';
@@ -473,7 +486,8 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
 
         // Update counter (Persian digits per contract rule 8)
         if (counterText) {
-          counterText.textContent = 'نمایش ' + toFa(visibleCount) + ' سوال از کل ' + toFa(cards.length) + ' سوال';
+          counterText.textContent =
+            'نمایش ' + toFa(visibleCount) + ' سوال از کل ' + toFa(cards.length) + ' سوال';
         }
 
         // Show/hide empty state
@@ -484,7 +498,7 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
 
       // Search input handler
       if (searchInput) {
-        searchInput.addEventListener('input', function(e) {
+        searchInput.addEventListener('input', function (e) {
           searchQuery = e.target.value;
           if (searchClear) {
             searchClear.style.display = searchQuery ? 'flex' : 'none';
@@ -495,7 +509,7 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
 
       // Search clear button
       if (searchClear) {
-        searchClear.addEventListener('click', function() {
+        searchClear.addEventListener('click', function () {
           if (searchInput) {
             searchInput.value = '';
             searchQuery = '';
@@ -507,9 +521,9 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
       }
 
       // Category pills handler
-      catPills.forEach(function(pill) {
-        pill.addEventListener('click', function() {
-          catPills.forEach(function(p) {
+      catPills.forEach(function (pill) {
+        pill.addEventListener('click', function () {
+          catPills.forEach(function (p) {
             p.classList.remove('active');
             p.setAttribute('aria-selected', 'false');
           });
@@ -522,14 +536,14 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
 
       // Reset button in empty state
       if (emptyResetBtn) {
-        emptyResetBtn.addEventListener('click', function() {
+        emptyResetBtn.addEventListener('click', function () {
           if (searchInput) {
             searchInput.value = '';
             searchQuery = '';
             if (searchClear) searchClear.style.display = 'none';
           }
           activeCategory = 'all';
-          catPills.forEach(function(p) {
+          catPills.forEach(function (p) {
             if (p.getAttribute('data-category') === 'all') {
               p.classList.add('active');
               p.setAttribute('aria-selected', 'true');
@@ -544,4 +558,3 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
     })();
   </script>
 </PublicLayout>
-

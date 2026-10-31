@@ -15,7 +15,14 @@ interface CoveragePanelProps {
  * roster grid cannot: "at 14:00 on Tuesday, how many operators are actually
  * here?" — merged windows, a 24-slot heat strip and the names behind each block.
  */
-export function CoveragePanel({ catalog, coverage, loading, weekday, todayWeekday, onChangeWeekday }: CoveragePanelProps) {
+export function CoveragePanel({
+  catalog,
+  coverage,
+  loading,
+  weekday,
+  todayWeekday,
+  onChangeWeekday,
+}: CoveragePanelProps) {
   const segments = coverage?.segments ?? [];
   const hourly = coverage?.hourly ?? new Array<number>(24).fill(0);
   const maxCount = Math.max(1, ...segments.map((segment) => segment.count));
@@ -32,7 +39,8 @@ export function CoveragePanel({ catalog, coverage, loading, weekday, todayWeekda
           {loading ? 'در حال محاسبه…' : `${segments.length} بازهٔ پوشش`}
         </span>
         <p>
-          برای هر روز هفته، بازه‌هایی که حداقل یک اپراتور فعال حاضر است. عدد کنار هر نوار، تعداد اپراتور هم‌زمان در آن بازه است.
+          برای هر روز هفته، بازه‌هایی که حداقل یک اپراتور فعال حاضر است. عدد کنار هر نوار، تعداد
+          اپراتور هم‌زمان در آن بازه است.
         </p>
       </div>
 
@@ -55,7 +63,9 @@ export function CoveragePanel({ catalog, coverage, loading, weekday, todayWeekda
       <div className="ops-coverage__bars">
         {segments.length === 0 ? (
           <p className="ops-hint">
-            {loading ? 'در حال بارگذاری…' : `برای ${dayLabel} هیچ شیفت فعالی ثبت نشده است. روزهای کاری و ساعت شیفت اپراتورها را بررسی کنید.`}
+            {loading
+              ? 'در حال بارگذاری…'
+              : `برای ${dayLabel} هیچ شیفت فعالی ثبت نشده است. روزهای کاری و ساعت شیفت اپراتورها را بررسی کنید.`}
           </p>
         ) : (
           segments.map((segment) => (
@@ -101,8 +111,13 @@ export function CoveragePanel({ catalog, coverage, loading, weekday, todayWeekda
 
       {coverage && coverage.roster.length > 0 && (
         <p className="ops-hint">
-          حاضر در {dayLabel}: {coverage.roster.map((entry) => `${entry.displayName} (${entry.shiftStart}–${entry.shiftEnd})`).join('، ')}
-          {peak === 0 ? ' — هیچ ساعتی پوشش ندارد.' : ` — اوج پوشش ${toPersian(peak)} اپراتور هم‌زمان.`}
+          حاضر در {dayLabel}:{' '}
+          {coverage.roster
+            .map((entry) => `${entry.displayName} (${entry.shiftStart}–${entry.shiftEnd})`)
+            .join('، ')}
+          {peak === 0
+            ? ' — هیچ ساعتی پوشش ندارد.'
+            : ` — اوج پوشش ${toPersian(peak)} اپراتور هم‌زمان.`}
         </p>
       )}
     </section>

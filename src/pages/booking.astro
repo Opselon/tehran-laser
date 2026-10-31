@@ -74,12 +74,7 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
 
   <section class="section booking-page-section">
     <div class="container container-sm">
-      <BookingWizard
-        client:load
-        initialServices={services}
-        preselectedSlug={serviceParam}
-      />
+      <BookingWizard client:load initialServices={services} preselectedSlug={serviceParam} />
     </div>
   </section>
 </PublicLayout>
-

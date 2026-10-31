@@ -178,7 +178,17 @@ describe('image delivery: lazy below the fold, intrinsic size everywhere', () =>
   it('ships every gallery rung the srcset advertises', () => {
     const names = [...gallery.matchAll(/src:\s*'([^']+)'/g)].map((m) => m[1]);
     expect(names.length).toBeGreaterThanOrEqual(3);
-    const suffixes = ['-560.avif', '-560.webp', '-560.jpg', '-800.avif', '-800.webp', '-800.jpg', '.avif', '.webp', '.jpg'];
+    const suffixes = [
+      '-560.avif',
+      '-560.webp',
+      '-560.jpg',
+      '-800.avif',
+      '-800.webp',
+      '-800.jpg',
+      '.avif',
+      '.webp',
+      '.jpg',
+    ];
     const missing = names.flatMap((name) =>
       suffixes
         .map((suffix) => `public/images/${name}${suffix}`)

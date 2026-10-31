@@ -15,7 +15,12 @@ import { getSettingValue } from './repositories';
 export type NotificationChannel = 'telegram' | 'whatsapp';
 
 export interface NotificationPayload {
-  eventType: 'booking.created' | 'booking.confirmed' | 'booking.rejected' | 'booking.cancelled' | 'booking.rescheduled';
+  eventType:
+    | 'booking.created'
+    | 'booking.confirmed'
+    | 'booking.rejected'
+    | 'booking.cancelled'
+    | 'booking.rescheduled';
   bookingId: string;
   reference: string;
   customerName: string;
@@ -96,10 +101,7 @@ function formatTelegramMessage(p: NotificationPayload): string {
 }
 
 function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 /* ── WhatsApp Provider Abstraction (§51) ───────────────────────── */

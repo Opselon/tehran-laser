@@ -21,7 +21,9 @@ interface Festival {
 let festivals: Festival[] = [];
 
 try {
-  const result = await env.DB.prepare(`SELECT * FROM discount_festivals ORDER BY starts_at DESC`).all();
+  const result = await env.DB.prepare(
+    `SELECT * FROM discount_festivals ORDER BY starts_at DESC`,
+  ).all();
   festivals = (result.results as unknown as Festival[]) || [];
 } catch (e) {
   console.error('Failed to load festivals:', e);
@@ -31,7 +33,7 @@ const activeFestivals = festivals.filter((f) => Boolean(f.active));
 const activeCount = activeFestivals.length;
 const maxDiscount = activeFestivals.reduce(
   (max, f) => (f.discount_percent > max ? f.discount_percent : max),
-  0
+  0,
 );
 const totalCampaigns = festivals.length;
 
@@ -80,14 +82,18 @@ const seasonalTimeline = [
     <!-- Header -->
     <div class="dashboard-header-row">
       <div>
-        <h1 class="admin-page-title" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+        <h1
+          class="admin-page-title"
+          style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;"
+        >
           <span class="fest-title-emblem">
             <Icon name="festivals" size={24} />
           </span>
           <span>جشنواره‌های تخفیف و تایم‌لاین کمپین‌های فروش</span>
         </h1>
         <p class="section-block-sub">
-          مدیریت تخفیف‌های مناسبتی، کمپین‌های تبلیغاتی و تایم‌لاین فصلی کلینیک تهران لیزر (API First)
+          مدیریت تخفیف‌های مناسبتی، کمپین‌های تبلیغاتی و تایم‌لاین فصلی کلینیک تهران لیزر (API
+          First)
         </p>
       </div>
       <div class="actions">
@@ -109,7 +115,10 @@ const seasonalTimeline = [
     </div>
 
     <!-- 3D KPI Metrics Cards -->
-    <div class="kpi-grid-3d" style="grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); margin-bottom: 28px;">
+    <div
+      class="kpi-grid-3d"
+      style="grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); margin-bottom: 28px;"
+    >
       <div class="kpi-card-3d">
         <div class="kpi-header">
           <span class="kpi-title">کمپین‌های فعال روی سایت</span>
@@ -118,9 +127,13 @@ const seasonalTimeline = [
           </span>
         </div>
         <div class="kpi-value" style="color: #34d399;">
-          {activeCount} <span style="font-size: 0.9rem; color: #94a3b8; font-weight: 500;">کمپین لایو</span>
+          {activeCount}{' '}
+          <span style="font-size: 0.9rem; color: #94a3b8; font-weight: 500;">کمپین لایو</span>
         </div>
-        <div class="kpi-footer" style="color: #34d399; display: flex; align-items: center; gap: 6px;">
+        <div
+          class="kpi-footer"
+          style="color: #34d399; display: flex; align-items: center; gap: 6px;"
+        >
           <span class="live-dot"></span>
           <span>اعمال خودکار روی نوبت‌های آنلاین</span>
         </div>
@@ -227,11 +240,16 @@ const seasonalTimeline = [
               </div>
 
               <p class="fest-card-desc">
-                {f.description || 'تخفیف ویژه تمامی خدمات لیزر تماسی به مدت محدود روی وب‌سایت تهران لیزر.'}
+                {f.description ||
+                  'تخفیف ویژه تمامی خدمات لیزر تماسی به مدت محدود روی وب‌سایت تهران لیزر.'}
               </p>
 
               <!-- Dynamic 3D Countdown Box -->
-              <div class="fest-countdown-container" data-ends-at={f.ends_at} data-active={isActive ? '1' : '0'}>
+              <div
+                class="fest-countdown-container"
+                data-ends-at={f.ends_at}
+                data-active={isActive ? '1' : '0'}
+              >
                 <div class="fest-countdown-header">
                   <span class="fest-countdown-title">
                     <Icon name="clock" size={13} />
@@ -281,7 +299,9 @@ const seasonalTimeline = [
             <div class="fest-empty-icon">
               <Icon name="festivals" size={40} />
             </div>
-            <h4 style="font-size: 1.1rem; color: #f8fafc; margin-bottom: 6px;">هنوز هیچ جشنواره‌ای تعریف نشده است</h4>
+            <h4 style="font-size: 1.1rem; color: #f8fafc; margin-bottom: 6px;">
+              هنوز هیچ جشنواره‌ای تعریف نشده است
+            </h4>
             <p style="font-size: 0.85rem; color: #94a3b8; margin: 0 0 16px;">
               برای شروع کمپین‌های تبلیغاتی و ارائه تخفیف‌های فصلی، از دکمه زیر استفاده نمایید.
             </p>
@@ -341,14 +361,21 @@ const seasonalTimeline = [
           <Icon name="festivals" size={22} />
           <span>تعریف جشنواره تخفیف جدید</span>
         </h3>
-        <button id="closeFestModalBtn" class="modal-close-btn" type="button" aria-label="بستن پنجره">
+        <button
+          id="closeFestModalBtn"
+          class="modal-close-btn"
+          type="button"
+          aria-label="بستن پنجره"
+        >
           <Icon name="close" size={18} />
         </button>
       </div>
 
       <form id="festForm" style="display: flex; flex-direction: column; gap: 16px;">
         <div>
-          <label for="festTitle" class="form-label-modal">عنوان جشنواره:</label>
+          <label for="festTitle" class="form-label-modal">
+            عنوان جشنواره:
+          </label>
           <input
             type="text"
             id="festTitle"
@@ -360,7 +387,9 @@ const seasonalTimeline = [
 
         <div class="g-2" style="display: grid; gap: 14px;">
           <div>
-            <label for="festPercent" class="form-label-modal">درصد تخفیف (%):</label>
+            <label for="festPercent" class="form-label-modal">
+              درصد تخفیف (%):
+            </label>
             <input
               type="number"
               id="festPercent"
@@ -372,7 +401,9 @@ const seasonalTimeline = [
             />
           </div>
           <div>
-            <label for="festSlug" class="form-label-modal">نامک انگلیسی (Slug):</label>
+            <label for="festSlug" class="form-label-modal">
+              نامک انگلیسی (Slug):
+            </label>
             <input
               type="text"
               id="festSlug"
@@ -385,7 +416,9 @@ const seasonalTimeline = [
         </div>
 
         <div>
-          <label for="festDesc" class="form-label-modal">توضیحات و متن کمپین:</label>
+          <label for="festDesc" class="form-label-modal">
+            توضیحات و متن کمپین:
+          </label>
           <textarea
             id="festDesc"
             class="form-control-modal"
@@ -396,11 +429,15 @@ const seasonalTimeline = [
 
         <div class="g-2" style="display: grid; gap: 14px;">
           <div>
-            <label for="festStarts" class="form-label-modal">تاریخ شروع (شمسی):</label>
+            <label for="festStarts" class="form-label-modal">
+              تاریخ شروع (شمسی):
+            </label>
             <JalaliPicker id="festStarts" defaultOffsetDays={0} label="تاریخ شروع جشنواره (شمسی)" />
           </div>
           <div>
-            <label for="festEnds" class="form-label-modal">تاریخ پایان (شمسی):</label>
+            <label for="festEnds" class="form-label-modal">
+              تاریخ پایان (شمسی):
+            </label>
             <JalaliPicker id="festEnds" defaultOffsetDays={14} label="تاریخ پایان جشنواره (شمسی)" />
           </div>
         </div>
@@ -464,15 +501,22 @@ const seasonalTimeline = [
       border: 1px solid rgba(212, 175, 55, 0.22);
       border-radius: 20px;
       padding: 22px;
-      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.08);
+      box-shadow:
+        0 16px 36px rgba(0, 0, 0, 0.55),
+        inset 0 1px 1px rgba(255, 255, 255, 0.08);
       display: flex;
       flex-direction: column;
       gap: 14px;
-      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+      transition:
+        transform 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
     }
     .fest-card-3d.is-active {
       border-color: rgba(212, 175, 55, 0.5);
-      box-shadow: 0 18px 42px rgba(0, 0, 0, 0.65), 0 0 24px rgba(212, 175, 55, 0.16);
+      box-shadow:
+        0 18px 42px rgba(0, 0, 0, 0.65),
+        0 0 24px rgba(212, 175, 55, 0.16);
     }
     .fest-card-3d:hover {
       transform: translateY(-4px);
@@ -693,8 +737,12 @@ const seasonalTimeline = [
       border-radius: 16px;
       padding: 20px 16px;
       text-align: center;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.06);
-      transition: transform 0.2s ease, border-color 0.2s ease;
+      box-shadow:
+        0 8px 24px rgba(0, 0, 0, 0.5),
+        inset 0 1px 1px rgba(255, 255, 255, 0.06);
+      transition:
+        transform 0.2s ease,
+        border-color 0.2s ease;
     }
     .timeline-season-card:hover {
       transform: translateY(-3px);

@@ -43,7 +43,6 @@ function cspSafeCover(url: string | null | undefined): string | undefined {
   return undefined;
 }
 
-
 // Related posts (same published set, exclude current)
 let related: Awaited<ReturnType<typeof listPublicBlogPosts>>['items'] = [];
 try {
@@ -55,7 +54,13 @@ try {
 
 const readingMinutes = Math.max(
   3,
-  Math.ceil(post.content.replace(/<[^>]*>/g, ' ').trim().split(/\s+/).filter(Boolean).length / 150),
+  Math.ceil(
+    post.content
+      .replace(/<[^>]*>/g, ' ')
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean).length / 150,
+  ),
 );
 const articleCover = cspSafeCover(post.coverImage);
 
@@ -307,7 +312,9 @@ const blogJsonLdArray = [articleJsonLd, breadcrumbJsonLd];
             <div class="author-info">
               <div class="author-label">نویسنده مقاله</div>
               <div class="author-name-big">{post.author || 'تیم علمی تهران لیزر'}</div>
-              <div class="author-bio">تیم تولید محتوای علمی و کلینیکال کلینیک تخصصی تهران لیزر پاسداران</div>
+              <div class="author-bio">
+                تیم تولید محتوای علمی و کلینیکال کلینیک تخصصی تهران لیزر پاسداران
+              </div>
             </div>
           </div>
 
@@ -324,12 +331,18 @@ const blogJsonLdArray = [articleJsonLd, breadcrumbJsonLd];
               <Icon name="arrowLeft" size={18} class="cta-arrow" />
             </a>
 
-            <a href="tel:+989035555090" class="article-cta-card cta-outline" aria-label="مشاوره تلفنی با ۰۹۰۳ ۵۵۵ ۵۰۹۰">
+            <a
+              href="tel:+989035555090"
+              class="article-cta-card cta-outline"
+              aria-label="مشاوره تلفنی با ۰۹۰۳ ۵۵۵ ۵۰۹۰"
+            >
               <div class="cta-icon-box">
                 <Icon name="phone" size={22} />
               </div>
               <div class="cta-card-text">
-                <div class="cta-card-title">مشاوره تلفنی رایگان (<bdi dir="ltr">۰۹۰۳ ۵۵۵ ۵۰۹۰</bdi>)</div>
+                <div class="cta-card-title">
+                  مشاوره تلفنی رایگان (<bdi dir="ltr">۰۹۰۳ ۵۵۵ ۵۰۹۰</bdi>)
+                </div>
                 <div class="cta-card-sub">پاسخگویی به سوالات شما توسط کارشناسان کلینیک</div>
               </div>
               <Icon name="arrowLeft" size={18} class="cta-arrow" />
@@ -375,7 +388,9 @@ const blogJsonLdArray = [articleJsonLd, breadcrumbJsonLd];
                 <div class="related-body">
                   <span class="related-date">
                     <Icon name="calendar" size={12} />
-                    <span>{rp.publishedAt ? formatJalaliDate(rp.publishedAt.slice(0, 10)) : ''}</span>
+                    <span>
+                      {rp.publishedAt ? formatJalaliDate(rp.publishedAt.slice(0, 10)) : ''}
+                    </span>
                   </span>
                   <h3 class="related-title">{rp.title}</h3>
                   <p class="related-excerpt">{rp.excerpt}</p>

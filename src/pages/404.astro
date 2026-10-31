@@ -15,11 +15,15 @@ import '../styles/404.css';
          around this slot, and a nested <main> is an invalid duplicate landmark. -->
     <div class="error-main-container">
       <div class="container container-sm text-center">
-
         <!-- 3D Obsidian-Gold Illustration Component -->
         <div class="illustration-wrapper" aria-hidden="true">
           <div class="glow-orb"></div>
-          <svg class="svg-3d-404" viewBox="0 0 480 260" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg
+            class="svg-3d-404"
+            viewBox="0 0 480 260"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
             <defs>
               <!-- Gold metallic gradients -->
               <linearGradient id="goldGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -46,40 +50,143 @@ import '../styles/404.css';
 
             <!-- Ground shadow & platform ring -->
             <ellipse cx="240" cy="225" rx="180" ry="24" fill="#000000" opacity="0.6" />
-            <ellipse cx="240" cy="220" rx="160" ry="18" stroke="url(#goldGrad1)" stroke-width="1.5" stroke-dasharray="6 8" opacity="0.4" />
-            <ellipse cx="240" cy="220" rx="120" ry="12" fill="url(#obsidianGrad)" stroke="rgba(16, 185, 129,0.3)" stroke-width="1" />
+            <ellipse
+              cx="240"
+              cy="220"
+              rx="160"
+              ry="18"
+              stroke="url(#goldGrad1)"
+              stroke-width="1.5"
+              stroke-dasharray="6 8"
+              opacity="0.4"
+            />
+            <ellipse
+              cx="240"
+              cy="220"
+              rx="120"
+              ry="12"
+              fill="url(#obsidianGrad)"
+              stroke="rgba(16, 185, 129,0.3)"
+              stroke-width="1"
+            />
 
             <!-- Isometric Obsidian Monolith / Broken Laser Focal Emitter -->
-            <polygon points="240,45 300,80 300,165 240,200 180,165 180,80" fill="url(#obsidianGrad)" stroke="url(#goldGrad1)" stroke-width="2" />
+            <polygon
+              points="240,45 300,80 300,165 240,200 180,165 180,80"
+              fill="url(#obsidianGrad)"
+              stroke="url(#goldGrad1)"
+              stroke-width="2"
+            />
             <!-- Crystal facets -->
             <polygon points="240,45 240,200 300,165 300,80" fill="#151820" opacity="0.7" />
             <polygon points="240,45 240,200 180,165 180,80" fill="#242b38" opacity="0.5" />
-            <line x1="240" y1="45" x2="240" y2="200" stroke="#34d399" stroke-width="1.5" opacity="0.7" />
+            <line
+              x1="240"
+              y1="45"
+              x2="240"
+              y2="200"
+              stroke="#34d399"
+              stroke-width="1.5"
+              opacity="0.7"
+            />
 
             <!-- Laser refraction rings -->
-            <ellipse cx="240" cy="120" rx="45" ry="14" stroke="#34d399" stroke-width="2" opacity="0.8" filter="url(#goldGlow)" />
-            <ellipse cx="240" cy="120" rx="70" ry="22" stroke="rgba(16, 185, 129,0.4)" stroke-width="1" stroke-dasharray="4 4" />
+            <ellipse
+              cx="240"
+              cy="120"
+              rx="45"
+              ry="14"
+              stroke="#34d399"
+              stroke-width="2"
+              opacity="0.8"
+              filter="url(#goldGlow)"
+            />
+            <ellipse
+              cx="240"
+              cy="120"
+              rx="70"
+              ry="22"
+              stroke="rgba(16, 185, 129,0.4)"
+              stroke-width="1"
+              stroke-dasharray="4 4"
+            />
 
             <!-- Laser beam horizontal slice -->
-            <path d="M 60 120 L 420 120" stroke="url(#laserBeamGrad)" stroke-width="3" filter="url(#goldGlow)" />
+            <path
+              d="M 60 120 L 420 120"
+              stroke="url(#laserBeamGrad)"
+              stroke-width="3"
+              filter="url(#goldGlow)"
+            />
 
             <!-- Stylized 3D Metallic "404" numbers hovering -->
             <!-- Number 4 (Left) -->
             <g transform="translate(65, 75)">
-              <text x="0" y="70" font-family="sans-serif" font-weight="900" font-size="74" fill="#000000" opacity="0.5" dx="4" dy="6">۴</text>
-              <text x="0" y="70" font-family="sans-serif" font-weight="900" font-size="74" fill="url(#goldGrad1)" filter="url(#goldGlow)">۴</text>
+              <text
+                x="0"
+                y="70"
+                font-family="sans-serif"
+                font-weight="900"
+                font-size="74"
+                fill="#000000"
+                opacity="0.5"
+                dx="4"
+                dy="6"
+              >
+                ۴
+              </text>
+              <text
+                x="0"
+                y="70"
+                font-family="sans-serif"
+                font-weight="900"
+                font-size="74"
+                fill="url(#goldGrad1)"
+                filter="url(#goldGlow)"
+              >
+                ۴
+              </text>
             </g>
 
             <!-- Center Target Null Indicator (0) -->
             <g transform="translate(240, 120)">
-              <circle cx="0" cy="0" r="18" fill="none" stroke="url(#goldGrad1)" stroke-width="2.5" />
+              <circle
+                cx="0"
+                cy="0"
+                r="18"
+                fill="none"
+                stroke="url(#goldGrad1)"
+                stroke-width="2.5"
+              />
               <line x1="-12" y1="-12" x2="12" y2="12" stroke="#34d399" stroke-width="2" />
             </g>
 
             <!-- Number 4 (Right) -->
             <g transform="translate(355, 75)">
-              <text x="0" y="70" font-family="sans-serif" font-weight="900" font-size="74" fill="#000000" opacity="0.5" dx="4" dy="6">۴</text>
-              <text x="0" y="70" font-family="sans-serif" font-weight="900" font-size="74" fill="url(#goldGrad1)" filter="url(#goldGlow)">۴</text>
+              <text
+                x="0"
+                y="70"
+                font-family="sans-serif"
+                font-weight="900"
+                font-size="74"
+                fill="#000000"
+                opacity="0.5"
+                dx="4"
+                dy="6"
+              >
+                ۴
+              </text>
+              <text
+                x="0"
+                y="70"
+                font-family="sans-serif"
+                font-weight="900"
+                font-size="74"
+                fill="url(#goldGrad1)"
+                filter="url(#goldGlow)"
+              >
+                ۴
+              </text>
             </g>
 
             <!-- Sparkle nodes -->
@@ -96,7 +203,7 @@ import '../styles/404.css';
         </div>
 
         <h1 class="error-title">صفحه مورد نظر در مدار کلینیک قرار ندارد</h1>
-        
+
         <p class="error-subtitle">
           آدرس اینترنتی که وارد نموده‌اید تغییر یافته، حذف شده یا در نشانی آن خطای تایپی وجود دارد.
         </p>
@@ -110,7 +217,8 @@ import '../styles/404.css';
             <div class="diagnostic-title">راهنمای بازگردانی و هدایت بالینی</div>
           </div>
           <p class="diagnostic-text">
-            نگران نباشید! هیچ اختلالی در روند رزرو وقت و تعرفه خدمات به وجود نیامده است. جهت دسترسی سریع به بخش مورد نظر خود از میانبرهای زیر استفاده فرمایید:
+            نگران نباشید! هیچ اختلالی در روند رزرو وقت و تعرفه خدمات به وجود نیامده است. جهت دسترسی
+            سریع به بخش مورد نظر خود از میانبرهای زیر استفاده فرمایید:
           </p>
 
           <!-- Quick Navigation Hub -->
@@ -167,14 +275,18 @@ import '../styles/404.css';
             <Icon name="calendar" size={18} />
             <span>رزرو آنلاین نوبت لیزر</span>
           </a>
-          <a href="tel:+989035555090" class="btn-phone-quick" aria-label="تماس با پذیرش کلینیک ۰۹۰۳ ۵۵۵ ۵۰۹۰">
+          <a
+            href="tel:+989035555090"
+            class="btn-phone-quick"
+            aria-label="تماس با پذیرش کلینیک ۰۹۰۳ ۵۵۵ ۵۰۹۰"
+          >
             <Icon name="phone" size={16} />
-            <span><bdi dir="ltr">۰۹۰۳ ۵۵۵ ۵۰۹۰</bdi></span>
+            <span>
+              <bdi dir="ltr">۰۹۰۳ ۵۵۵ ۵۰۹۰</bdi>
+            </span>
           </a>
         </div>
-
       </div>
     </div>
   </div>
 </PublicLayout>
-

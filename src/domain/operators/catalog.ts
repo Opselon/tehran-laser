@@ -193,7 +193,14 @@ export const OPERATOR_STATUS_LABELS: Record<OperatorStatus, string> = {
 };
 
 /** Sort options exposed by the roster toolbar. */
-export const OPERATOR_SORTS = ['order', 'name', 'sessions', 'revenue', 'utilization', 'recent'] as const;
+export const OPERATOR_SORTS = [
+  'order',
+  'name',
+  'sessions',
+  'revenue',
+  'utilization',
+  'recent',
+] as const;
 export type OperatorSortKey = (typeof OPERATOR_SORTS)[number];
 
 export const OPERATOR_SORT_LABELS: Record<OperatorSortKey, string> = {

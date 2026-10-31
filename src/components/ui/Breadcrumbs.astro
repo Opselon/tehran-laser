@@ -39,19 +39,11 @@ const { items = [], class: className = '' } = Astro.props;
               itemtype="https://schema.org/ListItem"
             >
               {isLast ? (
-                <span
-                  class="tl-breadcrumbs-link is-current"
-                  aria-current="page"
-                  itemprop="name"
-                >
+                <span class="tl-breadcrumbs-link is-current" aria-current="page" itemprop="name">
                   {crumb.name}
                 </span>
               ) : (
-                <a
-                  href={crumb.url}
-                  class="tl-breadcrumbs-link"
-                  itemprop="item"
-                >
+                <a href={crumb.url} class="tl-breadcrumbs-link" itemprop="item">
                   <span itemprop="name">{crumb.name}</span>
                 </a>
               )}

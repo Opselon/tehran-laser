@@ -154,9 +154,12 @@ export function resolveInstagram(
     return legacySettings[settingsKey] ?? '';
   };
 
-  const handle = normalizeInstagramHandle(pick('handle', 'instagram_username')) || 'tehranlaser_clinic';
+  const handle =
+    normalizeInstagramHandle(pick('handle', 'instagram_username')) || 'tehranlaser_clinic';
   const profileUrl = `https://www.instagram.com/${handle}/`;
-  const discountPercent = String(pick('promoDiscountPercent', 'instagram_follower_discount_percent'))
+  const discountPercent = String(
+    pick('promoDiscountPercent', 'instagram_follower_discount_percent'),
+  )
     .replace(/\D/g, '')
     .slice(0, 2);
 
@@ -164,7 +167,9 @@ export function resolveInstagram(
     handle,
     profileUrl,
     reelUrl: safeInstagramReelUrl(pick('latestReelUrl', 'instagram_latest_reel_url'), profileUrl),
-    promoCode: pick('promoCode', 'instagram_promo_code').replace(/[^\w-]/g, '').slice(0, 24),
+    promoCode: pick('promoCode', 'instagram_promo_code')
+      .replace(/[^\w-]/g, '')
+      .slice(0, 24),
     discountPercent,
     bioLink: safeExternalLink(pick('bioLink', 'instagram_bio_link')),
   };

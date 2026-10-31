@@ -75,7 +75,11 @@ export function useToasts() {
 
 /** Client-side mirror of the server's summary, used for instant optimistic
  *  recounts. The authoritative meta arrives with the next fetch. */
-function summarize(items: OperatorDto[], todayWeekday: number, previous: OperatorListMeta): OperatorListMeta {
+function summarize(
+  items: OperatorDto[],
+  todayWeekday: number,
+  previous: OperatorListMeta,
+): OperatorListMeta {
   const meta: OperatorListMeta = {
     total: items.length,
     active: 0,
@@ -122,42 +126,42 @@ export function useRoster({ initial, debounceMs = 320 }: UseRosterOptions) {
     };
   }, [query, status, role, sort, weekday]);
 
-  const load = useCallback(
-    async (filters: RosterFilters, options: { quiet?: boolean } = {}) => {
-      const seq = ++requestSeq.current;
-      if (!options.quiet) setLoading(true);
-      setError(null);
-      try {
-        const data = await fetchRoster(filters);
-        if (seq !== requestSeq.current) return; // a newer request won
-        setState({
-          items: data.items,
-          meta: data.meta,
-          today: data.today,
-          capabilities: data.capabilities,
-        });
-      } catch (err) {
-        if (seq !== requestSeq.current) return;
-        setError(err instanceof ApiClientError ? err.message : 'بارگذاری فهرست تیم ناموفق بود.');
-      } finally {
-        if (seq === requestSeq.current) setLoading(false);
-      }
-    },
-    [],
-  );
+  const load = useCallback(async (filters: RosterFilters, options: { quiet?: boolean } = {}) => {
+    const seq = ++requestSeq.current;
+    if (!options.quiet) setLoading(true);
+    setError(null);
+    try {
+      const data = await fetchRoster(filters);
+      if (seq !== requestSeq.current) return; // a newer request won
+      setState({
+        items: data.items,
+        meta: data.meta,
+        today: data.today,
+        capabilities: data.capabilities,
+      });
+    } catch (err) {
+      if (seq !== requestSeq.current) return;
+      setError(err instanceof ApiClientError ? err.message : 'بارگذاری فهرست تیم ناموفق بود.');
+    } finally {
+      if (seq === requestSeq.current) setLoading(false);
+    }
+  }, []);
 
   // Debounced refetch whenever a filter changes. The first render keeps the SSR
   // payload (already the unfiltered first page) without a duplicate request.
   useEffect(() => {
     if (firstRender.current) {
       firstRender.current = false;
-      if (!query && status === 'all' && role === 'all' && sort === 'order' && weekday === null) return;
+      if (!query && status === 'all' && role === 'all' && sort === 'order' && weekday === null)
+        return;
     }
     const timer = setTimeout(() => {
       void load(buildFilters());
     }, debounceMs);
     return () => clearTimeout(timer);
-  }, [buildFilters, debounceMs, load]);
+    /* The filter values are listed explicitly for the lint rule; they already
+       drive this effect transitively through `buildFilters`'s identity. */
+  }, [buildFilters, debounceMs, load, query, role, sort, status, weekday]);
 
   const refresh = useCallback(() => load(buildFilters(), { quiet: true }), [load, buildFilters]);
 
@@ -180,7 +184,7 @@ export function useRoster({ initial, debounceMs = 320 }: UseRosterOptions) {
   }, []);
 
   const run = useCallback(
-    async <T,>(id: string, action: () => Promise<T>, successMessage?: string): Promise<T | null> => {
+    async <T>(id: string, action: () => Promise<T>, successMessage?: string): Promise<T | null> => {
       setPendingId(id);
       try {
         const result = await action();
@@ -227,7 +231,9 @@ export function useRoster({ initial, debounceMs = 320 }: UseRosterOptions) {
       const result = await run(
         operator.id,
         () => setOperatorActive(operator.id, !operator.active),
-        operator.active ? `${operator.displayName} غیرفعال شد.` : `${operator.displayName} فعال شد.`,
+        operator.active
+          ? `${operator.displayName} غیرفعال شد.`
+          : `${operator.displayName} فعال شد.`,
       );
       if (result?.operator) upsert(result.operator);
       return result?.operator ?? null;
@@ -246,7 +252,12 @@ export function useRoster({ initial, debounceMs = 320 }: UseRosterOptions) {
         setState((current) => {
           const items = current.items.map((item) =>
             item.id === operator.id
-              ? { ...item, archivedAt: new Date().toISOString(), active: false, status: 'archived' as const }
+              ? {
+                  ...item,
+                  archivedAt: new Date().toISOString(),
+                  active: false,
+                  status: 'archived' as const,
+                }
               : item,
           );
           return { ...current, items, meta: summarize(items, current.today.weekday, current.meta) };
@@ -292,7 +303,10 @@ export function useRoster({ initial, debounceMs = 320 }: UseRosterOptions) {
       const swapped = ordered[index]!;
       ordered[index] = ordered[target]!;
       ordered[target] = swapped;
-      const order = ordered.map((item, position) => ({ id: item.id, sortOrder: (position + 1) * 10 }));
+      const order = ordered.map((item, position) => ({
+        id: item.id,
+        sortOrder: (position + 1) * 10,
+      }));
       const optimistic = new Map(order.map((entry) => [entry.id, entry.sortOrder]));
       setState((current) => ({
         ...current,
@@ -319,7 +333,11 @@ export function useRoster({ initial, debounceMs = 320 }: UseRosterOptions) {
   const createAccount = useCallback(
     async (
       operator: OperatorDto,
-      payload: { email?: string | undefined; role?: RoleKey | undefined; password?: string | undefined },
+      payload: {
+        email?: string | undefined;
+        role?: RoleKey | undefined;
+        password?: string | undefined;
+      },
     ) => {
       setPendingId(`account:${operator.id}`);
       try {
@@ -359,7 +377,8 @@ export function useRoster({ initial, debounceMs = 320 }: UseRosterOptions) {
     setWeekday(null);
   }, []);
 
-  const filtersActive = query.trim() !== '' || status !== 'all' || role !== 'all' || weekday !== null;
+  const filtersActive =
+    query.trim() !== '' || status !== 'all' || role !== 'all' || weekday !== null;
 
   return {
     ...state,

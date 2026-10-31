@@ -19,9 +19,7 @@ interface OperatorsAppProps {
 }
 
 type DrawerState =
-  | { mode: 'create'; templateKey: string | null }
-  | { mode: 'edit'; operator: OperatorDto }
-  | null;
+  { mode: 'create'; templateKey: string | null } | { mode: 'edit'; operator: OperatorDto } | null;
 
 type ConfirmState =
   | { kind: 'archive'; operator: OperatorDto }
@@ -51,7 +49,9 @@ export function OperatorsApp({ initial, catalog, services, initialCoverage }: Op
   const [accountFor, setAccountFor] = useState<OperatorDto | null>(null);
   const [confirm, setConfirm] = useState<ConfirmState>(null);
   const [coverage, setCoverage] = useState<CoverageResponse | null>(initialCoverage);
-  const [coverageWeekday, setCoverageWeekday] = useState(initialCoverage?.weekday ?? initial.today.weekday);
+  const [coverageWeekday, setCoverageWeekday] = useState(
+    initialCoverage?.weekday ?? initial.today.weekday,
+  );
   const [coverageLoading, setCoverageLoading] = useState(false);
 
   const canWrite = roster.capabilities.canWrite;
@@ -69,23 +69,29 @@ export function OperatorsApp({ initial, catalog, services, initialCoverage }: Op
     );
   }, [roster.items]);
 
-  const loadCoverage = useCallback(async (weekday: number) => {
-    setCoverageWeekday(weekday);
-    setCoverageLoading(true);
-    try {
-      const data = await fetchCoverage(weekday);
-      setCoverage(data);
-    } catch {
-      roster.pushToast('error', 'محاسبه پوشش شیفت ناموفق بود.');
-    } finally {
-      setCoverageLoading(false);
-    }
-  }, [roster]);
+  const loadCoverage = useCallback(
+    async (weekday: number) => {
+      setCoverageWeekday(weekday);
+      setCoverageLoading(true);
+      try {
+        const data = await fetchCoverage(weekday);
+        setCoverage(data);
+      } catch {
+        roster.pushToast('error', 'محاسبه پوشش شیفت ناموفق بود.');
+      } finally {
+        setCoverageLoading(false);
+      }
+    },
+    [roster],
+  );
 
   // Refresh coverage after any roster mutation: adding a person with a Saturday
   // shift must change the Saturday chart immediately.
   const rosterFingerprint = roster.items
-    .map((operator) => `${operator.id}:${operator.active}:${operator.archivedAt ?? ''}:${operator.shiftStart}-${operator.shiftEnd}:${operator.workdays.join('.')}`)
+    .map(
+      (operator) =>
+        `${operator.id}:${operator.active}:${operator.archivedAt ?? ''}:${operator.shiftStart}-${operator.shiftEnd}:${operator.workdays.join('.')}`,
+    )
     .join('|');
 
   useEffect(() => {
@@ -167,8 +173,9 @@ export function OperatorsApp({ initial, catalog, services, initialCoverage }: Op
             هر زمان که خواستید، اپراتور جدید اضافه کنید
           </h1>
           <p className="ops-hero__sub">
-            پروفایل کامل هر اپراتور — نقش بالینی، خدمات قابل اجرا، روزهای کاری، شیفت، کمیسیون و حساب ورود — از همین‌جا ساخته می‌شود.
-            فهرست تیم از پیش تعیین‌شده نیست؛ خالی بودن آن یک وضعیت عادی است، نه خطا.
+            پروفایل کامل هر اپراتور — نقش بالینی، خدمات قابل اجرا، روزهای کاری، شیفت، کمیسیون و حساب
+            ورود — از همین‌جا ساخته می‌شود. فهرست تیم از پیش تعیین‌شده نیست؛ خالی بودن آن یک وضعیت
+            عادی است، نه خطا.
           </p>
           <div className="ops-hero__today">
             <span>
@@ -192,7 +199,12 @@ export function OperatorsApp({ initial, catalog, services, initialCoverage }: Op
               افزودن اپراتور
             </button>
           )}
-          <button type="button" className="ops-btn" onClick={() => void roster.refresh()} aria-busy={roster.loading}>
+          <button
+            type="button"
+            className="ops-btn"
+            onClick={() => void roster.refresh()}
+            aria-busy={roster.loading}
+          >
             <IconReact name={roster.loading ? 'refresh' : 'chart'} size={16} />
             به‌روزرسانی
           </button>
@@ -235,7 +247,11 @@ export function OperatorsApp({ initial, catalog, services, initialCoverage }: Op
           <span className="ops-kpi__label">
             <IconReact name="cash" size={13} /> درآمد ثبت‌شده
           </span>
-          <span className="ops-kpi__value" style={{ fontSize: '1.02rem' }} title={`${totals.revenue.toLocaleString('fa-IR')} تومان`}>
+          <span
+            className="ops-kpi__value"
+            style={{ fontSize: '1.02rem' }}
+            title={`${totals.revenue.toLocaleString('fa-IR')} تومان`}
+          >
             {formatToman(totals.revenue)}
           </span>
           <span className="ops-kpi__hint">جلسات تکمیل‌شده، پس از تخفیف</span>
@@ -255,7 +271,12 @@ export function OperatorsApp({ initial, catalog, services, initialCoverage }: Op
             enterKeyHint="search"
           />
           {roster.query && (
-            <button type="button" className="ops-search__clear" onClick={() => roster.setQuery('')} aria-label="پاک کردن جستجو">
+            <button
+              type="button"
+              className="ops-search__clear"
+              onClick={() => roster.setQuery('')}
+              aria-label="پاک کردن جستجو"
+            >
               <IconReact name="x" size={14} />
             </button>
           )}
@@ -295,7 +316,11 @@ export function OperatorsApp({ initial, catalog, services, initialCoverage }: Op
 
           <label className="ops-select">
             ترتیب
-            <select value={roster.sort} onChange={(event) => roster.setSort(event.target.value)} aria-label="ترتیب فهرست">
+            <select
+              value={roster.sort}
+              onChange={(event) => roster.setSort(event.target.value)}
+              aria-label="ترتیب فهرست"
+            >
               {catalog.sorts.map((sort) => (
                 <option key={sort.key} value={sort.key}>
                   {sort.label}
@@ -305,7 +330,11 @@ export function OperatorsApp({ initial, catalog, services, initialCoverage }: Op
           </label>
 
           {roster.filtersActive && (
-            <button type="button" className="ops-btn ops-btn--sm ops-btn--ghost" onClick={roster.resetFilters}>
+            <button
+              type="button"
+              className="ops-btn ops-btn--sm ops-btn--ghost"
+              onClick={roster.resetFilters}
+            >
               <IconReact name="x" size={13} />
               پاک کردن فیلترها
             </button>
@@ -329,7 +358,12 @@ export function OperatorsApp({ initial, catalog, services, initialCoverage }: Op
 
       {/* ── Roster + coverage ────────────────────────────────────── */}
       {isTrulyEmpty ? (
-        <EmptyState catalog={catalog} canWrite={canWrite} onPick={(key) => openCreate(key)} onBlank={() => openCreate()} />
+        <EmptyState
+          catalog={catalog}
+          canWrite={canWrite}
+          onPick={(key) => openCreate(key)}
+          onBlank={() => openCreate()}
+        />
       ) : (
         <div className="ops-layout">
           <div>
@@ -345,13 +379,20 @@ export function OperatorsApp({ initial, catalog, services, initialCoverage }: Op
                   <IconReact name="search" size={22} />
                 </div>
                 <h3>اپراتوری با این فیلترها پیدا نشد</h3>
-                <p>عبارت جستجو را کوتاه‌تر کنید یا فیلترها را پاک کنید. اگر تیم واقعاً خالی است، از دکمه افزودن اپراتور شروع کنید.</p>
+                <p>
+                  عبارت جستجو را کوتاه‌تر کنید یا فیلترها را پاک کنید. اگر تیم واقعاً خالی است، از
+                  دکمه افزودن اپراتور شروع کنید.
+                </p>
                 <div className="ops-hero__actions" style={{ justifyContent: 'center' }}>
                   <button type="button" className="ops-btn" onClick={roster.resetFilters}>
                     پاک کردن فیلترها
                   </button>
                   {canWrite && (
-                    <button type="button" className="ops-btn ops-btn--primary" onClick={() => openCreate()}>
+                    <button
+                      type="button"
+                      className="ops-btn ops-btn--primary"
+                      onClick={() => openCreate()}
+                    >
                       <IconReact name="plus" size={16} /> افزودن اپراتور
                     </button>
                   )}
@@ -408,7 +449,9 @@ export function OperatorsApp({ initial, catalog, services, initialCoverage }: Op
             <div className="ops-drawer__head">
               <div className="ops-drawer__title">
                 <h2 id="ops-drawer-title">
-                  {drawer.mode === 'edit' ? `ویرایش ${drawer.operator.displayName}` : 'اپراتور جدید'}
+                  {drawer.mode === 'edit'
+                    ? `ویرایش ${drawer.operator.displayName}`
+                    : 'اپراتور جدید'}
                 </h2>
                 <p>
                   {drawer.mode === 'edit'
@@ -416,7 +459,12 @@ export function OperatorsApp({ initial, catalog, services, initialCoverage }: Op
                     : 'فقط نام و شماره تماس اجباری است؛ بقیه را می‌توانید بعداً کامل کنید.'}
                 </p>
               </div>
-              <button type="button" className="ops-drawer__close" onClick={closeDrawer} aria-label="بستن">
+              <button
+                type="button"
+                className="ops-drawer__close"
+                onClick={closeDrawer}
+                aria-label="بستن"
+              >
                 <IconReact name="x" size={18} />
               </button>
             </div>
@@ -425,7 +473,10 @@ export function OperatorsApp({ initial, catalog, services, initialCoverage }: Op
                 catalog={catalog}
                 services={services}
                 operator={drawer.mode === 'edit' ? drawer.operator : null}
-                busy={roster.pendingId === 'new' || roster.pendingId === (drawer.mode === 'edit' ? drawer.operator.id : '')}
+                busy={
+                  roster.pendingId === 'new' ||
+                  roster.pendingId === (drawer.mode === 'edit' ? drawer.operator.id : '')
+                }
                 serverErrors={serverErrors}
                 templateKey={drawer.mode === 'create' ? drawer.templateKey : null}
                 onSubmit={(payload) => void submitDraft(payload)}
@@ -446,7 +497,10 @@ export function OperatorsApp({ initial, catalog, services, initialCoverage }: Op
           onSubmit={async (payload) => {
             const result = await roster.createAccount(accountFor, payload);
             // Keep the dialog open: it is now showing the one-time password.
-            setAccountFor({ ...accountFor, account: result.operator?.account ?? accountFor.account });
+            setAccountFor({
+              ...accountFor,
+              account: result.operator?.account ?? accountFor.account,
+            });
             return result;
           }}
         />
@@ -465,16 +519,27 @@ export function OperatorsApp({ initial, catalog, services, initialCoverage }: Op
           body={
             confirm.kind === 'archive' ? (
               <>
-                پروفایل از فهرست فعال و نوبت‌دهی خارج می‌شود و حساب ورودش غیرفعال می‌گردد. <b>سابقه جلسات و پرونده بالینی حفظ می‌شود</b> و هر زمان می‌توانید بازیابی کنید.
+                پروفایل از فهرست فعال و نوبت‌دهی خارج می‌شود و حساب ورودش غیرفعال می‌گردد.{' '}
+                <b>سابقه جلسات و پرونده بالینی حفظ می‌شود</b> و هر زمان می‌توانید بازیابی کنید.
               </>
             ) : confirm.kind === 'restore' ? (
-              <>پروفایل دوباره فعال می‌شود. اگر شماره تماس این اپراتور در این فاصله به فرد دیگری داده شده باشد، بازیابی با پیام خطا متوقف می‌شود.</>
+              <>
+                پروفایل دوباره فعال می‌شود. اگر شماره تماس این اپراتور در این فاصله به فرد دیگری
+                داده شده باشد، بازیابی با پیام خطا متوقف می‌شود.
+              </>
             ) : (
-              <>این عملیات برگشت‌پذیر نیست و فقط برای پروفایلی مجاز است که هیچ جلسه‌ای نداشته باشد. حساب ورود و نقش‌های آن هم حذف می‌شوند.</>
+              <>
+                این عملیات برگشت‌پذیر نیست و فقط برای پروفایلی مجاز است که هیچ جلسه‌ای نداشته باشد.
+                حساب ورود و نقش‌های آن هم حذف می‌شوند.
+              </>
             )
           }
           confirmLabel={
-            confirm.kind === 'archive' ? 'بایگانی کن' : confirm.kind === 'restore' ? 'بازیابی کن' : 'حذف قطعی'
+            confirm.kind === 'archive'
+              ? 'بایگانی کن'
+              : confirm.kind === 'restore'
+                ? 'بازیابی کن'
+                : 'حذف قطعی'
           }
           tone={confirm.kind === 'restore' ? 'primary' : 'danger'}
           busy={roster.pendingId === confirm.operator.id}
@@ -486,9 +551,19 @@ export function OperatorsApp({ initial, catalog, services, initialCoverage }: Op
       {/* ── Toasts ───────────────────────────────────────────────── */}
       <div className="ops-toasts" role="status" aria-live="polite">
         {roster.toasts.map((toast) => (
-          <div key={toast.id} className={`ops-toast ops-toast--${toast.tone}`} onClick={() => roster.dismissToast(toast.id)}>
+          <div
+            key={toast.id}
+            className={`ops-toast ops-toast--${toast.tone}`}
+            onClick={() => roster.dismissToast(toast.id)}
+          >
             <IconReact
-              name={toast.tone === 'success' ? 'checkCircle' : toast.tone === 'error' ? 'warning' : 'info'}
+              name={
+                toast.tone === 'success'
+                  ? 'checkCircle'
+                  : toast.tone === 'error'
+                    ? 'warning'
+                    : 'info'
+              }
               size={16}
             />
             <span>{toast.message}</span>
@@ -519,14 +594,19 @@ function EmptyState({
       </div>
       <h3>هنوز هیچ اپراتوری ثبت نشده است</h3>
       <p>
-        کلینیک از این لحظه تیم ندارد و این کاملاً طبیعی است — هر وقت خواستید اولین نفر را اضافه کنید. با یک الگوی آماده شروع کنید یا
-        فرم خالی را باز کنید؛ بعداً همه‌چیز قابل ویرایش است.
+        کلینیک از این لحظه تیم ندارد و این کاملاً طبیعی است — هر وقت خواستید اولین نفر را اضافه
+        کنید. با یک الگوی آماده شروع کنید یا فرم خالی را باز کنید؛ بعداً همه‌چیز قابل ویرایش است.
       </p>
 
       {canWrite ? (
         <div className="ops-templates">
           {catalog.templates.map((template) => (
-            <button key={template.key} type="button" className="ops-template" onClick={() => onPick(template.key)}>
+            <button
+              key={template.key}
+              type="button"
+              className="ops-template"
+              onClick={() => onPick(template.key)}
+            >
               <IconReact name="plus" size={18} />
               <span className="ops-template__body">
                 <strong>{template.label}</strong>

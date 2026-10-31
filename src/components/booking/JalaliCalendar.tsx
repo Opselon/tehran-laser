@@ -74,7 +74,12 @@ interface JalaliCalendarProps {
  * Only months containing a selectable day are reachable, so a visitor can
  * never page into a dead month.
  */
-export function JalaliCalendar({ selectableDates, selectedDate, onSelect, closedNote }: JalaliCalendarProps) {
+export function JalaliCalendar({
+  selectableDates,
+  selectedDate,
+  onSelect,
+  closedNote,
+}: JalaliCalendarProps) {
   const months = useMemo<CalendarMonth[]>(() => {
     const byKey = new Map<string, CalendarMonth>();
     const selectable = new Set(selectableDates);
@@ -190,7 +195,8 @@ export function JalaliCalendar({ selectableDates, selectedDate, onSelect, closed
         {month.weeks.map((week, wi) => (
           <div className="calendar-week" key={wi}>
             {week.map((iso, di) => {
-              if (!iso) return <span key={di} className="calendar-cell is-empty" aria-hidden="true" />;
+              if (!iso)
+                return <span key={di} className="calendar-cell is-empty" aria-hidden="true" />;
               const dayNum = jalaliDayOf(iso);
               const isFriday = persianWeekIndex(iso) === 6;
               const selected = selectedDate === iso;

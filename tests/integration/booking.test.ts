@@ -45,7 +45,9 @@ describe('Tehran Laser — Full Integration Flow', () => {
 
   it('3. GET /api/v1/availability returns available slots for a future day', async () => {
     const testDate = getFutureNonFriday(3);
-    const req = new Request(`http://localhost/api/v1/availability?service=full-body&category=female&date=${testDate}`);
+    const req = new Request(
+      `http://localhost/api/v1/availability?service=full-body&category=female&date=${testDate}`,
+    );
     const res = await worker.fetch(req);
     expect(res.status).toBe(200);
     const body = (await res.json()) as {

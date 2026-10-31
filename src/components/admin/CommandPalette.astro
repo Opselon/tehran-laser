@@ -46,188 +46,186 @@ const KIND_LABELS: Record<SearchHit['kind'], string> = {
 };
 ---
 
-{
-  canSearch && (
-    <>
-      <button
-        type="button"
-        class="palette-trigger"
-        id="tlPaletteBtn"
-        aria-haspopup="dialog"
-        aria-label="جستجوی سراسری (Ctrl+K)"
-        title="جستجوی سراسری — Ctrl+K"
-      >
-        <Icon name="search" size={16} aria-hidden />
-        <span class="palette-trigger__label">جستجو</span>
-        <kbd class="palette-trigger__kbd">Ctrl K</kbd>
-      </button>
+{canSearch && (
+  <>
+    <button
+      type="button"
+      class="palette-trigger"
+      id="tlPaletteBtn"
+      aria-haspopup="dialog"
+      aria-label="جستجوی سراسری (Ctrl+K)"
+      title="جستجوی سراسری — Ctrl+K"
+    >
+      <Icon name="search" size={16} aria-hidden />
+      <span class="palette-trigger__label">جستجو</span>
+      <kbd class="palette-trigger__kbd">Ctrl K</kbd>
+    </button>
 
-      <dialog class="palette-dialog" id="tlPalette" aria-label="جستجوی سراسری پنل">
-        <div class="palette-search-row">
-          <Icon name="search" size={18} aria-hidden />
-          <input
-            type="text"
-            id="tlPaletteInput"
-            class="palette-input"
-            placeholder="جستجوی شماره نوبت، تلفن مراجع یا نام خدمت…"
-            autocomplete="off"
-            spellcheck="false"
-          />
-          <button type="button" class="palette-close" id="tlPaletteClose" aria-label="بستن">
-            <Icon name="close" size={16} aria-hidden />
-          </button>
-        </div>
-        <ul class="palette-results" id="tlPaletteResults" role="listbox" aria-label="نتایج جستجو" />
-        <div class="palette-empty" id="tlPaletteEmpty" hidden>
-          <Icon name="search" size={22} aria-hidden />
-          <p>عبارتی کوتاه وارد کنید — دست‌کم دو حرف.</p>
-        </div>
-      </dialog>
+    <dialog class="palette-dialog" id="tlPalette" aria-label="جستجوی سراسری پنل">
+      <div class="palette-search-row">
+        <Icon name="search" size={18} aria-hidden />
+        <input
+          type="text"
+          id="tlPaletteInput"
+          class="palette-input"
+          placeholder="جستجوی شماره نوبت، تلفن مراجع یا نام خدمت…"
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <button type="button" class="palette-close" id="tlPaletteClose" aria-label="بستن">
+          <Icon name="close" size={16} aria-hidden />
+        </button>
+      </div>
+      <ul class="palette-results" id="tlPaletteResults" role="listbox" aria-label="نتایج جستجو" />
+      <div class="palette-empty" id="tlPaletteEmpty" hidden>
+        <Icon name="search" size={22} aria-hidden />
+        <p>عبارتی کوتاه وارد کنید — دست‌کم دو حرف.</p>
+      </div>
+    </dialog>
 
-      <script define:vars={{ KIND_LABELS }}>
-        (function () {
-          var btn = document.getElementById('tlPaletteBtn');
-          var dialog = document.getElementById('tlPalette');
-          var input = document.getElementById('tlPaletteInput');
-          var list = document.getElementById('tlPaletteResults');
-          var empty = document.getElementById('tlPaletteEmpty');
-          var closeBtn = document.getElementById('tlPaletteClose');
-          if (!btn || !dialog || !input || !list || !closeBtn) return;
+    <script define:vars={{ KIND_LABELS }}>
+      (function () {
+        const btn = document.getElementById('tlPaletteBtn');
+        const dialog = document.getElementById('tlPalette');
+        const input = document.getElementById('tlPaletteInput');
+        const list = document.getElementById('tlPaletteResults');
+        const empty = document.getElementById('tlPaletteEmpty');
+        const closeBtn = document.getElementById('tlPaletteClose');
+        if (!btn || !dialog || !input || !list || !closeBtn) return;
 
-          var items = [];
-          var active = -1;
-          var controller = null;
+        let items = [];
+        let active = -1;
+        let controller = null;
 
-          function setActive(index) {
-            active = index;
-            Array.prototype.forEach.call(list.children, function (li, i) {
-              li.setAttribute('aria-selected', i === index ? 'true' : 'false');
-              li.classList.toggle('is-active', i === index);
-            });
-          }
-
-          function render(hits) {
-            list.textContent = '';
-            items = hits;
-            if (hits.length === 0) {
-              empty.hidden = false;
-              return;
-            }
-            empty.hidden = true;
-            hits.forEach(function (hit, i) {
-              var li = document.createElement('li');
-              li.setAttribute('role', 'option');
-              li.className = 'palette-item palette-item--' + hit.kind;
-
-              var a = document.createElement('a');
-              a.href = hit.href;
-              a.className = 'palette-item__link';
-
-              var badge = document.createElement('span');
-              badge.className = 'palette-item__kind';
-              badge.textContent = KIND_LABELS[hit.kind] || hit.kind;
-
-              var texts = document.createElement('span');
-              texts.className = 'palette-item__texts';
-              var title = document.createElement('span');
-              title.className = 'palette-item__title';
-              title.textContent = hit.title;
-              texts.appendChild(title);
-              if (hit.subtitle) {
-                var sub = document.createElement('span');
-                sub.className = 'palette-item__subtitle';
-                sub.textContent = hit.subtitle;
-                texts.appendChild(sub);
-              }
-
-              a.appendChild(badge);
-              a.appendChild(texts);
-              li.appendChild(a);
-              li.addEventListener('click', function () {
-                dialog.close();
-              });
-              list.appendChild(li);
-            });
-            setActive(0);
-          }
-
-          function search(term) {
-            if (controller) controller.abort();
-            if (term.trim().length < 2) {
-              render([]);
-              return;
-            }
-            controller = new AbortController();
-            fetch('/api/v1/admin/search?q=' + encodeURIComponent(term.trim()), {
-              signal: controller.signal,
-              credentials: 'same-origin',
-            })
-              .then(function (res) {
-                if (!res.ok) throw new Error('search ' + res.status);
-                return res.json();
-              })
-              .then(function (payload) {
-                render((payload && payload.data) || []);
-              })
-              .catch(function () {
-                render([]);
-              });
-          }
-
-          var timer = null;
-          input.addEventListener('input', function () {
-            if (timer) clearTimeout(timer);
-            timer = setTimeout(function () {
-              search(input.value);
-            }, 200);
+        function setActive(index) {
+          active = index;
+          Array.prototype.forEach.call(list.children, function (li, i) {
+            li.setAttribute('aria-selected', i === index ? 'true' : 'false');
+            li.classList.toggle('is-active', i === index);
           });
+        }
 
-          function openPalette() {
-            dialog.showModal();
-            input.value = '';
+        function render(hits) {
+          list.textContent = '';
+          items = hits;
+          if (hits.length === 0) {
+            empty.hidden = false;
+            return;
+          }
+          empty.hidden = true;
+          hits.forEach(function (hit) {
+            const li = document.createElement('li');
+            li.setAttribute('role', 'option');
+            li.className = 'palette-item palette-item--' + hit.kind;
+
+            const a = document.createElement('a');
+            a.href = hit.href;
+            a.className = 'palette-item__link';
+
+            const badge = document.createElement('span');
+            badge.className = 'palette-item__kind';
+            badge.textContent = KIND_LABELS[hit.kind] || hit.kind;
+
+            const texts = document.createElement('span');
+            texts.className = 'palette-item__texts';
+            const title = document.createElement('span');
+            title.className = 'palette-item__title';
+            title.textContent = hit.title;
+            texts.appendChild(title);
+            if (hit.subtitle) {
+              const sub = document.createElement('span');
+              sub.className = 'palette-item__subtitle';
+              sub.textContent = hit.subtitle;
+              texts.appendChild(sub);
+            }
+
+            a.appendChild(badge);
+            a.appendChild(texts);
+            li.appendChild(a);
+            li.addEventListener('click', function () {
+              dialog.close();
+            });
+            list.appendChild(li);
+          });
+          setActive(0);
+        }
+
+        function search(term) {
+          if (controller) controller.abort();
+          if (term.trim().length < 2) {
             render([]);
-            input.focus();
+            return;
           }
+          controller = new AbortController();
+          fetch('/api/v1/admin/search?q=' + encodeURIComponent(term.trim()), {
+            signal: controller.signal,
+            credentials: 'same-origin',
+          })
+            .then(function (res) {
+              if (!res.ok) throw new Error('search ' + res.status);
+              return res.json();
+            })
+            .then(function (payload) {
+              render((payload && payload.data) || []);
+            })
+            .catch(function () {
+              render([]);
+            });
+        }
 
-          btn.addEventListener('click', openPalette);
-          closeBtn.addEventListener('click', function () {
-            dialog.close();
-          });
+        let timer = null;
+        input.addEventListener('input', function () {
+          if (timer) clearTimeout(timer);
+          timer = setTimeout(function () {
+            search(input.value);
+          }, 200);
+        });
 
-          dialog.addEventListener('close', function () {
-            if (controller) controller.abort();
-            btn.focus();
-          });
+        function openPalette() {
+          dialog.showModal();
+          input.value = '';
+          render([]);
+          input.focus();
+        }
 
-          input.addEventListener('keydown', function (e) {
-            if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-              e.preventDefault();
-              if (items.length === 0) return;
-              var next =
-                e.key === 'ArrowDown'
-                  ? (active + 1) % items.length
-                  : (active - 1 + items.length) % items.length;
-              setActive(next);
-              var el = list.children[next];
-              if (el && el.scrollIntoView) el.scrollIntoView({ block: 'nearest' });
-            } else if (e.key === 'Enter') {
-              e.preventDefault();
-              var hit = items[active];
-              if (hit) {
-                dialog.close();
-                window.location.href = hit.href;
-              }
+        btn.addEventListener('click', openPalette);
+        closeBtn.addEventListener('click', function () {
+          dialog.close();
+        });
+
+        dialog.addEventListener('close', function () {
+          if (controller) controller.abort();
+          btn.focus();
+        });
+
+        input.addEventListener('keydown', function (e) {
+          if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+            e.preventDefault();
+            if (items.length === 0) return;
+            const next =
+              e.key === 'ArrowDown'
+                ? (active + 1) % items.length
+                : (active - 1 + items.length) % items.length;
+            setActive(next);
+            const el = list.children[next];
+            if (el && el.scrollIntoView) el.scrollIntoView({ block: 'nearest' });
+          } else if (e.key === 'Enter') {
+            e.preventDefault();
+            const hit = items[active];
+            if (hit) {
+              dialog.close();
+              window.location.href = hit.href;
             }
-          });
+          }
+        });
 
-          document.addEventListener('keydown', function (e) {
-            if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) {
-              e.preventDefault();
-              openPalette();
-            }
-          });
-        })();
-      </script>
-    </>
-  )
-}
+        document.addEventListener('keydown', function (e) {
+          if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) {
+            e.preventDefault();
+            openPalette();
+          }
+        });
+      })();
+    </script>
+  </>
+)}

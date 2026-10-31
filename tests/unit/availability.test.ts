@@ -77,7 +77,9 @@ describe('calculateAvailability — exceptions', () => {
   it('closes on holiday and closed days', () => {
     for (const kind of ['holiday', 'closed'] as const) {
       expect(
-        calculateAvailability(base({ exceptions: [{ date: SATURDAY, kind, opensAt: null, closesAt: null }] })),
+        calculateAvailability(
+          base({ exceptions: [{ date: SATURDAY, kind, opensAt: null, closesAt: null }] }),
+        ),
       ).toHaveLength(0);
     }
   });
@@ -99,9 +101,7 @@ describe('calculateAvailability — exceptions', () => {
   it('subtracts blocked_time ranges', () => {
     const times = startTimes(
       base({
-        exceptions: [
-          { date: SATURDAY, kind: 'blocked_time', opensAt: '11:00', closesAt: '12:00' },
-        ],
+        exceptions: [{ date: SATURDAY, kind: 'blocked_time', opensAt: '11:00', closesAt: '12:00' }],
       }),
     );
     expect(times).toContain('2026-10-03T07:00:00.000Z'); // 10:30
@@ -151,7 +151,9 @@ describe('calculateAvailability — occupancy, buffer, lead time', () => {
     const times = startTimes(base({ nowIso: '2026-10-03T06:30:00.000Z', minLeadMinutes: 60 }));
     expect(times).toContain('2026-10-03T07:30:00.000Z'); // 11:00
     expect(times).not.toContain('2026-10-03T07:15:00.000Z'); // 10:45 too soon
-    expect(times.every((time) => Date.parse(time) >= Date.parse('2026-10-03T07:30:00.000Z'))).toBe(true);
+    expect(times.every((time) => Date.parse(time) >= Date.parse('2026-10-03T07:30:00.000Z'))).toBe(
+      true,
+    );
   });
 });
 
@@ -196,7 +198,9 @@ describe('validateSlotStart', () => {
         granularityMinutes: 15,
       }),
     );
-    expect(validateSlotStart(base({ occupiedSlots: occupied }), '2026-10-03T06:45:00.000Z')).toEqual({
+    expect(
+      validateSlotStart(base({ occupiedSlots: occupied }), '2026-10-03T06:45:00.000Z'),
+    ).toEqual({
       ok: false,
       reason: 'occupied',
     });
@@ -214,7 +218,9 @@ describe('validateSlotStart', () => {
   });
 
   it('rejects starts on a closed day', () => {
-    expect(validateSlotStart(base({ localDate: '2026-10-09' }), '2026-10-09T05:30:00.000Z')).toEqual({
+    expect(
+      validateSlotStart(base({ localDate: '2026-10-09' }), '2026-10-09T05:30:00.000Z'),
+    ).toEqual({
       ok: false,
       reason: 'outside_hours',
     });

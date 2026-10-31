@@ -9,9 +9,20 @@ import JournalStrip from '../components/public/JournalStrip.astro';
 import { defaultFaqs } from '../data/faqs';
 import { MENS_ONLY_SLUG_SET } from '../data/male-pricing';
 import { env } from 'cloudflare:workers';
-import { listPublicServices, listFaqItems, getPublicSettings, listPublicBlogPosts } from '../server/repositories';
+import {
+  listPublicServices,
+  listFaqItems,
+  getPublicSettings,
+  listPublicBlogPosts,
+} from '../server/repositories';
 import { getModuleStateMap } from '../server/features';
-import { enabledConfig, isModuleOn, mergeModuleStates, resolveInstagram, toStateMap } from '../domain/features/state';
+import {
+  enabledConfig,
+  isModuleOn,
+  mergeModuleStates,
+  resolveInstagram,
+  toStateMap,
+} from '../domain/features/state';
 import { createFAQPageSchema, createBreadcrumbSchema } from '../lib/seo';
 import '../styles/index.css';
 
@@ -20,10 +31,7 @@ let services: Awaited<ReturnType<typeof listPublicServices>> = [];
 let faqs: Awaited<ReturnType<typeof listFaqItems>> = [];
 
 try {
-  [services, faqs] = await Promise.all([
-    listPublicServices(env.DB),
-    listFaqItems(env.DB),
-  ]);
+  [services, faqs] = await Promise.all([listPublicServices(env.DB), listFaqItems(env.DB)]);
 } catch (e) {
   console.error('SSR homepage data fetch failure:', e);
 }
@@ -73,9 +81,7 @@ const faqJsonLd = createFAQPageSchema(
   activeFaqs.slice(0, 6).map((f) => ({ question: f.question, answer: f.answer })),
 );
 
-const breadcrumbJsonLd = createBreadcrumbSchema([
-  { name: 'صفحه اصلی', url: '/' },
-]);
+const breadcrumbJsonLd = createBreadcrumbSchema([{ name: 'صفحه اصلی', url: '/' }]);
 
 // ── Unified gender price table (Lane B) ──────────────────────────────────────
 // One row per zone with BOTH tariffs, so women's and men's prices read side by
@@ -171,391 +177,453 @@ function faDigits(value: string): string {
   ]}
 >
   <!-- Hero Section (§38) — module gate: plugin `hero` -->
-{isOn('hero') && (
-  <section class="hero-section">
-    <!-- The stage: three light sources, a hairline grid and one gold beam.
+  {isOn('hero') && (
+    <section class="hero-section">
+      <!-- The stage: three light sources, a hairline grid and one gold beam.
          Decorative only — nothing here is announced, focusable or measureable. -->
-    <div class="hero-stage" aria-hidden="true">
-      <span class="hero-aura hero-aura-gold"></span>
-      <span class="hero-aura hero-aura-emerald"></span>
-      <span class="hero-grid-lines"></span>
-      <span class="hero-noise"></span>
-      <svg class="hero-beam" viewBox="0 0 1200 620" preserveAspectRatio="none" focusable="false">
-        <defs>
-          <linearGradient id="beam-gold" x1="1" y1="0" x2="0" y2="1">
-            <stop offset="0" stop-color="#e8cb8f" stop-opacity="0.5" />
-            <stop offset="0.55" stop-color="#e8cb8f" stop-opacity="0.12" />
-            <stop offset="1" stop-color="#e8cb8f" stop-opacity="0" />
-          </linearGradient>
-          <linearGradient id="beam-emerald" x1="1" y1="0" x2="0" y2="1">
-            <stop offset="0" stop-color="#3bd9a4" stop-opacity="0.28" />
-            <stop offset="1" stop-color="#3bd9a4" stop-opacity="0" />
-          </linearGradient>
-        </defs>
-        <path class="hero-beam-line" d="M1180 12 C 900 120, 660 300, 360 600" stroke="url(#beam-gold)" />
-        <path class="hero-beam-line hero-beam-line-2" d="M1100 0 C 840 150, 640 330, 430 620" stroke="url(#beam-emerald)" />
-        <path class="hero-beam-line hero-beam-line-3" d="M1240 60 C 980 170, 760 330, 540 620" stroke="url(#beam-gold)" />
-      </svg>
-    </div>
-
-    <div class="container hero-container">
-      <div class="hero-content">
-        <div class="hero-badge">
-          <Icon name="award" size={14} />
-          <span>مرکز تخصصی لیزر و زیبایی پاسداران — لیزر تماسی رادو پلاس</span>
-        </div>
-
-        <h1 class="hero-title">
-          تجربه‌ای لوکس، بدون درد و قطعی از <span class="gold-gradient-text">لیزر موهای زائد</span> در پاسداران
-        </h1>
-
-        <p class="hero-subtitle">
-          لیزر تماسی <b>رادو پلاس</b> با سه طول موج، سرمایش پیوسته و پک استریل اختصاصی — با پروتکل بهداشتی ثبت‌شده برای هر جلسه.
-        </p>
-
-        <div class="hero-cta-group">
-          <a href="/booking" class="btn btn-primary btn-lg hero-btn-book">
-            <Icon name="calendar" size={18} />
-            <span>رزرو آنلاین نوبت</span>
-            <span class="promo-tag">۱۵٪ تخفیف</span>
-            <Icon name="arrowLeft" size={17} />
-          </a>
-          <a href="#services" class="btn btn-outline btn-lg hero-btn-services">
-            <Icon name="services" size={18} />
-            <span>مشاهده تعرفه‌ها</span>
-          </a>
-          <a href="tel:+989035555090" class="hero-phone-chip" aria-label="مشاوره و پذیرش: ۰۹۰۳ ۵۵۵ ۵۰۹۰">
-            <Icon name="phone" size={15} />
-            <span>مشاوره و پذیرش: <bdi dir="ltr">۰۹۰۳ ۵۵۵ ۵۰۹۰</bdi></span>
-          </a>
-        </div>
+      <div class="hero-stage" aria-hidden="true">
+        <span class="hero-aura hero-aura-gold"></span>
+        <span class="hero-aura hero-aura-emerald"></span>
+        <span class="hero-grid-lines"></span>
+        <span class="hero-noise"></span>
+        <svg class="hero-beam" viewBox="0 0 1200 620" preserveAspectRatio="none" focusable="false">
+          <defs>
+            <linearGradient id="beam-gold" x1="1" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#e8cb8f" stop-opacity="0.5" />
+              <stop offset="0.55" stop-color="#e8cb8f" stop-opacity="0.12" />
+              <stop offset="1" stop-color="#e8cb8f" stop-opacity="0" />
+            </linearGradient>
+            <linearGradient id="beam-emerald" x1="1" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#3bd9a4" stop-opacity="0.28" />
+              <stop offset="1" stop-color="#3bd9a4" stop-opacity="0" />
+            </linearGradient>
+          </defs>
+          <path
+            class="hero-beam-line"
+            d="M1180 12 C 900 120, 660 300, 360 600"
+            stroke="url(#beam-gold)"
+          />
+          <path
+            class="hero-beam-line hero-beam-line-2"
+            d="M1100 0 C 840 150, 640 330, 430 620"
+            stroke="url(#beam-emerald)"
+          />
+          <path
+            class="hero-beam-line hero-beam-line-3"
+            d="M1240 60 C 980 170, 760 330, 540 620"
+            stroke="url(#beam-gold)"
+          />
+        </svg>
       </div>
 
-      <!-- Hero visual (Lane L2): imagery-led, decorative ambience only.
+      <div class="container hero-container">
+        <div class="hero-content">
+          <div class="hero-badge">
+            <Icon name="award" size={14} />
+            <span>مرکز تخصصی لیزر و زیبایی پاسداران — لیزر تماسی رادو پلاس</span>
+          </div>
+
+          <h1 class="hero-title">
+            تجربه‌ای لوکس، بدون درد و قطعی از{' '}
+            <span class="gold-gradient-text">لیزر موهای زائد</span> در پاسداران
+          </h1>
+
+          <p class="hero-subtitle">
+            لیزر تماسی <b>رادو پلاس</b> با سه طول موج، سرمایش پیوسته و پک استریل اختصاصی — با پروتکل
+            بهداشتی ثبت‌شده برای هر جلسه.
+          </p>
+
+          <div class="hero-cta-group">
+            <a href="/booking" class="btn btn-primary btn-lg hero-btn-book">
+              <Icon name="calendar" size={18} />
+              <span>رزرو آنلاین نوبت</span>
+              <span class="promo-tag">۱۵٪ تخفیف</span>
+              <Icon name="arrowLeft" size={17} />
+            </a>
+            <a href="#services" class="btn btn-outline btn-lg hero-btn-services">
+              <Icon name="services" size={18} />
+              <span>مشاهده تعرفه‌ها</span>
+            </a>
+            <a
+              href="tel:+989035555090"
+              class="hero-phone-chip"
+              aria-label="مشاوره و پذیرش: ۰۹۰۳ ۵۵۵ ۵۰۹۰"
+            >
+              <Icon name="phone" size={15} />
+              <span>
+                مشاوره و پذیرش: <bdi dir="ltr">۰۹۰۳ ۵۵۵ ۵۰۹۰</bdi>
+              </span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Hero visual (Lane L2): imagery-led, decorative ambience only.
            Image is generated illustration of a laser hair-removal session —
            NOT a photo of this clinic or of the Rado Plus device, so the alt
            text and caption describe ambience only and make no equipment or
            facility claim. Replace with a real clinic photo when one exists. -->
-      <figure class="hero-visual">
-        <div class="hero-visual-stage">
-        <div class="hero-visual-frame">
-          <picture>
-            <!-- Mobile (<768px): a phone shows this band at ≤96vw (≈400 CSS px).
+        <figure class="hero-visual">
+          <div class="hero-visual-stage">
+            <div class="hero-visual-frame">
+              <picture>
+                <!-- Mobile (<768px): a phone shows this band at ≤96vw (≈400 CSS px).
                  Capping the candidate list at 700w keeps DPR-3 phones from
                  pulling the 1400w file (~97 KB) for a ~400 px box. -->
-            <source
-              type="image/avif"
-              media="(max-width: 767px)"
-              srcset="/images/hero-laser-700.avif 700w"
-              sizes="96vw"
-            />
-            <source
-              type="image/webp"
-              media="(max-width: 767px)"
-              srcset="/images/hero-laser-700.webp 700w"
-              sizes="96vw"
-            />
-            <source
-              type="image/avif"
-              srcset="/images/hero-laser-700.avif 700w, /images/hero-laser-1400.avif 1400w"
-              sizes="(min-width: 1024px) 46vw, 96vw"
-            />
-            <source
-              type="image/webp"
-              srcset="/images/hero-laser-700.webp 700w, /images/hero-laser-1400.webp 1400w"
-              sizes="(min-width: 1024px) 46vw, 96vw"
-            />
-            <img
-              class="hero-visual-img"
-              src="/images/hero-laser-1400.jpg"
-              srcset="/images/hero-laser-700.jpg 700w, /images/hero-laser-1400.jpg 1400w"
-              sizes="(min-width: 1024px) 46vw, 96vw"
-              alt="جلسه لیزر موهای زائد با دستگاه تماسی روی پوست پا در فضایی آرام و استریل"
-              width="1400"
-              height="933"
-              loading="eager"
-              fetchpriority="high"
-              decoding="async"
-            />
-          </picture>
-          <div class="hero-visual-overlay" aria-hidden="true"></div>
-          <span class="hero-corner hero-corner-1" aria-hidden="true"></span>
-          <span class="hero-corner hero-corner-2" aria-hidden="true"></span>
-          <span class="hero-corner hero-corner-3" aria-hidden="true"></span>
-          <span class="hero-corner hero-corner-4" aria-hidden="true"></span>
-        </div>
+                <source
+                  type="image/avif"
+                  media="(max-width: 767px)"
+                  srcset="/images/hero-laser-700.avif 700w"
+                  sizes="96vw"
+                />
+                <source
+                  type="image/webp"
+                  media="(max-width: 767px)"
+                  srcset="/images/hero-laser-700.webp 700w"
+                  sizes="96vw"
+                />
+                <source
+                  type="image/avif"
+                  srcset="/images/hero-laser-700.avif 700w, /images/hero-laser-1400.avif 1400w"
+                  sizes="(min-width: 1024px) 46vw, 96vw"
+                />
+                <source
+                  type="image/webp"
+                  srcset="/images/hero-laser-700.webp 700w, /images/hero-laser-1400.webp 1400w"
+                  sizes="(min-width: 1024px) 46vw, 96vw"
+                />
+                <img
+                  class="hero-visual-img"
+                  src="/images/hero-laser-1400.jpg"
+                  srcset="/images/hero-laser-700.jpg 700w, /images/hero-laser-1400.jpg 1400w"
+                  sizes="(min-width: 1024px) 46vw, 96vw"
+                  alt="جلسه لیزر موهای زائد با دستگاه تماسی روی پوست پا در فضایی آرام و استریل"
+                  width="1400"
+                  height="933"
+                  loading="eager"
+                  fetchpriority="high"
+                  decoding="async"
+                />
+              </picture>
+              <div class="hero-visual-overlay" aria-hidden="true"></div>
+              <span class="hero-corner hero-corner-1" aria-hidden="true"></span>
+              <span class="hero-corner hero-corner-2" aria-hidden="true"></span>
+              <span class="hero-corner hero-corner-3" aria-hidden="true"></span>
+              <span class="hero-corner hero-corner-4" aria-hidden="true"></span>
+            </div>
 
-        <!-- Device seal: a slow-turning spec ring breaking the photo's frame.
+            <!-- Device seal: a slow-turning spec ring breaking the photo's frame.
              Decorative, so it is hidden from AT and from reduced-motion users. -->
-        <div class="hero-seal" aria-hidden="true">
-          <svg viewBox="0 0 100 100" class="hero-seal-ring" focusable="false">
-            <defs>
-              <path id="seal-path" d="M50,50 m-37,0 a37,37 0 1,1 74,0 a37,37 0 1,1 -74,0" />
-            </defs>
-            <text>
-              <textPath href="#seal-path" startOffset="0%">RADO PLUS · CONTACT LASER · </textPath>
-            </text>
-          </svg>
-          <span class="hero-seal-core"><Icon name="sparkles" size={17} /></span>
-        </div>
+            <div class="hero-seal" aria-hidden="true">
+              <svg viewBox="0 0 100 100" class="hero-seal-ring" focusable="false">
+                <defs>
+                  <path id="seal-path" d="M50,50 m-37,0 a37,37 0 1,1 74,0 a37,37 0 1,1 -74,0" />
+                </defs>
+                <text>
+                  <textPath href="#seal-path" startOffset="0%">
+                    RADO PLUS · CONTACT LASER ·{' '}
+                  </textPath>
+                </text>
+              </svg>
+              <span class="hero-seal-core">
+                <Icon name="sparkles" size={17} />
+              </span>
+            </div>
 
-        <!-- Spec panel — the device numbers, read as instrumentation instead of
+            <!-- Spec panel — the device numbers, read as instrumentation instead of
              three glass chips floating on the photo's scrim. -->
-        <div class="hero-spec-card">
-          <span class="hero-spec-head">
-            <Icon name="target" size={13} />
-            <span>مشخصات دستگاه رادو پلاس</span>
-          </span>
-          <dl class="hero-spec-list">
-            <div class="hero-spec-row">
-              <dt>طول موج</dt>
-              <dd><bdi dir="ltr">۷۵۵ · ۸۰۸ · ۱۰۶۴</bdi> <span>نانومتر</span></dd>
+            <div class="hero-spec-card">
+              <span class="hero-spec-head">
+                <Icon name="target" size={13} />
+                <span>مشخصات دستگاه رادو پلاس</span>
+              </span>
+              <dl class="hero-spec-list">
+                <div class="hero-spec-row">
+                  <dt>طول موج</dt>
+                  <dd>
+                    <bdi dir="ltr">۷۵۵ · ۸۰۸ · ۱۰۶۴</bdi> <span>نانومتر</span>
+                  </dd>
+                </div>
+                <div class="hero-spec-row">
+                  <dt>سرمایش</dt>
+                  <dd>TEC Double</dd>
+                </div>
+                <div class="hero-spec-row">
+                  <dt>توان</dt>
+                  <dd>
+                    <bdi>۱۶۰۰</bdi> <span>وات</span>
+                  </dd>
+                </div>
+              </dl>
             </div>
-            <div class="hero-spec-row">
-              <dt>سرمایش</dt>
-              <dd>TEC Double</dd>
+          </div>
+          <figcaption class="hero-visual-caption">
+            لیزر تماسی رادو پلاس با تست شات رایگان پیش از شروع دوره — پاسداران، خیابان پایدارفرد
+            <span class="hero-visual-note">
+              تصویر بالا تزئینی است و دستگاه یا محل مرکز را نشان نمی‌دهد.
+            </span>
+          </figcaption>
+        </figure>
+
+        <!-- Hero Trust Metrics Grid -->
+        <div class="hero-trust-metrics">
+          <div class="metric-item">
+            <div class="metric-top">
+              <Icon name="shield" size={16} class="metric-icon" />
+              <span class="metric-val">۱۰۰٪</span>
             </div>
-            <div class="hero-spec-row">
-              <dt>توان</dt>
-              <dd><bdi>۱۶۰۰</bdi> <span>وات</span></dd>
+            <span class="metric-label">پک بهداشتی و سری استریل اختصاصی هر مراجع</span>
+          </div>
+
+          <div class="metric-item">
+            <div class="metric-top">
+              <Icon name="percent" size={16} class="metric-icon" />
+              <span class="metric-val">۱۵٪</span>
             </div>
-          </dl>
-        </div>
-        </div>
-        <figcaption class="hero-visual-caption">
-          لیزر تماسی رادو پلاس با تست شات رایگان پیش از شروع دوره — پاسداران، خیابان پایدارفرد
-          <span class="hero-visual-note">تصویر بالا تزئینی است و دستگاه یا محل مرکز را نشان نمی‌دهد.</span>
-        </figcaption>
-      </figure>
-
-      <!-- Hero Trust Metrics Grid -->
-      <div class="hero-trust-metrics">
-        <div class="metric-item">
-          <div class="metric-top">
-            <Icon name="shield" size={16} class="metric-icon" />
-            <span class="metric-val">۱۰۰٪</span>
+            <span class="metric-label">تخفیف رزرو اینترنتی پکیج فول بادی</span>
           </div>
-          <span class="metric-label">پک بهداشتی و سری استریل اختصاصی هر مراجع</span>
-        </div>
 
-        <div class="metric-item">
-          <div class="metric-top">
-            <Icon name="percent" size={16} class="metric-icon" />
-            <span class="metric-val">۱۵٪</span>
+          <div class="metric-item">
+            <div class="metric-top">
+              <Icon name="target" size={16} class="metric-icon" />
+              <span class="metric-val">
+                <bdi dir="ltr">۷۵۵ · ۸۰۸ · ۱۰۶۴</bdi>
+              </span>
+            </div>
+            <span class="metric-label">سه طول موج الکس، دایود و یاگ برای همه تیپ‌های پوستی</span>
           </div>
-          <span class="metric-label">تخفیف رزرو اینترنتی پکیج فول بادی</span>
-        </div>
 
-        <div class="metric-item">
-          <div class="metric-top">
-            <Icon name="target" size={16} class="metric-icon" />
-            <span class="metric-val"><bdi dir="ltr">۷۵۵ · ۸۰۸ · ۱۰۶۴</bdi></span>
+          <div class="metric-item">
+            <div class="metric-top">
+              <Icon name="pin" size={16} class="metric-icon" />
+              <span class="metric-val">پاسداران</span>
+            </div>
+            <span class="metric-label">لوکیشن پایدارفرد با دسترسی آسان و پارکینگ</span>
           </div>
-          <span class="metric-label">سه طول موج الکس، دایود و یاگ برای همه تیپ‌های پوستی</span>
-        </div>
-
-        <div class="metric-item">
-          <div class="metric-top">
-            <Icon name="pin" size={16} class="metric-icon" />
-            <span class="metric-val">پاسداران</span>
-          </div>
-          <span class="metric-label">لوکیشن پایدارفرد با دسترسی آسان و پارکینگ</span>
         </div>
       </div>
-    </div>
-  </section>
-
-)}
+    </section>
+  )}
 
   <!-- Rado Plus Contact Laser Showcase (§37, §38) -->
   {isOn('device-showcase') && <DeviceShowcase />}
 
   <!-- Trust Strip (§37) -->
-{isOn('trust-strip') && (
-  <section class="trust-strip">
-    <div class="container trust-grid">
-      <div class="trust-card">
-        <div class="trust-icon">
-          <Icon name="doctor" size={26} />
+  {isOn('trust-strip') && (
+    <section class="trust-strip">
+      <div class="container trust-grid">
+        <div class="trust-card">
+          <div class="trust-icon">
+            <Icon name="doctor" size={26} />
+          </div>
+          <h3 class="trust-title">اپراتورهای ارشد دوره‌دیده</h3>
+          <p class="trust-desc">
+            ارائه خدمات توسط اپراتورهای دارای گواهینامه کاربری لیزرهای پزشکی، در لاین‌های کاملاً
+            مجزای بانوان و آقایان
+          </p>
         </div>
-        <h3 class="trust-title">اپراتورهای ارشد دوره‌دیده</h3>
-        <p class="trust-desc">ارائه خدمات توسط اپراتورهای دارای گواهینامه کاربری لیزرهای پزشکی، در لاین‌های کاملاً مجزای بانوان و آقایان</p>
-      </div>
 
-      <div class="trust-card">
-        <div class="trust-icon">
-          <Icon name="clean" size={26} />
+        <div class="trust-card">
+          <div class="trust-icon">
+            <Icon name="clean" size={26} />
+          </div>
+          <h3 class="trust-title">پک بهداشتی و سری اختصاصی</h3>
+          <p class="trust-desc">
+            سلفون‌کشی کامل، ملحفه یکبار مصرف و سری مجزا برای هر مراجعه‌کننده با تضمین سلامت کامل
+            پزشکی
+          </p>
         </div>
-        <h3 class="trust-title">پک بهداشتی و سری اختصاصی</h3>
-        <p class="trust-desc">سلفون‌کشی کامل، ملحفه یکبار مصرف و سری مجزا برای هر مراجعه‌کننده با تضمین سلامت کامل پزشکی</p>
-      </div>
 
-      <div class="trust-card">
-        <div class="trust-icon">
-          <Icon name="gem" size={26} />
+        <div class="trust-card">
+          <div class="trust-icon">
+            <Icon name="gem" size={26} />
+          </div>
+          <h3 class="trust-title">تعرفه‌های شفاف و مصوب</h3>
+          <p class="trust-desc">
+            هزینه‌های اعلامی قطعی بوده و هیچ‌گونه هزینه پنهان یا تغییر قیمت در محل کلینیک اخذ
+            نمی‌گردد
+          </p>
         </div>
-        <h3 class="trust-title">تعرفه‌های شفاف و مصوب</h3>
-        <p class="trust-desc">هزینه‌های اعلامی قطعی بوده و هیچ‌گونه هزینه پنهان یا تغییر قیمت در محل کلینیک اخذ نمی‌گردد</p>
-      </div>
 
-      <div class="trust-card">
-        <div class="trust-icon">
-          <Icon name="sparkles" size={26} />
+        <div class="trust-card">
+          <div class="trust-icon">
+            <Icon name="sparkles" size={26} />
+          </div>
+          <h3 class="trust-title">گارانتی اثربخشی دوره</h3>
+          <p class="trust-desc">
+            ریزش بین ۸۰ تا ۹۵ درصد موهای زائد در پایان دوره استاندارد ۶ الی ۸ جلسه‌ای تحت پروتکل
+            علمی
+          </p>
         </div>
-        <h3 class="trust-title">گارانتی اثربخشی دوره</h3>
-        <p class="trust-desc">ریزش بین ۸۰ تا ۹۵ درصد موهای زائد در پایان دوره استاندارد ۶ الی ۸ جلسه‌ای تحت پروتکل علمی</p>
       </div>
-    </div>
-  </section>
-
-)}
+    </section>
+  )}
 
   <!-- Clinic ambience band (Lane L2) — imagery-led visual proof -->
   {isOn('clinic-gallery') && <ClinicGallery />}
 
   <!-- Services & Pricing Section (§10, §11, §253, §254) -->
-{isOn('pricing-table') && (
-  <section id="services" class="section services-section">
-    <div class="container">
-      <div class="section-header text-center">
-        <span class="section-subtitle">تعرفه‌های مصوب و شفاف کلینیک</span>
-        <h2 class="section-title">تعرفه لیزر بانوان و آقایان — کنار هم</h2>
-        <p class="section-desc">
-          تعرفه‌های رسمی کلینیک تهران لیزر با دستگاه لیزر تماسی رادو پلاس برای هر دو لاین بانوان و آقایان. رزرو آنلاین پکیج کل بدن مشمول ۱۵٪ تخفیف ویژه می‌باشد.
-        </p>
-      </div>
-
-      <!-- Featured Promo Banner -->
-      <div class="featured-promo-card">
-        <div class="promo-badge-ribbon">
-          <Icon name="sparkles" size={14} />
-          <span>{str(pricingCfg.promoBadge, 'پیشنهاد طلایی رزرو آنلاین')}</span>
+  {isOn('pricing-table') && (
+    <section id="services" class="section services-section">
+      <div class="container">
+        <div class="section-header text-center">
+          <span class="section-subtitle">تعرفه‌های مصوب و شفاف کلینیک</span>
+          <h2 class="section-title">تعرفه لیزر بانوان و آقایان — کنار هم</h2>
+          <p class="section-desc">
+            تعرفه‌های رسمی کلینیک تهران لیزر با دستگاه لیزر تماسی رادو پلاس برای هر دو لاین بانوان و
+            آقایان. رزرو آنلاین پکیج کل بدن مشمول ۱۵٪ تخفیف ویژه می‌باشد.
+          </p>
         </div>
-        <div class="promo-content">
-          <div class="promo-info">
-            <h3 class="promo-title">{str(pricingCfg.promoTitle, 'پکیج طلایی کل بدن بانوان (Full Body)')}</h3>
-            <p class="promo-desc">شامل دست کامل، پا کامل، زیر بغل، بیکینی، خط باسن، خط ناف و شکم با شات نامحدود</p>
-            <ul class="promo-features">
-              <li>
-                <Icon name="checkCircle" size={16} class="check-icon" />
-                <span>انجام توسط اپراتور ارشد با شات نامحدود واقعی</span>
-              </li>
-              <li>
-                <Icon name="checkCircle" size={16} class="check-icon" />
-                <span>سرمایش پیوسته TEC Double بدون درد</span>
-              </li>
-              <li>
-                <Icon name="checkCircle" size={16} class="check-icon" />
-                <span>پک بهداشتی و سری اختصاصی استریل</span>
-              </li>
-            </ul>
+
+        <!-- Featured Promo Banner -->
+        <div class="featured-promo-card">
+          <div class="promo-badge-ribbon">
+            <Icon name="sparkles" size={14} />
+            <span>{str(pricingCfg.promoBadge, 'پیشنهاد طلایی رزرو آنلاین')}</span>
           </div>
-          <div class="promo-pricing-box">
-            <div class="old-price">
-              <span class="strikethrough">{str(pricingCfg.promoOldPrice, '۲٬۲۹۰٬۰۰۰')}</span>
-              <span class="price-unit">تومان</span>
+          <div class="promo-content">
+            <div class="promo-info">
+              <h3 class="promo-title">
+                {str(pricingCfg.promoTitle, 'پکیج طلایی کل بدن بانوان (Full Body)')}
+              </h3>
+              <p class="promo-desc">
+                شامل دست کامل، پا کامل، زیر بغل، بیکینی، خط باسن، خط ناف و شکم با شات نامحدود
+              </p>
+              <ul class="promo-features">
+                <li>
+                  <Icon name="checkCircle" size={16} class="check-icon" />
+                  <span>انجام توسط اپراتور ارشد با شات نامحدود واقعی</span>
+                </li>
+                <li>
+                  <Icon name="checkCircle" size={16} class="check-icon" />
+                  <span>سرمایش پیوسته TEC Double بدون درد</span>
+                </li>
+                <li>
+                  <Icon name="checkCircle" size={16} class="check-icon" />
+                  <span>پک بهداشتی و سری اختصاصی استریل</span>
+                </li>
+              </ul>
             </div>
-            <div class="new-price">
-              <span class="final-amount">{str(pricingCfg.promoNewPrice, '۱٬۹۴۰٬۰۰۰')}</span>
-              <span class="price-unit">تومان</span>
+            <div class="promo-pricing-box">
+              <div class="old-price">
+                <span class="strikethrough">{str(pricingCfg.promoOldPrice, '۲٬۲۹۰٬۰۰۰')}</span>
+                <span class="price-unit">تومان</span>
+              </div>
+              <div class="new-price">
+                <span class="final-amount">{str(pricingCfg.promoNewPrice, '۱٬۹۴۰٬۰۰۰')}</span>
+                <span class="price-unit">تومان</span>
+              </div>
+              <span class="discount-tag">
+                {str(pricingCfg.promoDiscountLabel, '۱۵٪ تخفیف اختصاصی رزرو سایت')}
+              </span>
+              <a
+                href={`/booking?service=${encodeURIComponent(str(pricingCfg.promoServiceSlug, 'full-body'))}`}
+                class="btn btn-primary btn-block mt-3"
+              >
+                <Icon name="calendar" size={18} />
+                <span>رزرو نوبت پکیج کل بدن</span>
+              </a>
             </div>
-            <span class="discount-tag">{str(pricingCfg.promoDiscountLabel, '۱۵٪ تخفیف اختصاصی رزرو سایت')}</span>
-            <a href={`/booking?service=${encodeURIComponent(str(pricingCfg.promoServiceSlug, 'full-body'))}`} class="btn btn-primary btn-block mt-3">
-              <Icon name="calendar" size={18} />
-              <span>رزرو نوبت پکیج کل بدن</span>
-            </a>
           </div>
         </div>
-      </div>
 
-      <!-- Unified gender price table — تعرفه بانوان و آقایان کنار هم (Lane B) -->
-      <div class="gender-price-table-wrap mt-5">
-        <table class="gender-price-table">
-          <thead>
-            <tr>
-              <th scope="col" class="gpt-th-zone">ناحیه خدمت</th>
-              <th scope="col" class="gpt-th-female">تعرفه بانوان <span class="gpt-th-unit">(تومان)</span></th>
-              <th scope="col" class="gpt-th-male">تعرفه آقایان <span class="gpt-th-unit">(تومان)</span></th>
-              <th scope="col" class="gpt-th-action">رزرو</th>
-            </tr>
-          </thead>
-          <tbody>
-            {priceRows.map((row) => (
-              <tr class={row.mensOnly ? 'gpt-row gpt-row-mens' : 'gpt-row'}>
-                <td class="gpt-cell-zone">
-                  <span class="gpt-zone-name">{row.name}</span>
-                  {row.mensOnly && <span class="gpt-mens-tag">مخصوص آقایان</span>}
-                </td>
-                <td class="gpt-cell-female" data-label="بانوان">
-                  {row.femaleAmount !== null ? (
-                    <span class="gpt-price">
-                      <span class="gpt-amount">{toman(row.femaleAmount)}</span>
-                      <span class="gpt-unit">تومان</span>
-                    </span>
-                  ) : (
-                    <span class="gpt-na">—</span>
-                  )}
-                </td>
-                <td class="gpt-cell-male" data-label="آقایان">
-                  {row.maleAmount !== null ? (
-                    <span class="gpt-price">
-                      <span class="gpt-amount">{toman(row.maleAmount)}</span>
-                      <span class="gpt-unit">تومان</span>
-                    </span>
-                  ) : (
-                    <span class="gpt-na">استعلام تلفنی</span>
-                  )}
-                </td>
-                <td class="gpt-cell-action">
-                  <a href={`/booking?service=${row.slug}`} class="gpt-book-btn" aria-label={`رزرو ${row.name}`}>
-                    <Icon name="calendar" size={14} />
-                    <span>رزرو</span>
-                  </a>
-                </td>
+        <!-- Unified gender price table — تعرفه بانوان و آقایان کنار هم (Lane B) -->
+        <div class="gender-price-table-wrap mt-5">
+          <table class="gender-price-table">
+            <thead>
+              <tr>
+                <th scope="col" class="gpt-th-zone">
+                  ناحیه خدمت
+                </th>
+                <th scope="col" class="gpt-th-female">
+                  تعرفه بانوان <span class="gpt-th-unit">(تومان)</span>
+                </th>
+                <th scope="col" class="gpt-th-male">
+                  تعرفه آقایان <span class="gpt-th-unit">(تومان)</span>
+                </th>
+                <th scope="col" class="gpt-th-action">
+                  رزرو
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {priceRows.map((row) => (
+                <tr class={row.mensOnly ? 'gpt-row gpt-row-mens' : 'gpt-row'}>
+                  <td class="gpt-cell-zone">
+                    <span class="gpt-zone-name">{row.name}</span>
+                    {row.mensOnly && <span class="gpt-mens-tag">مخصوص آقایان</span>}
+                  </td>
+                  <td class="gpt-cell-female" data-label="بانوان">
+                    {row.femaleAmount !== null ? (
+                      <span class="gpt-price">
+                        <span class="gpt-amount">{toman(row.femaleAmount)}</span>
+                        <span class="gpt-unit">تومان</span>
+                      </span>
+                    ) : (
+                      <span class="gpt-na">—</span>
+                    )}
+                  </td>
+                  <td class="gpt-cell-male" data-label="آقایان">
+                    {row.maleAmount !== null ? (
+                      <span class="gpt-price">
+                        <span class="gpt-amount">{toman(row.maleAmount)}</span>
+                        <span class="gpt-unit">تومان</span>
+                      </span>
+                    ) : (
+                      <span class="gpt-na">استعلام تلفنی</span>
+                    )}
+                  </td>
+                  <td class="gpt-cell-action">
+                    <a
+                      href={`/booking?service=${row.slug}`}
+                      class="gpt-book-btn"
+                      aria-label={`رزرو ${row.name}`}
+                    >
+                      <Icon name="calendar" size={14} />
+                      <span>رزرو</span>
+                    </a>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
 
-      <div class="text-center mt-5">
-        <a href="/services" class="btn btn-outline btn-lg">
-          <span>مشاهده جزئیات کامل هر ناحیه و راهنمای مراقبت</span>
-          <Icon name="arrowLeft" size={18} />
-        </a>
+        <div class="text-center mt-5">
+          <a href="/services" class="btn btn-outline btn-lg">
+            <span>مشاهده جزئیات کامل هر ناحیه و راهنمای مراقبت</span>
+            <Icon name="arrowLeft" size={18} />
+          </a>
+        </div>
       </div>
-    </div>
-  </section>
-
-)}
+    </section>
+  )}
 
   <!-- Male Services Section Info (§11) -->
-{isOn('mens-line') && (
-  <section class="section male-services-strip">
-    <div class="container male-strip-inner">
-      <div class="male-text">
-        <span class="badge badge-outline">
-          <Icon name="shield" size={14} />
-          <span>لاین درمانی مجزا</span>
-        </span>
-        <h3 class="male-title">{str(mensCfg.title, 'خدمات اختصاصی لیزر آقایان در فضای مجزا')}</h3>
-        <p class="male-desc">
-          {str(
-            mensCfg.description,
-            'کلینیک تهران لیزر مجهز به لاین اختصاصی آقایان با فضای کاملاً مجزا و پروتکل‌های ویژه موهای ضخیم می‌باشد. نواحی آنکارد ریش، خط گردن و گونه، پشت، شانه‌ها، سینه و پکیج کامل کل بدن با تعیین وقت قبلی و در کمال حریم شخصی ارائه می‌گردد.',
-          )}
-        </p>
+  {isOn('mens-line') && (
+    <section class="section male-services-strip">
+      <div class="container male-strip-inner">
+        <div class="male-text">
+          <span class="badge badge-outline">
+            <Icon name="shield" size={14} />
+            <span>لاین درمانی مجزا</span>
+          </span>
+          <h3 class="male-title">{str(mensCfg.title, 'خدمات اختصاصی لیزر آقایان در فضای مجزا')}</h3>
+          <p class="male-desc">
+            {str(
+              mensCfg.description,
+              'کلینیک تهران لیزر مجهز به لاین اختصاصی آقایان با فضای کاملاً مجزا و پروتکل‌های ویژه موهای ضخیم می‌باشد. نواحی آنکارد ریش، خط گردن و گونه، پشت، شانه‌ها، سینه و پکیج کامل کل بدن با تعیین وقت قبلی و در کمال حریم شخصی ارائه می‌گردد.',
+            )}
+          </p>
+        </div>
+        <div class="male-cta">
+          <a href="/booking" class="btn btn-outline btn-lg">
+            <Icon name="calendar" size={18} />
+            <span>رزرو نوبت لاین اختصاصی آقایان</span>
+          </a>
+        </div>
       </div>
-      <div class="male-cta">
-        <a href="/booking" class="btn btn-outline btn-lg">
-          <Icon name="calendar" size={18} />
-          <span>رزرو نوبت لاین اختصاصی آقایان</span>
-        </a>
-      </div>
-    </div>
-  </section>
-
-)}
+    </section>
+  )}
 
   <!-- Clinical Protocol & Trust Standards Section -->
   {isOn('protocol') && <ProtocolSection />}
@@ -569,7 +637,9 @@ function faDigits(value: string): string {
       <div class="container">
         <header class="section-header text-center">
           <span class="section-subtitle">اعتماد در اعداد</span>
-          <h2 class="section-title" id="stat-band-title">تهران لیزر از نگاه مراجعین</h2>
+          <h2 class="section-title" id="stat-band-title">
+            تهران لیزر از نگاه مراجعین
+          </h2>
         </header>
         <div class="stat-band-grid">
           <div class="stat-band-card">
@@ -581,7 +651,10 @@ function faDigits(value: string): string {
             <span class="stat-band-label">جلسه لیزر انجام‌شده</span>
           </div>
           <div class="stat-band-card">
-            <span class="stat-band-value">{str(statsCfg.rating, '۴.۹')}<small>/۵</small></span>
+            <span class="stat-band-value">
+              {str(statsCfg.rating, '۴.۹')}
+              <small>/۵</small>
+            </span>
             <span class="stat-band-label">امتیاز رضایت مراجعین</span>
           </div>
           <div class="stat-band-card">
@@ -598,203 +671,216 @@ function faDigits(value: string): string {
   {isOn('content-blog') && <JournalStrip posts={journalPosts} />}
 
   <!-- FAQ Section (§31, §256) -->
-{isOn('faq') && (
-  <section id="faq" class="section faq-section">
-    <div class="container">
-      <div class="section-header text-center">
-        <span class="section-subtitle">{str(faqCfg.subtitle, 'پاسخ به سوالات پرتکرار')}</span>
-        <h2 class="section-title">{str(faqCfg.title, 'سوالات متداول مراجعین تهران لیزر')}</h2>
-      </div>
+  {isOn('faq') && (
+    <section id="faq" class="section faq-section">
+      <div class="container">
+        <div class="section-header text-center">
+          <span class="section-subtitle">{str(faqCfg.subtitle, 'پاسخ به سوالات پرتکرار')}</span>
+          <h2 class="section-title">{str(faqCfg.title, 'سوالات متداول مراجعین تهران لیزر')}</h2>
+        </div>
 
-      <div class="faq-accordion">
-        {activeFaqs.map((faq) => (
-          <details class="faq-card">
-            <summary class="faq-question">
-              <span>{faq.question}</span>
-              <span class="faq-toggle-icon">
-                <Icon name="chevronDown" size={18} />
-              </span>
-            </summary>
-            <div class="faq-answer">
-              <p>{faq.answer}</p>
-            </div>
-          </details>
-        ))}
+        <div class="faq-accordion">
+          {activeFaqs.map((faq) => (
+            <details class="faq-card">
+              <summary class="faq-question">
+                <span>{faq.question}</span>
+                <span class="faq-toggle-icon">
+                  <Icon name="chevronDown" size={18} />
+                </span>
+              </summary>
+              <div class="faq-answer">
+                <p>{faq.answer}</p>
+              </div>
+            </details>
+          ))}
+        </div>
       </div>
-    </div>
-  </section>
-
-)}
+    </section>
+  )}
 
   <!-- Clinic Location & Direct CTA (§34, §35, §36) -->
-{isOn('location') && (
-  <section class="section clinic-location-section">
-    <div class="container location-container">
-      <div class="location-card">
-        <span class="section-subtitle">موقعیت مکانی و راه‌های ارتباطی</span>
-        <h2 class="location-heading">کلینیک تهران لیزر در منطقه پاسداران</h2>
+  {isOn('location') && (
+    <section class="section clinic-location-section">
+      <div class="container location-container">
+        <div class="location-card">
+          <span class="section-subtitle">موقعیت مکانی و راه‌های ارتباطی</span>
+          <h2 class="location-heading">کلینیک تهران لیزر در منطقه پاسداران</h2>
 
-        <div class="location-details-list">
-          <div class="loc-detail-item">
-            <Icon name="pin" size={20} class="loc-icon" />
-            <div class="loc-text">
-              <strong>نشانی دقیق:</strong> تهران، پاسداران، خیابان پایدارفرد، نبش بوستان هفتم
+          <div class="location-details-list">
+            <div class="loc-detail-item">
+              <Icon name="pin" size={20} class="loc-icon" />
+              <div class="loc-text">
+                <strong>نشانی دقیق:</strong> تهران، پاسداران، خیابان پایدارفرد، نبش بوستان هفتم
+              </div>
+            </div>
+
+            <div class="loc-detail-item">
+              <Icon name="phone" size={20} class="loc-icon" />
+              <div class="loc-text">
+                <strong>تلفن پذیرش و هماهنگی:</strong>
+                <a href="tel:+989035555090" class="loc-phone-link">
+                  <bdi dir="ltr">۰۹۰۳ ۵۵۵ ۵۰۹۰</bdi>
+                </a>
+              </div>
+            </div>
+
+            <div class="loc-detail-item">
+              <Icon name="clock" size={20} class="loc-icon" />
+              <div class="loc-text">
+                <strong>ساعات پذیرش:</strong> شنبه تا چهارشنبه ۹ الی ۲۰ | پنجشنبه ۹ الی ۱۸
+              </div>
             </div>
           </div>
 
-          <div class="loc-detail-item">
-            <Icon name="phone" size={20} class="loc-icon" />
-            <div class="loc-text">
-              <strong>تلفن پذیرش و هماهنگی:</strong>
-              <a href="tel:+989035555090" class="loc-phone-link"><bdi dir="ltr">۰۹۰۳ ۵۵۵ ۵۰۹۰</bdi></a>
-            </div>
-          </div>
-
-          <div class="loc-detail-item">
-            <Icon name="clock" size={20} class="loc-icon" />
-            <div class="loc-text">
-              <strong>ساعات پذیرش:</strong> شنبه تا چهارشنبه ۹ الی ۲۰ | پنجشنبه ۹ الی ۱۸
-            </div>
-          </div>
-        </div>
-
-        <div class="location-actions mt-4">
-          <a
-            href="https://maps.google.com/?q=Pasdaran+Paydarfard+Tehran"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="btn btn-outline loc-map-btn"
-          >
-            <Icon name="pin" size={17} />
-            <span>مسیریابی روی نقشه گوگل</span>
-          </a>
-          <a href="/booking" class="btn btn-primary loc-book-btn">
-            <Icon name="calendar" size={17} />
-            <span>رزرو آنلاین نوبت{str(closingCfg.badge, ' (۱۵٪ تخفیف)')}</span>
-          </a>
-        </div>
-      </div>
-    </div>
-  </section>
-
-)}
-
-{isOn('instagram-hub') && (
-  <section class="section instagram-section" id="instagram" aria-labelledby="ig-title">
-    <div class="container">
-      <header class="section-header text-center">
-        <span class="section-subtitle ig-eyebrow">اینستاگرام رسمی کلینیک</span>
-        <h2 class="section-title" id="ig-title">نتایج و نکات لیزر را در اینستاگرام دنبال کنید</h2>
-        <p class="section-desc">
-          ریلزهای کوتاه، نکات مراقبتی قبل و بعد از لیزر و تخفیف ویژه فالوورها؛ هر هفته در صفحه ما.
-        </p>
-      </header>
-
-      <div class="ig-hub">
-        <!-- Profile card -->
-        <div class="ig-card ig-profile">
-          <div class="ig-avatar" aria-hidden="true">
-            <Icon name="instagram" size={30} />
-          </div>
-          <div class="ig-profile-main">
+          <div class="location-actions mt-4">
             <a
-              class="ig-handle"
-              href={igProfileUrl}
+              href="https://maps.google.com/?q=Pasdaran+Paydarfard+Tehran"
               target="_blank"
               rel="noopener noreferrer"
-              dir="ltr"
-              >@{igHandle}</a
+              class="btn btn-outline loc-map-btn"
             >
-            <p class="ig-profile-desc">کلینیک تخصصی تهران لیزر — لیزر تماسی رادو پلاس</p>
-            <div class="ig-profile-actions">
-              <a href={igProfileUrl} target="_blank" rel="noopener noreferrer" class="btn btn-primary ig-follow-btn">
-                <Icon name="instagram" size={17} />
-                <span>دنبال‌کردن در اینستاگرام</span>
-              </a>
-              {igBioLink && (
-                <a href={igBioLink} target="_blank" rel="noopener noreferrer" class="ig-vip-link">
-                  لینک ویژه فالوورها
-                </a>
-              )}
-            </div>
+              <Icon name="pin" size={17} />
+              <span>مسیریابی روی نقشه گوگل</span>
+            </a>
+            <a href="/booking" class="btn btn-primary loc-book-btn">
+              <Icon name="calendar" size={17} />
+              <span>رزرو آنلاین نوبت{str(closingCfg.badge, ' (۱۵٪ تخفیف)')}</span>
+            </a>
           </div>
-        </div>
-
-        <!-- Latest reel card -->
-        <a class="ig-card ig-reel" href={igReelUrl} target="_blank" rel="noopener noreferrer">
-          <span class="ig-reel-badge">ریلز جدید</span>
-          <span class="ig-reel-play" aria-hidden="true">
-            <Icon name="play" size={26} />
-          </span>
-          <span class="ig-reel-copy">
-            <strong>آخرین ویدیوی کلینیک</strong>
-            <span>معرفی دستگاه و تکنیک‌های لیزر بدون درد</span>
-          </span>
-        </a>
-
-        <!-- Promo card -->
-        <div class="ig-card ig-promo">
-          <div class="ig-promo-top">
-            <Icon name="sparkles" size={20} />
-            <span class="ig-promo-title">تخفیف ویژه فالوورها</span>
-          </div>
-          <p class="ig-promo-pct">
-            {igDiscountPct ? (
-              <><strong>{faDigits(igDiscountPct)}٪</strong> روی همه خدمات لیزر</>
-            ) : (
-              <>تخفیف ویژه فالوورهای اینستاگرام</>
-            )}
-          </p>
-          {igPromoCode && (
-            <div class="ig-promo-code-row">
-              <code class="ig-promo-code" dir="ltr">{igPromoCode}</code>
-              <button type="button" class="ig-copy-btn" data-code={igPromoCode}>کپی کد</button>
-            </div>
-          )}
-          <span class="ig-promo-note" role="status" aria-live="polite"></span>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
+  )}
 
-)}
+  {isOn('instagram-hub') && (
+    <section class="section instagram-section" id="instagram" aria-labelledby="ig-title">
+      <div class="container">
+        <header class="section-header text-center">
+          <span class="section-subtitle ig-eyebrow">اینستاگرام رسمی کلینیک</span>
+          <h2 class="section-title" id="ig-title">
+            نتایج و نکات لیزر را در اینستاگرام دنبال کنید
+          </h2>
+          <p class="section-desc">
+            ریلزهای کوتاه، نکات مراقبتی قبل و بعد از لیزر و تخفیف ویژه فالوورها؛ هر هفته در صفحه ما.
+          </p>
+        </header>
+
+        <div class="ig-hub">
+          <!-- Profile card -->
+          <div class="ig-card ig-profile">
+            <div class="ig-avatar" aria-hidden="true">
+              <Icon name="instagram" size={30} />
+            </div>
+            <div class="ig-profile-main">
+              <a
+                class="ig-handle"
+                href={igProfileUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                dir="ltr"
+              >
+                @{igHandle}
+              </a>
+              <p class="ig-profile-desc">کلینیک تخصصی تهران لیزر — لیزر تماسی رادو پلاس</p>
+              <div class="ig-profile-actions">
+                <a
+                  href={igProfileUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="btn btn-primary ig-follow-btn"
+                >
+                  <Icon name="instagram" size={17} />
+                  <span>دنبال‌کردن در اینستاگرام</span>
+                </a>
+                {igBioLink && (
+                  <a href={igBioLink} target="_blank" rel="noopener noreferrer" class="ig-vip-link">
+                    لینک ویژه فالوورها
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <!-- Latest reel card -->
+          <a class="ig-card ig-reel" href={igReelUrl} target="_blank" rel="noopener noreferrer">
+            <span class="ig-reel-badge">ریلز جدید</span>
+            <span class="ig-reel-play" aria-hidden="true">
+              <Icon name="play" size={26} />
+            </span>
+            <span class="ig-reel-copy">
+              <strong>آخرین ویدیوی کلینیک</strong>
+              <span>معرفی دستگاه و تکنیک‌های لیزر بدون درد</span>
+            </span>
+          </a>
+
+          <!-- Promo card -->
+          <div class="ig-card ig-promo">
+            <div class="ig-promo-top">
+              <Icon name="sparkles" size={20} />
+              <span class="ig-promo-title">تخفیف ویژه فالوورها</span>
+            </div>
+            <p class="ig-promo-pct">
+              {igDiscountPct ? (
+                <>
+                  <strong>{faDigits(igDiscountPct)}٪</strong> روی همه خدمات لیزر
+                </>
+              ) : (
+                <>تخفیف ویژه فالوورهای اینستاگرام</>
+              )}
+            </p>
+            {igPromoCode && (
+              <div class="ig-promo-code-row">
+                <code class="ig-promo-code" dir="ltr">
+                  {igPromoCode}
+                </code>
+                <button type="button" class="ig-copy-btn" data-code={igPromoCode}>
+                  کپی کد
+                </button>
+              </div>
+            )}
+            <span class="ig-promo-note" role="status" aria-live="polite"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+  )}
 
   <!-- Closing CTA -->
-{isOn('closing-cta') && (
-  <section class="section closing-cta-section">
-    <div class="container closing-cta-inner">
-      <div class="closing-cta-text">
-        <h2 class="closing-cta-title">{str(closingCfg.title, 'آماده‌اید شروع کنید؟')}</h2>
-        <p class="closing-cta-desc">
-          {str(
-            closingCfg.description,
-            'اولین مشاوره رایگان است؛ همین حالا نوبت بگیرید و ۱۵٪ تخفیف رزرو آنلاین را از دست ندهید.',
-          )}
-        </p>
+  {isOn('closing-cta') && (
+    <section class="section closing-cta-section">
+      <div class="container closing-cta-inner">
+        <div class="closing-cta-text">
+          <h2 class="closing-cta-title">{str(closingCfg.title, 'آماده‌اید شروع کنید؟')}</h2>
+          <p class="closing-cta-desc">
+            {str(
+              closingCfg.description,
+              'اولین مشاوره رایگان است؛ همین حالا نوبت بگیرید و ۱۵٪ تخفیف رزرو آنلاین را از دست ندهید.',
+            )}
+          </p>
+        </div>
+        <div class="closing-cta-actions">
+          <a href="/booking" class="btn btn-primary closing-cta-book">
+            <Icon name="calendar" size={17} />
+            <span>رزرو آنلاین نوبت (۱۵٪ تخفیف)</span>
+          </a>
+          <a href="tel:+989035555090" class="btn btn-outline closing-cta-call">
+            <Icon name="phone" size={17} />
+            <span>
+              تماس: <bdi dir="ltr">۰۹۰۳ ۵۵۵ ۵۰۹۰</bdi>
+            </span>
+          </a>
+        </div>
       </div>
-      <div class="closing-cta-actions">
-        <a href="/booking" class="btn btn-primary closing-cta-book">
-          <Icon name="calendar" size={17} />
-          <span>رزرو آنلاین نوبت (۱۵٪ تخفیف)</span>
-        </a>
-        <a href="tel:+989035555090" class="btn btn-outline closing-cta-call">
-          <Icon name="phone" size={17} />
-          <span>تماس: <bdi dir="ltr">۰۹۰۳ ۵۵۵ ۵۰۹۰</bdi></span>
-        </a>
-      </div>
-    </div>
-  </section>
-
-)}
-
+    </section>
+  )}
 </PublicLayout>
 
 <script is:inline>
   (function () {
     document.querySelectorAll('.ig-copy-btn').forEach(function (btn) {
       btn.addEventListener('click', function () {
-        var code = btn.getAttribute('data-code') || '';
-        var done = function () {
+        const code = btn.getAttribute('data-code') || '';
+        const done = function () {
           btn.textContent = 'کپی شد';
           btn.classList.add('is-copied');
           setTimeout(function () {
@@ -805,14 +891,18 @@ function faDigits(value: string): string {
         if (navigator.clipboard && navigator.clipboard.writeText) {
           navigator.clipboard.writeText(code).then(done).catch(done);
         } else {
-          var ta = document.createElement('textarea');
+          const ta = document.createElement('textarea');
           ta.value = code;
           ta.setAttribute('readonly', '');
           ta.style.position = 'fixed';
           ta.style.opacity = '0';
           document.body.appendChild(ta);
           ta.select();
-          try { document.execCommand('copy'); } catch (e) { /* noop */ }
+          try {
+            document.execCommand('copy');
+          } catch {
+            /* noop */
+          }
           document.body.removeChild(ta);
           done();
         }
@@ -826,9 +916,9 @@ function faDigits(value: string): string {
   // publishing the header's real height as a CSS custom property.
   (function () {
     function syncHeaderOffset() {
-      var header = document.querySelector('.site-header');
+      const header = document.querySelector('.site-header');
       if (!header) return;
-      var h = Math.round(header.getBoundingClientRect().height);
+      const h = Math.round(header.getBoundingClientRect().height);
       if (h > 0) {
         document.documentElement.style.setProperty('--tl-header-offset', h + 'px');
       }
@@ -838,4 +928,3 @@ function faDigits(value: string): string {
     window.addEventListener('orientationchange', syncHeaderOffset);
   })();
 </script>
-

@@ -41,11 +41,17 @@ const weekdayNames = [
           <span>تنظیمات ساعات کاری و زمان‌بندی کلینیک</span>
         </h1>
         <p class="section-block-sub">
-          مدیریت بازه‌های نوبت‌دهی هفتگی، تغییر ساعات کاری و تقویم تعطیلات رسمی (کاملاً API First و بلادرنگ)
+          مدیریت بازه‌های نوبت‌دهی هفتگی، تغییر ساعات کاری و تقویم تعطیلات رسمی (کاملاً API First و
+          بلادرنگ)
         </p>
       </div>
       <div class="actions">
-        <button type="button" id="openExceptionModalBtn" class="btn-3d-gold" style="display: inline-flex; align-items: center; gap: 8px;">
+        <button
+          type="button"
+          id="openExceptionModalBtn"
+          class="btn-3d-gold"
+          style="display: inline-flex; align-items: center; gap: 8px;"
+        >
           <Icon name="plus" size={16} />
           <span>ثبت روز تعطیل یا استثنا</span>
         </button>
@@ -113,7 +119,9 @@ const weekdayNames = [
                     )}
                   </td>
                   <td>
-                    <span class={`badge-status ${isOpen ? 'badge-status-completed' : 'badge-status-rejected'}`}>
+                    <span
+                      class={`badge-status ${isOpen ? 'badge-status-completed' : 'badge-status-rejected'}`}
+                    >
                       {isOpen ? (
                         <>
                           <Icon name="checkCircle" size={12} />
@@ -194,7 +202,9 @@ const weekdayNames = [
                     </span>
                   </td>
                   <td>
-                    <span class={`badge-status ${ex.kind === 'holiday' ? 'badge-status-rejected' : 'badge-status-pending'}`}>
+                    <span
+                      class={`badge-status ${ex.kind === 'holiday' ? 'badge-status-rejected' : 'badge-status-pending'}`}
+                    >
                       {ex.kind === 'holiday' && (
                         <>
                           <Icon name="close" size={12} />
@@ -231,7 +241,9 @@ const weekdayNames = [
                     {ex.opensAt && ex.closesAt ? (
                       <span class="time-slot-badge">
                         <Icon name="clock" size={13} />
-                        <span>{ex.opensAt} تا {ex.closesAt}</span>
+                        <span>
+                          {ex.opensAt} تا {ex.closesAt}
+                        </span>
                       </span>
                     ) : (
                       <span class="badge-all-day-closed">
@@ -268,15 +280,23 @@ const weekdayNames = [
             <span class="modal-icon-badge">
               <Icon name="edit" size={20} />
             </span>
-            <h3 class="modal-title">تنظیم ساعت کاری <span id="modalDayName"></span></h3>
+            <h3 class="modal-title">
+              تنظیم ساعت کاری <span id="modalDayName"></span>
+            </h3>
           </div>
-          <button type="button" class="modal-close-icon-btn" id="closeHourModalBtn" aria-label="بستن">
+          <button
+            type="button"
+            class="modal-close-icon-btn"
+            id="closeHourModalBtn"
+            aria-label="بستن"
+          >
             <Icon name="close" size={18} />
           </button>
         </div>
 
         <p class="modal-sub-desc">
-          تغییرات مستقیماً در دیتابیس D1 اعمال شده و موتور نوبت‌دهی بلافاصله بر این اساس اسلات‌های آزاد را محاسبه می‌کند.
+          تغییرات مستقیماً در دیتابیس D1 اعمال شده و موتور نوبت‌دهی بلافاصله بر این اساس اسلات‌های
+          آزاد را محاسبه می‌کند.
         </p>
 
         <form id="editHourForm">
@@ -293,18 +313,17 @@ const weekdayNames = [
             </select>
           </div>
 
-          <div class="form-grid-pair" id="hoursInputGroup" style="display: grid; gap: 14px; margin-bottom: 18px">
+          <div
+            class="form-grid-pair"
+            id="hoursInputGroup"
+            style="display: grid; gap: 14px; margin-bottom: 18px"
+          >
             <div>
               <label class="modal-input-label">
                 <Icon name="clock" size={14} />
                 <span>ساعت شروع فعالیت:</span>
               </label>
-              <input
-                type="time"
-                id="editOpensAt"
-                class="form-control-modal"
-                dir="ltr"
-              />
+              <input type="time" id="editOpensAt" class="form-control-modal" dir="ltr" />
             </div>
 
             <div>
@@ -312,12 +331,7 @@ const weekdayNames = [
                 <Icon name="clock" size={14} />
                 <span>ساعت پایان فعالیت:</span>
               </label>
-              <input
-                type="time"
-                id="editClosesAt"
-                class="form-control-modal"
-                dir="ltr"
-              />
+              <input type="time" id="editClosesAt" class="form-control-modal" dir="ltr" />
             </div>
           </div>
 
@@ -375,7 +389,11 @@ const weekdayNames = [
             </select>
           </div>
 
-          <div class="form-grid-pair" id="exHoursGroup" style="display: none; gap: 14px; margin-bottom: 14px">
+          <div
+            class="form-grid-pair"
+            id="exHoursGroup"
+            style="display: none; gap: 14px; margin-bottom: 14px"
+          >
             <div>
               <label class="modal-input-label">
                 <Icon name="clock" size={14} />
@@ -434,7 +452,11 @@ const weekdayNames = [
       width: 44px;
       height: 44px;
       border-radius: 14px;
-      background: linear-gradient(135deg, rgba(212, 175, 55, 0.22) 0%, rgba(212, 175, 55, 0.06) 100%);
+      background: linear-gradient(
+        135deg,
+        rgba(212, 175, 55, 0.22) 0%,
+        rgba(212, 175, 55, 0.06) 100%
+      );
       border: 1px solid rgba(212, 175, 55, 0.4);
       color: #f5d77f;
       box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
@@ -446,7 +468,9 @@ const weekdayNames = [
       border-radius: 20px;
       border: 1px solid rgba(212, 175, 55, 0.24);
       background: rgba(11, 14, 22, 0.95);
-      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.08);
+      box-shadow:
+        0 16px 36px rgba(0, 0, 0, 0.55),
+        inset 0 1px 1px rgba(255, 255, 255, 0.08);
     }
 
     .schedule-section-title {
@@ -614,7 +638,9 @@ const weekdayNames = [
       padding: 26px;
       max-width: 500px;
       width: 100%;
-      box-shadow: 0 35px 80px rgba(0, 0, 0, 0.85), 0 0 32px rgba(212, 175, 55, 0.2);
+      box-shadow:
+        0 35px 80px rgba(0, 0, 0, 0.85),
+        0 0 32px rgba(212, 175, 55, 0.2);
       max-height: calc(100dvh - 32px);
       overflow-y: auto;
     }

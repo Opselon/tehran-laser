@@ -149,7 +149,11 @@ body.admin-body .dashboard-header-row {
   flex: 0 0 auto;
   border-radius: 16px;
   color: #f5d77f;
-  background: radial-gradient(circle at 30% 25%, rgba(245, 215, 127, 0.28), rgba(12, 16, 26, 0.9) 72%);
+  background: radial-gradient(
+    circle at 30% 25%,
+    rgba(245, 215, 127, 0.28),
+    rgba(12, 16, 26, 0.9) 72%
+  );
   border: 1px solid var(--adm-line-strong);
   box-shadow: 0 12px 26px -14px rgba(212, 175, 55, 0.8);
 }
@@ -451,7 +455,9 @@ body.admin-body .dashboard-header-row {
   border-radius: 999px;
   background: rgba(71, 85, 105, 0.7);
   border: 1px solid rgba(255, 255, 255, 0.12);
-  transition: background 0.18s ease, border-color 0.18s ease;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease;
 }
 
 .plugin-switch__thumb {
@@ -463,7 +469,9 @@ body.admin-body .dashboard-header-row {
   border-radius: 50%;
   background: #cbd5e1;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
-  transition: transform 0.18s ease, background 0.18s ease;
+  transition:
+    transform 0.18s ease,
+    background 0.18s ease;
 }
 
 .plugin-switch__input:checked + .plugin-switch__track {
@@ -644,7 +652,9 @@ body.admin-body .dashboard-header-row {
   font-family: inherit;
   font-size: 0.84rem;
   box-sizing: border-box;
-  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+  transition:
+    border-color 0.16s ease,
+    box-shadow 0.16s ease;
 }
 
 .plugin-field__input:focus {
@@ -902,7 +912,9 @@ body.admin-body .dashboard-plugin-strip__cta {
   text-decoration: none;
   background: linear-gradient(180deg, #f5d77f, #d4af37);
   box-shadow: 0 10px 20px -10px rgba(212, 175, 55, 0.8);
-  transition: filter 0.16s ease, transform 0.16s ease;
+  transition:
+    filter 0.16s ease,
+    transform 0.16s ease;
 }
 
 body.admin-body .dashboard-plugin-strip__cta:hover {

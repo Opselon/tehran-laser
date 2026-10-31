@@ -54,7 +54,11 @@ import type {
   OperatorUpdateInput,
 } from '../domain/operators/operators';
 import { computeOperatorStats, rangeOfDays } from '../domain/operators/stats';
-import type { OperatorBookingRow, OperatorRankingEntry, OperatorRange } from '../domain/operators/stats';
+import type {
+  OperatorBookingRow,
+  OperatorRankingEntry,
+  OperatorRange,
+} from '../domain/operators/stats';
 import type { RoleKey } from '../domain/rbac/rbac.types';
 import type { BookingStatus } from '../domain/booking/booking.types';
 
@@ -139,9 +143,7 @@ function parseWorkdayList(raw: string): number[] {
   try {
     const parsed: unknown = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [...DEFAULT_WORKDAYS];
-    return normalizeWorkdays(
-      parsed.filter((value): value is number => typeof value === 'number'),
-    );
+    return normalizeWorkdays(parsed.filter((value): value is number => typeof value === 'number'));
   } catch {
     return [...DEFAULT_WORKDAYS];
   }
@@ -171,7 +173,8 @@ function accountOf(row: OperatorRow, roles: Map<string, RoleKey[]>): OperatorAcc
 function mapOperatorRow(row: OperatorRow, roles: Map<string, RoleKey[]>): OperatorDto {
   const role = operatorRoleOrDefault(row.roleKey);
   const workdays = parseWorkdayList(row.workdays);
-  const weekly = shiftMinutes({ shiftStart: row.shiftStart, shiftEnd: row.shiftEnd }) * workdays.length;
+  const weekly =
+    shiftMinutes({ shiftStart: row.shiftStart, shiftEnd: row.shiftEnd }) * workdays.length;
   // Utilization on the roster card is a 30-day rolling view, matching the profile
   // default so the two never disagree.
   const monthlyCapacity = capacityMinutes(weekly, 30);
@@ -340,7 +343,10 @@ export async function getOperatorById(db: Queryable, id: string): Promise<Operat
   return mapOperatorRow(row, roles);
 }
 
-export async function getOperatorByUserId(db: Queryable, userId: string): Promise<OperatorDto | null> {
+export async function getOperatorByUserId(
+  db: Queryable,
+  userId: string,
+): Promise<OperatorDto | null> {
   const now = new Date();
   const row = await one<OperatorRow>(
     db,
@@ -354,7 +360,10 @@ export async function getOperatorByUserId(db: Queryable, userId: string): Promis
   return mapOperatorRow(row, roles);
 }
 
-export function listMeta(operators: readonly OperatorDto[], todayWeekday: number): OperatorListMeta {
+export function listMeta(
+  operators: readonly OperatorDto[],
+  todayWeekday: number,
+): OperatorListMeta {
   return summarizeOperators(operators, todayWeekday);
 }
 
@@ -462,7 +471,9 @@ export async function createOperator(
     input.commissionPercent ?? 0,
     input.monthlyTarget ?? 0,
     input.active === false ? 0 : 1,
-    nextSortOrder(await all<{ sortOrder: number }>(db, `SELECT sort_order AS sortOrder FROM operators`)),
+    nextSortOrder(
+      await all<{ sortOrder: number }>(db, `SELECT sort_order AS sortOrder FROM operators`),
+    ),
     actor.id,
     nowIso,
     nowIso,
@@ -471,7 +482,8 @@ export async function createOperator(
   await writeAuditLog(db, actor.id, 'operator.created', 'operator', id);
 
   const created = await getOperatorById(db, id);
-  if (!created) throw new ApiError('INTERNAL_ERROR', 'ثبت اپراتور انجام نشد. لطفاً دوباره تلاش کنید.');
+  if (!created)
+    throw new ApiError('INTERNAL_ERROR', 'ثبت اپراتور انجام نشد. لطفاً دوباره تلاش کنید.');
   return created;
 }
 
@@ -495,7 +507,8 @@ export async function updateOperator(
 
   if (input.displayName !== undefined) {
     const name = normalizeDisplayName(input.displayName);
-    if (name.length < 2) validationError({ displayName: ['نام و نام خانوادگی را کامل وارد کنید.'] });
+    if (name.length < 2)
+      validationError({ displayName: ['نام و نام خانوادگی را کامل وارد کنید.'] });
     push('display_name', name);
     push('initials', deriveInitials(name));
   }
@@ -607,7 +620,12 @@ export async function archiveOperator(
     id,
   );
   if (existing.account) {
-    await run(db, `UPDATE users SET active = 0, updated_at = ? WHERE id = ?`, nowIso, existing.account.userId);
+    await run(
+      db,
+      `UPDATE users SET active = 0, updated_at = ? WHERE id = ?`,
+      nowIso,
+      existing.account.userId,
+    );
     await revokeAllSessionsForUser(db, existing.account.userId, now);
   }
   await writeAuditLog(db, actor.id, 'operator.archived', 'operator', id);
@@ -672,7 +690,12 @@ export async function restoreOperator(
     id,
   );
   if (existing.account) {
-    await run(db, `UPDATE users SET active = 1, updated_at = ? WHERE id = ?`, nowIso, existing.account.userId);
+    await run(
+      db,
+      `UPDATE users SET active = 1, updated_at = ? WHERE id = ?`,
+      nowIso,
+      existing.account.userId,
+    );
   }
   await writeAuditLog(db, actor.id, 'operator.restored', 'operator', id);
   const restored = await getOperatorById(db, id);
@@ -745,8 +768,13 @@ export async function issueOperatorAccount(
     validationError({ email: ['برای صدور حساب، ایمیل الزامی است.'] });
   }
 
-  const roleKey: RoleKey = input.role ?? findOperatorRole(existing.roleKey)?.accessRole ?? 'OPERATOR';
-  const contact = await one<{ id: string }>(db, `SELECT id FROM users WHERE lower(email) = lower(?) LIMIT 1`, email);
+  const roleKey: RoleKey =
+    input.role ?? findOperatorRole(existing.roleKey)?.accessRole ?? 'OPERATOR';
+  const contact = await one<{ id: string }>(
+    db,
+    `SELECT id FROM users WHERE lower(email) = lower(?) LIMIT 1`,
+    email,
+  );
 
   if (contact && (!existing.account || contact.id !== existing.account.userId)) {
     validationError({ email: ['این ایمیل قبلاً برای حساب دیگری استفاده شده است.'] });
@@ -788,7 +816,13 @@ export async function issueOperatorAccount(
       nowIso,
       nowIso,
     );
-    await run(db, `UPDATE operators SET user_id = ?, updated_at = ? WHERE id = ?`, userId, nowIso, id);
+    await run(
+      db,
+      `UPDATE operators SET user_id = ?, updated_at = ? WHERE id = ?`,
+      userId,
+      nowIso,
+      id,
+    );
   }
 
   await run(db, `DELETE FROM user_roles WHERE user_id = ?`, userId);
@@ -1009,7 +1043,13 @@ export async function assignBookingOperator(
   }
 
   const nowIso = now.toISOString();
-  await run(db, `UPDATE bookings SET operator_id = ?, updated_at = ? WHERE id = ?`, operatorId, nowIso, bookingId);
+  await run(
+    db,
+    `UPDATE bookings SET operator_id = ?, updated_at = ? WHERE id = ?`,
+    operatorId,
+    nowIso,
+    bookingId,
+  );
   await run(
     db,
     `INSERT INTO booking_events (id, booking_id, event_type, actor_id, detail, created_at)
@@ -1123,7 +1163,13 @@ export async function getRosterSnapshot(
   db: Queryable,
   timezone: string,
   now: Date = new Date(),
-): Promise<{ total: number; active: number; onShiftToday: number; weekday: number; localDate: string }> {
+): Promise<{
+  total: number;
+  active: number;
+  onShiftToday: number;
+  weekday: number;
+  localDate: string;
+}> {
   const localDate = localDateOf(now.toISOString(), timezone);
   const weekday = (new Date(`${localDate}T00:00:00.000Z`).getUTCDay() + 1) % 7;
   const operators = await listOperators(db, {}, now);

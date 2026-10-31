@@ -12,12 +12,8 @@ const TZ = 'Asia/Tehran';
 describe('slot grid', () => {
   it('canonicalises arbitrary instants onto the granularity grid', () => {
     // 10:17 local = 06:47Z → floor to 10:15 local = 06:45Z
-    expect(canonicalSlotStart('2026-10-03T06:47:00.000Z', TZ, 15)).toBe(
-      '2026-10-03T06:45:00.000Z',
-    );
-    expect(canonicalSlotStart('2026-10-03T06:45:00.000Z', TZ, 15)).toBe(
-      '2026-10-03T06:45:00.000Z',
-    );
+    expect(canonicalSlotStart('2026-10-03T06:47:00.000Z', TZ, 15)).toBe('2026-10-03T06:45:00.000Z');
+    expect(canonicalSlotStart('2026-10-03T06:45:00.000Z', TZ, 15)).toBe('2026-10-03T06:45:00.000Z');
   });
 
   it('claims every slot a booking occupies', () => {
@@ -47,13 +43,15 @@ describe('slot grid', () => {
   });
 
   it('detects conflicts against an occupied set', () => {
-    const occupied = new Set(occupiedSlotStarts({
-      startsAt: '2026-10-03T06:30:00.000Z',
-      durationMinutes: 30,
-      bufferMinutes: 0,
-      timezone: TZ,
-      granularityMinutes: 15,
-    }));
+    const occupied = new Set(
+      occupiedSlotStarts({
+        startsAt: '2026-10-03T06:30:00.000Z',
+        durationMinutes: 30,
+        bufferMinutes: 0,
+        timezone: TZ,
+        granularityMinutes: 15,
+      }),
+    );
     expect(
       conflictsWithOccupied(
         {

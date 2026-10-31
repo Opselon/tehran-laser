@@ -14,9 +14,7 @@ const fs = require('fs');
 function styleCss(file) {
   const t = fs.readFileSync(file, 'utf8');
   const blocks = t.match(/<style[^>]*>([\s\S]*?)<\/style>/g) || [];
-  return blocks
-    .map((b) => b.replace(/^<style[^>]*>/, '').replace(/<\/style>$/, ''))
-    .join('\n');
+  return blocks.map((b) => b.replace(/^<style[^>]*>/, '').replace(/<\/style>$/, '')).join('\n');
 }
 
 // Split a CSS string into top-level blocks, keeping any leading comment with

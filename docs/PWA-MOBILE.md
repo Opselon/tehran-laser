@@ -18,8 +18,18 @@
   "dir": "rtl",
   "lang": "fa-IR",
   "icons": [
-    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
   ]
 }
 ```
@@ -30,6 +40,7 @@
 - **رهنمود:** طبق قرارداد این موج، افزودن فیلد `"id": "/"` به مانیفست لازم است تا شرایط نصب‌پذیری کامل شود.
 
 ### ارجاع‌های PWA در `src/layouts/PublicLayout.astro`
+
 ```html
 <meta name="theme-color" content="#d4af37" />
 <meta name="application-name" content="کلینیک تهران لیزر" />
@@ -51,7 +62,9 @@
 - `install` و `activate` نسخه‌های کش قدیمی را پاک می‌کنند و `clients.claim()` انجام می‌دهند.
 
 ### ثبت Service Worker
+
 در `PublicLayout.astro` فقط روی HTTPS و پس از `load`:
+
 ```html
 <script is:inline>
   if ('serviceWorker' in navigator && window.location.protocol === 'https:') {

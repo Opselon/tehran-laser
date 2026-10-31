@@ -40,17 +40,22 @@ const featuredServices = [
   <div class="container footer-content">
     <div class="footer-col brand-col">
       <a href="/" class="brand-logo mb-3 tap-target" aria-label="تهران لیزر — صفحه اصلی">
-        <span class="logo-mark" aria-hidden="true"><BrandMark size={20} /></span>
+        <span class="logo-mark" aria-hidden="true">
+          <BrandMark size={20} />
+        </span>
         <span class="logo-text">
           <span class="logo-title">تهران لیزر</span>
           <span class="logo-sub">مرکز تخصصی لیزر پاسداران</span>
         </span>
       </a>
       <p class="footer-desc">
-        تهران لیزر با بهره‌گیری از پیشرفته‌ترین تکنولوژی‌های روز دنیا و رعایت بالاترین استانداردهای بهداشتی، محیطی لوکس و آرام برای تجربه بهترین نتایج لیزر موهای زائد فراهم آورده است.
+        تهران لیزر با بهره‌گیری از پیشرفته‌ترین تکنولوژی‌های روز دنیا و رعایت بالاترین استانداردهای
+        بهداشتی، محیطی لوکس و آرام برای تجربه بهترین نتایج لیزر موهای زائد فراهم آورده است.
       </p>
       <address class="clinic-direct-contact mt-3">
-        <p><strong>آدرس:</strong> {CLINIC_CONTACT.streetAddress}</p>
+        <p>
+          <strong>آدرس:</strong> {CLINIC_CONTACT.streetAddress}
+        </p>
         <p>
           <strong>شماره تماس:</strong>
           <a
@@ -77,22 +82,30 @@ const featuredServices = [
     </div>
 
     <nav class="footer-col" aria-labelledby="footer-quick-heading">
-      <h2 class="footer-heading" id="footer-quick-heading">دسترسی سریع</h2>
+      <h2 class="footer-heading" id="footer-quick-heading">
+        دسترسی سریع
+      </h2>
       <ul class="footer-links">
         {FOOTER_QUICK_LINKS.map((link) => (
           <li>
-            <a href={link.href} class="footer-link tap-target">{link.label}</a>
+            <a href={link.href} class="footer-link tap-target">
+              {link.label}
+            </a>
           </li>
         ))}
       </ul>
     </nav>
 
     <nav class="footer-col" aria-labelledby="footer-services-heading">
-      <h2 class="footer-heading" id="footer-services-heading">خدمات پرطرفدار بانوان</h2>
+      <h2 class="footer-heading" id="footer-services-heading">
+        خدمات پرطرفدار بانوان
+      </h2>
       <ul class="footer-links">
         {featuredServices.map((link) => (
           <li>
-            <a href={link.href} class="footer-link tap-target">{link.label}</a>
+            <a href={link.href} class="footer-link tap-target">
+              {link.label}
+            </a>
           </li>
         ))}
       </ul>
@@ -110,22 +123,32 @@ const featuredServices = [
       </p>
       <div class="footer-cta-box mt-3">
         <p class="small text-muted mb-2">پذیرش فقط با هماهنگی و رزرو قبلی</p>
-        <a href="/booking" class="btn btn-primary btn-sm btn-block tap-target">رزرو اینترنتی نوبت</a>
+        <a href="/booking" class="btn btn-primary btn-sm btn-block tap-target">
+          رزرو اینترنتی نوبت
+        </a>
       </div>
     </div>
   </div>
 
   <div class="footer-bottom">
     <div class="container footer-bottom-inner">
-      <p class="copyright">
-        © {currentYear} کلینیک تخصصی تهران لیزر. تمامی حقوق محفوظ است.
-      </p>
+      <p class="copyright">© {currentYear} کلینیک تخصصی تهران لیزر. تمامی حقوق محفوظ است.</p>
       <nav class="legal-links" aria-label="پیوندهای حقوقی">
-        <a href="/privacy" class="tap-target">حریم خصوصی</a>
-        <span class="sep" aria-hidden="true">•</span>
-        <a href="/terms" class="tap-target">قوانین و مقررات</a>
-        <span class="sep" aria-hidden="true">•</span>
-        <a href="/admin/login" class="admin-entry-link tap-target" rel="nofollow">ورود پرسنل</a>
+        <a href="/privacy" class="tap-target">
+          حریم خصوصی
+        </a>
+        <span class="sep" aria-hidden="true">
+          •
+        </span>
+        <a href="/terms" class="tap-target">
+          قوانین و مقررات
+        </a>
+        <span class="sep" aria-hidden="true">
+          •
+        </span>
+        <a href="/admin/login" class="admin-entry-link tap-target" rel="nofollow">
+          ورود پرسنل
+        </a>
       </nav>
     </div>
   </div>

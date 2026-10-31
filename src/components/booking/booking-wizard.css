@@ -309,7 +309,10 @@
   border: 1px solid #2a2e36;
   border-radius: 14px;
   color: #e6e9ee;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
 }
 
 .booking-wizard-container .service-select-card:hover {
@@ -579,7 +582,10 @@
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid #2c3038;
   color: #c9cdd6;
-  transition: border-color 0.18s ease, color 0.18s ease, background 0.18s ease;
+  transition:
+    border-color 0.18s ease,
+    color 0.18s ease,
+    background 0.18s ease;
 }
 
 .booking-wizard-container .calendar-nav-btn:hover:not(:disabled) {
@@ -649,7 +655,10 @@
   font-size: 14px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
-  transition: border-color 0.16s ease, background 0.16s ease, color 0.16s ease;
+  transition:
+    border-color 0.16s ease,
+    background 0.16s ease,
+    color 0.16s ease;
 }
 
 .booking-wizard-container .calendar-day:hover {

@@ -41,13 +41,7 @@ export function buildSessionCookie(token: string, options: CookieOptions): strin
 }
 
 export function clearSessionCookie(secure: boolean): string {
-  const parts = [
-    `${SESSION_COOKIE_NAME}=`,
-    'Path=/',
-    'HttpOnly',
-    'SameSite=Lax',
-    'Max-Age=0',
-  ];
+  const parts = [`${SESSION_COOKIE_NAME}=`, 'Path=/', 'HttpOnly', 'SameSite=Lax', 'Max-Age=0'];
   if (secure) parts.push('Secure');
   return parts.join('; ');
 }

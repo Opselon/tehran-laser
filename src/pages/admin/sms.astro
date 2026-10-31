@@ -18,12 +18,14 @@ let totalSent = 0;
 
 try {
   const [logsResult, countResult] = await Promise.all([
-    env.DB.prepare(`
+    env.DB.prepare(
+      `
       SELECT l.*, c.name AS customerName
         FROM sms_logs l
         LEFT JOIN customers c ON c.id = l.customer_id
        ORDER BY l.created_at DESC LIMIT 50
-    `).all(),
+    `,
+    ).all(),
     env.DB.prepare(`SELECT COUNT(*) AS count FROM sms_logs`).first<{ count: number }>(),
   ]);
 
@@ -39,14 +41,18 @@ try {
     <!-- Header -->
     <div class="dashboard-header-row">
       <div>
-        <h1 class="admin-page-title" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+        <h1
+          class="admin-page-title"
+          style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;"
+        >
           <span class="sms-title-emblem">
             <Icon name="sms" size={24} />
           </span>
           <span>پنل هوشمند پیامک و اطلاع‌رسانی خودکار</span>
         </h1>
         <p class="section-block-sub">
-          ارسال خودکار پیامک‌های تایید نوبت، یادآوری جلسات، تبریک تولد و کمپین‌های جشنواره مراجعین (API First)
+          ارسال خودکار پیامک‌های تایید نوبت، یادآوری جلسات، تبریک تولد و کمپین‌های جشنواره مراجعین
+          (API First)
         </p>
       </div>
       <div class="actions">
@@ -68,7 +74,10 @@ try {
     </div>
 
     <!-- KPI Grid -->
-    <div class="kpi-grid-3d" style="grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); margin-bottom: 26px;">
+    <div
+      class="kpi-grid-3d"
+      style="grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); margin-bottom: 26px;"
+    >
       <div class="kpi-card-3d">
         <div class="kpi-header">
           <span class="kpi-title">موجودی شارژ پنل پیامکی</span>
@@ -79,7 +88,10 @@ try {
         <div class="kpi-value" style="color: #34d399;">
           ۱۴,۲۵۰ <span style="font-size: 0.9rem; color: #94a3b8; font-weight: 500;">پیامک</span>
         </div>
-        <div class="kpi-footer" style="color: #34d399; display: flex; align-items: center; gap: 6px;">
+        <div
+          class="kpi-footer"
+          style="color: #34d399; display: flex; align-items: center; gap: 6px;"
+        >
           <span class="live-dot"></span>
           <span>اعتبار شارژ فعال و بدون انقضا</span>
         </div>
@@ -215,9 +227,7 @@ try {
             <Icon name="lightning" size={20} />
             <span>ارسال پیامک سریع به مراجع</span>
           </h3>
-          <p class="section-block-sub">
-            ارسال لحظه‌ای با خط خدماتی اختصاصی و بدون تأخیر در صف
-          </p>
+          <p class="section-block-sub">ارسال لحظه‌ای با خط خدماتی اختصاصی و بدون تأخیر در صف</p>
         </div>
 
         <form id="smsForm" class="sms-form-stack">
@@ -271,7 +281,10 @@ try {
             ></textarea>
             <div class="sms-char-counter-bar">
               <span class="char-count-text">
-                تعداد کاراکتر: <strong id="charCount" style="color: #f5d77f;">۰</strong>
+                تعداد کاراکتر:{' '}
+                <strong id="charCount" style="color: #f5d77f;">
+                  ۰
+                </strong>
               </span>
               <span id="smsPagesText" class="sms-page-calc">
                 ۱ صفحه پیامک فارسی
@@ -295,9 +308,7 @@ try {
             <Icon name="mobile" size={20} />
             <span>پیش‌نمایش زنده در گوشی مراجع</span>
           </h3>
-          <p class="section-block-sub">
-            نحوه نمایش متن در نوتیفیکیشن و اپلیکیشن پیام‌رسان گوشی
-          </p>
+          <p class="section-block-sub">نحوه نمایش متن در نوتیفیکیشن و اپلیکیشن پیام‌رسان گوشی</p>
         </div>
 
         <div class="sms-phone-mockup">
@@ -383,9 +394,7 @@ try {
                   {log.message}
                 </td>
                 <td>
-                  <span class="sms-table-template-pill">
-                    {log.template_name || 'سفارشی'}
-                  </span>
+                  <span class="sms-table-template-pill">{log.template_name || 'سفارشی'}</span>
                 </td>
                 <td>
                   <span class="badge-status badge-status-confirmed">
@@ -705,10 +714,8 @@ try {
         'یادآوری: نوبت لیزر شما فردا در کلینیک تهران لیزر هماهنگ شده است. لطفا ۲۴ ساعت قبل موهای ناحیه را شیو بفرمایید و از لایه‌بردار پرهیز کنید.',
       birthday:
         'زادروزتان فرخنده باد! کلینیک تهران لیزر ۳۰٪ تخفیف اختصاصی روی تمامی جلسات برای شما هدیه در نظر گرفته است. کد هدیه: HBD30',
-      next_session:
-        `مراجع گرامی، زمان جلسه بعدی دوره لیزر تماسی شما فرا رسیده است. جهت حفظ اثربخشی و عدم ریزش نتیجه، نوبت خود را آنلاین رزرو فرمایید: ${bookingOrigin}`,
-      festival:
-        `جشنواره تخفیف پاییزه تهران لیزر آغاز شد! ۱۵٪ تخفیف ویژه روی تمامی پکیج‌های فول بادی لیزر تماسی رادو پلاس ۲۰۲۶. رزرو آنلاین: ${bookingOrigin}`,
+      next_session: `مراجع گرامی، زمان جلسه بعدی دوره لیزر تماسی شما فرا رسیده است. جهت حفظ اثربخشی و عدم ریزش نتیجه، نوبت خود را آنلاین رزرو فرمایید: ${bookingOrigin}`,
+      festival: `جشنواره تخفیف پاییزه تهران لیزر آغاز شد! ۱۵٪ تخفیف ویژه روی تمامی پکیج‌های فول بادی لیزر تماسی رادو پلاس ۲۰۲۶. رزرو آنلاین: ${bookingOrigin}`,
       custom: '',
     };
 

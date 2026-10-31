@@ -101,7 +101,13 @@ describe('operator identity', () => {
 
   it('canonicalises every Iranian phone shape to +98', () => {
     const expected = '+989121234567';
-    for (const input of ['09121234567', '+989121234567', '00989121234567', '9121234567', '۰۹۱۲۱۲۳۴۵۶۷']) {
+    for (const input of [
+      '09121234567',
+      '+989121234567',
+      '00989121234567',
+      '9121234567',
+      '۰۹۱۲۱۲۳۴۵۶۷',
+    ]) {
       expect(normalizePhoneInput(input)).toBe(expected);
     }
   });
@@ -174,11 +180,42 @@ describe('shifts and workdays', () => {
 
 describe('coverage', () => {
   const roster = [
-    makeOperator({ id: 'a', displayName: 'الف', workdays: [1], shiftStart: '09:00', shiftEnd: '13:00' }),
-    makeOperator({ id: 'b', displayName: 'ب', workdays: [1], shiftStart: '11:00', shiftEnd: '17:00' }),
-    makeOperator({ id: 'c', displayName: 'ج', workdays: [1], shiftStart: '15:00', shiftEnd: '20:00' }),
-    makeOperator({ id: 'd', displayName: 'د', workdays: [2], shiftStart: '09:00', shiftEnd: '20:00' }),
-    makeOperator({ id: 'e', displayName: 'ه', workdays: [1], shiftStart: '09:00', shiftEnd: '20:00', active: false }),
+    makeOperator({
+      id: 'a',
+      displayName: 'الف',
+      workdays: [1],
+      shiftStart: '09:00',
+      shiftEnd: '13:00',
+    }),
+    makeOperator({
+      id: 'b',
+      displayName: 'ب',
+      workdays: [1],
+      shiftStart: '11:00',
+      shiftEnd: '17:00',
+    }),
+    makeOperator({
+      id: 'c',
+      displayName: 'ج',
+      workdays: [1],
+      shiftStart: '15:00',
+      shiftEnd: '20:00',
+    }),
+    makeOperator({
+      id: 'd',
+      displayName: 'د',
+      workdays: [2],
+      shiftStart: '09:00',
+      shiftEnd: '20:00',
+    }),
+    makeOperator({
+      id: 'e',
+      displayName: 'ه',
+      workdays: [1],
+      shiftStart: '09:00',
+      shiftEnd: '20:00',
+      active: false,
+    }),
   ];
 
   it('merges overlapping windows into headcount segments', () => {
@@ -212,9 +249,25 @@ describe('coverage', () => {
 
 describe('roster shaping', () => {
   const roster = [
-    makeOperator({ id: 'a', displayName: 'بهنام', sortOrder: 20, stats: { sessions: 5, revenue: 500, upcoming: 1, utilization: 40 } }),
-    makeOperator({ id: 'b', displayName: 'آرش', sortOrder: 10, stats: { sessions: 9, revenue: 900, upcoming: 0, utilization: 80 } }),
-    makeOperator({ id: 'c', displayName: 'سارا', sortOrder: 30, archivedAt: '2026-10-10T00:00:00.000Z', active: false }),
+    makeOperator({
+      id: 'a',
+      displayName: 'بهنام',
+      sortOrder: 20,
+      stats: { sessions: 5, revenue: 500, upcoming: 1, utilization: 40 },
+    }),
+    makeOperator({
+      id: 'b',
+      displayName: 'آرش',
+      sortOrder: 10,
+      stats: { sessions: 9, revenue: 900, upcoming: 0, utilization: 80 },
+    }),
+    makeOperator({
+      id: 'c',
+      displayName: 'سارا',
+      sortOrder: 30,
+      archivedAt: '2026-10-10T00:00:00.000Z',
+      active: false,
+    }),
     makeOperator({ id: 'd', displayName: 'مینا', active: false, status: 'inactive' }),
   ];
 
@@ -229,7 +282,9 @@ describe('roster shaping', () => {
     expect(filterOperators(roster, { status: 'archived' }).map((o) => o.id)).toEqual(['c']);
     expect(filterOperators(roster, { role: 'laser_technician' })).toHaveLength(4);
     expect(filterOperators(roster, { serviceId: 'svc_x' })).toHaveLength(0);
-    expect(filterOperators([makeOperator({ serviceIds: ['svc_x'] })], { serviceId: 'svc_x' })).toHaveLength(1);
+    expect(
+      filterOperators([makeOperator({ serviceIds: ['svc_x'] })], { serviceId: 'svc_x' }),
+    ).toHaveLength(1);
   });
 
   it('searches name, code, phone and ASCII/Persian digits alike', () => {
@@ -244,9 +299,21 @@ describe('roster shaping', () => {
   it('sorts by the requested metric with a stable tiebreak', () => {
     // b and d share the default sortOrder 10, so the Persian name breaks the tie.
     expect(sortOperators(roster, 'order').map((o) => o.id)).toEqual(['b', 'd', 'a', 'c']);
-    expect(sortOperators(roster, 'sessions').map((o) => o.id).slice(0, 2)).toEqual(['b', 'a']);
-    expect(sortOperators(roster, 'revenue').map((o) => o.id).slice(0, 2)).toEqual(['b', 'a']);
-    expect(sortOperators(roster, 'utilization').map((o) => o.id).slice(0, 2)).toEqual(['b', 'a']);
+    expect(
+      sortOperators(roster, 'sessions')
+        .map((o) => o.id)
+        .slice(0, 2),
+    ).toEqual(['b', 'a']);
+    expect(
+      sortOperators(roster, 'revenue')
+        .map((o) => o.id)
+        .slice(0, 2),
+    ).toEqual(['b', 'a']);
+    expect(
+      sortOperators(roster, 'utilization')
+        .map((o) => o.id)
+        .slice(0, 2),
+    ).toEqual(['b', 'a']);
   });
 
   it('summarizes the roster without double counting', () => {
@@ -294,15 +361,80 @@ describe('metrics', () => {
 
 describe('performance stats', () => {
   const rows: OperatorBookingRow[] = [
-    { id: '1', startsAt: '2026-10-10T06:00:00.000Z', endsAt: '2026-10-10T06:30:00.000Z', status: 'completed', quotedAmount: 1000, discountAmount: 100, serviceId: 's1', serviceName: 'لیزر', customerId: 'c1' },
-    { id: '2', startsAt: '2026-10-11T06:00:00.000Z', endsAt: '2026-10-11T07:00:00.000Z', status: 'completed', quotedAmount: 2000, discountAmount: 0, serviceId: 's1', serviceName: 'لیزر', customerId: 'c2' },
-    { id: '3', startsAt: '2026-10-12T06:00:00.000Z', endsAt: '2026-10-12T07:00:00.000Z', status: 'confirmed', quotedAmount: 3000, discountAmount: 0, serviceId: 's2', serviceName: 'پکیج', customerId: 'c3' },
-    { id: '4', startsAt: '2026-10-12T08:00:00.000Z', endsAt: '2026-10-12T08:30:00.000Z', status: 'cancelled', quotedAmount: 500, discountAmount: 0, serviceId: 's2', serviceName: 'پکیج', customerId: 'c4' },
-    { id: '5', startsAt: '2026-10-13T08:00:00.000Z', endsAt: '2026-10-13T08:30:00.000Z', status: 'no_show', quotedAmount: 500, discountAmount: 0, serviceId: 's2', serviceName: 'پکیج', customerId: 'c5' },
-    { id: '6', startsAt: '2026-11-20T08:00:00.000Z', endsAt: '2026-11-20T08:30:00.000Z', status: 'pending', quotedAmount: 800, discountAmount: 0, serviceId: 's1', serviceName: 'لیزر', customerId: 'c6' },
+    {
+      id: '1',
+      startsAt: '2026-10-10T06:00:00.000Z',
+      endsAt: '2026-10-10T06:30:00.000Z',
+      status: 'completed',
+      quotedAmount: 1000,
+      discountAmount: 100,
+      serviceId: 's1',
+      serviceName: 'لیزر',
+      customerId: 'c1',
+    },
+    {
+      id: '2',
+      startsAt: '2026-10-11T06:00:00.000Z',
+      endsAt: '2026-10-11T07:00:00.000Z',
+      status: 'completed',
+      quotedAmount: 2000,
+      discountAmount: 0,
+      serviceId: 's1',
+      serviceName: 'لیزر',
+      customerId: 'c2',
+    },
+    {
+      id: '3',
+      startsAt: '2026-10-12T06:00:00.000Z',
+      endsAt: '2026-10-12T07:00:00.000Z',
+      status: 'confirmed',
+      quotedAmount: 3000,
+      discountAmount: 0,
+      serviceId: 's2',
+      serviceName: 'پکیج',
+      customerId: 'c3',
+    },
+    {
+      id: '4',
+      startsAt: '2026-10-12T08:00:00.000Z',
+      endsAt: '2026-10-12T08:30:00.000Z',
+      status: 'cancelled',
+      quotedAmount: 500,
+      discountAmount: 0,
+      serviceId: 's2',
+      serviceName: 'پکیج',
+      customerId: 'c4',
+    },
+    {
+      id: '5',
+      startsAt: '2026-10-13T08:00:00.000Z',
+      endsAt: '2026-10-13T08:30:00.000Z',
+      status: 'no_show',
+      quotedAmount: 500,
+      discountAmount: 0,
+      serviceId: 's2',
+      serviceName: 'پکیج',
+      customerId: 'c5',
+    },
+    {
+      id: '6',
+      startsAt: '2026-11-20T08:00:00.000Z',
+      endsAt: '2026-11-20T08:30:00.000Z',
+      status: 'pending',
+      quotedAmount: 800,
+      discountAmount: 0,
+      serviceId: 's1',
+      serviceName: 'لیزر',
+      customerId: 'c6',
+    },
   ];
 
-  const operator = makeOperator({ id: 'op_1', workdays: [0, 1, 2, 3, 4, 5, 6], shiftStart: '09:00', shiftEnd: '17:00' });
+  const operator = makeOperator({
+    id: 'op_1',
+    workdays: [0, 1, 2, 3, 4, 5, 6],
+    shiftStart: '09:00',
+    shiftEnd: '17:00',
+  });
 
   it('counts completed revenue net of discount only', () => {
     const stats = computeOperatorStats({
@@ -373,7 +505,14 @@ describe('performance stats', () => {
 
   it('explains an empty or unhealthy profile in the operator’s language', () => {
     const insights = buildInsights(
-      { active: true, archivedAt: null, account: null, workdays: [], serviceIds: [], commissionPercent: 10 },
+      {
+        active: true,
+        archivedAt: null,
+        account: null,
+        workdays: [],
+        serviceIds: [],
+        commissionPercent: 10,
+      },
       { totals: { sessions: 0 } as never },
     );
     expect(insights.some((i) => i.text.includes('حساب ورود ندارد'))).toBe(true);
@@ -393,7 +532,11 @@ describe('draft → payload contract', () => {
   });
 
   it('round-trips a DTO into a draft and back into a normalized payload', () => {
-    const operator = makeOperator({ email: 'SARA@Example.COM', serviceIds: ['s1', 's1'], workdays: [2, 1] });
+    const operator = makeOperator({
+      email: 'SARA@Example.COM',
+      serviceIds: ['s1', 's1'],
+      workdays: [2, 1],
+    });
     const draft = draftFromOperator(operator);
     const payload = draftToPayload(draft);
     expect(payload.email).toBe('sara@example.com');
@@ -403,7 +546,16 @@ describe('draft → payload contract', () => {
   });
 
   it('reports every invalid field in one pass instead of failing fast', () => {
-    const draft = { ...emptyOperatorDraft(), displayName: 'x', phone: '123', email: 'nope', workdays: [], shiftStart: '20:00', shiftEnd: '09:00', commissionPercent: 120 };
+    const draft = {
+      ...emptyOperatorDraft(),
+      displayName: 'x',
+      phone: '123',
+      email: 'nope',
+      workdays: [],
+      shiftStart: '20:00',
+      shiftEnd: '09:00',
+      commissionPercent: 120,
+    };
     const errors = validateOperatorDraft(draft);
     expect(Object.keys(errors).sort()).toEqual(
       ['commissionPercent', 'displayName', 'email', 'phone', 'shift', 'workdays'].sort(),
@@ -469,7 +621,11 @@ describe('operator zod schemas', () => {
   });
 
   it('parses roster query strings, including Persian weekday digits', () => {
-    const parsed = operatorListQuerySchema.parse({ weekday: '2', status: 'active', sort: 'revenue' });
+    const parsed = operatorListQuerySchema.parse({
+      weekday: '2',
+      status: 'active',
+      sort: 'revenue',
+    });
     expect(parsed).toMatchObject({ weekday: 2, status: 'active', sort: 'revenue' });
     expect(operatorListQuerySchema.safeParse({ weekday: '9' }).success).toBe(false);
     expect(operatorListQuerySchema.safeParse({ sort: 'nope' }).success).toBe(false);

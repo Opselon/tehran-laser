@@ -58,7 +58,8 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
           تکنولوژی لیزر تماسی <span class="gold-gradient-text">رادو پلاس</span> در تهران
         </h1>
         <p class="hero-desc">
-          لیزر تماسی (لمسی) با تلفیق سه طول موج الکساندرایت، دیود و ان‌دی‌یاگ، سرمایش پیوسته TEC Double و پروتکل بهداشتی اختصاصی در محیطی آرام و استاندارد.
+          لیزر تماسی (لمسی) با تلفیق سه طول موج الکساندرایت، دیود و ان‌دی‌یاگ، سرمایش پیوسته TEC
+          Double و پروتکل بهداشتی اختصاصی در محیطی آرام و استاندارد.
         </p>
 
         <div class="hero-cta-row">
@@ -75,28 +76,38 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
         <!-- Trust Badges Strip -->
         <div class="hero-badges-grid">
           <div class="hero-badge-card">
-            <div class="badge-icon-box"><Icon name="award" size={22} /></div>
+            <div class="badge-icon-box">
+              <Icon name="award" size={22} />
+            </div>
             <div>
               <div class="badge-title">تاییدیه رسمی FDA و CE</div>
               <div class="badge-sub">مجوز رسمی تجهیزات پزشکی آمریکا و اروپا</div>
             </div>
           </div>
           <div class="hero-badge-card">
-            <div class="badge-icon-box"><Icon name="lightning" size={22} /></div>
+            <div class="badge-icon-box">
+              <Icon name="lightning" size={22} />
+            </div>
             <div>
               <div class="badge-title">سه طول موج همزمان</div>
-              <div class="badge-sub" dir="ltr">Alexandrite 755nm + Diode 808nm + Nd:YAG 1064nm</div>
+              <div class="badge-sub" dir="ltr">
+                Alexandrite 755nm + Diode 808nm + Nd:YAG 1064nm
+              </div>
             </div>
           </div>
           <div class="hero-badge-card">
-            <div class="badge-icon-box"><Icon name="snowflake" size={22} /></div>
+            <div class="badge-icon-box">
+              <Icon name="snowflake" size={22} />
+            </div>
             <div>
               <div class="badge-title">خنک‌کننده TEC Double</div>
               <div class="badge-sub">سرمایش پیوسته، تجربه بدون درد</div>
             </div>
           </div>
           <div class="hero-badge-card">
-            <div class="badge-icon-box"><Icon name="shield" size={22} /></div>
+            <div class="badge-icon-box">
+              <Icon name="shield" size={22} />
+            </div>
             <div>
               <div class="badge-title">پروتکل بهداشتی اختصاصی</div>
               <div class="badge-sub">پرونده هر مراجع و اپراتورهای آموزش‌دیده</div>
@@ -110,42 +121,85 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
     <section class="section tech-section">
       <div class="container">
         <div class="section-heading text-center">
-          <div class="pill-label"><Icon name="gem" size={14} /> شناسنامه فناوری</div>
-          <h2 class="section-title">بررسی تخصصی دستگاه <span class="gold-gradient-text">Rado Plus</span></h2>
+          <div class="pill-label">
+            <Icon name="gem" size={14} /> شناسنامه فناوری
+          </div>
+          <h2 class="section-title">
+            بررسی تخصصی دستگاه <span class="gold-gradient-text">Rado Plus</span>
+          </h2>
           <p class="section-lead">
-            دستگاه رادو پلاس یک لیزر تماسی (لمسی) با توان خروجی ۱۶۰۰ وات و سه طول موج است که اثربخشی قطعی را با حداکثر ایمنی و سرعت ترکیب کرده است.
+            دستگاه رادو پلاس یک لیزر تماسی (لمسی) با توان خروجی ۱۶۰۰ وات و سه طول موج است که اثربخشی
+            قطعی را با حداکثر ایمنی و سرعت ترکیب کرده است.
           </p>
         </div>
 
         <!-- Interactive Wavelength Explorer -->
         <div class="tech-explorer-card">
           <div class="wavelength-tabs" role="tablist" aria-label="انتخاب طول موج دستگاه رادو پلاس">
-            <button id="tab-alex" class="wl-tab active" data-target="alex" role="tab" aria-selected="true" aria-controls="panel-alex">
+            <button
+              id="tab-alex"
+              class="wl-tab active"
+              data-target="alex"
+              role="tab"
+              aria-selected="true"
+              aria-controls="panel-alex"
+            >
               <Icon name="lightning" size={18} />
               <span>الکساندرایت ۷۵۵ نانومتر (Alexandrite)</span>
             </button>
-            <button id="tab-diode" class="wl-tab" data-target="diode" role="tab" aria-selected="false" aria-controls="panel-diode">
+            <button
+              id="tab-diode"
+              class="wl-tab"
+              data-target="diode"
+              role="tab"
+              aria-selected="false"
+              aria-controls="panel-diode"
+            >
               <Icon name="services" size={18} />
               <span>دیود ۸۰۸ نانومتر (Diode)</span>
             </button>
-            <button id="tab-yag" class="wl-tab" data-target="yag" role="tab" aria-selected="false" aria-controls="panel-yag">
+            <button
+              id="tab-yag"
+              class="wl-tab"
+              data-target="yag"
+              role="tab"
+              aria-selected="false"
+              aria-controls="panel-yag"
+            >
               <Icon name="target" size={18} />
               <span>ان‌دی‌یاگ ۱۰۶۴ نانومتر (Nd:YAG)</span>
             </button>
           </div>
 
-          <div class="wavelength-panel active" id="panel-alex" role="tabpanel" aria-labelledby="tab-alex" tabindex="0">
+          <div
+            class="wavelength-panel active"
+            id="panel-alex"
+            role="tabpanel"
+            aria-labelledby="tab-alex"
+            tabindex="0"
+          >
             <div class="wl-grid">
               <div class="wl-content">
                 <span class="wl-pill">پیک جذب ملانین فوق‌العاده بالا</span>
                 <h3 class="wl-title">طول موج ۷۵۵nm الکساندرایت؛ طلایه‌دار موهای روشن و نازک</h3>
                 <p class="wl-text">
-                  طول موج ۷۵۵ نانومتر دارای بالاترین ضریب جذب نوری توسط رنگدانه‌های ملانین در ساقه و ریشه مو است. این ویژگی سبب تخریب حرارتی کامل پیاز مو (Papilla) در کمترین تعداد جلسات درمانی می‌شود.
+                  طول موج ۷۵۵ نانومتر دارای بالاترین ضریب جذب نوری توسط رنگدانه‌های ملانین در ساقه و
+                  ریشه مو است. این ویژگی سبب تخریب حرارتی کامل پیاز مو (Papilla) در کمترین تعداد
+                  جلسات درمانی می‌شود.
                 </p>
                 <ul class="spec-checks">
-                  <li><Icon name="checkCircle" size={16} /> <span>ایده‌آل برای تیپ‌های پوستی روشن تا گندمی (Fitzpatrick I-III)</span></li>
-                  <li><Icon name="checkCircle" size={16} /> <span>قدرت برتر در تخریب موهای کرکی، نازک و کم‌رنگ باقی‌مانده</span></li>
-                  <li><Icon name="checkCircle" size={16} /> <span>ریزش تا ۹۰ درصدی موها تنها پس از جلسه اول و دوم</span></li>
+                  <li>
+                    <Icon name="checkCircle" size={16} />{' '}
+                    <span>ایده‌آل برای تیپ‌های پوستی روشن تا گندمی (Fitzpatrick I-III)</span>
+                  </li>
+                  <li>
+                    <Icon name="checkCircle" size={16} />{' '}
+                    <span>قدرت برتر در تخریب موهای کرکی، نازک و کم‌رنگ باقی‌مانده</span>
+                  </li>
+                  <li>
+                    <Icon name="checkCircle" size={16} />{' '}
+                    <span>ریزش تا ۹۰ درصدی موها تنها پس از جلسه اول و دوم</span>
+                  </li>
                 </ul>
               </div>
               <div class="wl-stats">
@@ -163,18 +217,35 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
             </div>
           </div>
 
-          <div class="wavelength-panel" id="panel-diode" role="tabpanel" aria-labelledby="tab-diode" tabindex="0">
+          <div
+            class="wavelength-panel"
+            id="panel-diode"
+            role="tabpanel"
+            aria-labelledby="tab-diode"
+            tabindex="0"
+          >
             <div class="wl-grid">
               <div class="wl-content">
                 <span class="wl-pill">تعادل طلایی عمق نفوذ و سرعت</span>
                 <h3 class="wl-title">طول موج ۸۰۸nm دیود؛ ستون فقرات لیزرهای تماسی</h3>
                 <p class="wl-text">
-                  طول موج ۸۰۸ نانومتر عمیق‌ترین نفوذ را در میان سه طول موج این دستگاه دارد و بالاترین توان پیوسته را برای حرکت سریع هندپیس روی پوست فراهم می‌کند. این ویژگی، تعداد جلسات نواحی وسیع مانند پا و پشت را کاهش می‌دهد.
+                  طول موج ۸۰۸ نانومتر عمیق‌ترین نفوذ را در میان سه طول موج این دستگاه دارد و
+                  بالاترین توان پیوسته را برای حرکت سریع هندپیس روی پوست فراهم می‌کند. این ویژگی،
+                  تعداد جلسات نواحی وسیع مانند پا و پشت را کاهش می‌دهد.
                 </p>
                 <ul class="spec-checks">
-                  <li><Icon name="checkCircle" size={16} /> <span>مناسب طیف گسترده‌ای از تیپ‌های پوستی گندمی تا سبزه</span></li>
-                  <li><Icon name="checkCircle" size={16} /> <span>بالاترین سرعت حرکت هندپیس برای نواحی وسیع بدن</span></li>
-                  <li><Icon name="checkCircle" size={16} /> <span>نفوذ مؤثر برای موهای ضخیم و ریشه‌دار</span></li>
+                  <li>
+                    <Icon name="checkCircle" size={16} />{' '}
+                    <span>مناسب طیف گسترده‌ای از تیپ‌های پوستی گندمی تا سبزه</span>
+                  </li>
+                  <li>
+                    <Icon name="checkCircle" size={16} />{' '}
+                    <span>بالاترین سرعت حرکت هندپیس برای نواحی وسیع بدن</span>
+                  </li>
+                  <li>
+                    <Icon name="checkCircle" size={16} />{' '}
+                    <span>نفوذ مؤثر برای موهای ضخیم و ریشه‌دار</span>
+                  </li>
                 </ul>
               </div>
               <div class="wl-stats">
@@ -192,18 +263,39 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
             </div>
           </div>
 
-          <div class="wavelength-panel" id="panel-yag" role="tabpanel" aria-labelledby="tab-yag" tabindex="0">
+          <div
+            class="wavelength-panel"
+            id="panel-yag"
+            role="tabpanel"
+            aria-labelledby="tab-yag"
+            tabindex="0"
+          >
             <div class="wl-grid">
               <div class="wl-content">
                 <span class="wl-pill yag">نفوذ ایمن و عمیق به درمیس</span>
-                <h3 class="wl-title">طول موج ۱۰۶۴nm ان‌دی‌یاگ؛ امنیت ۱۰۰٪ برای پوست‌های سبزه و برنزه</h3>
+                <h3 class="wl-title">
+                  طول موج ۱۰۶۴nm ان‌دی‌یاگ؛ امنیت ۱۰۰٪ برای پوست‌های سبزه و برنزه
+                </h3>
                 <p class="wl-text">
-                  پالس‌های بلند ۱۰۶۴ نانومتر از ملانین سطحی اپیدرم عبور کرده و انرژی گرمایی را مستقیماً به عروق تغذیه‌کننده فولیکول در لایه‌های عمقی می‌رسانند. بدون کوچک‌ترین ریسک سوختگی یا لک.
+                  پالس‌های بلند ۱۰۶۴ نانومتر از ملانین سطحی اپیدرم عبور کرده و انرژی گرمایی را
+                  مستقیماً به عروق تغذیه‌کننده فولیکول در لایه‌های عمقی می‌رسانند. بدون کوچک‌ترین
+                  ریسک سوختگی یا لک.
                 </p>
                 <ul class="spec-checks">
-                  <li><Icon name="checkCircle" size={16} /> <span>کاملاً ایمن برای پوست‌های سبزه، گندمی تیره و برنزه (Fitzpatrick IV-VI)</span></li>
-                  <li><Icon name="checkCircle" size={16} /> <span>پیشگیری مطلق از هایپرپیگمانتاسیون (PIH) پس از درمان</span></li>
-                  <li><Icon name="checkCircle" size={16} /> <span>نفوذ عمیق برای موهای ریشه‌دار و ضخیم نواحی مقاوم بدن</span></li>
+                  <li>
+                    <Icon name="checkCircle" size={16} />{' '}
+                    <span>
+                      کاملاً ایمن برای پوست‌های سبزه، گندمی تیره و برنزه (Fitzpatrick IV-VI)
+                    </span>
+                  </li>
+                  <li>
+                    <Icon name="checkCircle" size={16} />{' '}
+                    <span>پیشگیری مطلق از هایپرپیگمانتاسیون (PIH) پس از درمان</span>
+                  </li>
+                  <li>
+                    <Icon name="checkCircle" size={16} />{' '}
+                    <span>نفوذ عمیق برای موهای ریشه‌دار و ضخیم نواحی مقاوم بدن</span>
+                  </li>
                 </ul>
               </div>
               <div class="wl-stats">
@@ -300,10 +392,15 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
         <!-- 3D Feature Cards: TEC Double Cooling & FHR Speed -->
         <div class="features-dual-grid">
           <div class="feature-card-3d">
-            <div class="card-icon-accent"><Icon name="snowflake" size={30} /></div>
+            <div class="card-icon-accent">
+              <Icon name="snowflake" size={30} />
+            </div>
             <h3 class="card-title">سیستم خنک‌کننده دوگانه TEC Double</h3>
             <p class="card-body">
-              دستگاه رادو پلاس دو سیستم خنک‌کننده مجزا دارد: سیستم داخلی با پمپ آب ایتالیایی، اجزای دستگاه را در استفاده‌های طولانی سالم نگه می‌دارد و سیستم خارجی با سرمایش پیوسته (Continuous Cooling) دمای سطح پوست را پایین می‌آورد تا درد و احتمال سوختگی به حداقل برسد.
+              دستگاه رادو پلاس دو سیستم خنک‌کننده مجزا دارد: سیستم داخلی با پمپ آب ایتالیایی، اجزای
+              دستگاه را در استفاده‌های طولانی سالم نگه می‌دارد و سیستم خارجی با سرمایش پیوسته
+              (Continuous Cooling) دمای سطح پوست را پایین می‌آورد تا درد و احتمال سوختگی به حداقل
+              برسد.
             </p>
             <div class="card-metric-tag">
               <Icon name="shield" size={16} />
@@ -312,10 +409,14 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
           </div>
 
           <div class="feature-card-3d">
-            <div class="card-icon-accent"><Icon name="target" size={30} /></div>
+            <div class="card-icon-accent">
+              <Icon name="target" size={30} />
+            </div>
             <h3 class="card-title">سیستم FHR با نرخ ۱ تا ۲۰ شات در ثانیه</h3>
             <p class="card-body">
-              فناوری Fast Hair Removal با پرتاب سریع و متوالی پالس‌ها، حرکت هندپیس را روی نواحی وسیع مانند پا، پشت و کمر سرعت می‌بخشد و مدت زمان درمان کل بدن (Full Body) را به‌طور محسوس کوتاه می‌کند.
+              فناوری Fast Hair Removal با پرتاب سریع و متوالی پالس‌ها، حرکت هندپیس را روی نواحی وسیع
+              مانند پا، پشت و کمر سرعت می‌بخشد و مدت زمان درمان کل بدن (Full Body) را به‌طور محسوس
+              کوتاه می‌کند.
             </p>
             <div class="card-metric-tag">
               <Icon name="clock" size={16} />
@@ -327,25 +428,33 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
         <!-- Interactive Metrics Strip: clinical outcomes -->
         <div class="metrics-grid">
           <div class="metric-card">
-            <div class="m-icon"><Icon name="chart" size={22} /></div>
+            <div class="m-icon">
+              <Icon name="chart" size={22} />
+            </div>
             <div class="m-val">۹۲٪+</div>
             <div class="m-label">راندمان پاکسازی دائمی</div>
             <div class="m-sub">تایید بالینی مستند در پایان دوره درمان</div>
           </div>
           <div class="metric-card">
-            <div class="m-icon"><Icon name="clock" size={22} /></div>
+            <div class="m-icon">
+              <Icon name="clock" size={22} />
+            </div>
             <div class="m-val">۳ طول موج</div>
             <div class="m-label">پوشش همه رنگ‌های پوستی</div>
             <div class="m-sub">الکساندرایت ۷۵۵ · دیود ۸۰۸ · ان‌دی‌یاگ ۱۰۶۴ نانومتر</div>
           </div>
           <div class="metric-card">
-            <div class="m-icon"><Icon name="snowflake" size={22} /></div>
+            <div class="m-icon">
+              <Icon name="snowflake" size={22} />
+            </div>
             <div class="m-val">۱ تا ۲۰</div>
             <div class="m-label">شات در ثانیه (سیستم FHR)</div>
             <div class="m-sub">سرمایش پیوسته TEC Double بدون نیاز به پماد بی‌حسی</div>
           </div>
           <div class="metric-card">
-            <div class="m-icon"><Icon name="calendar" size={22} /></div>
+            <div class="m-icon">
+              <Icon name="calendar" size={22} />
+            </div>
             <div class="m-val">۶ الی ۸ جلسه</div>
             <div class="m-label">طول دوره استاندارد درمان</div>
             <div class="m-sub">فاصله ۴ تا ۶ هفته بسته به ناحیه تحت درمان</div>
@@ -358,10 +467,13 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
     <section class="section benefits-section">
       <div class="container">
         <div class="section-heading text-center">
-          <div class="pill-label"><Icon name="checkCircle" size={14} /> چرا لیزر تماسی</div>
+          <div class="pill-label">
+            <Icon name="checkCircle" size={14} /> چرا لیزر تماسی
+          </div>
           <h2 class="section-title">چرا لیزر تماسی (لمسی) انتخاب بهتری است</h2>
           <p class="section-lead">
-            در لیزر تماسی هندپیس مستقیماً روی پوست حرکت می‌کند و انرژی از نزدیک‌ترین فاصله به ریشه مو می‌رسد. هفت دلیل مهم که این روش را به انتخاب اول تبدیل می‌کند:
+            در لیزر تماسی هندپیس مستقیماً روی پوست حرکت می‌کند و انرژی از نزدیک‌ترین فاصله به ریشه
+            مو می‌رسد. هفت دلیل مهم که این روش را به انتخاب اول تبدیل می‌کند:
           </p>
         </div>
 
@@ -369,7 +481,10 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
           <div class="benefit-card-3d">
             <span class="benefit-index">۱</span>
             <h3 class="benefit-title">اثرگذاری بیشتر</h3>
-            <p class="benefit-body">به خاطر تماس مستقیم، امواج از فاصله نزدیک‌تر به فولیکول‌ها می‌رسند و نتیجه سریع‌تر و قوی‌تر است.</p>
+            <p class="benefit-body">
+              به خاطر تماس مستقیم، امواج از فاصله نزدیک‌تر به فولیکول‌ها می‌رسند و نتیجه سریع‌تر و
+              قوی‌تر است.
+            </p>
           </div>
           <div class="benefit-card-3d">
             <span class="benefit-index">۲</span>
@@ -379,17 +494,25 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
           <div class="benefit-card-3d">
             <span class="benefit-index">۳</span>
             <h3 class="benefit-title">درد کمتر و پخش انرژی یکنواخت</h3>
-            <p class="benefit-body">استفاده از ژل خنک‌کننده و تماس مستقیم هندپیس با پوست به کاهش درد و یکنواخت کردن پخش انرژی در سطح پوست کمک می‌کند.</p>
+            <p class="benefit-body">
+              استفاده از ژل خنک‌کننده و تماس مستقیم هندپیس با پوست به کاهش درد و یکنواخت کردن پخش
+              انرژی در سطح پوست کمک می‌کند.
+            </p>
           </div>
           <div class="benefit-card-3d">
             <span class="benefit-index">۴</span>
             <h3 class="benefit-title">بهداشت کامل</h3>
-            <p class="benefit-body">هر بار استفاده با کاور یکبار مصرف مخصوص هر فرد، بدون نگرانی از انتقال بیماری.</p>
+            <p class="benefit-body">
+              هر بار استفاده با کاور یکبار مصرف مخصوص هر فرد، بدون نگرانی از انتقال بیماری.
+            </p>
           </div>
           <div class="benefit-card-3d">
             <span class="benefit-index">۵</span>
             <h3 class="benefit-title">مناسب برای انواع پوست‌ها</h3>
-            <p class="benefit-body">لیزر تماسی برای افراد با رنگ پوست‌های مختلف مؤثر است و امکان استفاده برای افراد متنوع با رنگ پوست متفاوت را فراهم می‌کند.</p>
+            <p class="benefit-body">
+              لیزر تماسی برای افراد با رنگ پوست‌های مختلف مؤثر است و امکان استفاده برای افراد متنوع
+              با رنگ پوست متفاوت را فراهم می‌کند.
+            </p>
           </div>
           <div class="benefit-card-3d">
             <span class="benefit-index">۶</span>
@@ -399,7 +522,10 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
           <div class="benefit-card-3d">
             <span class="benefit-index">۷</span>
             <h3 class="benefit-title">جلوگیری از عوارض پوستی</h3>
-            <p class="benefit-body">ژل خنک‌کننده به کاهش دما و جلوگیری از التهاب، قرمزی و سوختگی‌های احتمالی ناشی از حرارت لیزر کمک می‌کند.</p>
+            <p class="benefit-body">
+              ژل خنک‌کننده به کاهش دما و جلوگیری از التهاب، قرمزی و سوختگی‌های احتمالی ناشی از حرارت
+              لیزر کمک می‌کند.
+            </p>
           </div>
         </div>
       </div>
@@ -409,48 +535,70 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
     <section class="section rado-section">
       <div class="container">
         <div class="section-heading text-center">
-          <div class="pill-label"><Icon name="gem" size={14} /> انتخاب دستگاه</div>
+          <div class="pill-label">
+            <Icon name="gem" size={14} /> انتخاب دستگاه
+          </div>
           <h2 class="section-title">چرا برای لیزر دستگاه رادو پلاس را انتخاب کنیم</h2>
           <p class="section-lead">
-            دستگاه لیزر تماسی رادو پلاس با توان خروجی واقعی و سه طول موج، ترکیبی از قدرت، ایمنی و سرعت را در یک هندپیس سبک فراهم می‌کند.
+            دستگاه لیزر تماسی رادو پلاس با توان خروجی واقعی و سه طول موج، ترکیبی از قدرت، ایمنی و
+            سرعت را در یک هندپیس سبک فراهم می‌کند.
           </p>
         </div>
 
         <div class="rado-grid">
           <div class="rado-card-3d">
             <div class="rado-card-head">
-              <div class="card-icon-accent"><Icon name="lightning" size={26} /></div>
+              <div class="card-icon-accent">
+                <Icon name="lightning" size={26} />
+              </div>
               <h3 class="rado-title">قدرت و تکنولوژی روز دنیا</h3>
             </div>
-            <p class="rado-body">دستگاه رادو پلاس با قدرت ۱۶۰۰ وات واقعی، به‌روزترین و پیشرفته‌ترین دستگاه لیزر تماسی است.</p>
+            <p class="rado-body">
+              دستگاه رادو پلاس با قدرت ۱۶۰۰ وات واقعی، به‌روزترین و پیشرفته‌ترین دستگاه لیزر تماسی
+              است.
+            </p>
           </div>
           <div class="rado-card-3d">
             <div class="rado-card-head">
-              <div class="card-icon-accent"><Icon name="services" size={26} /></div>
+              <div class="card-icon-accent">
+                <Icon name="services" size={26} />
+              </div>
               <h3 class="rado-title">پوشش همه رنگ‌های پوستی</h3>
             </div>
-            <p class="rado-body">سه طول موج متفاوت (الکساندرایت ۷۵۵، دیود ۸۰۸ و ان‌دی‌یاگ ۱۰۶۴ نانومتر) برای پوشش همه طیف‌های رنگی پوست.</p>
+            <p class="rado-body">
+              سه طول موج متفاوت (الکساندرایت ۷۵۵، دیود ۸۰۸ و ان‌دی‌یاگ ۱۰۶۴ نانومتر) برای پوشش همه
+              طیف‌های رنگی پوست.
+            </p>
           </div>
           <div class="rado-card-3d">
             <div class="rado-card-head">
-              <div class="card-icon-accent"><Icon name="sparkles" size={26} /></div>
+              <div class="card-icon-accent">
+                <Icon name="sparkles" size={26} />
+              </div>
               <h3 class="rado-title">روشن‌کنندگی نواحی تیره</h3>
             </div>
             <p class="rado-body">قابلیت Whitening برای روشن‌کردن و بهبود نواحی تیره.</p>
           </div>
           <div class="rado-card-3d">
             <div class="rado-card-head">
-              <div class="card-icon-accent"><Icon name="target" size={26} /></div>
+              <div class="card-icon-accent">
+                <Icon name="target" size={26} />
+              </div>
               <h3 class="rado-title">تأثیر روی همه نوع مو</h3>
             </div>
             <p class="rado-body">اثرگذاری فوق‌العاده حتی روی موهای نازک، کرکی و روشن.</p>
           </div>
           <div class="rado-card-3d rado-card-wide">
             <div class="rado-card-head">
-              <div class="card-icon-accent"><Icon name="snowflake" size={26} /></div>
+              <div class="card-icon-accent">
+                <Icon name="snowflake" size={26} />
+              </div>
               <h3 class="rado-title">بدون درد و سوختگی</h3>
             </div>
-            <p class="rado-body">سیستم خنک‌کننده مجهز به <span dir="ltr">TEC Double</span> و <span dir="ltr">Continuous Cooling</span> برای آرامش و ایمنی کامل.</p>
+            <p class="rado-body">
+              سیستم خنک‌کننده مجهز به <span dir="ltr">TEC Double</span> و{' '}
+              <span dir="ltr">Continuous Cooling</span> برای آرامش و ایمنی کامل.
+            </p>
           </div>
         </div>
       </div>
@@ -463,10 +611,13 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
     <section class="section team-section">
       <div class="container">
         <div class="section-heading text-center">
-          <div class="pill-label"><Icon name="award" size={14} /> مدیریت کلینیک</div>
+          <div class="pill-label">
+            <Icon name="award" size={14} /> مدیریت کلینیک
+          </div>
           <h2 class="section-title">مدیریت و کادر تهران لیزر</h2>
           <p class="section-lead">
-            تهران لیزر با مدیریت صدف مظفری و کادر آموزش‌دیده پذیرش و اپراتوری اداره می‌شود؛ هر جلسه بر اساس چک‌لیست بهداشتی و پروتکل ثبت‌شده همان ناحیه انجام می‌گیرد.
+            تهران لیزر با مدیریت صدف مظفری و کادر آموزش‌دیده پذیرش و اپراتوری اداره می‌شود؛ هر جلسه
+            بر اساس چک‌لیست بهداشتی و پروتکل ثبت‌شده همان ناحیه انجام می‌گیرد.
           </p>
         </div>
 
@@ -479,11 +630,15 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
             <div class="lead-profile-info">
               <div class="lead-profile-name-row">
                 <h3 class="lead-profile-name">صدف مظفری</h3>
-                <span class="lead-profile-verified"><Icon name="checkCircle" size={14} /> مدیر کلینیک تهران لیزر</span>
+                <span class="lead-profile-verified">
+                  <Icon name="checkCircle" size={14} /> مدیر کلینیک تهران لیزر
+                </span>
               </div>
               <div class="lead-profile-role">بنیان‌گذار و مدیر کلینیک — مسئول تجربه مراجعین</div>
               <p class="lead-profile-desc">
-                صدف مظفری مدیریت تهران لیزر را بر عهده دارد: هماهنگی تیم پذیرش و اپراتورها، پیگیری بازخورد مراجعین و کنترل اجرای چک‌لیست بهداشتی هر جلسه. خدمات لیزر بانوان و آقایان در لاین‌های مجزا و با کادر آموزش‌دیده ارائه می‌شود.
+                صدف مظفری مدیریت تهران لیزر را بر عهده دارد: هماهنگی تیم پذیرش و اپراتورها، پیگیری
+                بازخورد مراجعین و کنترل اجرای چک‌لیست بهداشتی هر جلسه. خدمات لیزر بانوان و آقایان در
+                لاین‌های مجزا و با کادر آموزش‌دیده ارائه می‌شود.
               </p>
               <div class="lead-profile-facts">
                 <div class="fact-item">
@@ -510,34 +665,52 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
       <div class="container">
         <div class="hygiene-layout">
           <div class="hygiene-content">
-            <div class="pill-label"><Icon name="clean" size={14} /> پروتکل سلامت</div>
+            <div class="pill-label">
+              <Icon name="clean" size={14} /> پروتکل سلامت
+            </div>
             <h2 class="section-title">بهداشت و استریلیزاسیون فراتر از استانداردهای بیمارستانی</h2>
             <p class="section-lead">
-              سلامت و آسودگی خیال شما اولویت مطلق ماست. تمام مراحل آماده‌سازی اتاق و تجهیزات در حضور خود مراجع انجام می‌پذیرد.
+              سلامت و آسودگی خیال شما اولویت مطلق ماست. تمام مراحل آماده‌سازی اتاق و تجهیزات در حضور
+              خود مراجع انجام می‌پذیرد.
             </p>
 
             <div class="hygiene-list">
               <div class="hygiene-item">
-                <div class="h-icon"><Icon name="clean" size={20} /></div>
+                <div class="h-icon">
+                  <Icon name="clean" size={20} />
+                </div>
                 <div>
                   <h3 class="h-title">سری‌های شخصی و پک بهداشتی انحصاری</h3>
-                  <p class="h-desc">سری هندپیس به صورت پلمپ و یکبار مصرف برای هر شخص باز شده و ملحفه و عینک ایمنی اختصاصی تحویل داده می‌شود.</p>
+                  <p class="h-desc">
+                    سری هندپیس به صورت پلمپ و یکبار مصرف برای هر شخص باز شده و ملحفه و عینک ایمنی
+                    اختصاصی تحویل داده می‌شود.
+                  </p>
                 </div>
               </div>
 
               <div class="hygiene-item">
-                <div class="h-icon"><Icon name="shield" size={20} /></div>
+                <div class="h-icon">
+                  <Icon name="shield" size={20} />
+                </div>
                 <div>
                   <h3 class="h-title">ضدعفونی با استانداردهای بیمارستانی سطح بالا</h3>
-                  <p class="h-desc">سلفون‌کشی کامل سیم‌ها و پروب دستگاه و شستشوی سطوح با مواد مجاز وزارت بهداشت بین هر دو نوبت مراجعین.</p>
+                  <p class="h-desc">
+                    سلفون‌کشی کامل سیم‌ها و پروب دستگاه و شستشوی سطوح با مواد مجاز وزارت بهداشت بین
+                    هر دو نوبت مراجعین.
+                  </p>
                 </div>
               </div>
 
               <div class="hygiene-item">
-                <div class="h-icon"><Icon name="snowflake" size={20} /></div>
+                <div class="h-icon">
+                  <Icon name="snowflake" size={20} />
+                </div>
                 <div>
                   <h3 class="h-title">سیستم فیلتراسیون هوا و تهویه فعال</h3>
-                  <p class="h-desc">فیلترهای هپای فعال در اتاق‌های لیزر برای حذف فوری ذرات هوابرد و تضمین هوای مطبوع و پاکیزه.</p>
+                  <p class="h-desc">
+                    فیلترهای هپای فعال در اتاق‌های لیزر برای حذف فوری ذرات هوابرد و تضمین هوای مطبوع
+                    و پاکیزه.
+                  </p>
                 </div>
               </div>
             </div>
@@ -545,31 +718,41 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
 
           <!-- Official Accreditations Card -->
           <div class="certifications-card">
-            <h3 class="cert-title"><Icon name="award" size={22} class="gold-icon" /> گواهی‌ها و اعتبارسنجی‌های بین‌المللی</h3>
+            <h3 class="cert-title">
+              <Icon name="award" size={22} class="gold-icon" /> گواهی‌ها و اعتبارسنجی‌های بین‌المللی
+            </h3>
             <ul class="cert-list">
               <li class="cert-item">
-                <div class="cert-check"><Icon name="checkCircle" size={18} /></div>
+                <div class="cert-check">
+                  <Icon name="checkCircle" size={18} />
+                </div>
                 <div>
                   <strong>مجوز رسمی وزارت بهداشت و درمان ایران</strong>
                   <span>شناسه مرکز درمانی معتبر ثبت‌شده در سامانه پزشکی</span>
                 </div>
               </li>
               <li class="cert-item">
-                <div class="cert-check"><Icon name="checkCircle" size={18} /></div>
+                <div class="cert-check">
+                  <Icon name="checkCircle" size={18} />
+                </div>
                 <div>
                   <strong>تاییدیه سازمان غذا و داروی آمریکا (US FDA)</strong>
                   <span>استاندارد اثربخشی بالینی دائم برای لیزر تماسی رادو پلاس</span>
                 </div>
               </li>
               <li class="cert-item">
-                <div class="cert-check"><Icon name="checkCircle" size={18} /></div>
+                <div class="cert-check">
+                  <Icon name="checkCircle" size={18} />
+                </div>
                 <div>
                   <strong>نشان استاندارد سلامت اروپا (CE Mark)</strong>
                   <span>مطابقت کامل با الزامات ایمنی تجهیزات پزشکی ایمن</span>
                 </div>
               </li>
               <li class="cert-item">
-                <div class="cert-check"><Icon name="checkCircle" size={18} /></div>
+                <div class="cert-check">
+                  <Icon name="checkCircle" size={18} />
+                </div>
                 <div>
                   <strong>گواهینامه مدیریت کیفیت ISO 13485</strong>
                   <span>استاندارد بین‌المللی کنترل فرآیندهای تجهیزات کلینیکی</span>
@@ -582,28 +765,36 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
         <!-- Authenticity & calibration guarantees -->
         <div class="authenticity-strip">
           <div class="auth-item">
-            <div class="auth-icon"><Icon name="shield" size={22} /></div>
+            <div class="auth-icon">
+              <Icon name="shield" size={22} />
+            </div>
             <div class="auth-body">
               <div class="auth-title">دستگاه اورجینال با شماره سریال</div>
               <div class="auth-sub">تجهیز رسمی دارای مجوز و خدمات پس از فروش شرکت سازنده</div>
             </div>
           </div>
           <div class="auth-item">
-            <div class="auth-icon"><Icon name="refresh" size={22} /></div>
+            <div class="auth-icon">
+              <Icon name="refresh" size={22} />
+            </div>
             <div class="auth-body">
               <div class="auth-title">کالیبراسیون روزانه توان سنجی</div>
               <div class="auth-sub">تست و تنظیم انرژی شات‌ها در ابتدای هر شیفت</div>
             </div>
           </div>
           <div class="auth-item">
-            <div class="auth-icon"><Icon name="clean" size={22} /></div>
+            <div class="auth-icon">
+              <Icon name="clean" size={22} />
+            </div>
             <div class="auth-body">
               <div class="auth-title">سری هندپیس پلمپ یکبارمصرف</div>
               <div class="auth-sub">باز شدن پک اختصاصی در حضور هر مراجع</div>
             </div>
           </div>
           <div class="auth-item">
-            <div class="auth-icon"><Icon name="document" size={22} /></div>
+            <div class="auth-icon">
+              <Icon name="document" size={22} />
+            </div>
             <div class="auth-body">
               <div class="auth-title">پرونده بالینی و قرارداد درمانی</div>
               <div class="auth-sub">ثبت دقیق دوز و تعداد شات در هر جلسه</div>
@@ -619,24 +810,38 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
         <div class="location-card-3d">
           <div class="loc-grid">
             <div class="loc-details">
-              <div class="pill-label"><Icon name="pin" size={14} /> دسترسی و لوکیشن</div>
+              <div class="pill-label">
+                <Icon name="pin" size={14} /> دسترسی و لوکیشن
+              </div>
               <h3 class="loc-title">محیطی لوکس و آرام در قلب منطقه پاسداران</h3>
               <p class="loc-desc">
-                کلینیک تهران لیزر در خیابان پایدارفرد، نبش بوستان هفتم واقع شده است؛ موقعیتی دنج و با دسترسی آسان به بزرگراه‌های شهید صیاد شیرازی و شهید همت با امکان پارک خودرو بدون دغدغه ترافیک.
+                کلینیک تهران لیزر در خیابان پایدارفرد، نبش بوستان هفتم واقع شده است؛ موقعیتی دنج و
+                با دسترسی آسان به بزرگراه‌های شهید صیاد شیرازی و شهید همت با امکان پارک خودرو بدون
+                دغدغه ترافیک.
               </p>
 
               <div class="loc-meta">
                 <div class="meta-row">
                   <Icon name="pin" size={18} class="gold-icon" />
-                  <span><strong>آدرس:</strong> تهران، پاسداران، خیابان پایدارفرد، نبش بوستان هفتم</span>
+                  <span>
+                    <strong>آدرس:</strong> تهران، پاسداران، خیابان پایدارفرد، نبش بوستان هفتم
+                  </span>
                 </div>
                 <div class="meta-row">
                   <Icon name="phone" size={18} class="gold-icon" />
-                  <span><strong>شماره تماس پذیرش:</strong> <a href="tel:+989035555090"><bdi dir="ltr">۰۹۰۳ ۵۵۵ ۵۰۹۰</bdi></a></span>
+                  <span>
+                    <strong>شماره تماس پذیرش:</strong>{' '}
+                    <a href="tel:+989035555090">
+                      <bdi dir="ltr">۰۹۰۳ ۵۵۵ ۵۰۹۰</bdi>
+                    </a>
+                  </span>
                 </div>
                 <div class="meta-row">
                   <Icon name="clock" size={18} class="gold-icon" />
-                  <span><strong>ساعات کاری:</strong> شنبه الی چهارشنبه ۹:۰۰ الی ۲۰:۰۰ | پنجشنبه‌ها ۹:۰۰ الی ۱۸:۰۰</span>
+                  <span>
+                    <strong>ساعات کاری:</strong> شنبه الی چهارشنبه ۹:۰۰ الی ۲۰:۰۰ | پنجشنبه‌ها ۹:۰۰
+                    الی ۱۸:۰۰
+                  </span>
                 </div>
               </div>
             </div>
@@ -644,10 +849,18 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
             <div class="loc-amenities">
               <h3 class="amenities-title">امکانات رفاهی مرکز:</h3>
               <ul class="amenities-list">
-                <li><Icon name="check" size={16} /> سالن انتظار VIP با پذیرایی گرم و سرد</li>
-                <li><Icon name="check" size={16} /> اینترنت بی‌سیم پرسرعت و رایگان</li>
-                <li><Icon name="check" size={16} /> اتاق‌های ایزوله با سیستم موسیقی آرامش‌بخش</li>
-                <li><Icon name="check" size={16} /> کمدهای قفل‌دار اختصاصی برای لوازم مراجعین</li>
+                <li>
+                  <Icon name="check" size={16} /> سالن انتظار VIP با پذیرایی گرم و سرد
+                </li>
+                <li>
+                  <Icon name="check" size={16} /> اینترنت بی‌سیم پرسرعت و رایگان
+                </li>
+                <li>
+                  <Icon name="check" size={16} /> اتاق‌های ایزوله با سیستم موسیقی آرامش‌بخش
+                </li>
+                <li>
+                  <Icon name="check" size={16} /> کمدهای قفل‌دار اختصاصی برای لوازم مراجعین
+                </li>
               </ul>
             </div>
           </div>
@@ -659,7 +872,9 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
     <section class="section faq-section">
       <div class="container container-narrow">
         <div class="section-heading text-center">
-          <div class="pill-label"><Icon name="info" size={14} /> پاسخ به ابهامات</div>
+          <div class="pill-label">
+            <Icon name="info" size={14} /> پاسخ به ابهامات
+          </div>
           <h2 class="section-title">پرسش‌های متداول مراجعین درباره لیزر تماسی رادو پلاس</h2>
         </div>
 
@@ -667,40 +882,61 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
           <details class="faq-item" open>
             <summary class="faq-summary">
               <span class="faq-q">آیا لیزر تماسی رادو پلاس احساس درد دارد؟</span>
-              <span class="faq-arrow"><Icon name="chevronDown" size={18} /></span>
+              <span class="faq-arrow">
+                <Icon name="chevronDown" size={18} />
+              </span>
             </summary>
             <div class="faq-answer">
-              به لطف سیستم خنک‌کننده دوگانه TEC Double و پخش یکنواخت انرژی از طریق تماس مستقیم هندپیس با پوست به همراه ژل خنک‌کننده، عمده مراجعین فقط حس خنکی ملایمی را گزارش می‌کنند و نیازی به پمادهای بی‌حسی نیست.
+              به لطف سیستم خنک‌کننده دوگانه TEC Double و پخش یکنواخت انرژی از طریق تماس مستقیم
+              هندپیس با پوست به همراه ژل خنک‌کننده، عمده مراجعین فقط حس خنکی ملایمی را گزارش می‌کنند
+              و نیازی به پمادهای بی‌حسی نیست.
             </div>
           </details>
 
           <details class="faq-item">
             <summary class="faq-summary">
               <span class="faq-q">چرا دستگاه رادو پلاس برای لیزر انتخاب بهتری است؟</span>
-              <span class="faq-arrow"><Icon name="chevronDown" size={18} /></span>
+              <span class="faq-arrow">
+                <Icon name="chevronDown" size={18} />
+              </span>
             </summary>
             <div class="faq-answer">
-              رادو پلاس یک لیزر تماسی (لمسی) با سه طول موج ۷۵۵ و ۸۰۸ و ۱۰۶۴ نانومتر و توان خروجی ۱۶۰۰ وات است. در لیزر تماسی، امواج از فاصله نزدیک‌تر به فولیکول‌ها می‌رسند و نتیجه سریع‌تر و قوی‌تر می‌شود؛ پوشش نواحی کامل‌تر است و هیچ نقطه‌ای جا نمی‌ماند. به دلیل تماس مستقیم هندپیس با پوست و استفاده از ژل خنک‌کننده، درد کمتر و پخش انرژی یکنواخت‌تر است. برای هر مراجع کاور یکبار مصرف اختصاصی استفاده می‌شود و این روش برای همه رنگ‌های پوستی مؤثر است.
+              رادو پلاس یک لیزر تماسی (لمسی) با سه طول موج ۷۵۵ و ۸۰۸ و ۱۰۶۴ نانومتر و توان خروجی
+              ۱۶۰۰ وات است. در لیزر تماسی، امواج از فاصله نزدیک‌تر به فولیکول‌ها می‌رسند و نتیجه
+              سریع‌تر و قوی‌تر می‌شود؛ پوشش نواحی کامل‌تر است و هیچ نقطه‌ای جا نمی‌ماند. به دلیل
+              تماس مستقیم هندپیس با پوست و استفاده از ژل خنک‌کننده، درد کمتر و پخش انرژی یکنواخت‌تر
+              است. برای هر مراجع کاور یکبار مصرف اختصاصی استفاده می‌شود و این روش برای همه رنگ‌های
+              پوستی مؤثر است.
             </div>
           </details>
 
           <details class="faq-item">
             <summary class="faq-summary">
               <span class="faq-q">چند جلسه برای حذف دائمی موها نیاز است؟</span>
-              <span class="faq-arrow"><Icon name="chevronDown" size={18} /></span>
+              <span class="faq-arrow">
+                <Icon name="chevronDown" size={18} />
+              </span>
             </summary>
             <div class="faq-answer">
-              پروتکل استاندارد پزشکی بین ۶ الی ۸ جلسه با فواصل زمانی ۴ تا ۶ هفته بسته به ناحیه درمان است. پس از اتمام دوره، بیش از ۹۰ درصد موها به طور دائم از بین رفته و تنها جلسات شارژ سالانه توصیه می‌گردد.
+              پروتکل استاندارد پزشکی بین ۶ الی ۸ جلسه با فواصل زمانی ۴ تا ۶ هفته بسته به ناحیه درمان
+              است. پس از اتمام دوره، بیش از ۹۰ درصد موها به طور دائم از بین رفته و تنها جلسات شارژ
+              سالانه توصیه می‌گردد.
             </div>
           </details>
 
           <details class="faq-item">
             <summary class="faq-summary">
-              <span class="faq-q">آیا افراد با پوست سبزه یا برنزه می‌توانند با این دستگاه لیزر انجام دهند؟</span>
-              <span class="faq-arrow"><Icon name="chevronDown" size={18} /></span>
+              <span class="faq-q">
+                آیا افراد با پوست سبزه یا برنزه می‌توانند با این دستگاه لیزر انجام دهند؟
+              </span>
+              <span class="faq-arrow">
+                <Icon name="chevronDown" size={18} />
+              </span>
             </summary>
             <div class="faq-answer">
-              بله، دستگاه ما مجهز به طول موج اختصاصی ان‌دی‌یاگ (Nd:YAG 1064nm) است که منحصراً برای تایپ‌های پوستی سبزه و تیره طراحی شده و ایمن‌ترین لیزر تاییدشده بدون هیچ‌گونه ریسک لک یا تغییر رنگدانه است.
+              بله، دستگاه ما مجهز به طول موج اختصاصی ان‌دی‌یاگ (Nd:YAG 1064nm) است که منحصراً برای
+              تایپ‌های پوستی سبزه و تیره طراحی شده و ایمن‌ترین لیزر تاییدشده بدون هیچ‌گونه ریسک لک
+              یا تغییر رنگدانه است.
             </div>
           </details>
         </div>
@@ -711,10 +947,13 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
     <section class="section cta-section">
       <div class="container">
         <div class="obsidian-cta-card">
-          <div class="cta-sparkle-decor"><Icon name="sparkles" size={48} /></div>
+          <div class="cta-sparkle-decor">
+            <Icon name="sparkles" size={48} />
+          </div>
           <h2 class="cta-title">تجربه بالاترین سطح درمان و آرامش در کلینیک تهران لیزر</h2>
           <p class="cta-desc">
-            هم‌اکنون نوبت خود را به صورت آنلاین ثبت نمایید و از ۱۵٪ تخفیف ویژه رزرو اینترنتی پکیج کل بدن به همراه جلسه مشاوره رایگان بهره‌مند شوید.
+            هم‌اکنون نوبت خود را به صورت آنلاین ثبت نمایید و از ۱۵٪ تخفیف ویژه رزرو اینترنتی پکیج کل
+            بدن به همراه جلسه مشاوره رایگان بهره‌مند شوید.
           </p>
           <div class="cta-actions">
             <a href="/booking" class="btn-3d-gold">
@@ -723,7 +962,9 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
             </a>
             <a href="tel:+989035555090" class="btn-obsidian-outline">
               <Icon name="phone" size={18} />
-              <span>مشاوره تلفنی: <bdi dir="ltr">۰۹۰۳ ۵۵۵ ۵۰۹۰</bdi></span>
+              <span>
+                مشاوره تلفنی: <bdi dir="ltr">۰۹۰۳ ۵۵۵ ۵۰۹۰</bdi>
+              </span>
             </a>
           </div>
         </div>
@@ -774,4 +1015,3 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
     initWavelengthSwitcher();
   }
 </script>
-

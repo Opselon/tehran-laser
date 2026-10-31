@@ -166,13 +166,22 @@ describe('mergeModuleStates', () => {
   });
 
   it('enabled is read from the 0/1 integer only — no truthy coercion', () => {
-    expect(mergeModuleStates([row('faq', { enabled: 2 })]).find((s) => s.key === 'faq')!.enabled).toBe(false);
-    expect(mergeModuleStates([row('faq', { enabled: 1 })]).find((s) => s.key === 'faq')!.enabled).toBe(true);
-    expect(mergeModuleStates([row('faq', { enabled: 0 })]).find((s) => s.key === 'faq')!.enabled).toBe(false);
+    expect(
+      mergeModuleStates([row('faq', { enabled: 2 })]).find((s) => s.key === 'faq')!.enabled,
+    ).toBe(false);
+    expect(
+      mergeModuleStates([row('faq', { enabled: 1 })]).find((s) => s.key === 'faq')!.enabled,
+    ).toBe(true);
+    expect(
+      mergeModuleStates([row('faq', { enabled: 0 })]).find((s) => s.key === 'faq')!.enabled,
+    ).toBe(false);
   });
 
   it('sorts by order, then key — deterministic across renders', () => {
-    const states = mergeModuleStates([row('faq', { displayOrder: 5 }), row('hero', { displayOrder: 5 })]);
+    const states = mergeModuleStates([
+      row('faq', { displayOrder: 5 }),
+      row('hero', { displayOrder: 5 }),
+    ]);
     const orders = states.map((s) => s.order);
     expect(orders).toEqual([...orders].sort((a, b) => a - b));
     // Two modules sharing an order are tie-broken alphabetically.
@@ -191,9 +200,13 @@ describe('mergeModuleStates', () => {
   });
 
   it('a row only affects its own key — sibling modules stay at their defaults', () => {
-    const states = mergeModuleStates([row('pricing-table', { config: JSON.stringify({ promoTitle: 'دoverride' }) })]);
+    const states = mergeModuleStates([
+      row('pricing-table', { config: JSON.stringify({ promoTitle: 'دoverride' }) }),
+    ]);
     expect(states.find((s) => s.key === 'pricing-table')!.config.promoTitle).toBe('دoverride');
-    expect(states.find((s) => s.key === 'hero')!.config).toEqual(defaultConfig(getModuleDef('hero')!));
+    expect(states.find((s) => s.key === 'hero')!.config).toEqual(
+      defaultConfig(getModuleDef('hero')!),
+    );
   });
 });
 
@@ -236,7 +249,9 @@ describe('publicModules', () => {
   });
 
   it('includes the effective config for each enabled module', () => {
-    const list = publicModules(mergeModuleStates([row('pricing-table', { config: '{"promoTitle":"T"}' })]));
+    const list = publicModules(
+      mergeModuleStates([row('pricing-table', { config: '{"promoTitle":"T"}' })]),
+    );
     const pricing = list.find((m) => m.key === 'pricing-table')!;
     expect(pricing.config.promoTitle).toBe('T');
   });
@@ -286,7 +301,9 @@ describe('parseStoredConfig', () => {
   });
 
   it('refuses a blob carrying an unknown key (strict schema, no silent drop)', () => {
-    expect(parseStoredConfig('pricing-table', JSON.stringify({ promoTitle: 'a', unknown: 'b' }))).toEqual({});
+    expect(
+      parseStoredConfig('pricing-table', JSON.stringify({ promoTitle: 'a', unknown: 'b' })),
+    ).toEqual({});
   });
 });
 
@@ -315,7 +332,11 @@ describe('resolveInstagram', () => {
   it('module config wins over legacy settings', () => {
     const view = resolveInstagram(
       { handle: 'newhandle', promoCode: 'NEW', promoDiscountPercent: 10 },
-      { instagram_username: 'old', instagram_promo_code: 'OLD', instagram_follower_discount_percent: '99' },
+      {
+        instagram_username: 'old',
+        instagram_promo_code: 'OLD',
+        instagram_follower_discount_percent: '99',
+      },
     );
     expect(view.handle).toBe('newhandle');
     expect(view.promoCode).toBe('NEW');

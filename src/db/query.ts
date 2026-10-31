@@ -21,32 +21,20 @@ export interface Page<T> {
 }
 
 /** All matching rows. Caller is responsible for an explicit column list + LIMIT. */
-export async function all<T>(
-  db: Queryable,
-  sql: string,
-  ...binds: SqlValue[]
-): Promise<T[]> {
+export async function all<T>(db: Queryable, sql: string, ...binds: SqlValue[]): Promise<T[]> {
   const stmt = binds.length > 0 ? db.prepare(sql).bind(...binds) : db.prepare(sql);
   const result = await stmt.all<T>();
   return result.results as T[];
 }
 
 /** First matching row or null. */
-export async function one<T>(
-  db: Queryable,
-  sql: string,
-  ...binds: SqlValue[]
-): Promise<T | null> {
+export async function one<T>(db: Queryable, sql: string, ...binds: SqlValue[]): Promise<T | null> {
   const stmt = binds.length > 0 ? db.prepare(sql).bind(...binds) : db.prepare(sql);
   return (await stmt.first<T>()) as T | null;
 }
 
 /** Execute a write. `meta` carries changes/last_row_id for callers that need it. */
-export async function run(
-  db: Queryable,
-  sql: string,
-  ...binds: SqlValue[]
-): Promise<D1Result> {
+export async function run(db: Queryable, sql: string, ...binds: SqlValue[]): Promise<D1Result> {
   const stmt = binds.length > 0 ? db.prepare(sql).bind(...binds) : db.prepare(sql);
   return stmt.run();
 }

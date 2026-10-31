@@ -12,33 +12,70 @@
    here when you start using it; do not restore the whole scale.
    ───────────────────────────────────────────────────────────── */
 
-.p-5{padding: 1.25rem !important;}
-.flex-wrap{flex-wrap: wrap !important;}
-.text-center{text-align: center !important;}
-.text-justify{text-align: justify !important;}
-.font-bold{font-weight: 700 !important;}
-.text-gold{color: var(--color-text-gold, #34d399) !important;}
-.text-obsidian-muted{color: var(--color-text-obsidian-muted, #94a3b8) !important;}
+.p-5 {
+  padding: 1.25rem !important;
+}
+.flex-wrap {
+  flex-wrap: wrap !important;
+}
+.text-center {
+  text-align: center !important;
+}
+.text-justify {
+  text-align: justify !important;
+}
+.font-bold {
+  font-weight: 700 !important;
+}
+.text-gold {
+  color: var(--color-text-gold, #34d399) !important;
+}
+.text-obsidian-muted {
+  color: var(--color-text-obsidian-muted, #94a3b8) !important;
+}
 .text-rose,
-.text-danger{color: #f87171 !important;}
-.media-ratio-1x1{aspect-ratio: 1 / 1;}
-.media-ratio-4x3{aspect-ratio: 4 / 3;}
-.media-ratio-3x2{aspect-ratio: 3 / 2;}
-.media-ratio-16x9{aspect-ratio: 16 / 9;}
-.media-ratio-21x9{aspect-ratio: 21 / 9;}
-.media-ratio-3x4{aspect-ratio: 3 / 4;}
-.media-cover{object-fit: cover !important;
-  object-position: center !important;}
-.media-frame-fluid{inline-size: 100%;
-  max-inline-size: 100%;}
-.touch-target{min-height: 44px !important;
+.text-danger {
+  color: #f87171 !important;
+}
+.media-ratio-1x1 {
+  aspect-ratio: 1 / 1;
+}
+.media-ratio-4x3 {
+  aspect-ratio: 4 / 3;
+}
+.media-ratio-3x2 {
+  aspect-ratio: 3 / 2;
+}
+.media-ratio-16x9 {
+  aspect-ratio: 16 / 9;
+}
+.media-ratio-21x9 {
+  aspect-ratio: 21 / 9;
+}
+.media-ratio-3x4 {
+  aspect-ratio: 3 / 4;
+}
+.media-cover {
+  object-fit: cover !important;
+  object-position: center !important;
+}
+.media-frame-fluid {
+  inline-size: 100%;
+  max-inline-size: 100%;
+}
+.touch-target {
+  min-height: 44px !important;
   min-width: 44px !important;
   display: inline-flex !important;
   align-items: center !important;
-  justify-content: center !important;}
-.touch-target-44{min-height: var(--tap-target-min, 44px) !important;
-  min-width: var(--tap-target-min, 44px) !important;}
-.sr-only{position: absolute !important;
+  justify-content: center !important;
+}
+.touch-target-44 {
+  min-height: var(--tap-target-min, 44px) !important;
+  min-width: var(--tap-target-min, 44px) !important;
+}
+.sr-only {
+  position: absolute !important;
   width: 1px !important;
   height: 1px !important;
   padding: 0 !important;
@@ -46,5 +83,8 @@
   overflow: hidden !important;
   clip: rect(0, 0, 0, 0) !important;
   white-space: nowrap !important;
-  border: 0 !important;}
-.kpi-value{letter-spacing: var(--tracking-heading);}
+  border: 0 !important;
+}
+.kpi-value {
+  letter-spacing: var(--tracking-heading);
+}

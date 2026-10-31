@@ -80,7 +80,10 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
 
   const envelope = payload as
     | { data: T; error: null; meta?: Record<string, unknown> }
-    | { data: null; error: { code: ApiErrorCode; message: string; fields?: Record<string, string[]> } };
+    | {
+        data: null;
+        error: { code: ApiErrorCode; message: string; fields?: Record<string, string[]> };
+      };
 
   if (envelope && typeof envelope === 'object' && 'error' in envelope && envelope.error) {
     throw new ApiClientError(

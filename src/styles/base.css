@@ -43,10 +43,7 @@ body {
      `font-variant-ligatures: common-ligatures` is required for the
      Arabic-script joining forms to be applied by the shaper on some
      WebKit builds. */
-  font-feature-settings:
-    'ss01',
-    'kern',
-    'pnum';
+  font-feature-settings: 'ss01', 'kern', 'pnum';
   font-variant-ligatures: common-ligatures;
   font-variant-numeric: proportional-nums;
   /* Long unbroken tokens (URLs, product codes) are the one thing that

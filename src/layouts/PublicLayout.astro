@@ -37,7 +37,13 @@ import {
 } from '../lib/seo';
 import { env } from 'cloudflare:workers';
 import { getModuleStateMap } from '../server/features';
-import { enabledConfig, isModuleOn, mergeModuleStates, safeExternalLink, toStateMap } from '../domain/features/state';
+import {
+  enabledConfig,
+  isModuleOn,
+  mergeModuleStates,
+  safeExternalLink,
+  toStateMap,
+} from '../domain/features/state';
 import type { ModuleState } from '../domain/features/registry';
 
 interface PreloadAsset {
@@ -143,11 +149,7 @@ const breadcrumbJsonLd =
     ? createBreadcrumbSchema(pageBreadcrumbs, siteOrigin)
     : undefined;
 
-const pageJsonLd = jsonLd
-  ? Array.isArray(jsonLd)
-    ? [...jsonLd]
-    : [jsonLd]
-  : [];
+const pageJsonLd = jsonLd ? (Array.isArray(jsonLd) ? [...jsonLd] : [jsonLd]) : [];
 
 // Page-declared breadcrumbs always win over the derived fallback.
 const hasOwnBreadcrumb = pageJsonLd.some(
@@ -208,23 +210,31 @@ const bottomNav = BOTTOM_NAV.filter((item) => bookingOn || item.href !== '/booki
 const announcementCfg = enabledConfig(moduleStates, 'announcement-bar');
 const stickyCfg = enabledConfig(moduleStates, 'sticky-booking-cta');
 const whatsappCfg = enabledConfig(moduleStates, 'whatsapp-float');
-const stickyLabel = typeof stickyCfg.label === 'string' && stickyCfg.label ? stickyCfg.label : 'رزرو آنلاین نوبت';
+const stickyLabel =
+  typeof stickyCfg.label === 'string' && stickyCfg.label ? stickyCfg.label : 'رزرو آنلاین نوبت';
 const stickyBadge = typeof stickyCfg.badge === 'string' && stickyCfg.badge ? stickyCfg.badge : '';
 const announcementMessage =
-  typeof announcementCfg.message === 'string' && announcementCfg.message ? announcementCfg.message : '';
+  typeof announcementCfg.message === 'string' && announcementCfg.message
+    ? announcementCfg.message
+    : '';
 const announcementCtaLabel =
-  typeof announcementCfg.ctaLabel === 'string' && announcementCfg.ctaLabel ? announcementCfg.ctaLabel : 'رزرو با تخفیف';
+  typeof announcementCfg.ctaLabel === 'string' && announcementCfg.ctaLabel
+    ? announcementCfg.ctaLabel
+    : 'رزرو با تخفیف';
 const announcementHrefRaw =
-  typeof announcementCfg.ctaHref === 'string' && announcementCfg.ctaHref ? announcementCfg.ctaHref : '/booking';
+  typeof announcementCfg.ctaHref === 'string' && announcementCfg.ctaHref
+    ? announcementCfg.ctaHref
+    : '/booking';
 const announcementCtaHref = /^\//.test(announcementHrefRaw)
   ? announcementHrefRaw
   : safeExternalLink(announcementHrefRaw) || '/booking';
-const whatsappPhone = (typeof whatsappCfg.phone === 'string' ? whatsappCfg.phone : '').replace(/[^\d]/g, '').slice(0, 20);
+const whatsappPhone = (typeof whatsappCfg.phone === 'string' ? whatsappCfg.phone : '')
+  .replace(/[^\d]/g, '')
+  .slice(0, 20);
 const whatsappShow = isOn('whatsapp-float') && whatsappPhone.length >= 10;
 const whatsappHref = whatsappPhone
   ? `https://wa.me/${whatsappPhone}${whatsappCfg.message ? `?text=${encodeURIComponent(String(whatsappCfg.message))}` : ''}`
   : '';
-
 ---
 
 <!doctype html>
@@ -253,19 +263,17 @@ const whatsappHref = whatsappPhone
          file on the critical path; preloading it removes the swap-induced
          reflow that measured 0.196 CLS on desktop. -->
     <link rel="preload" href={arabicWoff2} as="font" type="font/woff2" crossorigin="anonymous" />
-    {
-      preload.map((asset) => (
-        <link
-          rel="preload"
-          as={asset.as}
-          href={asset.href}
-          type={asset.type}
-          media={asset.media}
-          imagesrcset={asset.imagesrcset}
-          imagesizes={asset.imagesizes}
-        />
-      ))
-    }
+    {preload.map((asset) => (
+      <link
+        rel="preload"
+        as={asset.as}
+        href={asset.href}
+        type={asset.type}
+        media={asset.media}
+        imagesrcset={asset.imagesrcset}
+        imagesizes={asset.imagesizes}
+      />
+    ))}
 
     <!-- Service worker registration (§47) -->
     <script is:inline>
@@ -278,7 +286,9 @@ const whatsappHref = whatsappPhone
   </head>
   <body class:list={[theme === 'dark' ? 'theme-dark-obsidian' : '', bodyClass]}>
     <!-- WCAG 2.4.1 Bypass Blocks — first focusable element -->
-    <a href="#main-content" class="skip-link">پرش به محتوای اصلی</a>
+    <a href="#main-content" class="skip-link">
+      پرش به محتوای اصلی
+    </a>
 
     <!-- Top announcement / trust strip. Rendered by the `announcement-bar`
          module — until it is enabled in /admin/plugins, nothing is here. -->
@@ -301,7 +311,9 @@ const whatsappHref = whatsappPhone
     <header class="site-header" data-header-scroll>
       <div class="container header-inner">
         <a href="/" class="brand-logo" aria-current={currentPath === '/' ? 'page' : undefined}>
-          <span class="logo-mark" aria-hidden="true"><BrandMark size={22} /></span>
+          <span class="logo-mark" aria-hidden="true">
+            <BrandMark size={22} />
+          </span>
           <span class="logo-text">
             <span class="logo-title">تهران لیزر</span>
             <span class="logo-sub">کلینیک تخصصی زیبایی و لیزر</span>
@@ -325,11 +337,23 @@ const whatsappHref = whatsappPhone
 
         <!-- Header Actions -->
         <div class="header-actions">
-          <a href={`tel:${CLINIC_CONTACT.telephone}`} class="header-phone" aria-label={`تماس با کلینیک: ${CLINIC_CONTACT.phoneDisplay}`}>
-            <span class="icon-phone"><Icon name="phone" size={16} aria-hidden="true" /></span>
-            <span class="phone-digits"><bdi dir="ltr">{CLINIC_CONTACT.phoneDisplay}</bdi></span>
+          <a
+            href={`tel:${CLINIC_CONTACT.telephone}`}
+            class="header-phone"
+            aria-label={`تماس با کلینیک: ${CLINIC_CONTACT.phoneDisplay}`}
+          >
+            <span class="icon-phone">
+              <Icon name="phone" size={16} aria-hidden="true" />
+            </span>
+            <span class="phone-digits">
+              <bdi dir="ltr">{CLINIC_CONTACT.phoneDisplay}</bdi>
+            </span>
           </a>
-          {bookingOn && <a href="/booking" class="btn btn-primary header-cta">رزرو آنلاین نوبت</a>}
+          {bookingOn && (
+            <a href="/booking" class="btn btn-primary header-cta">
+              رزرو آنلاین نوبت
+            </a>
+          )}
           <!-- One-tap call on phones: the header is the only persistent
                surface, so the highest-intent local action lives here. -->
           <a
@@ -371,7 +395,11 @@ const whatsappHref = whatsappPhone
             </a>
           ))}
           <div class="drawer-actions">
-            {bookingOn && <a href="/booking" class="btn btn-primary btn-block">رزرو آنلاین نوبت</a>}
+            {bookingOn && (
+              <a href="/booking" class="btn btn-primary btn-block">
+                رزرو آنلاین نوبت
+              </a>
+            )}
             <a href={`tel:${CLINIC_CONTACT.telephone}`} class="btn btn-outline btn-block mt-2">
               تماس: <bdi dir="ltr">{CLINIC_CONTACT.phoneDisplay}</bdi>
             </a>
@@ -386,7 +414,7 @@ const whatsappHref = whatsappPhone
     </main>
 
     <!-- Footer -->
-        <SiteFooter />
+    <SiteFooter />
 
     <!-- Mobile Bottom Navigation (≤768px) — A2. Icons are decorative; the
          label span carries the accessible name. -->
@@ -418,23 +446,31 @@ const whatsappHref = whatsappPhone
           <span>{stickyLabel}</span>
           {stickyBadge && <span class="promo-tag">{stickyBadge}</span>}
         </a>
-      <button
-        id="basketFab"
-        class="basket-fab tap-target"
-        type="button"
-        aria-expanded="false"
-        aria-controls="basketDrawer"
-        aria-label="سبد سفارش"
-      >
-        <Icon name="shoppingBag" size={20} aria-hidden="true" />
-        <span class="basket-fab-label">سبد</span>
-        <span id="basketCount" class="basket-count" hidden aria-live="polite">۰</span>
-      </button>
-      <!-- PWA install control (A3) — revealed only on beforeinstallprompt -->
-      <button id="pwaInstallBtn" class="pwa-install tap-target" type="button" aria-label="نصب اپلیکیشن" hidden>
-        <Icon name="sparkles" size={18} aria-hidden="true" />
-        <span class="pwa-install-label">نصب اپلیکیشن</span>
-      </button>
+        <button
+          id="basketFab"
+          class="basket-fab tap-target"
+          type="button"
+          aria-expanded="false"
+          aria-controls="basketDrawer"
+          aria-label="سبد سفارش"
+        >
+          <Icon name="shoppingBag" size={20} aria-hidden="true" />
+          <span class="basket-fab-label">سبد</span>
+          <span id="basketCount" class="basket-count" hidden aria-live="polite">
+            ۰
+          </span>
+        </button>
+        <!-- PWA install control (A3) — revealed only on beforeinstallprompt -->
+        <button
+          id="pwaInstallBtn"
+          class="pwa-install tap-target"
+          type="button"
+          aria-label="نصب اپلیکیشن"
+          hidden
+        >
+          <Icon name="sparkles" size={18} aria-hidden="true" />
+          <span class="pwa-install-label">نصب اپلیکیشن</span>
+        </button>
       </div>
     )}
 
@@ -451,13 +487,22 @@ const whatsappHref = whatsappPhone
       hidden
     >
       <div class="basket-head">
-        <strong id="basketTitle" class="basket-title">سبد سفارش</strong>
-        <button id="basketClose" class="basket-close tap-target" type="button" aria-label="بستن سبد">
+        <strong id="basketTitle" class="basket-title">
+          سبد سفارش
+        </strong>
+        <button
+          id="basketClose"
+          class="basket-close tap-target"
+          type="button"
+          aria-label="بستن سبد"
+        >
           <Icon name="x" size={18} aria-hidden="true" />
         </button>
       </div>
       <ul id="basketList" class="basket-list"></ul>
-      <p id="basketEmpty" class="basket-empty">سبد شما خالی است. از بخش خدمات و تعرفه‌ها می‌توانید خدمت مورد نظر را اضافه کنید.</p>
+      <p id="basketEmpty" class="basket-empty">
+        سبد شما خالی است. از بخش خدمات و تعرفه‌ها می‌توانید خدمت مورد نظر را اضافه کنید.
+      </p>
       <div class="basket-foot">
         <div class="basket-total">
           <span>مجموع</span>
@@ -466,7 +511,9 @@ const whatsappHref = whatsappPhone
         <a id="basketCta" href="/booking" class="btn btn-primary btn-block basket-cta tap-target">
           ادامه و رزرو نوبت
         </a>
-        <button id="basketClear" class="basket-clear tap-target" type="button">خالی کردن سبد</button>
+        <button id="basketClear" class="basket-clear tap-target" type="button">
+          خالی کردن سبد
+        </button>
       </div>
     </div>
     <div id="basketScrim" class="basket-scrim" aria-hidden="true" hidden></div>
@@ -540,8 +587,8 @@ const whatsappHref = whatsappPhone
     <!-- A3 · PWA install prompt capture -->
     <script is:inline>
       (function () {
-        var deferred = null;
-        var installBtn = document.getElementById('pwaInstallBtn');
+        let deferred = null;
+        const installBtn = document.getElementById('pwaInstallBtn');
         if (!installBtn) return;
 
         window.addEventListener('beforeinstallprompt', function (e) {
@@ -567,64 +614,80 @@ const whatsappHref = whatsappPhone
     </script>
 
     <!-- A4 · ORDER BASKET — sessionStorage persistence, RTL drawer -->
-    <script is:inline define:vars={{ basketAddEndpoint: '/services' }}>
+    <script is:inline>
       (function () {
-        var KEY = 'tl_basket_v1';
-        var fab = document.getElementById('basketFab');
-        var drawer = document.getElementById('basketDrawer');
-        var scrim = document.getElementById('basketScrim');
-        var closeBtn = document.getElementById('basketClose');
-        var list = document.getElementById('basketList');
-        var emptyMsg = document.getElementById('basketEmpty');
-        var countEl = document.getElementById('basketCount');
-        var totalEl = document.getElementById('basketTotal');
-        var cta = document.getElementById('basketCta');
-        var clearBtn = document.getElementById('basketClear');
+        const KEY = 'tl_basket_v1';
+        const fab = document.getElementById('basketFab');
+        const drawer = document.getElementById('basketDrawer');
+        const scrim = document.getElementById('basketScrim');
+        const closeBtn = document.getElementById('basketClose');
+        const list = document.getElementById('basketList');
+        const emptyMsg = document.getElementById('basketEmpty');
+        const countEl = document.getElementById('basketCount');
+        const totalEl = document.getElementById('basketTotal');
+        const cta = document.getElementById('basketCta');
+        const clearBtn = document.getElementById('basketClear');
         if (!fab || !drawer) return;
 
-        var FA_DIGITS = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
-        function toFa(n) { return String(n).replace(/\d/g, function (d) { return FA_DIGITS[+d]; }); }
-        function faNum(n) { return toFa(n.toLocaleString('en-US')); }
+        const FA_DIGITS = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+        function toFa(n) {
+          return String(n).replace(/\d/g, function (d) {
+            return FA_DIGITS[+d];
+          });
+        }
+        function faNum(n) {
+          return toFa(n.toLocaleString('en-US'));
+        }
 
         function read() {
-          try { var raw = sessionStorage.getItem(KEY); return raw ? JSON.parse(raw) : []; }
-          catch (e) { return []; }
+          try {
+            const raw = sessionStorage.getItem(KEY);
+            return raw ? JSON.parse(raw) : [];
+          } catch {
+            return [];
+          }
         }
         function write(items) {
-          try { sessionStorage.setItem(KEY, JSON.stringify(items)); } catch (e) {}
+          try {
+            sessionStorage.setItem(KEY, JSON.stringify(items));
+          } catch {}
         }
 
         function render() {
-          var items = read();
+          const items = read();
           countEl.textContent = toFa(items.length);
           countEl.hidden = items.length === 0;
           list.innerHTML = '';
-          var total = 0;
+          let total = 0;
           items.forEach(function (it) {
             total += Number(it.price) || 0;
-            var li = document.createElement('li');
+            const li = document.createElement('li');
             li.className = 'basket-item';
 
-            var name = document.createElement('span');
+            const name = document.createElement('span');
             name.className = 'basket-item-name';
             name.textContent = it.name;
 
-            var price = document.createElement('span');
+            const price = document.createElement('span');
             price.className = 'basket-item-price';
             price.textContent = faNum(it.price) + ' تومان';
 
-            var del = document.createElement('button');
+            const del = document.createElement('button');
             del.type = 'button';
             del.className = 'basket-item-del';
             del.setAttribute('aria-label', 'حذف ' + it.name + ' از سبد');
-            del.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>';
+            del.innerHTML =
+              '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>';
             del.addEventListener('click', function () {
-              var all = read().filter(function (x) { return x.id !== it.id; });
-              write(all); render();
+              const all = read().filter(function (x) {
+                return x.id !== it.id;
+              });
+              write(all);
+              render();
             });
 
             li.appendChild(name);
-            var mid = document.createElement('span');
+            const mid = document.createElement('span');
             mid.className = 'basket-item-mid';
             mid.appendChild(price);
             li.appendChild(mid);
@@ -650,23 +713,45 @@ const whatsappHref = whatsappPhone
         // drawer, and restore the true page-title tabindex on close.
         function trapTab(e) {
           if (e.key !== 'Tab') return;
-          var focusables = Array.prototype.slice.call(
+          const focusables = Array.prototype.slice.call(
             drawer.querySelectorAll('a[href], button:not([disabled])'),
           );
           if (!focusables.length) return;
-          var first = focusables[0];
-          var last = focusables[focusables.length - 1];
-          if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-          else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+          const first = focusables[0];
+          const last = focusables[focusables.length - 1];
+          if (e.shiftKey && document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          } else if (!e.shiftKey && document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
         }
 
-        fab.addEventListener('click', function () { setOpen(drawer.hidden); });
-        if (closeBtn) closeBtn.addEventListener('click', function () { setOpen(false); fab.focus(); });
-        if (scrim) scrim.addEventListener('click', function () { setOpen(false); fab.focus(); });
-        if (clearBtn) clearBtn.addEventListener('click', function () { write([]); render(); });
+        fab.addEventListener('click', function () {
+          setOpen(drawer.hidden);
+        });
+        if (closeBtn)
+          closeBtn.addEventListener('click', function () {
+            setOpen(false);
+            fab.focus();
+          });
+        if (scrim)
+          scrim.addEventListener('click', function () {
+            setOpen(false);
+            fab.focus();
+          });
+        if (clearBtn)
+          clearBtn.addEventListener('click', function () {
+            write([]);
+            render();
+          });
         drawer.addEventListener('keydown', trapTab);
         document.addEventListener('keydown', function (e) {
-          if (e.key === 'Escape' && !drawer.hidden) { setOpen(false); fab.focus(); }
+          if (e.key === 'Escape' && !drawer.hidden) {
+            setOpen(false);
+            fab.focus();
+          }
         });
         document.addEventListener('visibilitychange', function () {
           if (document.hidden && !drawer.hidden) setOpen(false);
@@ -674,12 +759,18 @@ const whatsappHref = whatsappPhone
 
         // Any page may add a service: dispatch `tl:basket-add` { id, name, price }
         window.addEventListener('tl:basket-add', function (e) {
-          var d = e.detail || {};
+          const d = e.detail || {};
           if (!d.id || !d.name) return;
-          var items = read();
-          if (items.some(function (x) { return x.id === d.id; })) return;
+          const items = read();
+          if (
+            items.some(function (x) {
+              return x.id === d.id;
+            })
+          )
+            return;
           items.push({ id: d.id, name: d.name, price: Number(d.price) || 0 });
-          write(items); render();
+          write(items);
+          render();
           setOpen(true);
         });
 
@@ -693,18 +784,18 @@ const whatsappHref = whatsappPhone
          passive, and a no-op when a user prefers reduced motion. -->
     <script is:inline>
       (function () {
-        var header = document.querySelector('[data-header-scroll]');
-        var hero = document.querySelector('.hero-section');
-        var body = document.body;
-        var dockAt = hero ? Math.round(hero.offsetHeight * 0.72) : 420;
-        var ticking = false;
-        var lastDocked = null;
+        const header = document.querySelector('[data-header-scroll]');
+        const hero = document.querySelector('.hero-section');
+        const body = document.body;
+        let dockAt = hero ? Math.round(hero.offsetHeight * 0.72) : 420;
+        let ticking = false;
+        let lastDocked = null;
 
         function apply() {
           ticking = false;
-          var y = window.scrollY || window.pageYOffset || 0;
+          const y = window.scrollY || window.pageYOffset || 0;
           if (header) header.classList.toggle('is-scrolled', y > 8);
-          var docked = y > dockAt;
+          const docked = y > dockAt;
           if (docked !== lastDocked) {
             body.classList.toggle('chrome-docked', docked);
             lastDocked = docked;
@@ -718,10 +809,14 @@ const whatsappHref = whatsappPhone
         }
 
         window.addEventListener('scroll', onScroll, { passive: true });
-        window.addEventListener('resize', function () {
-          dockAt = hero ? Math.round(hero.offsetHeight * 0.72) : 420;
-          onScroll();
-        }, { passive: true });
+        window.addEventListener(
+          'resize',
+          function () {
+            dockAt = hero ? Math.round(hero.offsetHeight * 0.72) : 420;
+            onScroll();
+          },
+          { passive: true },
+        );
         apply();
       })();
     </script>

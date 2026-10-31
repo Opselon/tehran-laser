@@ -45,7 +45,8 @@ try {
           <span>تنظیمات و پیکربندی مرکزی کلینیک</span>
         </h1>
         <p class="section-block-sub">
-          مدیریت یکپارچه مشخصات کلینیک، درگاه پیامک، شیفت‌های کاری، امنیت دسترسی و پشتیبان‌گیری دیتابیس D1
+          مدیریت یکپارچه مشخصات کلینیک، درگاه پیامک، شیفت‌های کاری، امنیت دسترسی و پشتیبان‌گیری
+          دیتابیس D1
         </p>
       </div>
       <div class="actions">
@@ -69,30 +70,65 @@ try {
     </div>
 
     <!-- Always-visible validation toast (stays on screen even when the field is far down the page) -->
-    <div id="settingsValidationToast" class="settings-validation-toast" style="display: none;" role="alert">
+    <div
+      id="settingsValidationToast"
+      class="settings-validation-toast"
+      style="display: none;"
+      role="alert"
+    >
       <Icon name="warning" size={18} />
       <span id="settingsValidationText"></span>
     </div>
 
     <!-- 3D Settings Tab Bar -->
     <nav class="settings-tab-bar" aria-label="دسته‌بندی تنظیمات">
-      <button type="button" class="settings-tab-btn active" data-tab="profile" role="tab" aria-selected="true">
+      <button
+        type="button"
+        class="settings-tab-btn active"
+        data-tab="profile"
+        role="tab"
+        aria-selected="true"
+      >
         <Icon name="gem" size={17} />
         <span>مشخصات کلینیک</span>
       </button>
-      <button type="button" class="settings-tab-btn" data-tab="sms" role="tab" aria-selected="false">
+      <button
+        type="button"
+        class="settings-tab-btn"
+        data-tab="sms"
+        role="tab"
+        aria-selected="false"
+      >
         <Icon name="sms" size={17} />
         <span>درگاه پیامک</span>
       </button>
-      <button type="button" class="settings-tab-btn" data-tab="schedule" role="tab" aria-selected="false">
+      <button
+        type="button"
+        class="settings-tab-btn"
+        data-tab="schedule"
+        role="tab"
+        aria-selected="false"
+      >
         <Icon name="clock" size={17} />
         <span>زمان‌بندی و شیفت‌ها</span>
       </button>
-      <button type="button" class="settings-tab-btn" data-tab="security" role="tab" aria-selected="false">
+      <button
+        type="button"
+        class="settings-tab-btn"
+        data-tab="security"
+        role="tab"
+        aria-selected="false"
+      >
         <Icon name="shield" size={17} />
         <span>امنیت و نشست‌ها</span>
       </button>
-      <button type="button" class="settings-tab-btn" data-tab="backup" role="tab" aria-selected="false">
+      <button
+        type="button"
+        class="settings-tab-btn"
+        data-tab="backup"
+        role="tab"
+        aria-selected="false"
+      >
         <Icon name="database" size={17} />
         <span>پشتیبان‌گیری و دیتابیس D1</span>
       </button>
@@ -108,7 +144,9 @@ try {
               <Icon name="gem" size={20} />
               <span>هویت تجاری و مشخصات رسمی کلینیک</span>
             </h2>
-            <p class="section-block-sub">اطلاعات برندینگ که در فاکتورها، سربرگ‌ها، رزرو و پیامک‌های ارسالی درج می‌شود.</p>
+            <p class="section-block-sub">
+              اطلاعات برندینگ که در فاکتورها، سربرگ‌ها، رزرو و پیامک‌های ارسالی درج می‌شود.
+            </p>
           </div>
 
           <div class="settings-grid">
@@ -118,7 +156,8 @@ try {
                 <span>نام تجاری رسمی (فارسی):</span>
               </label>
               <input
-                id="business_name" autocomplete="off"
+                id="business_name"
+                autocomplete="off"
                 type="text"
                 name="business_name"
                 class="form-control-modal"
@@ -134,7 +173,8 @@ try {
                 <span>نام بین‌المللی (انگلیسی):</span>
               </label>
               <input
-                id="business_name_en" autocomplete="off"
+                id="business_name_en"
+                autocomplete="off"
                 type="text"
                 name="business_name_en"
                 dir="ltr"
@@ -151,7 +191,8 @@ try {
                 <span>شماره تماس و نوبت‌دهی مستقیم:</span>
               </label>
               <input
-                id="phone" autocomplete="off"
+                id="phone"
+                autocomplete="off"
                 type="tel"
                 name="phone"
                 dir="ltr"
@@ -168,7 +209,8 @@ try {
                 <span>شماره پشتیبانی پیام‌رسان‌ها:</span>
               </label>
               <input
-                id="support_phone" autocomplete="off"
+                id="support_phone"
+                autocomplete="off"
                 type="tel"
                 name="support_phone"
                 dir="ltr"
@@ -184,14 +226,17 @@ try {
                 <span>نشانی دقیق کلینیک:</span>
               </label>
               <input
-                id="address" autocomplete="off"
+                id="address"
+                autocomplete="off"
                 type="text"
                 name="address"
                 class="form-control-modal"
                 value={settings.address || 'تهران، پاسداران، خیابان پایدارفرد، نبش بوستان هفتم'}
                 required
               />
-              <span class="field-hint">آدرس ارسالی در پیامک‌های تایید نوبت و نمایش در فوتر سایت.</span>
+              <span class="field-hint">
+                آدرس ارسالی در پیامک‌های تایید نوبت و نمایش در فوتر سایت.
+              </span>
             </div>
 
             <div class="field-group">
@@ -200,7 +245,8 @@ try {
                 <span>واحد پول سیستم:</span>
               </label>
               <input
-                id="currency" autocomplete="off"
+                id="currency"
+                autocomplete="off"
                 type="text"
                 name="currency"
                 dir="ltr"
@@ -217,7 +263,8 @@ try {
                 <span>برچسب نمایشی واحد قیمت:</span>
               </label>
               <input
-                id="currency_label" autocomplete="off"
+                id="currency_label"
+                autocomplete="off"
                 type="text"
                 name="currency_label"
                 class="form-control-modal"
@@ -234,7 +281,8 @@ try {
               </label>
               <div style="position: relative;">
                 <input
-                  id="discount_percent" autocomplete="off"
+                  id="discount_percent"
+                  autocomplete="off"
                   type="number"
                   name="discount_percent"
                   class="form-control-modal"
@@ -243,7 +291,9 @@ try {
                   max="100"
                   required
                 />
-                <span style="position: absolute; left: 16px; top: 12px; color: #94a3b8; font-weight: 700;">٪</span>
+                <span style="position: absolute; left: 16px; top: 12px; color: #94a3b8; font-weight: 700;">
+                  ٪
+                </span>
               </div>
               <span class="field-hint">میزان کسر تخفیف پیش‌فرض برای پکیج‌های کل بدن بانوان.</span>
             </div>
@@ -259,7 +309,9 @@ try {
               <Icon name="sms" size={20} />
               <span>پیکربندی درگاه پیامک و امنیت وب‌سرویس</span>
             </h2>
-            <p class="section-block-sub">تنظیم ارائه‌دهنده پیامک خدماتی، سرشماره ارسال و کلیدهای امنیتی احراز هویت.</p>
+            <p class="section-block-sub">
+              تنظیم ارائه‌دهنده پیامک خدماتی، سرشماره ارسال و کلیدهای امنیتی احراز هویت.
+            </p>
           </div>
 
           <div class="settings-grid" style="margin-bottom: 24px;">
@@ -268,12 +320,28 @@ try {
                 <Icon name="sms" size={15} />
                 <span>انتخاب ارائه‌دهنده پیامک:</span>
               </label>
-              <select id="sms_provider" autocomplete="off" name="sms_provider" class="form-control-modal">
-                <option value="kavenegar" selected={settings.sms_provider === 'kavenegar' || !settings.sms_provider}>کاوه نگار (Kavenegar Webhook / Pattern)</option>
-                <option value="farazsms" selected={settings.sms_provider === 'farazsms'}>فراز اس‌ام‌اس (FarazSMS / IPPanel)</option>
-                <option value="melipayamak" selected={settings.sms_provider === 'melipayamak'}>ملی پیامک (MeliPayamak)</option>
+              <select
+                id="sms_provider"
+                autocomplete="off"
+                name="sms_provider"
+                class="form-control-modal"
+              >
+                <option
+                  value="kavenegar"
+                  selected={settings.sms_provider === 'kavenegar' || !settings.sms_provider}
+                >
+                  کاوه نگار (Kavenegar Webhook / Pattern)
+                </option>
+                <option value="farazsms" selected={settings.sms_provider === 'farazsms'}>
+                  فراز اس‌ام‌اس (FarazSMS / IPPanel)
+                </option>
+                <option value="melipayamak" selected={settings.sms_provider === 'melipayamak'}>
+                  ملی پیامک (MeliPayamak)
+                </option>
               </select>
-              <span class="field-hint">وب‌سرویس مورد استفاده برای ارسال پترن‌های خدماتی بدون بلک‌لیست.</span>
+              <span class="field-hint">
+                وب‌سرویس مورد استفاده برای ارسال پترن‌های خدماتی بدون بلک‌لیست.
+              </span>
             </div>
 
             <div class="field-group">
@@ -282,7 +350,8 @@ try {
                 <span>خط خدماتی / سرشماره فرستنده:</span>
               </label>
               <input
-                id="sms_sender_number" autocomplete="off"
+                id="sms_sender_number"
+                autocomplete="off"
                 type="text"
                 name="sms_sender_number"
                 dir="ltr"
@@ -330,50 +399,88 @@ try {
               <Icon name="bell" size={18} />
               <span>ارسال خودکار پیامک‌ها (Automation Triggers)</span>
             </h3>
-            <p class="section-block-sub">تنظیم اعلان‌های خودکار برای هر چرخه از تجربه مراجعین کلینیک.</p>
+            <p class="section-block-sub">
+              تنظیم اعلان‌های خودکار برای هر چرخه از تجربه مراجعین کلینیک.
+            </p>
           </div>
 
           <div style="display: flex; flex-direction: column; gap: 12px;">
             <div class="toggle-row">
               <div>
-                <strong style="display: block; font-size: 0.9rem; color: #f8fafc; margin-bottom: 2px;">ارسال پیامک تایید آنی نوبت رزرو</strong>
-                <span class="field-hint">ارسال خودکار کد پیگیری، تاریخ، ساعت و نشانی کلینیک بلافاصله پس از ثبت نوبت.</span>
+                <strong style="display: block; font-size: 0.9rem; color: #f8fafc; margin-bottom: 2px;">
+                  ارسال پیامک تایید آنی نوبت رزرو
+                </strong>
+                <span class="field-hint">
+                  ارسال خودکار کد پیگیری، تاریخ، ساعت و نشانی کلینیک بلافاصله پس از ثبت نوبت.
+                </span>
               </div>
               <label class="toggle-switch-3d" aria-label="ارسال تایید نوبت">
-                <input type="checkbox" name="sms_booking_confirm_enabled" autocomplete="off" checked={settings.sms_booking_confirm_enabled !== 'false'} />
+                <input
+                  type="checkbox"
+                  name="sms_booking_confirm_enabled"
+                  autocomplete="off"
+                  checked={settings.sms_booking_confirm_enabled !== 'false'}
+                />
                 <span class="toggle-slider"></span>
               </label>
             </div>
 
             <div class="toggle-row">
               <div>
-                <strong style="display: block; font-size: 0.9rem; color: #f8fafc; margin-bottom: 2px;">یادآوری هوشمند نوبت ۲۴ ساعت قبل</strong>
-                <span class="field-hint">یادآوری آماده‌سازی قبل لیزر (شیو کردن) و اعلام زمان حضور به مراجع.</span>
+                <strong style="display: block; font-size: 0.9rem; color: #f8fafc; margin-bottom: 2px;">
+                  یادآوری هوشمند نوبت ۲۴ ساعت قبل
+                </strong>
+                <span class="field-hint">
+                  یادآوری آماده‌سازی قبل لیزر (شیو کردن) و اعلام زمان حضور به مراجع.
+                </span>
               </div>
               <label class="toggle-switch-3d" aria-label="یادآوری ۲۴ ساعته">
-                <input type="checkbox" name="sms_reminder_24h_enabled" autocomplete="off" checked={settings.sms_reminder_24h_enabled !== 'false'} />
+                <input
+                  type="checkbox"
+                  name="sms_reminder_24h_enabled"
+                  autocomplete="off"
+                  checked={settings.sms_reminder_24h_enabled !== 'false'}
+                />
                 <span class="toggle-slider"></span>
               </label>
             </div>
 
             <div class="toggle-row">
               <div>
-                <strong style="display: block; font-size: 0.9rem; color: #f8fafc; margin-bottom: 2px;">تبریک سالروز تولد همراه با کوپن تخفیف</strong>
-                <span class="field-hint">ارسال پیامک تبریک صمیمانه همراه با هدیه شارژ کیف پول یا ۳۰٪ تخفیف جلسه.</span>
+                <strong style="display: block; font-size: 0.9rem; color: #f8fafc; margin-bottom: 2px;">
+                  تبریک سالروز تولد همراه با کوپن تخفیف
+                </strong>
+                <span class="field-hint">
+                  ارسال پیامک تبریک صمیمانه همراه با هدیه شارژ کیف پول یا ۳۰٪ تخفیف جلسه.
+                </span>
               </div>
               <label class="toggle-switch-3d" aria-label="پیامک تبریک تولد">
-                <input type="checkbox" name="sms_birthday_enabled" autocomplete="off" checked={settings.sms_birthday_enabled !== 'false'} />
+                <input
+                  type="checkbox"
+                  name="sms_birthday_enabled"
+                  autocomplete="off"
+                  checked={settings.sms_birthday_enabled !== 'false'}
+                />
                 <span class="toggle-slider"></span>
               </label>
             </div>
 
             <div class="toggle-row">
               <div>
-                <strong style="display: block; font-size: 0.9rem; color: #f8fafc; margin-bottom: 2px;">یادآوری جلسه بعدی دوره درمان</strong>
-                <span class="field-hint">ارسال پیامک جهت رزرو جلسه بعد در بازه طلایی ۴ الی ۶ هفته پس از جلسه فعلی.</span>
+                <strong style="display: block; font-size: 0.9rem; color: #f8fafc; margin-bottom: 2px;">
+                  یادآوری جلسه بعدی دوره درمان
+                </strong>
+                <span class="field-hint">
+                  ارسال پیامک جهت رزرو جلسه بعد در بازه طلایی ۴ الی ۶ هفته پس از جلسه فعلی.
+                </span>
               </div>
               <label class="toggle-switch-3d" aria-label="یادآوری جلسه بعد">
-                <input type="checkbox" name="sms_next_session_enabled" autocomplete="off" checked={settings.sms_next_session_enabled !== 'false'} />
+                <input
+                  type="checkbox"
+                  name="sms_next_session_enabled"
+                  autocomplete="off"
+                  checked={settings.sms_next_session_enabled !== 'false'}
+                />
                 <span class="toggle-slider"></span>
               </label>
             </div>
@@ -383,25 +490,38 @@ try {
           <div style="margin-top: 24px; padding: 18px; background: rgba(10, 14, 22, 0.6); border: 1px dashed rgba(212, 175, 55, 0.3); border-radius: 16px;">
             <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
               <div>
-                <strong style="display: block; font-size: 0.88rem; color: #f5d77f; margin-bottom: 4px;">تست ارتباط وب‌سرویس پیامکی:</strong>
-                <span class="field-hint">یک پیامک تستی به شماره زیر ارسال کنید تا از اتصال درگاه مطمئن شوید.</span>
+                <strong style="display: block; font-size: 0.88rem; color: #f5d77f; margin-bottom: 4px;">
+                  تست ارتباط وب‌سرویس پیامکی:
+                </strong>
+                <span class="field-hint">
+                  یک پیامک تستی به شماره زیر ارسال کنید تا از اتصال درگاه مطمئن شوید.
+                </span>
               </div>
               <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
                 <input
-                  id="testSmsPhone" autocomplete="off"
+                  id="testSmsPhone"
+                  autocomplete="off"
                   type="tel"
                   dir="ltr"
                   placeholder="۰۹۱۲۳۴۵۶۷۸۹"
                   class="form-control-modal"
                   style="width: 170px; margin-top: 0; padding: 8px 12px; font-size: 0.86rem;"
                 />
-                <button type="button" id="testSmsBtn" class="btn-3d-secondary" style="padding: 8px 16px; min-height: 38px; font-size: 0.82rem;">
+                <button
+                  type="button"
+                  id="testSmsBtn"
+                  class="btn-3d-secondary"
+                  style="padding: 8px 16px; min-height: 38px; font-size: 0.82rem;"
+                >
                   <Icon name="send" size={14} />
                   <span>ارسال پیامک آزمایشی</span>
                 </button>
               </div>
             </div>
-            <div id="testSmsResult" style="display: none; margin-top: 10px; font-size: 0.82rem;"></div>
+            <div
+              id="testSmsResult"
+              style="display: none; margin-top: 10px; font-size: 0.82rem;"
+            ></div>
           </div>
         </div>
       </section>
@@ -414,7 +534,9 @@ try {
               <Icon name="clock" size={20} />
               <span>موتور نوبت‌دهی و زمان‌بندی هوشمند</span>
             </h2>
-            <p class="section-block-sub">تنظیم گام زمانی، بافر بهداشتی دستگاه‌ها و قواعد افق رزرو آنلاین کلینیک.</p>
+            <p class="section-block-sub">
+              تنظیم گام زمانی، بافر بهداشتی دستگاه‌ها و قواعد افق رزرو آنلاین کلینیک.
+            </p>
           </div>
 
           <div class="settings-grid" style="margin-bottom: 24px;">
@@ -424,7 +546,8 @@ try {
                 <span>گام اسلات‌های نوبت‌دهی (دقیقه):</span>
               </label>
               <input
-                id="slot_granularity_minutes" autocomplete="off"
+                id="slot_granularity_minutes"
+                autocomplete="off"
                 type="number"
                 name="slot_granularity_minutes"
                 class="form-control-modal"
@@ -433,7 +556,9 @@ try {
                 max="120"
                 required
               />
-              <span class="field-hint">فاصله‌ی زمانی بین شروع هر نوبت در تقویم (پیش‌فرض: ۱۵ یا ۳۰ دقیقه).</span>
+              <span class="field-hint">
+                فاصله‌ی زمانی بین شروع هر نوبت در تقویم (پیش‌فرض: ۱۵ یا ۳۰ دقیقه).
+              </span>
             </div>
 
             <div class="field-group">
@@ -442,7 +567,8 @@ try {
                 <span>زمان بافر استریل و ضدعفونی (دقیقه):</span>
               </label>
               <input
-                id="booking_buffer_minutes" autocomplete="off"
+                id="booking_buffer_minutes"
+                autocomplete="off"
                 type="number"
                 name="booking_buffer_minutes"
                 class="form-control-modal"
@@ -451,7 +577,9 @@ try {
                 max="60"
                 required
               />
-              <span class="field-hint">فرصت پاکسازی سری دستگاه لیزر و تعویض رول بعد از هر جلسه.</span>
+              <span class="field-hint">
+                فرصت پاکسازی سری دستگاه لیزر و تعویض رول بعد از هر جلسه.
+              </span>
             </div>
 
             <div class="field-group">
@@ -460,7 +588,8 @@ try {
                 <span>حداقل زمان پیش‌خرید نوبت (دقیقه):</span>
               </label>
               <input
-                id="min_lead_minutes" autocomplete="off"
+                id="min_lead_minutes"
+                autocomplete="off"
                 type="number"
                 name="min_lead_minutes"
                 class="form-control-modal"
@@ -478,7 +607,8 @@ try {
                 <span>حداکثر افق تقویم برای رزرو آینده (روز):</span>
               </label>
               <input
-                id="max_advance_days" autocomplete="off"
+                id="max_advance_days"
+                autocomplete="off"
                 type="number"
                 name="max_advance_days"
                 class="form-control-modal"
@@ -487,7 +617,9 @@ try {
                 max="365"
                 required
               />
-              <span class="field-hint">مراجعین تا چند روز آینده می‌توانند در سایت نوبت ثبت کنند.</span>
+              <span class="field-hint">
+                مراجعین تا چند روز آینده می‌توانند در سایت نوبت ثبت کنند.
+              </span>
             </div>
 
             <div class="field-group">
@@ -496,7 +628,8 @@ try {
                 <span>منطقه زمانی سرور رزرواسیون:</span>
               </label>
               <input
-                id="timezone" autocomplete="off"
+                id="timezone"
+                autocomplete="off"
                 type="text"
                 name="timezone"
                 dir="ltr"
@@ -510,11 +643,21 @@ try {
 
           <div class="toggle-row" style="margin-bottom: 24px;">
             <div>
-              <strong style="display: block; font-size: 0.9rem; color: #f8fafc; margin-bottom: 2px;">سامانه نوبت‌دهی آنلاین سراسری (Online Booking Engine)</strong>
-              <span class="field-hint">با غیرفعال‌سازی این گزینه، فرم نوبت‌دهی در وب‌سایت بسته شده و فقط رزرو تلفنی پذیرفته می‌شود.</span>
+              <strong style="display: block; font-size: 0.9rem; color: #f8fafc; margin-bottom: 2px;">
+                سامانه نوبت‌دهی آنلاین سراسری (Online Booking Engine)
+              </strong>
+              <span class="field-hint">
+                با غیرفعال‌سازی این گزینه، فرم نوبت‌دهی در وب‌سایت بسته شده و فقط رزرو تلفنی پذیرفته
+                می‌شود.
+              </span>
             </div>
             <label class="toggle-switch-3d" aria-label="فعال بودن نوبت‌دهی آنلاین">
-              <input type="checkbox" name="booking_enabled" autocomplete="off" checked={settings.booking_enabled !== 'false'} />
+              <input
+                type="checkbox"
+                name="booking_enabled"
+                autocomplete="off"
+                checked={settings.booking_enabled !== 'false'}
+              />
               <span class="toggle-slider"></span>
             </label>
           </div>
@@ -530,7 +673,11 @@ try {
                 شنبه تا پنج‌شنبه (۰۹:۰۰ الی ۱۳:۰۰ و ۱۴:۰۰ الی ۲۰:۰۰) • جمعه‌ها تعطیل رسمی
               </p>
             </div>
-            <a href="/admin/schedule" class="btn-3d-secondary" style="padding: 8px 16px; min-height: 38px; font-size: 0.82rem;">
+            <a
+              href="/admin/schedule"
+              class="btn-3d-secondary"
+              style="padding: 8px 16px; min-height: 38px; font-size: 0.82rem;"
+            >
               <Icon name="calendar" size={15} />
               <span>مدیریت ساعات کاری</span>
             </a>
@@ -546,7 +693,9 @@ try {
               <Icon name="shield" size={20} />
               <span>سیاست‌های امنیتی، کنترل نرخ و نشست‌ها</span>
             </h2>
-            <p class="section-block-sub">تنظیم محدودیت‌های امنیتی (Rate Limiting) و عمر نشست ورود مدیران کلینیک.</p>
+            <p class="section-block-sub">
+              تنظیم محدودیت‌های امنیتی (Rate Limiting) و عمر نشست ورود مدیران کلینیک.
+            </p>
           </div>
 
           <div class="settings-grid" style="margin-bottom: 24px;">
@@ -556,7 +705,8 @@ try {
                 <span>عمر نشست ورود مدیران (ساعت):</span>
               </label>
               <input
-                id="session_ttl_hours" autocomplete="off"
+                id="session_ttl_hours"
+                autocomplete="off"
                 type="number"
                 name="session_ttl_hours"
                 class="form-control-modal"
@@ -565,7 +715,9 @@ try {
                 max="720"
                 required
               />
-              <span class="field-hint">مدت زمان اعتبار کوکی ورود امن پس از آخرین استفاده (پیش‌فرض: ۱۶۸ ساعت / ۷ روز).</span>
+              <span class="field-hint">
+                مدت زمان اعتبار کوکی ورود امن پس از آخرین استفاده (پیش‌فرض: ۱۶۸ ساعت / ۷ روز).
+              </span>
             </div>
 
             <div class="field-group">
@@ -574,7 +726,8 @@ try {
                 <span>سقف تلاش‌های ورود مجاز (Rate Limit Login):</span>
               </label>
               <input
-                id="rate_limit_login" autocomplete="off"
+                id="rate_limit_login"
+                autocomplete="off"
                 type="text"
                 name="rate_limit_login"
                 dir="ltr"
@@ -582,7 +735,9 @@ try {
                 value={settings.rate_limit_login || '10/600'}
                 required
               />
-              <span class="field-hint">۱۰ تلاش در ۱۰ دقیقه به ازای هر آدرس آی‌پی برای جلوگیری از Brute-Force.</span>
+              <span class="field-hint">
+                ۱۰ تلاش در ۱۰ دقیقه به ازای هر آدرس آی‌پی برای جلوگیری از Brute-Force.
+              </span>
             </div>
 
             <div class="field-group">
@@ -591,7 +746,8 @@ try {
                 <span>سقف درخواست ثبت نوبت (Rate Limit Booking):</span>
               </label>
               <input
-                id="rate_limit_booking" autocomplete="off"
+                id="rate_limit_booking"
+                autocomplete="off"
                 type="text"
                 name="rate_limit_booking"
                 dir="ltr"
@@ -599,7 +755,9 @@ try {
                 value={settings.rate_limit_booking || '20/600'}
                 required
               />
-              <span class="field-hint">حداکثر تعداد ثبت نوبت در بازه زمانی جهت مقابله با اسپم و ربات‌ها.</span>
+              <span class="field-hint">
+                حداکثر تعداد ثبت نوبت در بازه زمانی جهت مقابله با اسپم و ربات‌ها.
+              </span>
             </div>
 
             <div class="field-group">
@@ -608,7 +766,8 @@ try {
                 <span>سقف فرم‌های عمومی و تماس (Public Form):</span>
               </label>
               <input
-                id="rate_limit_public_form" autocomplete="off"
+                id="rate_limit_public_form"
+                autocomplete="off"
                 type="text"
                 name="rate_limit_public_form"
                 dir="ltr"
@@ -627,10 +786,15 @@ try {
                 <span>لاگ‌برداری تفصیلی و رهگیری تغییرات (Audit Trail)</span>
               </div>
               <p class="field-hint" style="margin: 0;">
-                کلیه رویدادهای سیستمی، ورودها و تغییرات تنظیمات در جدول امنیتی audit_logs ثبت می‌شوند.
+                کلیه رویدادهای سیستمی، ورودها و تغییرات تنظیمات در جدول امنیتی audit_logs ثبت
+                می‌شوند.
               </p>
             </div>
-            <a href="/admin/audit" class="btn-3d-secondary" style="padding: 8px 16px; min-height: 38px; font-size: 0.82rem;">
+            <a
+              href="/admin/audit"
+              class="btn-3d-secondary"
+              style="padding: 8px 16px; min-height: 38px; font-size: 0.82rem;"
+            >
               <Icon name="audit" size={15} />
               <span>مشاهده لاگ وقایع</span>
             </a>
@@ -646,45 +810,70 @@ try {
               <Icon name="database" size={20} />
               <span>پایگاه داده لبه (Cloudflare D1) و ابزار پشتیبان‌گیری</span>
             </h2>
-            <p class="section-block-sub">مانیتورینگ برخط وضعیت دیتابیس، سلامت لبه و دانلود مستقیم بکاپ داده‌ها.</p>
+            <p class="section-block-sub">
+              مانیتورینگ برخط وضعیت دیتابیس، سلامت لبه و دانلود مستقیم بکاپ داده‌ها.
+            </p>
           </div>
 
           <!-- D1 KPI Grid -->
-          <div class="kpi-grid-3d" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-bottom: 24px;">
+          <div
+            class="kpi-grid-3d"
+            style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-bottom: 24px;"
+          >
             <div class="kpi-card-3d">
               <div class="kpi-header">
                 <span class="kpi-title">موتور دیتابیس</span>
-                <span class="kpi-icon" style="color: #f5d77f;"><Icon name="database" size={20} /></span>
+                <span class="kpi-icon" style="color: #f5d77f;">
+                  <Icon name="database" size={20} />
+                </span>
               </div>
-              <div class="kpi-value" style="font-size: 1.4rem; color: #f5d77f;">Cloudflare D1</div>
-              <div class="kpi-footer" style="color: #34d399;">SQLite Serverless on Edge</div>
+              <div class="kpi-value" style="font-size: 1.4rem; color: #f5d77f;">
+                Cloudflare D1
+              </div>
+              <div class="kpi-footer" style="color: #34d399;">
+                SQLite Serverless on Edge
+              </div>
             </div>
 
             <div class="kpi-card-3d">
               <div class="kpi-header">
                 <span class="kpi-title">تعداد کلیدهای تنظیمات</span>
-                <span class="kpi-icon" style="color: #38bdf8;"><Icon name="settings" size={20} /></span>
+                <span class="kpi-icon" style="color: #38bdf8;">
+                  <Icon name="settings" size={20} />
+                </span>
               </div>
-              <div class="kpi-value">{dbStats.settingsCount || Object.keys(settings).length || 22}</div>
-              <div class="kpi-footer" style="color: #38bdf8;">پیکربندی‌های ثبت‌شده در جدول</div>
+              <div class="kpi-value">
+                {dbStats.settingsCount || Object.keys(settings).length || 22}
+              </div>
+              <div class="kpi-footer" style="color: #38bdf8;">
+                پیکربندی‌های ثبت‌شده در جدول
+              </div>
             </div>
 
             <div class="kpi-card-3d">
               <div class="kpi-header">
                 <span class="kpi-title">مراجعین ثبت‌شده</span>
-                <span class="kpi-icon" style="color: #a78bfa;"><Icon name="users" size={20} /></span>
+                <span class="kpi-icon" style="color: #a78bfa;">
+                  <Icon name="users" size={20} />
+                </span>
               </div>
               <div class="kpi-value">{dbStats.customersCount}</div>
-              <div class="kpi-footer" style="color: #a78bfa;">پرونده‌های فعال در CRM</div>
+              <div class="kpi-footer" style="color: #a78bfa;">
+                پرونده‌های فعال در CRM
+              </div>
             </div>
 
             <div class="kpi-card-3d">
               <div class="kpi-header">
                 <span class="kpi-title">نوبت‌های سیستم</span>
-                <span class="kpi-icon" style="color: #34d399;"><Icon name="calendar" size={20} /></span>
+                <span class="kpi-icon" style="color: #34d399;">
+                  <Icon name="calendar" size={20} />
+                </span>
               </div>
               <div class="kpi-value">{dbStats.bookingsCount}</div>
-              <div class="kpi-footer" style="color: #34d399;">کل رزروهای پایگاه داده</div>
+              <div class="kpi-footer" style="color: #34d399;">
+                کل رزروهای پایگاه داده
+              </div>
             </div>
           </div>
 
@@ -696,7 +885,8 @@ try {
                 <span>دریافت نسخه پشتیبان (JSON Export)</span>
               </h3>
               <p class="field-hint" style="margin-bottom: 16px;">
-                دانلود مستقیم تمام متادیتا، پیکربندی‌های کلینیک و اطلاعات عملیاتی با یک کلیک در قالب استاندارد JSON.
+                دانلود مستقیم تمام متادیتا، پیکربندی‌های کلینیک و اطلاعات عملیاتی با یک کلیک در قالب
+                استاندارد JSON.
               </p>
               <button type="button" id="exportBackupBtn" class="btn-3d-gold" style="width: 100%;">
                 <Icon name="download" size={17} />
@@ -710,13 +900,22 @@ try {
                 <span>بررسی زنده پینگ و اتصال دیتابیس D1</span>
               </h3>
               <p class="field-hint" style="margin-bottom: 16px;">
-                سنجش بلادرنگ زمان تاخیر پاسخ دیتابیس در لبه شبکه و راستی‌آزمایی پایداری سرویس API Health.
+                سنجش بلادرنگ زمان تاخیر پاسخ دیتابیس در لبه شبکه و راستی‌آزمایی پایداری سرویس API
+                Health.
               </p>
-              <button type="button" id="pingHealthBtn" class="btn-3d-secondary" style="width: 100%;">
+              <button
+                type="button"
+                id="pingHealthBtn"
+                class="btn-3d-secondary"
+                style="width: 100%;"
+              >
                 <Icon name="refresh" size={17} />
                 <span>آزمون پینگ لایو D1</span>
               </button>
-              <div id="healthPingResult" style="display: none; margin-top: 12px; font-size: 0.84rem; padding: 10px 14px; border-radius: 10px; background: rgba(9, 12, 18, 0.9); border: 1px solid rgba(212, 175, 55, 0.25);"></div>
+              <div
+                id="healthPingResult"
+                style="display: none; margin-top: 12px; font-size: 0.84rem; padding: 10px 14px; border-radius: 10px; background: rgba(9, 12, 18, 0.9); border: 1px solid rgba(212, 175, 55, 0.25);"
+              ></div>
             </div>
           </div>
         </div>
@@ -804,10 +1003,16 @@ try {
     }
 
     .settings-tab-btn.active {
-      background: linear-gradient(135deg, rgba(212, 175, 55, 0.28) 0%, rgba(212, 175, 55, 0.08) 100%);
+      background: linear-gradient(
+        135deg,
+        rgba(212, 175, 55, 0.28) 0%,
+        rgba(212, 175, 55, 0.08) 100%
+      );
       border-color: #d4af37;
       color: #f5d77f;
-      box-shadow: 0 6px 18px rgba(212, 175, 55, 0.22), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+      box-shadow:
+        0 6px 18px rgba(212, 175, 55, 0.22),
+        inset 0 1px 1px rgba(255, 255, 255, 0.15);
     }
 
     .settings-panel {
@@ -820,8 +1025,14 @@ try {
     }
 
     @keyframes settingsFadeIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .settings-grid {
@@ -903,7 +1114,7 @@ try {
 
     .toggle-slider::before {
       position: absolute;
-      content: "";
+      content: '';
       height: 20px;
       width: 20px;
       left: 3px;
@@ -915,7 +1126,11 @@ try {
     }
 
     .toggle-switch-3d input:checked + .toggle-slider {
-      background: linear-gradient(135deg, rgba(212, 175, 55, 0.55) 0%, rgba(245, 215, 127, 0.3) 100%);
+      background: linear-gradient(
+        135deg,
+        rgba(212, 175, 55, 0.55) 0%,
+        rgba(245, 215, 127, 0.3) 100%
+      );
       border-color: #d4af37;
     }
 
@@ -1013,7 +1228,11 @@ try {
     }
 
     .alert-3d-success {
-      background: linear-gradient(135deg, rgba(16, 185, 129, 0.16) 0%, rgba(5, 150, 105, 0.08) 100%);
+      background: linear-gradient(
+        135deg,
+        rgba(16, 185, 129, 0.16) 0%,
+        rgba(5, 150, 105, 0.08) 100%
+      );
       border: 1px solid rgba(16, 185, 129, 0.45);
       color: #34d399;
       padding: 14px 18px;
@@ -1082,6 +1301,7 @@ try {
   </style>
 
   <script>
+    import type { ApiResponse } from '../../../domain/shared/api.types';
     // Tab Switching
     const tabBtns = document.querySelectorAll('.settings-tab-btn');
     const tabPanels = document.querySelectorAll('.settings-panel');
@@ -1111,7 +1331,9 @@ try {
     // Hash deep-linking
     const currentHash = window.location.hash.replace('#tab-', '');
     if (currentHash) {
-      const matchingBtn = document.querySelector(`.settings-tab-btn[data-tab="${currentHash}"]`) as HTMLButtonElement | null;
+      const matchingBtn = document.querySelector(
+        `.settings-tab-btn[data-tab="${currentHash}"]`,
+      ) as HTMLButtonElement | null;
       if (matchingBtn) matchingBtn.click();
     }
 
@@ -1130,7 +1352,7 @@ try {
     if (exportBackupBtn && settingsForm) {
       exportBackupBtn.addEventListener('click', () => {
         const formData = new FormData(settingsForm);
-        const dump: Record<string, any> = {};
+        const dump: Record<string, string> = {};
         formData.forEach((v, k) => {
           dump[k] = String(v).trim();
         });
@@ -1141,7 +1363,9 @@ try {
           engine: 'SQLite on Edge',
           settings: dump,
         };
-        const blob = new Blob([JSON.stringify(backupPayload, null, 2)], { type: 'application/json' });
+        const blob = new Blob([JSON.stringify(backupPayload, null, 2)], {
+          type: 'application/json',
+        });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         const dateStr = new Date().toISOString().slice(0, 10);
@@ -1161,12 +1385,17 @@ try {
       pingHealthBtn.addEventListener('click', async () => {
         pingHealthBtn.disabled = true;
         healthPingResult.style.display = 'block';
-        healthPingResult.innerHTML = '<span style="color: #f5d77f;">در حال اندازه‌گیری پینگ اتصال به Cloudflare D1...</span>';
+        healthPingResult.innerHTML =
+          '<span style="color: #f5d77f;">در حال اندازه‌گیری پینگ اتصال به Cloudflare D1...</span>';
         const t0 = performance.now();
         try {
           const res = await fetch('/api/health');
           const elapsed = Math.round(performance.now() - t0);
-          const json = (await res.json()) as any;
+          const json = (await res.json()) as ApiResponse<{
+            status?: string;
+            database?: string;
+            version?: string;
+          }>;
           if (res.ok && json.data) {
             healthPingResult.innerHTML = `
               <div style="display:flex; align-items:center; gap:8px; color:#34d399; font-weight:700; flex-wrap:wrap;">
@@ -1198,12 +1427,14 @@ try {
         const phone = testSmsPhone.value.trim();
         if (!phone) {
           testSmsResult.style.display = 'block';
-          testSmsResult.innerHTML = '<span style="color:#f87171;">شماره موبایل تست را وارد کنید.</span>';
+          testSmsResult.innerHTML =
+            '<span style="color:#f87171;">شماره موبایل تست را وارد کنید.</span>';
           return;
         }
         testSmsBtn.disabled = true;
         testSmsResult.style.display = 'block';
-        testSmsResult.innerHTML = '<span style="color:#f5d77f;">در حال ارسال پیامک آزمایشی...</span>';
+        testSmsResult.innerHTML =
+          '<span style="color:#f5d77f;">در حال ارسال پیامک آزمایشی...</span>';
         try {
           const res = await fetch('/api/v1/admin/sms/send', {
             method: 'POST',
@@ -1214,14 +1445,16 @@ try {
               templateName: 'test',
             }),
           });
-          const json = (await res.json()) as any;
+          const json = (await res.json()) as ApiResponse<unknown>;
           if (res.ok && json.data) {
-            testSmsResult.innerHTML = '<span style="color:#34d399;">پیامک تست با موفقیت ارسال و در صف مخابرات قرار گرفت.</span>';
+            testSmsResult.innerHTML =
+              '<span style="color:#34d399;">پیامک تست با موفقیت ارسال و در صف مخابرات قرار گرفت.</span>';
           } else {
             testSmsResult.innerHTML = `<span style="color:#f87171;">خطا در ارسال: ${json.error?.message || 'پاسخ ناموفق از درگاه.'}</span>`;
           }
         } catch {
-          testSmsResult.innerHTML = '<span style="color:#f87171;">خطای ارتباط با وب‌سرویس پیامک.</span>';
+          testSmsResult.innerHTML =
+            '<span style="color:#f87171;">خطای ارتباط با وب‌سرویس پیامک.</span>';
         } finally {
           testSmsBtn.disabled = false;
         }
@@ -1255,7 +1488,9 @@ try {
           const panel = invalidControl.closest('.settings-panel');
           const tabName = panel && panel.id ? panel.id.replace(/^panel-/, '') : '';
           const tabBtn = tabName
-            ? (document.querySelector(`.settings-tab-btn[data-tab="${tabName}"]`) as HTMLButtonElement | null)
+            ? (document.querySelector(
+                `.settings-tab-btn[data-tab="${tabName}"]`,
+              ) as HTMLButtonElement | null)
             : null;
 
           // 1) activate the tab that owns the invalid field
@@ -1271,7 +1506,7 @@ try {
           const ic = invalidControl as HTMLInputElement;
           const label =
             (ic.labels && ic.labels[0] && ic.labels[0].innerText.trim()) ||
-            (invalidControl.closest('.field-group')?.querySelector('label')?.textContent?.trim()) ||
+            invalidControl.closest('.field-group')?.querySelector('label')?.textContent?.trim() ||
             '';
           const message = label
             ? `ذخیره انجام نشد؛ فیلد «${label}» الزامی است و نمی‌تواند خالی بماند.`
@@ -1301,7 +1536,7 @@ try {
         });
 
         const formData = new FormData(settingsForm);
-        const payload: Record<string, any> = {};
+        const payload: Record<string, string | number> = {};
 
         formData.forEach((val, key) => {
           payload[key] = String(val).trim();
@@ -1349,7 +1584,7 @@ try {
             body: JSON.stringify(payload),
           });
 
-          const json = (await res.json()) as any;
+          const json = (await res.json()) as ApiResponse<unknown>;
           if (res.ok && json.data) {
             if (saveBtnText) saveBtnText.innerText = 'ذخیره شد!';
             if (successBox) successBox.style.display = 'flex';

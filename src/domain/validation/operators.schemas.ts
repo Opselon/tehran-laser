@@ -71,7 +71,10 @@ const hexColorSchema = z
   .trim()
   .regex(/^#[0-9a-fA-F]{6}$/, 'رنگ باید کد هگز شش‌رقمی باشد.');
 
-const serviceIdListSchema = z.array(z.string().trim().min(1).max(64)).max(40).transform((ids) => [...new Set(ids)]);
+const serviceIdListSchema = z
+  .array(z.string().trim().min(1).max(64))
+  .max(40)
+  .transform((ids) => [...new Set(ids)]);
 
 export const operatorCreateSchema = z
   .object({

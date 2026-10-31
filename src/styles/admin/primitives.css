@@ -150,7 +150,9 @@
   pointer-events: auto;
   opacity: 1;
   transform: translateY(0);
-  transition: opacity 180ms ease, transform 180ms ease;
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
 }
 .tl-toast--leaving {
   opacity: 0;

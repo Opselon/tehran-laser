@@ -81,6 +81,7 @@
 absence») و حذف override یعنی بازگشت به پیش‌فرض کارخانه، نه حذف ماژول.
 
 لایه‌ها (Node-testable تا D1):
+
 - `src/domain/features/registry.ts` — تعریف ماژول‌ها + schema مشتق برای config.
 - `src/domain/features/state.ts` — merge/gate/config resolution خالص.
 - `src/server/features.ts` — تنها خواننده/نویسندهٔ جدول (اعتبارسنجی پیش از UPSERT).
@@ -103,6 +104,7 @@ absence») و حذف override یعنی بازگشت به پیش‌فرض کار�
 ## ۴. استراتژی ایمنی همزمانی (Double-Booking Protection)
 
 جهت جلوگیری از بروز شرایط مسابقه (Race Condition) هنگام ارسال همزمان درخواست رزرو توسط دو مراجعه‌کننده برای یک زمان:
+
 1. جدول `booking_slots` در پایگاه داده ایجاد شده است:
    ```sql
    CREATE TABLE booking_slots (

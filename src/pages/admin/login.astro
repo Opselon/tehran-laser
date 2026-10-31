@@ -37,26 +37,62 @@ if (auth) {
         <!-- 3D Emblem & Header -->
         <div class="login-3d-header">
           <div class="emblem-3d-wrap">
-            <svg class="emblem-3d-icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M24 4L42 14V34L24 44L6 34V14L24 4Z" fill="url(#emblemGrad1)" stroke="#F5D77F" stroke-width="2"/>
-              <path d="M24 12L34 18V30L24 36L14 30V18L24 12Z" fill="url(#emblemGrad2)" stroke="#FFF2CC" stroke-width="1.5"/>
-              <circle cx="24" cy="24" r="4" fill="#FFFFFF" filter="url(#glowFilter)"/>
+            <svg
+              class="emblem-3d-icon"
+              viewBox="0 0 48 48"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M24 4L42 14V34L24 44L6 34V14L24 4Z"
+                fill="url(#emblemGrad1)"
+                stroke="#F5D77F"
+                stroke-width="2"
+              />
+              <path
+                d="M24 12L34 18V30L24 36L14 30V18L24 12Z"
+                fill="url(#emblemGrad2)"
+                stroke="#FFF2CC"
+                stroke-width="1.5"
+              />
+              <circle cx="24" cy="24" r="4" fill="#FFFFFF" filter="url(#glowFilter)" />
               <defs>
-                <linearGradient id="emblemGrad1" x1="6" y1="4" x2="42" y2="44" gradientUnits="userSpaceOnUse">
-                  <stop stop-color="#D4AF37"/>
-                  <stop offset="0.5" stop-color="#8C6D32"/>
-                  <stop offset="1" stop-color="#241B08"/>
+                <linearGradient
+                  id="emblemGrad1"
+                  x1="6"
+                  y1="4"
+                  x2="42"
+                  y2="44"
+                  gradientUnits="userSpaceOnUse"
+                >
+                  <stop stop-color="#D4AF37" />
+                  <stop offset="0.5" stop-color="#8C6D32" />
+                  <stop offset="1" stop-color="#241B08" />
                 </linearGradient>
-                <linearGradient id="emblemGrad2" x1="14" y1="12" x2="34" y2="36" gradientUnits="userSpaceOnUse">
-                  <stop stop-color="#FFF2CC"/>
-                  <stop offset="0.6" stop-color="#D4AF37"/>
-                  <stop offset="1" stop-color="#5E4310"/>
+                <linearGradient
+                  id="emblemGrad2"
+                  x1="14"
+                  y1="12"
+                  x2="34"
+                  y2="36"
+                  gradientUnits="userSpaceOnUse"
+                >
+                  <stop stop-color="#FFF2CC" />
+                  <stop offset="0.6" stop-color="#D4AF37" />
+                  <stop offset="1" stop-color="#5E4310" />
                 </linearGradient>
-                <filter id="glowFilter" x="16" y="16" width="16" height="16" filterUnits="userSpaceOnUse">
-                  <feGaussianBlur stdDeviation="2" result="blur"/>
+                <filter
+                  id="glowFilter"
+                  x="16"
+                  y="16"
+                  width="16"
+                  height="16"
+                  filterUnits="userSpaceOnUse"
+                >
+                  <feGaussianBlur stdDeviation="2" result="blur" />
                   <feMerge>
-                    <feMergeNode in="blur"/>
-                    <feMergeNode in="SourceGraphic"/>
+                    <feMergeNode in="blur" />
+                    <feMergeNode in="SourceGraphic" />
                   </feMerge>
                 </filter>
               </defs>
@@ -68,23 +104,32 @@ if (auth) {
             <span>نسخه امن پرسنلی v۳.۲</span>
           </div>
           <h1 class="login-3d-title">ورود به پنل مدیریت کلینیک</h1>
-          <p class="login-3d-subtitle">
-            سامانه جامع مدیریت نوبت‌ها، مراجعین و خدمات تهران لیزر
-          </p>
+          <p class="login-3d-subtitle">سامانه جامع مدیریت نوبت‌ها، مراجعین و خدمات تهران لیزر</p>
         </div>
 
         <!-- Rate-Limiting Lockout Alert (Initially Hidden) -->
         <div id="rateLimitAlert" class="alert-3d-lockout" style="display: none;" role="alert">
           <div style="display: flex; align-items: center; gap: 10px;">
-            <span style="color: #f87171; display: inline-flex;"><Icon name="shield" size={22} /></span>
-            <strong style="color: #ffffff; font-size: 0.95rem;">قفل امنیتی نشست (Rate-Limit Lockout)</strong>
+            <span style="color: #f87171; display: inline-flex;">
+              <Icon name="shield" size={22} />
+            </span>
+            <strong style="color: #ffffff; font-size: 0.95rem;">
+              قفل امنیتی نشست (Rate-Limit Lockout)
+            </strong>
           </div>
           <div id="rateLimitAlertText">
-            تعداد تلاش‌های ناموفق ورود از سقف مجاز فراتر رفته است. جهت جلوگیری از حملات نفوذ، این آدرس IP موقتاً مسدود شده است.
+            تعداد تلاش‌های ناموفق ورود از سقف مجاز فراتر رفته است. جهت جلوگیری از حملات نفوذ، این
+            آدرس IP موقتاً مسدود شده است.
           </div>
           <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(248,113,113,0.3); padding-top: 8px; font-size: 0.8rem;">
             <span>مدت زمان باقیمانده تا آزادسازی:</span>
-            <span id="lockoutTimer" dir="ltr" style="font-variant-numeric: tabular-nums; font-weight: 800; color: #fbbf24;">۱۰:۰۰</span>
+            <span
+              id="lockoutTimer"
+              dir="ltr"
+              style="font-variant-numeric: tabular-nums; font-weight: 800; color: #fbbf24;"
+            >
+              ۱۰:۰۰
+            </span>
           </div>
         </div>
 
@@ -100,7 +145,9 @@ if (auth) {
         <form id="adminLoginForm" class="login-3d-form" autocomplete="on" novalidate>
           <div class="form-group-3d">
             <label for="adminEmail" class="label-3d">
-              <span class="label-icon"><Icon name="mail" size={15} /></span>
+              <span class="label-icon">
+                <Icon name="mail" size={15} />
+              </span>
               <span>آدرس ایمیل پرسنل:</span>
             </label>
             <div class="input-3d-wrapper">
@@ -114,14 +161,20 @@ if (auth) {
                 required
                 autocomplete="username"
               />
-              <span class="input-prefix-icon"><Icon name="mail" size={16} /></span>
+              <span class="input-prefix-icon">
+                <Icon name="mail" size={16} />
+              </span>
             </div>
-            <div id="emailError" class="field-error-msg">لطفاً آدرس ایمیل پرسنلی معتبر را وارد کنید.</div>
+            <div id="emailError" class="field-error-msg">
+              لطفاً آدرس ایمیل پرسنلی معتبر را وارد کنید.
+            </div>
           </div>
 
           <div class="form-group-3d">
             <label for="adminPassword" class="label-3d">
-              <span class="label-icon"><Icon name="lock" size={15} /></span>
+              <span class="label-icon">
+                <Icon name="lock" size={15} />
+              </span>
               <span>کلمه عبور امنیتی:</span>
             </label>
             <div class="input-3d-wrapper">
@@ -134,7 +187,9 @@ if (auth) {
                 required
                 autocomplete="current-password"
               />
-              <span class="input-prefix-icon"><Icon name="lock" size={16} /></span>
+              <span class="input-prefix-icon">
+                <Icon name="lock" size={16} />
+              </span>
               <button
                 type="button"
                 id="togglePasswordBtn"
@@ -143,11 +198,17 @@ if (auth) {
                 title="نمایش / پنهان کردن رمز"
                 aria-pressed="false"
               >
-                <span id="eyeOpenIcon" style="display: inline-flex;"><Icon name="eye" size={18} /></span>
-                <span id="eyeClosedIcon" style="display: none;"><Icon name="lock" size={18} /></span>
+                <span id="eyeOpenIcon" style="display: inline-flex;">
+                  <Icon name="eye" size={18} />
+                </span>
+                <span id="eyeClosedIcon" style="display: none;">
+                  <Icon name="lock" size={18} />
+                </span>
               </button>
             </div>
-            <div id="passwordError" class="field-error-msg">کلمه عبور نمی‌تواند خالی باشد.</div>
+            <div id="passwordError" class="field-error-msg">
+              کلمه عبور نمی‌تواند خالی باشد.
+            </div>
           </div>
 
           <button type="submit" id="loginSubmitBtn" class="btn-3d-submit">
@@ -190,6 +251,7 @@ if (auth) {
 
     <!-- Client-Side 3D Physics & Canvas Script -->
     <script>
+      import type { ApiResponse } from '../../domain/shared/api.types';
       // A finger can steer neither the parallax nor the tilt, so both
       // effects are opt-in behind a fine pointer on a desktop-sized view.
       const finePointer = window.matchMedia('(pointer: fine)').matches;
@@ -412,7 +474,9 @@ if (auth) {
             if (rateLimitAlert) rateLimitAlert.style.display = 'none';
             return;
           }
-          const mins = Math.floor(remaining / 60).toString().padStart(2, '0');
+          const mins = Math.floor(remaining / 60)
+            .toString()
+            .padStart(2, '0');
           const secs = (remaining % 60).toString().padStart(2, '0');
           if (timerEl) timerEl.innerText = toPersianDigits(`${mins}:${secs}`);
         }, 1000);
@@ -474,7 +538,7 @@ if (auth) {
             }),
           });
 
-          const data = (await res.json()) as any;
+          const data = (await res.json()) as ApiResponse<unknown>;
           if (res.ok && data.data) {
             btnText.innerText = 'ورود موفق! در حال انتقال...';
             submitBtn.style.background = 'linear-gradient(180deg, #34d399 0%, #059669 100%)';

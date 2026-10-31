@@ -38,12 +38,15 @@ export const isoInstantSchema = z
 export const localDateSchema = z
   .string()
   .regex(/^\d{4}-\d{2}-\d{2}$/, 'تاریخ باید به شکل YYYY-MM-DD باشد.')
-  .refine((value) => {
-    const [y, m, d] = value.split('-').map(Number) as [number, number, number];
-    if (y < 2000 || y > 2100 || m < 1 || m > 12 || d < 1 || d > 31) return false;
-    const dt = new Date(Date.UTC(y, m - 1, d));
-    return dt.getUTCFullYear() === y && dt.getUTCMonth() === m - 1 && dt.getUTCDate() === d;
-  }, { message: 'تاریخ نامعتبر است.' });
+  .refine(
+    (value) => {
+      const [y, m, d] = value.split('-').map(Number) as [number, number, number];
+      if (y < 2000 || y > 2100 || m < 1 || m > 12 || d < 1 || d > 31) return false;
+      const dt = new Date(Date.UTC(y, m - 1, d));
+      return dt.getUTCFullYear() === y && dt.getUTCMonth() === m - 1 && dt.getUTCDate() === d;
+    },
+    { message: 'تاریخ نامعتبر است.' },
+  );
 
 export const slugSchema = z
   .string()
@@ -129,7 +132,9 @@ export const rescheduleBookingSchema = z.object({
 });
 
 export const adminBookingListQuerySchema = z.object({
-  status: z.enum(['pending', 'confirmed', 'rejected', 'cancelled', 'completed', 'no_show']).optional(),
+  status: z
+    .enum(['pending', 'confirmed', 'rejected', 'cancelled', 'completed', 'no_show'])
+    .optional(),
   from: localDateSchema.optional(),
   to: localDateSchema.optional(),
   q: z.string().trim().min(1).max(80).optional(),
@@ -246,10 +251,7 @@ export const faqWriteSchema = z.object({
 });
 
 export const settingsWriteSchema = z.object({
-  settings: z.record(
-    z.string().regex(/^[a-z_]{2,40}$/),
-    z.string().max(1000),
-  ),
+  settings: z.record(z.string().regex(/^[a-z_]{2,40}$/), z.string().max(1000)),
 });
 
 export const seoWriteSchema = z.object({
@@ -314,46 +316,46 @@ export const walkinBookSchema = z
     customerName: nameSchema.optional(),
     customerPhone: phoneSchema.optional(),
     pricingCategory: pricingCategorySchema.optional(),
-  serviceId: z.string().trim().max(64).optional(),
-  startsAt: isoInstantSchema.optional(),
-  amount: z.number().int().min(0).max(1_000_000_000).optional(),
-  paymentMethod: paymentMethodSchema.optional(),
-  trackingNumber: z.string().trim().max(80).optional(),
-  adminNote: z.string().trim().max(500).optional(),
-  note: z.string().trim().max(500).optional(),
-  sessionNumber: z.number().int().min(1).max(200).optional(),
-  totalSessions: z.number().int().min(1).max(200).optional(),
-  deviceModel: z.string().trim().max(120).optional(),
-  joulesEnergy: z.number().finite().min(0).max(200).optional(),
-  pulseWidthMs: z.number().finite().min(0).max(1000).optional(),
-  shotCount: z.number().int().min(0).max(100_000).optional(),
-  skinReaction: z.string().trim().max(200).optional(),
-  operatorName: z.string().trim().max(80).optional(),
-  doctorNotes: z.string().trim().max(2000).optional(),
-  scheduleNextSession: z.boolean().optional(),
-  nextSessionDate: z.string().trim().max(40).nullable().optional(),
+    serviceId: z.string().trim().max(64).optional(),
+    startsAt: isoInstantSchema.optional(),
+    amount: z.number().int().min(0).max(1_000_000_000).optional(),
+    paymentMethod: paymentMethodSchema.optional(),
+    trackingNumber: z.string().trim().max(80).optional(),
+    adminNote: z.string().trim().max(500).optional(),
+    note: z.string().trim().max(500).optional(),
+    sessionNumber: z.number().int().min(1).max(200).optional(),
+    totalSessions: z.number().int().min(1).max(200).optional(),
+    deviceModel: z.string().trim().max(120).optional(),
+    joulesEnergy: z.number().finite().min(0).max(200).optional(),
+    pulseWidthMs: z.number().finite().min(0).max(1000).optional(),
+    shotCount: z.number().int().min(0).max(100_000).optional(),
+    skinReaction: z.string().trim().max(200).optional(),
+    operatorName: z.string().trim().max(80).optional(),
+    doctorNotes: z.string().trim().max(2000).optional(),
+    scheduleNextSession: z.boolean().optional(),
+    nextSessionDate: z.string().trim().max(40).nullable().optional(),
   })
   /* An empty body must never create a walk-in booking: the handler falls back to
      "first customer in the table" and a default service when nothing is supplied,
      so at least an identity (customerId / customerName / customerPhone) is required. */
-  .refine(
-    (value) => Boolean(value.customerId || value.customerName || value.customerPhone),
-    { message: 'شناسه، نام یا شماره تماس مراجع الزامی است.', path: ['customerPhone'] },
-  )
+  .refine((value) => Boolean(value.customerId || value.customerName || value.customerPhone), {
+    message: 'شناسه، نام یا شماره تماس مراجع الزامی است.',
+    path: ['customerPhone'],
+  })
   /* The admin walk-in form always submits both, and the next-session scheduler is
      meaningless without them. */
-  .refine(
-    (value) => value.amount !== undefined && value.paymentMethod !== undefined,
-    { message: 'مبلغ و روش پرداخت الزامی است.', path: ['amount'] },
-  )
-  .refine(
-    (value) => value.sessionNumber !== undefined && value.totalSessions !== undefined,
-    { message: 'شماره و تعداد کل جلسات الزامی است.', path: ['sessionNumber'] },
-  )
-  .refine(
-    (value) => !(value.scheduleNextSession && !value.nextSessionDate),
-    { message: 'تاریخ جلسه بعدی برای زمان‌بندی انتخاب نشده است.', path: ['nextSessionDate'] },
-  );
+  .refine((value) => value.amount !== undefined && value.paymentMethod !== undefined, {
+    message: 'مبلغ و روش پرداخت الزامی است.',
+    path: ['amount'],
+  })
+  .refine((value) => value.sessionNumber !== undefined && value.totalSessions !== undefined, {
+    message: 'شماره و تعداد کل جلسات الزامی است.',
+    path: ['sessionNumber'],
+  })
+  .refine((value) => !(value.scheduleNextSession && !value.nextSessionDate), {
+    message: 'تاریخ جلسه بعدی برای زمان‌بندی انتخاب نشده است.',
+    path: ['nextSessionDate'],
+  });
 export type WalkinBookInput = z.infer<typeof walkinBookSchema>;
 
 export const clinicalRecordSchema = z.object({
@@ -439,9 +441,12 @@ export const featureUpdateSchema = z
     config: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])).optional(),
   })
   .strict()
-  .refine((v) => v.enabled !== undefined || v.displayOrder !== undefined || v.config !== undefined, {
-    message: 'حداقل یکی از فیلدهای enabled، displayOrder یا config لازم است.',
-  });
+  .refine(
+    (v) => v.enabled !== undefined || v.displayOrder !== undefined || v.config !== undefined,
+    {
+      message: 'حداقل یکی از فیلدهای enabled، displayOrder یا config لازم است.',
+    },
+  );
 export type FeatureUpdateInput = z.infer<typeof featureUpdateSchema>;
 
 export const featureReorderSchema = z
@@ -484,4 +489,3 @@ export const seoUpsertSchema = z
   })
   .strict();
 export type SeoUpsertInput = z.infer<typeof seoUpsertSchema>;
-

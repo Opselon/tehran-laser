@@ -30,7 +30,9 @@ const hasActions = Astro.slots.has('actions');
 <header class="tl-page-header">
   <div class="tl-page-header__texts">
     <h1 class="tl-page-header__title">
-      <span class="tl-page-header__icon"><Icon name={icon} size={26} aria-hidden /></span>
+      <span class="tl-page-header__icon">
+        <Icon name={icon} size={26} aria-hidden />
+      </span>
       <span>{title}</span>
       {meta && <span class="tl-page-header__meta">{meta}</span>}
     </h1>

@@ -43,7 +43,9 @@ const categories = Object.entries(CATEGORY_LABELS) as Array<[string, string]>;
   <div class="admin-content-pad plugin-hub" id="pluginHubRoot">
     <header class="dashboard-header-row plugin-hub__header">
       <div class="plugin-hub__heading">
-        <span class="plugin-hub__emblem"><Icon name="puzzle" size={26} /></span>
+        <span class="plugin-hub__emblem">
+          <Icon name="puzzle" size={26} />
+        </span>
         <div>
           <h1 class="admin-page-title">هاب افزونه‌ها و بخش‌های سایت</h1>
           <p class="section-block-sub">
@@ -55,11 +57,15 @@ const categories = Object.entries(CATEGORY_LABELS) as Array<[string, string]>;
 
       <div class="plugin-hub__stats" role="list">
         <div class="plugin-stat" role="listitem">
-          <span class="plugin-stat__value" data-stat="enabled">{enabledCount}</span>
+          <span class="plugin-stat__value" data-stat="enabled">
+            {enabledCount}
+          </span>
           <span class="plugin-stat__label">فعال</span>
         </div>
         <div class="plugin-stat" role="listitem">
-          <span class="plugin-stat__value" data-stat="disabled">{modules.length - enabledCount}</span>
+          <span class="plugin-stat__value" data-stat="disabled">
+            {modules.length - enabledCount}
+          </span>
           <span class="plugin-stat__label">غیرفعال</span>
         </div>
         <div class="plugin-stat plugin-stat--gold" role="listitem">
@@ -82,13 +88,25 @@ const categories = Object.entries(CATEGORY_LABELS) as Array<[string, string]>;
 
     <div class="plugin-toolbar">
       <div class="plugin-filters" role="tablist" aria-label="فیلتر دسته‌بندی افزونه‌ها">
-        <button type="button" class="plugin-filter is-active" data-filter="all" role="tab" aria-selected="true">
+        <button
+          type="button"
+          class="plugin-filter is-active"
+          data-filter="all"
+          role="tab"
+          aria-selected="true"
+        >
           همه <span class="plugin-filter__count">{modules.length}</span>
         </button>
         {categories.map(([key, label]) => {
           const count = modules.filter((m) => m.category === key).length;
           return (
-            <button type="button" class="plugin-filter" data-filter={key} role="tab" aria-selected="false">
+            <button
+              type="button"
+              class="plugin-filter"
+              data-filter={key}
+              role="tab"
+              aria-selected="false"
+            >
               {label} <span class="plugin-filter__count">{count}</span>
             </button>
           );
@@ -103,7 +121,11 @@ const categories = Object.entries(CATEGORY_LABELS) as Array<[string, string]>;
     <div class="plugin-grid" id="pluginGrid">
       {modules.map((m, index) => (
         <article
-          class:list={['plugin-card', m.enabled ? 'is-enabled' : 'is-disabled', m.premium && 'is-premium']}
+          class:list={[
+            'plugin-card',
+            m.enabled ? 'is-enabled' : 'is-disabled',
+            m.premium && 'is-premium',
+          ]}
           data-module={m.key}
           data-category={m.category}
           data-order={m.order}
@@ -112,7 +134,9 @@ const categories = Object.entries(CATEGORY_LABELS) as Array<[string, string]>;
           data-index={index}
         >
           <div class="plugin-card__top">
-            <span class="plugin-card__icon"><Icon name={m.icon} size={20} /></span>
+            <span class="plugin-card__icon">
+              <Icon name={m.icon} size={20} />
+            </span>
             <div class="plugin-card__title-wrap">
               <h2 class="plugin-card__title">{m.name}</h2>
               <div class="plugin-card__chips">
@@ -133,8 +157,12 @@ const categories = Object.entries(CATEGORY_LABELS) as Array<[string, string]>;
                 data-toggle={m.key}
                 checked={m.enabled}
               />
-              <span class="plugin-switch__track" aria-hidden="true"><span class="plugin-switch__thumb" /></span>
-              <span class="plugin-switch__text" data-switch-label>{m.enabled ? 'فعال' : 'خاموش'}</span>
+              <span class="plugin-switch__track" aria-hidden="true">
+                <span class="plugin-switch__thumb" />
+              </span>
+              <span class="plugin-switch__text" data-switch-label>
+                {m.enabled ? 'فعال' : 'خاموش'}
+              </span>
             </label>
           </div>
 
@@ -148,7 +176,12 @@ const categories = Object.entries(CATEGORY_LABELS) as Array<[string, string]>;
           <div class="plugin-card__footer">
             <div class="plugin-card__actions">
               {m.fields.length > 0 ? (
-                <button type="button" class="plugin-btn plugin-btn--ghost" data-open-config={m.key} aria-expanded="false">
+                <button
+                  type="button"
+                  class="plugin-btn plugin-btn--ghost"
+                  data-open-config={m.key}
+                  aria-expanded="false"
+                >
                   <Icon name="settings" size={15} />
                   <span>تنظیمات</span>
                 </button>
@@ -159,10 +192,22 @@ const categories = Object.entries(CATEGORY_LABELS) as Array<[string, string]>;
                 </span>
               )}
 
-              <button type="button" class="plugin-btn plugin-btn--icon" data-move="up" data-key={m.key} aria-label={`انتقال ${m.name} به بالا`}>
+              <button
+                type="button"
+                class="plugin-btn plugin-btn--icon"
+                data-move="up"
+                data-key={m.key}
+                aria-label={`انتقال ${m.name} به بالا`}
+              >
                 <Icon name="chevronUp" size={16} />
               </button>
-              <button type="button" class="plugin-btn plugin-btn--icon" data-move="down" data-key={m.key} aria-label={`انتقال ${m.name} به پایین`}>
+              <button
+                type="button"
+                class="plugin-btn plugin-btn--icon"
+                data-move="down"
+                data-key={m.key}
+                aria-label={`انتقال ${m.name} به پایین`}
+              >
                 <Icon name="chevronDown" size={16} />
               </button>
 
@@ -181,10 +226,17 @@ const categories = Object.entries(CATEGORY_LABELS) as Array<[string, string]>;
           </div>
 
           {m.fields.length > 0 && (
-            <section class="plugin-config" data-config-panel={m.key} hidden aria-label={`تنظیمات ${m.name}`}>
+            <section
+              class="plugin-config"
+              data-config-panel={m.key}
+              hidden
+              aria-label={`تنظیمات ${m.name}`}
+            >
               <div class="plugin-config__grid">
                 {m.fields.map((field) => (
-                  <div class:list={['plugin-field', field.type === 'textarea' && 'plugin-field--wide']}>
+                  <div
+                    class:list={['plugin-field', field.type === 'textarea' && 'plugin-field--wide']}
+                  >
                     <label class="plugin-field__label" for={`cfg-${m.key}-${field.key}`}>
                       {field.label}
                     </label>
@@ -207,7 +259,8 @@ const categories = Object.entries(CATEGORY_LABELS) as Array<[string, string]>;
                         maxlength={field.maxLength ?? 1200}
                         placeholder={field.placeholder ?? ''}
                         data-config-key={field.key}
-                        data-config-type={field.type}>{fieldValue(m, field.key)}</textarea>
+                        data-config-type={field.type}
+                      >{fieldValue(m, field.key)}</textarea>
                     ) : (
                       <input
                         id={`cfg-${m.key}-${field.key}`}
@@ -216,7 +269,7 @@ const categories = Object.entries(CATEGORY_LABELS) as Array<[string, string]>;
                         inputmode={field.type === 'number' ? 'numeric' : undefined}
                         min={field.min}
                         max={field.max}
-                        maxlength={field.type === 'number' ? undefined : field.maxLength ?? 300}
+                        maxlength={field.type === 'number' ? undefined : (field.maxLength ?? 300)}
                         value={fieldValue(m, field.key)}
                         placeholder={field.placeholder ?? ''}
                         dir={field.type === 'url' ? 'ltr' : undefined}
@@ -249,12 +302,27 @@ const categories = Object.entries(CATEGORY_LABELS) as Array<[string, string]>;
     <div class="plugin-toast" id="pluginToast" role="status" aria-live="polite" hidden></div>
 
     <section class="plugin-help">
-      <h2 class="plugin-help__title"><Icon name="info" size={16} /><span>این هاب چطور کار می‌کند؟</span></h2>
+      <h2 class="plugin-help__title">
+        <Icon name="info" size={16} />
+        <span>این هاب چطور کار می‌کند؟</span>
+      </h2>
       <ul class="plugin-help__list">
-        <li><strong>پنهان تا فعال‌سازی:</strong> هر بخش تا وقتی سوئیچ آن روشن نشود، نه در HTML صفحه ساخته می‌شود و نه در <code>GET /api/v1/features</code> دیده می‌شود.</li>
-        <li><strong>تنظیمات زنده:</strong> مقادیر فرم‌ها همان فیلدهای ثبت‌شده در رجیستری افزونه هستند؛ سرور پیش از ذخیره، آن‌ها را اعتبارسنجی می‌کند.</li>
-        <li><strong>بازنشانی:</strong> حذف تنظیمات اختصاصی، افزونه را به حالت پیش‌فرض کارخانه برمی‌گرداند (بدون حذف خود افزونه).</li>
-        <li><strong>API First:</strong> همه عملیات همین صفحه از مسیرهای <code>/api/v1/admin/features</code> انجام می‌شود و مستقل از UI قابل اتوماسیون است.</li>
+        <li>
+          <strong>پنهان تا فعال‌سازی:</strong> هر بخش تا وقتی سوئیچ آن روشن نشود، نه در HTML صفحه
+          ساخته می‌شود و نه در <code>GET /api/v1/features</code> دیده می‌شود.
+        </li>
+        <li>
+          <strong>تنظیمات زنده:</strong> مقادیر فرم‌ها همان فیلدهای ثبت‌شده در رجیستری افزونه هستند؛
+          سرور پیش از ذخیره، آن‌ها را اعتبارسنجی می‌کند.
+        </li>
+        <li>
+          <strong>بازنشانی:</strong> حذف تنظیمات اختصاصی، افزونه را به حالت پیش‌فرض کارخانه
+          برمی‌گرداند (بدون حذف خود افزونه).
+        </li>
+        <li>
+          <strong>API First:</strong> همه عملیات همین صفحه از مسیرهای{' '}
+          <code>/api/v1/admin/features</code> انجام می‌شود و مستقل از UI قابل اتوماسیون است.
+        </li>
       </ul>
     </section>
   </div>
@@ -311,7 +379,9 @@ const categories = Object.entries(CATEGORY_LABELS) as Array<[string, string]>;
     const enabledStat = hub?.querySelector<HTMLElement>('[data-stat="enabled"]');
     const disabledStat = hub?.querySelector<HTMLElement>('[data-stat="disabled"]');
     const cards = hub?.querySelectorAll('.plugin-card') ?? [];
-    const enabledTotal = Array.from(cards).filter((c) => (c as HTMLElement).dataset.enabled === '1').length;
+    const enabledTotal = Array.from(cards).filter(
+      (c) => (c as HTMLElement).dataset.enabled === '1',
+    ).length;
     if (enabledStat) enabledStat.textContent = String(enabledTotal);
     if (disabledStat) disabledStat.textContent = String(cards.length - enabledTotal);
   }
@@ -330,7 +400,11 @@ const categories = Object.entries(CATEGORY_LABELS) as Array<[string, string]>;
         return;
       }
       if (card) updateEnabledUi(card, enabled);
-      toast(enabled ? 'افزونه فعال شد و از این پس در سایت نمایش داده می‌شود.' : 'افزونه خاموش شد و از سایت حذف شد.');
+      toast(
+        enabled
+          ? 'افزونه فعال شد و از این پس در سایت نمایش داده می‌شود.'
+          : 'افزونه خاموش شد و از سایت حذف شد.',
+      );
     } catch {
       input.checked = !enabled;
       toast('خطای شبکه در ارتباط با سرور.', 'err');
@@ -345,15 +419,17 @@ const categories = Object.entries(CATEGORY_LABELS) as Array<[string, string]>;
     if (!card || !panel) return;
 
     const config: Record<string, string | number | boolean> = {};
-    panel.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('[data-config-key]').forEach((input) => {
-      const fieldKey = input.dataset.configKey;
-      if (!fieldKey) return;
-      if (input.dataset.configType === 'boolean') {
-        config[fieldKey] = (input as HTMLInputElement).checked;
-      } else {
-        config[fieldKey] = input.value;
-      }
-    });
+    panel
+      .querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('[data-config-key]')
+      .forEach((input) => {
+        const fieldKey = input.dataset.configKey;
+        if (!fieldKey) return;
+        if (input.dataset.configType === 'boolean') {
+          config[fieldKey] = (input as HTMLInputElement).checked;
+        } else {
+          config[fieldKey] = input.value;
+        }
+      });
 
     button.disabled = true;
     try {
@@ -361,7 +437,9 @@ const categories = Object.entries(CATEGORY_LABELS) as Array<[string, string]>;
         method: 'PUT',
         body: JSON.stringify({ config }),
       });
-      const json = (await res.json()) as { error?: { message?: string; fields?: Record<string, string[]> } };
+      const json = (await res.json()) as {
+        error?: { message?: string; fields?: Record<string, string[]> };
+      };
       if (!res.ok) {
         const fieldHint = json.error?.fields
           ? Object.values(json.error.fields).flat().join(' · ')
@@ -383,7 +461,9 @@ const categories = Object.entries(CATEGORY_LABELS) as Array<[string, string]>;
   async function resetModule(key: string) {
     if (!window.confirm('تنظیمات اختصاصی این افزونه حذف و به پیش‌فرض کارخانه بازگردد؟')) return;
     try {
-      const res = await csrfSafeFetch(`/api/v1/admin/features/${encodeURIComponent(key)}`, { method: 'DELETE' });
+      const res = await csrfSafeFetch(`/api/v1/admin/features/${encodeURIComponent(key)}`, {
+        method: 'DELETE',
+      });
       if (!res.ok) {
         toast('بازنشانی انجام نشد.', 'err');
         return;
@@ -398,7 +478,9 @@ const categories = Object.entries(CATEGORY_LABELS) as Array<[string, string]>;
   async function move(key: string, direction: 'up' | 'down') {
     if (!root) return;
     const cards = Array.from(root.querySelectorAll<HTMLElement>('.plugin-card')).sort(
-      (a, b) => Number(a.dataset.order) - Number(b.dataset.order) || a.dataset.module!.localeCompare(b.dataset.module!),
+      (a, b) =>
+        Number(a.dataset.order) - Number(b.dataset.order) ||
+        a.dataset.module!.localeCompare(b.dataset.module!),
     );
     const index = cards.findIndex((c) => c.dataset.module === key);
     const neighbour = cards[direction === 'up' ? index - 1 : index + 1];

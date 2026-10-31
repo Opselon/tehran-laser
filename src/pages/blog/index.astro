@@ -30,13 +30,31 @@ const allPosts = postsPage.items;
 
 function getCategory(title: string, excerpt: string): { id: string; label: string; icon: string } {
   const combined = (title + ' ' + excerpt).toLowerCase();
-  if (combined.includes('مراقبت') || combined.includes('آمادگی') || combined.includes('شیو') || combined.includes('قبل') || combined.includes('بعد')) {
+  if (
+    combined.includes('مراقبت') ||
+    combined.includes('آمادگی') ||
+    combined.includes('شیو') ||
+    combined.includes('قبل') ||
+    combined.includes('بعد')
+  ) {
     return { id: 'care', label: 'آمادگی و مراقبت', icon: 'shield' };
   }
-  if (combined.includes('دستگاه') || combined.includes('الکساندرایت') || combined.includes('رادو پلاس') || combined.includes('کولینگ') || combined.includes('تکنولوژی')) {
+  if (
+    combined.includes('دستگاه') ||
+    combined.includes('الکساندرایت') ||
+    combined.includes('رادو پلاس') ||
+    combined.includes('کولینگ') ||
+    combined.includes('تکنولوژی')
+  ) {
     return { id: 'tech', label: 'دستگاه و تکنولوژی', icon: 'lightning' };
   }
-  if (combined.includes('پوست') || combined.includes('دارو') || combined.includes('راکوتان') || combined.includes('سولاریوم') || combined.includes('پزشک')) {
+  if (
+    combined.includes('پوست') ||
+    combined.includes('دارو') ||
+    combined.includes('راکوتان') ||
+    combined.includes('سولاریوم') ||
+    combined.includes('پزشک')
+  ) {
     return { id: 'health', label: 'سلامت و تیپ پوستی', icon: 'gem' };
   }
   return { id: 'standards', label: 'استاندارد کلینیکال', icon: 'sparkles' };
@@ -84,7 +102,8 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
         </div>
         <h1 class="blog-hero-title">مجله تخصصی و راهنمای مراجعین</h1>
         <p class="blog-hero-desc">
-          راهنماهای گام‌به‌گام آمادگی جلسات، مراقبت‌های پس از درمان، تحلیل تکنولوژی لیزر تماسی و سلامت پوست با راهنمایی تیم محتوای کلینیک
+          راهنماهای گام‌به‌گام آمادگی جلسات، مراقبت‌های پس از درمان، تحلیل تکنولوژی لیزر تماسی و
+          سلامت پوست با راهنمایی تیم محتوای کلینیک
         </p>
 
         <!-- Fast Patient Guides Strip -->
@@ -95,7 +114,9 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
             </div>
             <div class="guide-text">
               <div class="guide-title">چک‌لیست قبل از لیزر</div>
-              <div class="guide-sub">شیو با تیغ ۲۴ ساعت قبل، عدم آفتاب‌سوختگی، پوست کاملاً تمیز</div>
+              <div class="guide-sub">
+                شیو با تیغ ۲۴ ساعت قبل، عدم آفتاب‌سوختگی، پوست کاملاً تمیز
+              </div>
             </div>
           </div>
 
@@ -115,7 +136,9 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
             </div>
             <div class="guide-text">
               <div class="guide-title">تکنولوژی لیزر تماسی</div>
-              <div class="guide-sub">سه طول موج ۷۵۵ و ۸۰۸ و ۱۰۶۴ نانومتر با سرمایش پیوسته بدون درد</div>
+              <div class="guide-sub">
+                سه طول موج ۷۵۵ و ۸۰۸ و ۱۰۶۴ نانومتر با سرمایش پیوسته بدون درد
+              </div>
             </div>
           </div>
         </div>
@@ -146,13 +169,19 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
             <Icon name="blog" size={36} />
           </div>
           <h2 class="empty-title">به‌زودی مقالات جدید منتشر می‌شود</h2>
-          <p class="empty-desc">تیم تولید محتوای پزشکی کلینیک در حال آماده‌سازی راهنماهای تخصصی جدید است.</p>
+          <p class="empty-desc">
+            تیم تولید محتوای پزشکی کلینیک در حال آماده‌سازی راهنماهای تخصصی جدید است.
+          </p>
         </div>
       ) : (
         <div class="articles-flow">
           <!-- Featured Article Hero Card -->
           {featuredPost && (
-            <section class="featured-article-section" id="featuredSection" data-category={getCategory(featuredPost.title, featuredPost.excerpt).id}>
+            <section
+              class="featured-article-section"
+              id="featuredSection"
+              data-category={getCategory(featuredPost.title, featuredPost.excerpt).id}
+            >
               <article class="featured-card-3d">
                 <div class="featured-image-col">
                   {featuredCover ? (
@@ -183,12 +212,17 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
                 <div class="featured-content-col">
                   <div class="card-meta-row">
                     <span class="meta-tag meta-category">
-                      <Icon name={getCategory(featuredPost.title, featuredPost.excerpt).icon} size={13} />
+                      <Icon
+                        name={getCategory(featuredPost.title, featuredPost.excerpt).icon}
+                        size={13}
+                      />
                       <span>{getCategory(featuredPost.title, featuredPost.excerpt).label}</span>
                     </span>
                     <span class="meta-tag meta-time">
                       <Icon name="clock" size={13} />
-                      <span>{toPersianDigits(readingMinutes(featuredPost.excerpt))} دقیقه مطالعه</span>
+                      <span>
+                        {toPersianDigits(readingMinutes(featuredPost.excerpt))} دقیقه مطالعه
+                      </span>
                     </span>
                     {featuredPost.publishedAt && (
                       <span class="meta-tag meta-date">
@@ -209,7 +243,9 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
                       <div class="author-avatar-mini">
                         <Icon name="users" size={14} />
                       </div>
-                      <span class="author-name">{featuredPost.author || 'تیم علمی تهران لیزر'}</span>
+                      <span class="author-name">
+                        {featuredPost.author || 'تیم علمی تهران لیزر'}
+                      </span>
                     </div>
 
                     <a href={`/blog/${featuredPost.slug}`} class="btn-read-featured">
@@ -306,7 +342,8 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
             </span>
             <h2 class="cta-title">سوالی درباره روند درمان و جلسات لیزر دارید؟</h2>
             <p class="cta-sub">
-              پزشکان و کارشناسان کلینیک تخصصی تهران لیزر در خیابان پایدارفرد پاسداران آماده پاسخگویی و ارائه مشاوره دقیق به شما هستند.
+              پزشکان و کارشناسان کلینیک تخصصی تهران لیزر در خیابان پایدارفرد پاسداران آماده پاسخگویی
+              و ارائه مشاوره دقیق به شما هستند.
             </p>
           </div>
           <div class="cta-actions-col">
@@ -314,9 +351,15 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
               <Icon name="calendar" size={17} />
               <span>رزرو آنلاین نوبت با تخفیف</span>
             </a>
-            <a href="tel:+989035555090" class="btn-cta-secondary" aria-label="تماس با کلینیک ۰۹۰۳ ۵۵۵ ۵۰۹۰">
+            <a
+              href="tel:+989035555090"
+              class="btn-cta-secondary"
+              aria-label="تماس با کلینیک ۰۹۰۳ ۵۵۵ ۵۰۹۰"
+            >
               <Icon name="phone" size={17} />
-              <span>تماس مستقیم: <bdi dir="ltr">۰۹۰۳ ۵۵۵ ۵۰۹۰</bdi></span>
+              <span>
+                تماس مستقیم: <bdi dir="ltr">۰۹۰۳ ۵۵۵ ۵۰۹۰</bdi>
+              </span>
             </a>
           </div>
         </div>

@@ -1,7 +1,18 @@
 import { useState, useEffect, useMemo } from 'react';
 import type { AdminDashboardDto, AdminBookingDto } from '../../domain/api/dto.types';
+import type { ApiResponse } from '../../domain/shared/api.types';
 import { formatJalaliDate } from '../../lib/datetime/jalali';
 import { IconReact } from '../ui/IconReact';
+
+/** Extract the server's Persian message from the standard API envelope (§6);
+ *  a network-level failure or malformed body falls back to the caller's default. */
+async function readError(res: Response): Promise<string | undefined> {
+  try {
+    return ((await res.json()) as ApiResponse<unknown>).error?.message;
+  } catch {
+    return undefined;
+  }
+}
 
 interface AdminDashboardProps {
   initialData?: AdminDashboardDto | undefined;
@@ -74,7 +85,7 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
     setError(null);
     try {
       const res = await fetch('/api/v1/admin/dashboard');
-      const json = (await res.json()) as any;
+      const json = (await res.json()) as ApiResponse<AdminDashboardDto>;
       if (res.ok && json.data) {
         setData(json.data);
       } else {
@@ -96,7 +107,7 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
     try {
       const res = await fetch(`/api/v1/admin/bookings/${bookingId}/accept`, { method: 'POST' });
       if (res.ok) await refreshDashboard();
-      else alert(((await res.json()) as any).error?.message || 'خطا در تأیید نوبت.');
+      else alert((await readError(res)) ?? 'خطا در تأیید نوبت.');
     } catch {
       alert('خطا در برقراری ارتباط با سرور.');
     } finally {
@@ -119,7 +130,7 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
         setRejectionReason('');
         await refreshDashboard();
       } else {
-        alert(((await res.json()) as any).error?.message || 'خطا در رد نوبت.');
+        alert((await readError(res)) ?? 'خطا در رد نوبت.');
       }
     } catch {
       alert('خطا در ارتباط با سرور.');
@@ -133,7 +144,7 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
     try {
       const res = await fetch(`/api/v1/admin/bookings/${bookingId}/complete`, { method: 'POST' });
       if (res.ok) await refreshDashboard();
-      else alert(((await res.json()) as any).error?.message || 'خطا در ثبت اتمام نوبت.');
+      else alert((await readError(res)) ?? 'خطا در ثبت اتمام نوبت.');
     } catch {
       alert('خطا در ارتباط با سرور.');
     } finally {
@@ -147,7 +158,7 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
     try {
       const res = await fetch(`/api/v1/admin/bookings/${bookingId}/no-show`, { method: 'POST' });
       if (res.ok) await refreshDashboard();
-      else alert(((await res.json()) as any).error?.message || 'خطا در تغییر وضعیت.');
+      else alert((await readError(res)) ?? 'خطا در تغییر وضعیت.');
     } catch {
       alert('خطا در ارتباط با سرور.');
     } finally {
@@ -155,7 +166,8 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
     }
   };
 
-  const scheduleBookings = data?.todayBookings || [];
+  // Stable identity across renders: the downstream useMemo hooks depend on it.
+  const scheduleBookings = useMemo(() => data?.todayBookings ?? [], [data]);
   const pendingBookings = useMemo(
     () => scheduleBookings.filter((b) => b.status === 'pending'),
     [scheduleBookings],
@@ -430,7 +442,7 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
           {QUICK_ACTIONS.map((a) => (
             <a key={a.href} href={a.href} className="quick-action-card-3d">
               <div className="quick-action-icon-wrap">
-                <IconReact name={a.icon as any} size={18} />
+                <IconReact name={a.icon} size={18} />
               </div>
               <div className="quick-action-texts">
                 <span className="quick-action-label">{a.label}</span>

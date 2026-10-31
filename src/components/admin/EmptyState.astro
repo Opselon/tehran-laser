@@ -40,12 +40,20 @@ const isError = variant === 'error';
 ---
 
 <div class={`tl-empty ${isError ? 'tl-empty--error' : ''}`} role={isError ? 'alert' : 'status'}>
-  <span class="tl-empty__icon"><Icon name={shownIcon} size={24} aria-hidden /></span>
+  <span class="tl-empty__icon">
+    <Icon name={shownIcon} size={24} aria-hidden />
+  </span>
   <h2 class="tl-empty__title">{title}</h2>
   {body && <p class="tl-empty__body">{body}</p>}
   {(hasAction || (isError && retryLabel)) && (
     <div class="tl-empty__action">
-      {hasAction ? <slot name="actions" /> : <button type="button" class="btn-3d-gold" data-tl-retry>{retryLabel}</button>}
+      {hasAction ? (
+        <slot name="actions" />
+      ) : (
+        <button type="button" class="btn-3d-gold" data-tl-retry>
+          {retryLabel}
+        </button>
+      )}
     </div>
   )}
 </div>

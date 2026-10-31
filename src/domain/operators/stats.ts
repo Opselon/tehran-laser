@@ -92,10 +92,7 @@ export function buildDailySeries(
   return [...byDate.values()];
 }
 
-export function topServices(
-  rows: readonly OperatorBookingRow[],
-  limit = 5,
-): OperatorServiceStat[] {
+export function topServices(rows: readonly OperatorBookingRow[], limit = 5): OperatorServiceStat[] {
   const map = new Map<string, OperatorServiceStat>();
   for (const row of rows) {
     if (row.status !== COMPLETED) continue;
@@ -113,7 +110,10 @@ export function topServices(
 
   const total = [...map.values()].reduce((sum, entry) => sum + entry.sessions, 0);
   return [...map.values()]
-    .map((entry) => ({ ...entry, share: total > 0 ? Math.round((entry.sessions / total) * 100) : 0 }))
+    .map((entry) => ({
+      ...entry,
+      share: total > 0 ? Math.round((entry.sessions / total) * 100) : 0,
+    }))
     .sort((a, b) => b.sessions - a.sessions || b.revenue - a.revenue)
     .slice(0, limit);
 }

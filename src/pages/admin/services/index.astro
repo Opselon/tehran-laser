@@ -129,7 +129,8 @@ const nextDisplayOrder = maxDisplayOrder + 1;
 
 /** How many services already carry a real (non-zero) tariff for each gender list. */
 const pricedCount = (category: 'female' | 'male') =>
-  services.filter((s) => s.prices.some((p) => p.pricingCategory === category && p.amount > 0)).length;
+  services.filter((s) => s.prices.some((p) => p.pricingCategory === category && p.amount > 0))
+    .length;
 const femalePricedCount = pricedCount('female');
 const malePricedCount = pricedCount('male');
 
@@ -161,7 +162,11 @@ for (const s of services) {
 ---
 
 <AdminLayout title="خدمات و تعرفه‌ها" activeNav="services">
-  <div class="admin-content-pad services-page-container" id="servicesPageRoot" data-tariff-gender="female">
+  <div
+    class="admin-content-pad services-page-container"
+    id="servicesPageRoot"
+    data-tariff-gender="female"
+  >
     <!-- 3D Header Row -->
     <div class="dashboard-header-row services-header-3d">
       <div class="services-header-info">
@@ -172,7 +177,8 @@ for (const s of services) {
           <h1 class="admin-page-title">کاتالوگ خدمات و تعرفه‌های مصوب کلینیک</h1>
         </div>
         <p class="section-block-sub">
-          مدیریت نواحی تحت پوشش لیزر، ویرایش زمان جلسات و به‌روزرسانی تعرفه مصوب بانوان و آقایان (کاملاً API First)
+          مدیریت نواحی تحت پوشش لیزر، ویرایش زمان جلسات و به‌روزرسانی تعرفه مصوب بانوان و آقایان
+          (کاملاً API First)
         </p>
       </div>
 
@@ -243,7 +249,13 @@ for (const s of services) {
               class="form-control-modal search-input-field"
               placeholder="جستجوی سریع با نام خدمت یا شناسه (مثال: صورت، arms، زیر بغل)..."
             />
-            <button type="button" id="clearSearchBtn" class="clear-search-btn" style="display: none;" title="پاک کردن جستجو">
+            <button
+              type="button"
+              id="clearSearchBtn"
+              class="clear-search-btn"
+              style="display: none;"
+              title="پاک کردن جستجو"
+            >
               <Icon name="close" size={14} />
             </button>
           </div>
@@ -294,8 +306,14 @@ for (const s of services) {
     </div>
 
     <!-- 3D Services Management Table (Desktop View) -->
-    <div class="admin-section-block services-table-section desktop-only-table" style="padding: 0; overflow: hidden;">
-      <div class="today-table-wrapper services-table-wrapper" style="border: none; border-radius: 0;">
+    <div
+      class="admin-section-block services-table-section desktop-only-table"
+      style="padding: 0; overflow: hidden;"
+    >
+      <div
+        class="today-table-wrapper services-table-wrapper"
+        style="border: none; border-radius: 0;"
+      >
         <table class="admin-table services-3d-table" id="servicesTable">
           <thead>
             <tr>
@@ -333,7 +351,10 @@ for (const s of services) {
                   <td>
                     <div class="service-name-cell">
                       <div class="service-title-text">{s.name}</div>
-                      <div class="service-category-badge" style={`color: ${cat.color}; background: ${cat.bg}; border: 1px solid ${cat.border};`}>
+                      <div
+                        class="service-category-badge"
+                        style={`color: ${cat.color}; background: ${cat.bg}; border: 1px solid ${cat.border};`}
+                      >
                         <Icon name={cat.icon} size={11} />
                         <span>{cat.label}</span>
                       </div>
@@ -342,7 +363,10 @@ for (const s of services) {
                       )}
                     </div>
                   </td>
-                  <td dir="ltr" style={{ fontFamily: 'monospace', color: '#f5d77f', fontSize: '0.85rem' }}>
+                  <td
+                    dir="ltr"
+                    style={{ fontFamily: 'monospace', color: '#f5d77f', fontSize: '0.85rem' }}
+                  >
                     <span class="slug-tag">{s.slug}</span>
                   </td>
                   <td>
@@ -356,12 +380,8 @@ for (const s of services) {
                       {femalePrice ? (
                         isPromo ? (
                           <div class="promo-price-block">
-                            <span class="promo-old-price">
-                              ۲٬۲۹۰٬۰۰۰
-                            </span>
-                            <span class="promo-new-price">
-                              ۱٬۹۴۰٬۰۰۰ تومان
-                            </span>
+                            <span class="promo-old-price">۲٬۲۹۰٬۰۰۰</span>
+                            <span class="promo-new-price">۱٬۹۴۰٬۰۰۰ تومان</span>
                             <span class="promo-tag">ویژه سایت</span>
                           </div>
                         ) : (
@@ -479,7 +499,10 @@ for (const s of services) {
               <div class="card-mobile-title-col">
                 <span class="order-pill-badge">{s.displayOrder}</span>
                 <span class="card-service-title">{s.name}</span>
-                <span class="service-category-badge" style={`color: ${cat.color}; background: ${cat.bg}; border: 1px solid ${cat.border};`}>
+                <span
+                  class="service-category-badge"
+                  style={`color: ${cat.color}; background: ${cat.bg}; border: 1px solid ${cat.border};`}
+                >
                   <Icon name={cat.icon} size={11} />
                   <span>{cat.label}</span>
                 </span>
@@ -502,16 +525,16 @@ for (const s of services) {
             </div>
 
             <div class="card-mobile-meta">
-              <span class="slug-tag" dir="ltr">{s.slug}</span>
+              <span class="slug-tag" dir="ltr">
+                {s.slug}
+              </span>
               <span class="duration-badge">
                 <Icon name="clock" size={12} />
                 <span>{s.durationMinutes} دقیقه</span>
               </span>
             </div>
 
-            {s.shortDescription && (
-              <div class="card-mobile-desc">{s.shortDescription}</div>
-            )}
+            {s.shortDescription && <div class="card-mobile-desc">{s.shortDescription}</div>}
 
             <div class="card-mobile-tariffs">
               <div class="tariff-box-mobile col-gender-female">
@@ -576,7 +599,11 @@ for (const s of services) {
     </div>
 
     <!-- 3D Edit Service Modal -->
-    <div id="serviceEditModal" class="modal-backdrop services-modal-backdrop" style="display: none;">
+    <div
+      id="serviceEditModal"
+      class="modal-backdrop services-modal-backdrop"
+      style="display: none;"
+    >
       <div class="modal-dialog services-modal-dialog">
         <div class="modal-header-row">
           <div class="modal-title-wrap">
@@ -591,7 +618,8 @@ for (const s of services) {
         </div>
 
         <p class="modal-subtitle-text">
-          تغییر نام ناحیه، زمان تخصیصی جلسه و نرخ‌گذاری هر فهرست تعرفه (بانوان / آقایان) به‌صورت کاملاً جداگانه، مستقیماً در دیتابیس D1 ذخیره می‌شود.
+          تغییر نام ناحیه، زمان تخصیصی جلسه و نرخ‌گذاری هر فهرست تعرفه (بانوان / آقایان) به‌صورت
+          کاملاً جداگانه، مستقیماً در دیتابیس D1 ذخیره می‌شود.
         </p>
 
         <div id="serviceAlert" class="alert-3d-danger" style="display: none;">
@@ -604,7 +632,9 @@ for (const s of services) {
 
           <div class="form-grid-2col">
             <div class="form-group-item">
-              <label for="editServiceName" class="form-label-gold">نام ناحیه / خدمت (فارسی):</label>
+              <label for="editServiceName" class="form-label-gold">
+                نام ناحیه / خدمت (فارسی):
+              </label>
               <input
                 type="text"
                 id="editServiceName"
@@ -616,7 +646,9 @@ for (const s of services) {
             </div>
 
             <div class="form-group-item">
-              <label for="editServiceSlug" class="form-label-gold">شناسه یکتا (Slug):</label>
+              <label for="editServiceSlug" class="form-label-gold">
+                شناسه یکتا (Slug):
+              </label>
               <input
                 type="text"
                 id="editServiceSlug"
@@ -648,7 +680,9 @@ for (const s of services) {
             </div>
 
             <div class="form-group-item">
-              <label for="editServiceOrder" class="form-label-gold">ترتیب نمایش در کاتالوگ:</label>
+              <label for="editServiceOrder" class="form-label-gold">
+                ترتیب نمایش در کاتالوگ:
+              </label>
               <input
                 type="number"
                 id="editServiceOrder"
@@ -662,7 +696,9 @@ for (const s of services) {
 
           <div class="form-grid-2col">
             <div class="form-group-item">
-              <label for="editServiceActive" class="form-label-gold">وضعیت انتشار در وب‌سایت:</label>
+              <label for="editServiceActive" class="form-label-gold">
+                وضعیت انتشار در وب‌سایت:
+              </label>
               <select id="editServiceActive" class="form-control-modal">
                 <option value="true">فعال (قابل مشاهده و رزرو در سایت)</option>
                 <option value="false">غیرفعال (مخفی از فرم رزرو و تعرفه‌ها)</option>
@@ -670,7 +706,9 @@ for (const s of services) {
             </div>
 
             <div class="form-group-item">
-              <label for="editServiceShortDesc" class="form-label-gold">توضیح مختصر خدمت (اختیاری):</label>
+              <label for="editServiceShortDesc" class="form-label-gold">
+                توضیح مختصر خدمت (اختیاری):
+              </label>
               <input
                 type="text"
                 id="editServiceShortDesc"
@@ -691,11 +729,23 @@ for (const s of services) {
             </div>
 
             <div class="modal-gender-tabs" role="tablist" aria-label="انتخاب فهرست تعرفه">
-              <button type="button" class="modal-gender-tab active" role="tab" aria-selected="true" data-gender="female">
+              <button
+                type="button"
+                class="modal-gender-tab active"
+                role="tab"
+                aria-selected="true"
+                data-gender="female"
+              >
                 <span class="tariff-gender-dot tariff-gender-dot--female"></span>
                 <span>بانوان</span>
               </button>
-              <button type="button" class="modal-gender-tab" role="tab" aria-selected="false" data-gender="male">
+              <button
+                type="button"
+                class="modal-gender-tab"
+                role="tab"
+                aria-selected="false"
+                data-gender="male"
+              >
                 <span class="tariff-gender-dot tariff-gender-dot--male"></span>
                 <span>آقایان</span>
               </button>
@@ -703,7 +753,9 @@ for (const s of services) {
 
             <div class="modal-gender-pane" data-gender="female">
               <div class="form-group-item">
-                <label for="editServicePriceFemale" class="form-label-gold">تعرفه مصوب بانوان:</label>
+                <label for="editServicePriceFemale" class="form-label-gold">
+                  تعرفه مصوب بانوان:
+                </label>
                 <div class="input-with-hint">
                   <input
                     type="number"
@@ -722,7 +774,9 @@ for (const s of services) {
 
             <div class="modal-gender-pane" data-gender="male">
               <div class="form-group-item">
-                <label for="editServicePriceMale" class="form-label-gold">تعرفه مصوب آقایان:</label>
+                <label for="editServicePriceMale" class="form-label-gold">
+                  تعرفه مصوب آقایان:
+                </label>
                 <div class="input-with-hint">
                   <input
                     type="number"
@@ -770,7 +824,8 @@ for (const s of services) {
         </div>
 
         <p class="modal-subtitle-text">
-          تعریف ناحیه جدید لیزر، تنظیم مدت جلسه و ثبت تعرفه هر بخش (بانوان / آقایان) در فهرست جداگانهٔ خودش.
+          تعریف ناحیه جدید لیزر، تنظیم مدت جلسه و ثبت تعرفه هر بخش (بانوان / آقایان) در فهرست
+          جداگانهٔ خودش.
         </p>
 
         <div id="newServiceAlert" class="alert-3d-danger" style="display: none;">
@@ -781,7 +836,9 @@ for (const s of services) {
         <form id="newServiceForm" class="services-modal-form">
           <div class="form-grid-2col">
             <div class="form-group-item">
-              <label for="newServiceName" class="form-label-gold">نام ناحیه / خدمت (فارسی):</label>
+              <label for="newServiceName" class="form-label-gold">
+                نام ناحیه / خدمت (فارسی):
+              </label>
               <input
                 type="text"
                 id="newServiceName"
@@ -794,7 +851,9 @@ for (const s of services) {
             </div>
 
             <div class="form-group-item">
-              <label for="newServiceSlug" class="form-label-gold">شناسه یکتا (Slug انگلیسی):</label>
+              <label for="newServiceSlug" class="form-label-gold">
+                شناسه یکتا (Slug انگلیسی):
+              </label>
               <input
                 type="text"
                 id="newServiceSlug"
@@ -828,7 +887,9 @@ for (const s of services) {
             </div>
 
             <div class="form-group-item">
-              <label for="newServiceOrder" class="form-label-gold">ترتیب نمایش در کاتالوگ:</label>
+              <label for="newServiceOrder" class="form-label-gold">
+                ترتیب نمایش در کاتالوگ:
+              </label>
               <input
                 type="number"
                 id="newServiceOrder"
@@ -843,15 +904,21 @@ for (const s of services) {
 
           <div class="form-grid-2col">
             <div class="form-group-item">
-              <label for="newServiceActive" class="form-label-gold">وضعیت انتشار اولیه:</label>
+              <label for="newServiceActive" class="form-label-gold">
+                وضعیت انتشار اولیه:
+              </label>
               <select id="newServiceActive" class="form-control-modal">
-                <option value="true" selected>فعال (بلافاصله منتشر شود)</option>
+                <option value="true" selected>
+                  فعال (بلافاصله منتشر شود)
+                </option>
                 <option value="false">غیرفعال (پیش‌نویس / مخفی)</option>
               </select>
             </div>
 
             <div class="form-group-item">
-              <label for="newServiceShortDesc" class="form-label-gold">توضیح کوتاه خدمت (اختیاری):</label>
+              <label for="newServiceShortDesc" class="form-label-gold">
+                توضیح کوتاه خدمت (اختیاری):
+              </label>
               <input
                 type="text"
                 id="newServiceShortDesc"
@@ -872,11 +939,23 @@ for (const s of services) {
             </div>
 
             <div class="modal-gender-tabs" role="tablist" aria-label="انتخاب فهرست تعرفه">
-              <button type="button" class="modal-gender-tab active" role="tab" aria-selected="true" data-gender="female">
+              <button
+                type="button"
+                class="modal-gender-tab active"
+                role="tab"
+                aria-selected="true"
+                data-gender="female"
+              >
                 <span class="tariff-gender-dot tariff-gender-dot--female"></span>
                 <span>بانوان</span>
               </button>
-              <button type="button" class="modal-gender-tab" role="tab" aria-selected="false" data-gender="male">
+              <button
+                type="button"
+                class="modal-gender-tab"
+                role="tab"
+                aria-selected="false"
+                data-gender="male"
+              >
                 <span class="tariff-gender-dot tariff-gender-dot--male"></span>
                 <span>آقایان</span>
               </button>
@@ -884,7 +963,9 @@ for (const s of services) {
 
             <div class="modal-gender-pane" data-gender="female">
               <div class="form-group-item">
-                <label for="newServicePriceFemale" class="form-label-gold">تعرفه مصوب بانوان:</label>
+                <label for="newServicePriceFemale" class="form-label-gold">
+                  تعرفه مصوب بانوان:
+                </label>
                 <div class="input-with-hint">
                   <input
                     type="number"
@@ -903,7 +984,9 @@ for (const s of services) {
 
             <div class="modal-gender-pane" data-gender="male">
               <div class="form-group-item">
-                <label for="newServicePriceMale" class="form-label-gold">تعرفه مصوب آقایان:</label>
+                <label for="newServicePriceMale" class="form-label-gold">
+                  تعرفه مصوب آقایان:
+                </label>
                 <div class="input-with-hint">
                   <input
                     type="number"
@@ -922,7 +1005,11 @@ for (const s of services) {
           </div>
 
           <div class="modal-actions-row services-modal-actions">
-            <button type="button" id="cancelNewServiceBtn" class="btn-table-action btn-modal-cancel">
+            <button
+              type="button"
+              id="cancelNewServiceBtn"
+              class="btn-table-action btn-modal-cancel"
+            >
               <Icon name="close" size={14} />
               <span>انصراف</span>
             </button>
@@ -978,7 +1065,9 @@ for (const s of services) {
       background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(18, 22, 30, 0.8));
       border: 1px solid rgba(212, 175, 55, 0.45);
       color: #f5d77f;
-      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      box-shadow:
+        0 4px 14px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
       flex-shrink: 0;
     }
 
@@ -1046,7 +1135,9 @@ for (const s of services) {
       background: linear-gradient(145deg, rgba(20, 24, 32, 0.95), rgba(12, 14, 18, 0.98));
       border: 1px solid rgba(212, 175, 55, 0.22);
       border-radius: 16px;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      box-shadow:
+        0 8px 30px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
     }
 
     .services-toolbar-top {
@@ -1262,11 +1353,11 @@ for (const s of services) {
     }
 
     /* Only the selected gender's tariff column / box is ever rendered on screen. */
-    #servicesPageRoot[data-tariff-gender="female"] .col-gender-male {
+    #servicesPageRoot[data-tariff-gender='female'] .col-gender-male {
       display: none !important;
     }
 
-    #servicesPageRoot[data-tariff-gender="male"] .col-gender-female {
+    #servicesPageRoot[data-tariff-gender='male'] .col-gender-female {
       display: none !important;
     }
 
@@ -1323,8 +1414,8 @@ for (const s of services) {
       display: none;
     }
 
-    .modal-tariffs-panel[data-gender="female"] .modal-gender-pane[data-gender="female"],
-    .modal-tariffs-panel[data-gender="male"] .modal-gender-pane[data-gender="male"] {
+    .modal-tariffs-panel[data-gender='female'] .modal-gender-pane[data-gender='female'],
+    .modal-tariffs-panel[data-gender='male'] .modal-gender-pane[data-gender='male'] {
       display: block;
     }
 
@@ -1340,7 +1431,9 @@ for (const s of services) {
       background: linear-gradient(145deg, rgba(18, 22, 30, 0.95), rgba(10, 12, 16, 0.98));
       border: 1px solid rgba(212, 175, 55, 0.22);
       border-radius: 16px;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      box-shadow:
+        0 8px 30px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
     }
 
     .services-3d-table {
@@ -1519,7 +1612,10 @@ for (const s of services) {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+      transition:
+        color 0.15s ease,
+        border-color 0.15s ease,
+        background-color 0.15s ease;
     }
 
     .btn-quick-edit:hover {
@@ -1560,7 +1656,9 @@ for (const s of services) {
     .switch-3d-track.active {
       background: linear-gradient(135deg, rgba(212, 175, 55, 0.35), rgba(180, 140, 30, 0.5));
       border-color: rgba(212, 175, 55, 0.7);
-      box-shadow: 0 0 10px rgba(212, 175, 55, 0.3), inset 0 1px 3px rgba(0, 0, 0, 0.4);
+      box-shadow:
+        0 0 10px rgba(212, 175, 55, 0.3),
+        inset 0 1px 3px rgba(0, 0, 0, 0.4);
     }
 
     .switch-3d-thumb {
@@ -1578,7 +1676,9 @@ for (const s of services) {
     .switch-3d-track.active .switch-3d-thumb {
       right: 21px;
       background: linear-gradient(135deg, #f5d77f, #d4af37);
-      box-shadow: 0 0 8px rgba(245, 215, 127, 0.8), 0 2px 4px rgba(0, 0, 0, 0.6);
+      box-shadow:
+        0 0 8px rgba(245, 215, 127, 0.8),
+        0 2px 4px rgba(0, 0, 0, 0.6);
     }
 
     .switch-3d-label {
@@ -1607,7 +1707,9 @@ for (const s of services) {
       border: 1px solid rgba(212, 175, 55, 0.25);
       border-radius: 16px;
       padding: 16px;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      box-shadow:
+        0 6px 20px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
       display: flex;
       flex-direction: column;
       gap: 12px;
@@ -1720,7 +1822,10 @@ for (const s of services) {
       background: linear-gradient(160deg, #181c26 0%, #0e1118 100%);
       border: 1.5px solid rgba(212, 175, 55, 0.4);
       border-radius: 20px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(212, 175, 55, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.8),
+        0 0 30px rgba(212, 175, 55, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
       width: 100%;
       max-width: 580px;
       max-height: 90vh;
@@ -1742,7 +1847,12 @@ for (const s of services) {
       bottom: -24px;
       margin: 0 -24px -24px;
       padding: 12px 24px 16px;
-      background: linear-gradient(180deg, rgba(14, 17, 24, 0) 0%, rgba(14, 17, 24, 0.96) 40%, rgba(14, 17, 24, 1) 100%);
+      background: linear-gradient(
+        180deg,
+        rgba(14, 17, 24, 0) 0%,
+        rgba(14, 17, 24, 0.96) 40%,
+        rgba(14, 17, 24, 1) 100%
+      );
       backdrop-filter: blur(6px);
       border-radius: 0 0 20px 20px;
     }
@@ -1925,7 +2035,9 @@ for (const s of services) {
       z-index: 9999;
       background: linear-gradient(135deg, rgba(20, 24, 32, 0.96), rgba(12, 14, 18, 0.98));
       border: 1px solid rgba(212, 175, 55, 0.45);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), 0 0 15px rgba(212, 175, 55, 0.2);
+      box-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.7),
+        0 0 15px rgba(212, 175, 55, 0.2);
       padding: 12px 20px;
       border-radius: 12px;
       display: flex;
@@ -2118,12 +2230,22 @@ for (const s of services) {
     const editIdInput = document.getElementById('editServiceId') as HTMLInputElement | null;
     const editNameInput = document.getElementById('editServiceName') as HTMLInputElement | null;
     const editSlugInput = document.getElementById('editServiceSlug') as HTMLInputElement | null;
-    const editDurationInput = document.getElementById('editServiceDuration') as HTMLInputElement | null;
+    const editDurationInput = document.getElementById(
+      'editServiceDuration',
+    ) as HTMLInputElement | null;
     const editOrderInput = document.getElementById('editServiceOrder') as HTMLInputElement | null;
-    const editActiveSelect = document.getElementById('editServiceActive') as HTMLSelectElement | null;
-    const editShortDescInput = document.getElementById('editServiceShortDesc') as HTMLInputElement | null;
-    const editPriceFemaleInput = document.getElementById('editServicePriceFemale') as HTMLInputElement | null;
-    const editPriceMaleInput = document.getElementById('editServicePriceMale') as HTMLInputElement | null;
+    const editActiveSelect = document.getElementById(
+      'editServiceActive',
+    ) as HTMLSelectElement | null;
+    const editShortDescInput = document.getElementById(
+      'editServiceShortDesc',
+    ) as HTMLInputElement | null;
+    const editPriceFemaleInput = document.getElementById(
+      'editServicePriceFemale',
+    ) as HTMLInputElement | null;
+    const editPriceMaleInput = document.getElementById(
+      'editServicePriceMale',
+    ) as HTMLInputElement | null;
     const editFemalePreview = document.getElementById('editFemaleTomanPreview');
     const editMalePreview = document.getElementById('editMaleTomanPreview');
 
@@ -2139,12 +2261,20 @@ for (const s of services) {
 
     const newNameInput = document.getElementById('newServiceName') as HTMLInputElement | null;
     const newSlugInput = document.getElementById('newServiceSlug') as HTMLInputElement | null;
-    const newDurationInput = document.getElementById('newServiceDuration') as HTMLInputElement | null;
+    const newDurationInput = document.getElementById(
+      'newServiceDuration',
+    ) as HTMLInputElement | null;
     const newOrderInput = document.getElementById('newServiceOrder') as HTMLInputElement | null;
     const newActiveSelect = document.getElementById('newServiceActive') as HTMLSelectElement | null;
-    const newShortDescInput = document.getElementById('newServiceShortDesc') as HTMLInputElement | null;
-    const newPriceFemaleInput = document.getElementById('newServicePriceFemale') as HTMLInputElement | null;
-    const newPriceMaleInput = document.getElementById('newServicePriceMale') as HTMLInputElement | null;
+    const newShortDescInput = document.getElementById(
+      'newServiceShortDesc',
+    ) as HTMLInputElement | null;
+    const newPriceFemaleInput = document.getElementById(
+      'newServicePriceFemale',
+    ) as HTMLInputElement | null;
+    const newPriceMaleInput = document.getElementById(
+      'newServicePriceMale',
+    ) as HTMLInputElement | null;
     const newFemalePreview = document.getElementById('newFemaleTomanPreview');
     const newMalePreview = document.getElementById('newMaleTomanPreview');
 
@@ -2179,16 +2309,24 @@ for (const s of services) {
 
     // Bind preview listeners
     if (editPriceFemaleInput && editFemalePreview) {
-      editPriceFemaleInput.addEventListener('input', () => updateTomanPreview(editPriceFemaleInput, editFemalePreview));
+      editPriceFemaleInput.addEventListener('input', () =>
+        updateTomanPreview(editPriceFemaleInput, editFemalePreview),
+      );
     }
     if (editPriceMaleInput && editMalePreview) {
-      editPriceMaleInput.addEventListener('input', () => updateTomanPreview(editPriceMaleInput, editMalePreview));
+      editPriceMaleInput.addEventListener('input', () =>
+        updateTomanPreview(editPriceMaleInput, editMalePreview),
+      );
     }
     if (newPriceFemaleInput && newFemalePreview) {
-      newPriceFemaleInput.addEventListener('input', () => updateTomanPreview(newPriceFemaleInput, newFemalePreview));
+      newPriceFemaleInput.addEventListener('input', () =>
+        updateTomanPreview(newPriceFemaleInput, newFemalePreview),
+      );
     }
     if (newPriceMaleInput && newMalePreview) {
-      newPriceMaleInput.addEventListener('input', () => updateTomanPreview(newPriceMaleInput, newMalePreview));
+      newPriceMaleInput.addEventListener('input', () =>
+        updateTomanPreview(newPriceMaleInput, newMalePreview),
+      );
     }
 
     // Auto slug sanitizer for new service
@@ -2205,7 +2343,11 @@ for (const s of services) {
     const genderLabel = (g: 'female' | 'male') => (g === 'female' ? 'بانوان' : 'آقایان');
 
     /** Reveals exactly one gender's price field inside a create/edit tariff panel. */
-    function setPanelGender(panel: HTMLElement | null, gender: 'female' | 'male', focusInput = false) {
+    function setPanelGender(
+      panel: HTMLElement | null,
+      gender: 'female' | 'male',
+      focusInput = false,
+    ) {
       if (!panel) return;
       panel.dataset.gender = gender;
       panel.querySelectorAll<HTMLButtonElement>('.modal-gender-tab').forEach((tab) => {
@@ -2348,7 +2490,19 @@ for (const s of services) {
 
     // Populate and open edit modal
     function openEditModal(btn: HTMLElement, focusTarget?: 'female' | 'male') {
-      if (!editModal || !editIdInput || !editNameInput || !editSlugInput || !editDurationInput || !editOrderInput || !editActiveSelect || !editShortDescInput || !editPriceFemaleInput || !editPriceMaleInput) return;
+      if (
+        !editModal ||
+        !editIdInput ||
+        !editNameInput ||
+        !editSlugInput ||
+        !editDurationInput ||
+        !editOrderInput ||
+        !editActiveSelect ||
+        !editShortDescInput ||
+        !editPriceFemaleInput ||
+        !editPriceMaleInput
+      )
+        return;
 
       const id = btn.dataset.id || '';
       editIdInput.value = id;
@@ -2469,15 +2623,17 @@ for (const s of services) {
             if (label) label.textContent = newActive ? 'فعال' : 'غیرفعال';
 
             // Also synchronize peer switches (e.g. mobile vs desktop)
-            document.querySelectorAll(`.js-toggle-active[data-id="${serviceId}"]`).forEach((peer) => {
-              if (peer !== target) {
-                peer.setAttribute('data-active', String(newActive));
-                const peerTrack = peer.querySelector('.switch-3d-track');
-                const peerLabel = peer.querySelector('.switch-3d-label');
-                if (peerTrack) peerTrack.classList.toggle('active', newActive);
-                if (peerLabel) peerLabel.textContent = newActive ? 'فعال' : 'غیرفعال';
-              }
-            });
+            document
+              .querySelectorAll(`.js-toggle-active[data-id="${serviceId}"]`)
+              .forEach((peer) => {
+                if (peer !== target) {
+                  peer.setAttribute('data-active', String(newActive));
+                  const peerTrack = peer.querySelector('.switch-3d-track');
+                  const peerLabel = peer.querySelector('.switch-3d-label');
+                  if (peerTrack) peerTrack.classList.toggle('active', newActive);
+                  if (peerLabel) peerLabel.textContent = newActive ? 'فعال' : 'غیرفعال';
+                }
+              });
 
             // Update row dataset
             document.querySelectorAll(`.service-row[data-id="${serviceId}"]`).forEach((row) => {
@@ -2485,11 +2641,15 @@ for (const s of services) {
             });
 
             // Update edit buttons dataset
-            document.querySelectorAll(`.edit-service-btn[data-id="${serviceId}"]`).forEach((editBtn) => {
-              (editBtn as HTMLElement).dataset.active = String(newActive);
-            });
+            document
+              .querySelectorAll(`.edit-service-btn[data-id="${serviceId}"]`)
+              .forEach((editBtn) => {
+                (editBtn as HTMLElement).dataset.active = String(newActive);
+              });
 
-            showToast(newActive ? 'خدمت با موفقیت در وب‌سایت فعال شد' : 'خدمت به حالت غیرفعال (مخفی) درآمد');
+            showToast(
+              newActive ? 'خدمت با موفقیت در وب‌سایت فعال شد' : 'خدمت به حالت غیرفعال (مخفی) درآمد',
+            );
           } else {
             showToast('خطا در تغییر وضعیت انتشار خدمت');
           }
@@ -2505,7 +2665,19 @@ for (const s of services) {
     if (editForm && editModal) {
       editForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        if (!editIdInput || !editNameInput || !editSlugInput || !editDurationInput || !editOrderInput || !editActiveSelect || !editShortDescInput || !editPriceFemaleInput || !editPriceMaleInput || !saveEditBtn) return;
+        if (
+          !editIdInput ||
+          !editNameInput ||
+          !editSlugInput ||
+          !editDurationInput ||
+          !editOrderInput ||
+          !editActiveSelect ||
+          !editShortDescInput ||
+          !editPriceFemaleInput ||
+          !editPriceMaleInput ||
+          !saveEditBtn
+        )
+          return;
 
         const serviceId = editIdInput.value;
         if (!serviceId) return;
@@ -2540,7 +2712,7 @@ for (const s of services) {
                 amount: femalePriceVal >= 0 ? femalePriceVal : 0,
                 currency: 'IRT',
               }),
-            })
+            }),
           );
 
           const malePriceVal = Number(editPriceMaleInput.value);
@@ -2553,7 +2725,7 @@ for (const s of services) {
                 amount: malePriceVal >= 0 ? malePriceVal : 0,
                 currency: 'IRT',
               }),
-            })
+            }),
           );
 
           const results = await Promise.all(promises);
@@ -2592,7 +2764,18 @@ for (const s of services) {
     if (newForm && newModal) {
       newForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        if (!newNameInput || !newSlugInput || !newDurationInput || !newOrderInput || !newActiveSelect || !newShortDescInput || !newPriceFemaleInput || !newPriceMaleInput || !saveNewBtn) return;
+        if (
+          !newNameInput ||
+          !newSlugInput ||
+          !newDurationInput ||
+          !newOrderInput ||
+          !newActiveSelect ||
+          !newShortDescInput ||
+          !newPriceFemaleInput ||
+          !newPriceMaleInput ||
+          !saveNewBtn
+        )
+          return;
 
         saveNewBtn.disabled = true;
         saveNewBtn.textContent = 'در حال ایجاد...';
@@ -2632,7 +2815,8 @@ for (const s of services) {
           const createdData = (await createRes.json()) as { id?: string; data?: { id?: string } };
           const newId = createdData.data?.id ?? createdData.id;
           if (!newId) {
-            if (newAlertText) newAlertText.textContent = 'شناسه خدمت جدید از سرور برنگشت؛ تعرفه ثبت نشد.';
+            if (newAlertText)
+              newAlertText.textContent = 'شناسه خدمت جدید از سرور برنگشت؛ تعرفه ثبت نشد.';
             if (newAlertBox) newAlertBox.style.display = 'flex';
             saveNewBtn.disabled = false;
             saveNewBtn.textContent = 'ایجاد خدمت و ثبت تعرفه';
@@ -2653,7 +2837,7 @@ for (const s of services) {
                   amount: femalePrice,
                   currency: 'IRT',
                 }),
-              })
+              }),
             );
           }
 
@@ -2668,7 +2852,7 @@ for (const s of services) {
                   amount: malePrice,
                   currency: 'IRT',
                 }),
-              })
+              }),
             );
           }
 

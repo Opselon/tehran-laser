@@ -14,20 +14,25 @@
 ## ۲. مراحل راه‌اندازی و دپلوی اولیه
 
 ### گام اول: ورود به حساب کلودفلر
+
 ```bash
 npx wrangler login
 ```
 
 ### گام دوم: ساخت پایگاه داده D1 در سرور کلودفلر
+
 ```bash
 npx wrangler d1 create tehran-laser-db
 ```
+
 پس از ساخت، شناسه `database_id` نمایش داده‌شده را در فایل `wrangler.jsonc` در بخش `d1_databases` جایگزین نمایید.
 
 ### گام سوم: اعمال مایگریشن‌های پایگاه داده بر روی محیط ریموت
+
 ```bash
 npx wrangler d1 migrations apply tehran-laser-db --remote
 ```
+
 دستور فوق تمامی مایگریشن‌های موجود در پوشه `migrations/` را به ترتیب و به‌صورت ایمن روی دیتابیس لایو اعمال می‌کند.
 
 > **اعمال مایگریشن از GitHub Actions (بدون نیاز به wrangler محلی):**
@@ -41,7 +46,9 @@ npx wrangler d1 migrations apply tehran-laser-db --remote
 > اگر توکن را به **D1: Edit** ارتقا دهید، از این پس مسیر استاندارد همان workflow **DB Migrate (remote)** است؛ دیگر نیازی به هیچ راه میان‌بری نیست.
 
 ### گام چهارم: پیکربندی کلیدهای محرمانه (Secrets)
+
 کلیدهای محرمانه هرگز در گیت کامیت نمی‌شوند (Contract §75). برای افزودن توکن ربات تلگرام کلینیک:
+
 ```bash
 npx wrangler secret put TELEGRAM_BOT_TOKEN
 # مقدار توکن را وارد کنید
@@ -51,6 +58,7 @@ npx wrangler secret put TELEGRAM_CHAT_ID
 ```
 
 ### گام پنجم: بیلد، تست و انتشار نهایی
+
 ```bash
 # ۱. اعتبارسنجی تایپ‌ها و کدهای استرو
 npm run typecheck
