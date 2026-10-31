@@ -17,98 +17,104 @@
  */
 ---
 
-    <style is:global>
-      /* Tap-target contract (WCAG 2.5.8 / iOS HIG): every interactive element
-         OWNED BY THIS LAYOUT marks itself with `.tap-target` so it cannot be
-         sized below 44×44 by a more specific rule elsewhere. This defines the
-         floor only; L1 owns the visual styling (padding, colour, motion).
-         `display: inline-flex` is required or min-height is ignored on the
-         inline anchors inside the footer list items. */
-      .tap-target {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 44px;
-        min-width: 44px;
-        box-sizing: border-box;
-      }
+<style is:global>
+  /* Tap-target contract (WCAG 2.5.8 / iOS HIG): every interactive element
+     OWNED BY THIS LAYOUT marks itself with `.tap-target` so it cannot be
+     sized below 44×44 by a more specific rule elsewhere. This defines the
+     floor only; L1 owns the visual styling (padding, colour, motion).
+     `display: inline-flex` is required or min-height is ignored on the
+     inline anchors inside the footer list items. */
+  .tap-target {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    min-width: 44px;
+    box-sizing: border-box;
+  }
 
-      /* Footer link columns are <ul>s of inline anchors; give each row enough
-         vertical room for the 44px floor. Width is NOT forced — the column
-         keeps its shrink-to-fit links so the hover underline stays text-width
-         (the L1 stylesheet lane owns the visual sizing above this floor). */
-      .site-footer .footer-links .tap-target,
-      .site-footer .legal-links .tap-target {
-        padding-block: 10px;
-      }
+  /* Footer link columns are <ul>s of inline anchors; give each row enough
+     vertical room for the 44px floor. Width is NOT forced — the column
+     keeps its shrink-to-fit links so the hover underline stays text-width
+     (the L1 stylesheet lane owns the visual sizing above this floor). */
+  .site-footer .footer-links .tap-target,
+  .site-footer .legal-links .tap-target {
+    padding-block: 10px;
+  }
 
-      /* A2 · Bottom nav must never force horizontal scroll */
-      .bottom-nav,
-      .bottom-nav-inner {
-        max-width: 100%;
-        box-sizing: border-box;
-      }
+  /* A2 · Bottom nav must never force horizontal scroll */
+  .bottom-nav,
+  .bottom-nav-inner {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
 
-      /* WCAG 2.4.1 Bypass Blocks (RTL-safe) */
-      .skip-link {
-        position: fixed;
-        inset-block-start: 8px;
-        inset-inline-start: 8px;
-        inset-inline-end: auto;
-        z-index: 200;
-        transform: translateY(-220%);
-        padding: 12px 22px;
-        background: var(--color-ink-bg, #16130f);
-        color: var(--color-on-ink, #f7f3ec);
-        border: 1.5px solid var(--gold-500, #10b981);
-        border-radius: var(--radius-md, 14px);
-        font-weight: 700;
-        font-size: 0.9rem;
-        text-decoration: none;
-        box-shadow: var(--elevation-3d-3, 0 18px 45px rgba(0, 0, 0, 0.65));
-        transition: transform var(--motion-fast, 180ms) var(--ease-out, ease);
-      }
+  /* WCAG 2.4.1 Bypass Blocks (RTL-safe) */
+  .skip-link {
+    position: fixed;
+    inset-block-start: 8px;
+    inset-inline-start: 8px;
+    inset-inline-end: auto;
+    z-index: 200;
+    transform: translateY(-220%);
+    padding: 12px 22px;
+    background: var(--color-ink-bg, #16130f);
+    color: var(--color-on-ink, #f7f3ec);
+    border: 1.5px solid var(--gold-500, #10b981);
+    border-radius: var(--radius-md, 14px);
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-decoration: none;
+    box-shadow: var(--elevation-3d-3, 0 18px 45px rgba(0, 0, 0, 0.65));
+    transition: transform var(--motion-fast, 180ms) var(--ease-out, ease);
+  }
 
-      .skip-link:focus,
-      .skip-link:focus-visible {
-        transform: translateY(0);
-        outline: 2px solid var(--gold-400, #34d399);
-        outline-offset: 2px;
-      }
+  .skip-link:focus,
+  .skip-link:focus-visible {
+    transform: translateY(0);
+    outline: 2px solid var(--gold-400, #34d399);
+    outline-offset: 2px;
+  }
 
-      /* A3 · Install control — an in-bar icon chip, ≥44px tap target.
-         It used to be a floating pill that needed its own 52px tier above
-         the dock (inset-block-end:144px) to escape .basket-fab; now that it
-         lives INSIDE .mobile-sticky-bar, positioning is static and the two
-         can no longer fight over an anchor point at all. */
-      .pwa-install {
-        position: static;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        flex: 0 0 auto;
-        min-width: 44px;
-        min-height: 44px;
-        padding: 0;
-        background: var(--color-ink-bg-soft, #211d18);
-        color: var(--gold-400, #34d399);
-        border: 1px solid rgba(52, 211, 153, 0.5);
-        border-radius: 999px;
-        font-family: inherit;
-        font-weight: 700;
-        cursor: pointer;
-        box-shadow: none;
-      }
+  /* A3 · Install control — an in-bar icon chip, ≥44px tap target.
+     It used to be a floating pill that needed its own 52px tier above
+     the dock (inset-block-end:144px) to escape .basket-fab; now that it
+     lives INSIDE .mobile-sticky-bar, positioning is static and the two
+     can no longer fight over an anchor point at all. */
+  .pwa-install {
+    position: static;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0;
+    background: var(--color-ink-bg-soft, #211d18);
+    color: var(--gold-400, #34d399);
+    border: 1px solid rgba(52, 211, 153, 0.5);
+    border-radius: 999px;
+    font-family: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: none;
+  }
 
-      .pwa-install[hidden] { display: none !important; }
-      .pwa-install:hover { border-color: var(--gold-400, #6ee7b7); }
-      .pwa-install:focus-visible {
-        outline: 2px solid var(--gold-400, #34d399);
-        outline-offset: 2px;
-      }
+  .pwa-install[hidden] {
+    display: none !important;
+  }
+  .pwa-install:hover {
+    border-color: var(--gold-400, #6ee7b7);
+  }
+  .pwa-install:focus-visible {
+    outline: 2px solid var(--gold-400, #34d399);
+    outline-offset: 2px;
+  }
 
-      /* Icon-only inside the bar — the aria-label on the button carries the
-         accessible name, so hiding this span costs nothing for screen
-         readers or for the reported hit target. */
-      .pwa-install-label { display: none; }
-    </style>
+  /* Icon-only inside the bar — the aria-label on the button carries the
+     accessible name, so hiding this span costs nothing for screen
+     readers or for the reported hit target. */
+  .pwa-install-label {
+    display: none;
+  }
+</style>

@@ -15,11 +15,15 @@ import '../styles/500.css';
          around this slot, and a nested <main> is an invalid duplicate landmark. -->
     <div class="error-main-container">
       <div class="container container-sm text-center">
-
         <!-- 3D Obsidian-Gold Server / Calibrating Core Illustration -->
         <div class="illustration-wrapper" aria-hidden="true">
           <div class="glow-orb"></div>
-          <svg class="svg-3d-500" viewBox="0 0 480 260" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg
+            class="svg-3d-500"
+            viewBox="0 0 480 260"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
             <defs>
               <linearGradient id="goldGrad500" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stop-color="#d1fae5" />
@@ -45,20 +49,66 @@ import '../styles/500.css';
 
             <!-- Base platform reflection -->
             <ellipse cx="240" cy="225" rx="170" ry="22" fill="#000000" opacity="0.65" />
-            <ellipse cx="240" cy="220" rx="140" ry="15" stroke="url(#goldGrad500)" stroke-width="1.5" stroke-dasharray="5 7" opacity="0.4" />
+            <ellipse
+              cx="240"
+              cy="220"
+              rx="140"
+              ry="15"
+              stroke="url(#goldGrad500)"
+              stroke-width="1.5"
+              stroke-dasharray="5 7"
+              opacity="0.4"
+            />
 
             <!-- Isometric 3D Obsidian Server Rack / Calibrating Laser Engine -->
-            <polygon points="240,55 310,95 310,185 240,225 170,185 170,95" fill="url(#obsidianServer)" stroke="url(#goldGrad500)" stroke-width="1.5" />
-            
+            <polygon
+              points="240,55 310,95 310,185 240,225 170,185 170,95"
+              fill="url(#obsidianServer)"
+              stroke="url(#goldGrad500)"
+              stroke-width="1.5"
+            />
+
             <!-- Side shadow facets -->
             <polygon points="240,55 240,225 310,185 310,95" fill="#11141a" opacity="0.8" />
             <polygon points="240,55 240,225 170,185 170,95" fill="#252c39" opacity="0.5" />
 
             <!-- Horizontal Server Tray Slots -->
-            <line x1="185" y1="120" x2="235" y2="148" stroke="#10b981" stroke-width="1.5" opacity="0.6" />
-            <line x1="245" y1="148" x2="295" y2="120" stroke="#10b981" stroke-width="1.5" opacity="0.4" />
-            <line x1="185" y1="145" x2="235" y2="173" stroke="#10b981" stroke-width="1.5" opacity="0.6" />
-            <line x1="245" y1="173" x2="295" y2="145" stroke="#10b981" stroke-width="1.5" opacity="0.4" />
+            <line
+              x1="185"
+              y1="120"
+              x2="235"
+              y2="148"
+              stroke="#10b981"
+              stroke-width="1.5"
+              opacity="0.6"
+            />
+            <line
+              x1="245"
+              y1="148"
+              x2="295"
+              y2="120"
+              stroke="#10b981"
+              stroke-width="1.5"
+              opacity="0.4"
+            />
+            <line
+              x1="185"
+              y1="145"
+              x2="235"
+              y2="173"
+              stroke="#10b981"
+              stroke-width="1.5"
+              opacity="0.6"
+            />
+            <line
+              x1="245"
+              y1="173"
+              x2="295"
+              y2="145"
+              stroke="#10b981"
+              stroke-width="1.5"
+              opacity="0.4"
+            />
 
             <!-- Pulsing Status Diodes -->
             <circle cx="200" cy="112" r="3" fill="#34d399" filter="url(#serverGlow)" />
@@ -67,26 +117,108 @@ import '../styles/500.css';
             <circle cx="212" cy="144" r="2" fill="#34d399" />
 
             <!-- Floating Laser Calibration Ring -->
-            <ellipse cx="240" cy="85" rx="55" ry="16" stroke="url(#circuitGold)" stroke-width="2" filter="url(#serverGlow)" />
-            <ellipse cx="240" cy="85" rx="80" ry="24" stroke="rgba(16, 185, 129,0.3)" stroke-width="1" stroke-dasharray="4 6" />
+            <ellipse
+              cx="240"
+              cy="85"
+              rx="55"
+              ry="16"
+              stroke="url(#circuitGold)"
+              stroke-width="2"
+              filter="url(#serverGlow)"
+            />
+            <ellipse
+              cx="240"
+              cy="85"
+              rx="80"
+              ry="24"
+              stroke="rgba(16, 185, 129,0.3)"
+              stroke-width="1"
+              stroke-dasharray="4 6"
+            />
 
             <!-- Stylized 3D Metallic "500" numerals -->
             <!-- Number 5 (Left) -->
             <g transform="translate(60, 75)">
-              <text x="0" y="70" font-family="sans-serif" font-weight="900" font-size="74" fill="#000000" opacity="0.5" dx="4" dy="6">۵</text>
-              <text x="0" y="70" font-family="sans-serif" font-weight="900" font-size="74" fill="url(#goldGrad500)" filter="url(#serverGlow)">۵</text>
+              <text
+                x="0"
+                y="70"
+                font-family="sans-serif"
+                font-weight="900"
+                font-size="74"
+                fill="#000000"
+                opacity="0.5"
+                dx="4"
+                dy="6"
+              >
+                ۵
+              </text>
+              <text
+                x="0"
+                y="70"
+                font-family="sans-serif"
+                font-weight="900"
+                font-size="74"
+                fill="url(#goldGrad500)"
+                filter="url(#serverGlow)"
+              >
+                ۵
+              </text>
             </g>
 
             <!-- Zero 1 (Center Right) -->
             <g transform="translate(340, 75)">
-              <text x="0" y="70" font-family="sans-serif" font-weight="900" font-size="74" fill="#000000" opacity="0.5" dx="4" dy="6">۰</text>
-              <text x="0" y="70" font-family="sans-serif" font-weight="900" font-size="74" fill="url(#goldGrad500)" filter="url(#serverGlow)">۰</text>
+              <text
+                x="0"
+                y="70"
+                font-family="sans-serif"
+                font-weight="900"
+                font-size="74"
+                fill="#000000"
+                opacity="0.5"
+                dx="4"
+                dy="6"
+              >
+                ۰
+              </text>
+              <text
+                x="0"
+                y="70"
+                font-family="sans-serif"
+                font-weight="900"
+                font-size="74"
+                fill="url(#goldGrad500)"
+                filter="url(#serverGlow)"
+              >
+                ۰
+              </text>
             </g>
 
             <!-- Zero 2 (Far Right) -->
             <g transform="translate(390, 75)">
-              <text x="0" y="70" font-family="sans-serif" font-weight="900" font-size="74" fill="#000000" opacity="0.5" dx="4" dy="6">۰</text>
-              <text x="0" y="70" font-family="sans-serif" font-weight="900" font-size="74" fill="url(#goldGrad500)" filter="url(#serverGlow)">۰</text>
+              <text
+                x="0"
+                y="70"
+                font-family="sans-serif"
+                font-weight="900"
+                font-size="74"
+                fill="#000000"
+                opacity="0.5"
+                dx="4"
+                dy="6"
+              >
+                ۰
+              </text>
+              <text
+                x="0"
+                y="70"
+                font-family="sans-serif"
+                font-weight="900"
+                font-size="74"
+                fill="url(#goldGrad500)"
+                filter="url(#serverGlow)"
+              >
+                ۰
+              </text>
             </g>
 
             <!-- Ambient sparkles -->
@@ -102,9 +234,10 @@ import '../styles/500.css';
         </div>
 
         <h1 class="error-title">اختلال موقت در ارتباط با سرورهای پردازش</h1>
-        
+
         <p class="error-subtitle">
-          سامانه در حال به‌روزرسانی امنیتی یا پردازش متمرکز است. اطلاعات پرونده و نوبت‌های شما در امنیت کامل محفوظ می‌باشد.
+          سامانه در حال به‌روزرسانی امنیتی یا پردازش متمرکز است. اطلاعات پرونده و نوبت‌های شما در
+          امنیت کامل محفوظ می‌باشد.
         </p>
 
         <!-- Reassurance & Diagnostic Card -->
@@ -126,7 +259,10 @@ import '../styles/500.css';
               </div>
               <div class="item-text">
                 <strong>تضمین استرداد درگاه بانکی:</strong>
-                <span>چنانچه در حال پرداخت بیعانه بوده‌اید و وجهی کسر گردیده، طبق قوانین شاپرک مبلغ ظرف ۷۲ ساعت کاری به حساب مبدأ بازمی‌گردد.</span>
+                <span>
+                  چنانچه در حال پرداخت بیعانه بوده‌اید و وجهی کسر گردیده، طبق قوانین شاپرک مبلغ ظرف
+                  ۷۲ ساعت کاری به حساب مبدأ بازمی‌گردد.
+                </span>
               </div>
             </div>
 
@@ -136,7 +272,10 @@ import '../styles/500.css';
               </div>
               <div class="item-text">
                 <strong>حفظ نوبت‌های از پیش ثبت‌شده:</strong>
-                <span>پایگاه داده کلینیک بر بستر ابری رمزنگاری‌شده فعال است؛ تاریخ و ساعت نوبت‌های تاییدشده قبلی کاملاً قطعی و بدون تغییر است.</span>
+                <span>
+                  پایگاه داده کلینیک بر بستر ابری رمزنگاری‌شده فعال است؛ تاریخ و ساعت نوبت‌های
+                  تاییدشده قبلی کاملاً قطعی و بدون تغییر است.
+                </span>
               </div>
             </div>
           </div>
@@ -145,7 +284,12 @@ import '../styles/500.css';
           <div class="trace-status-bar">
             <div class="trace-code">
               <Icon name="document" size={14} />
-              <span>کد پیگیری رخداد: <code dir="ltr" id="traceId">TL-SRV-9082</code></span>
+              <span>
+                کد پیگیری رخداد:{' '}
+                <code dir="ltr" id="traceId">
+                  TL-SRV-9082
+                </code>
+              </span>
             </div>
             <div class="system-status-indicator">
               <span class="status-dot"></span>
@@ -160,10 +304,16 @@ import '../styles/500.css';
             <Icon name="refresh" size={18} />
             <span>تلاش مجدد و بارگذاری صفحه</span>
           </button>
-          
-          <a href="tel:+989035555090" class="btn-secondary-3d" aria-label="تماس با پذیرش کلینیک ۰۹۰۳ ۵۵۵ ۵۰۹۰">
+
+          <a
+            href="tel:+989035555090"
+            class="btn-secondary-3d"
+            aria-label="تماس با پذیرش کلینیک ۰۹۰۳ ۵۵۵ ۵۰۹۰"
+          >
             <Icon name="phone" size={18} />
-            <span><bdi dir="ltr">۰۹۰۳ ۵۵۵ ۵۰۹۰</bdi></span>
+            <span>
+              <bdi dir="ltr">۰۹۰۳ ۵۵۵ ۵۰۹۰</bdi>
+            </span>
           </a>
 
           <a href="/" class="btn-obsidian-3d">
@@ -171,7 +321,6 @@ import '../styles/500.css';
             <span>بازگشت به صفحه اصلی</span>
           </a>
         </div>
-
       </div>
     </div>
   </div>
@@ -185,6 +334,5 @@ import '../styles/500.css';
       const randCode = Math.floor(1000 + Math.random() * 9000);
       traceEl.textContent = `TL-ERR-${randCode}`;
     }
-  } catch (e) {}
+  } catch {}
 </script>
-

@@ -46,10 +46,13 @@ const tiles: AmbienceTile[] = [
   <div class="container">
     <header class="section-header text-center">
       <span class="section-subtitle">نگاهی به فضای درمان</span>
-      <h2 class="section-title" id="clinic-gallery-title">محیطی VIP، آرام و کاملاً بهداشتی در قلب پاسداران</h2>
+      <h2 class="section-title" id="clinic-gallery-title">
+        محیطی VIP، آرام و کاملاً بهداشتی در قلب پاسداران
+      </h2>
       <p class="section-desc">
-        استانداردهای بهداشتی کلینیک تهران لیزر پیش از هر جلسه اجرا می‌شود؛ از تعویض پوشش تخت تا استریل‌سازی سری
-        دستگاه رادو پلاس. تصاویر زیر صرفاً حال‌وهوای آرام و حرفه‌ای این فضا را نشان می‌دهند.
+        استانداردهای بهداشتی کلینیک تهران لیزر پیش از هر جلسه اجرا می‌شود؛ از تعویض پوشش تخت تا
+        استریل‌سازی سری دستگاه رادو پلاس. تصاویر زیر صرفاً حال‌وهوای آرام و حرفه‌ای این فضا را نشان
+        می‌دهند.
       </p>
     </header>
 
@@ -88,7 +91,9 @@ const tiles: AmbienceTile[] = [
                 class="cg-img media-cover"
                 src={`/images/${tile.src}-800.jpg`}
                 srcset={`/images/${tile.src}-560.jpg 560w, /images/${tile.src}-800.jpg 800w, /images/${tile.src}.jpg 1600w`}
-                sizes={tile.wide ? '(max-width: 900px) 86vw, 40vw' : '(max-width: 900px) 86vw, 30vw'}
+                sizes={
+                  tile.wide ? '(max-width: 900px) 86vw, 40vw' : '(max-width: 900px) 86vw, 30vw'
+                }
                 alt={tile.alt}
                 width="1600"
                 height="1067"
@@ -117,8 +122,7 @@ const tiles: AmbienceTile[] = [
   /* Self-contained: dark obsidian surfaces, explicit light text only. */
   .clinic-gallery-section {
     background:
-      radial-gradient(900px 320px at 20% 0%, rgba(52, 211, 153, 0.07), transparent 60%),
-      #0a0b0d;
+      radial-gradient(900px 320px at 20% 0%, rgba(52, 211, 153, 0.07), transparent 60%), #0a0b0d;
     border-top: 1px solid rgba(148, 163, 184, 0.12);
   }
 

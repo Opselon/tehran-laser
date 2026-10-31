@@ -1,8 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  BOOKING_STATUSES,
-  type BookingStatus,
-} from '../../src/domain/booking/booking.types';
+import { BOOKING_STATUSES, type BookingStatus } from '../../src/domain/booking/booking.types';
 import { canTransitionBookingState } from '../../src/domain/booking/booking.state';
 
 /** Exhaustive 6×6 transition matrix — every pair is asserted explicitly. */

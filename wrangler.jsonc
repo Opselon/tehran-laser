@@ -5,23 +5,23 @@
   "compatibility_flags": ["nodejs_compat"],
   "assets": {
     "directory": "./dist",
-    "not_found_handling": "404-page"
+    "not_found_handling": "404-page",
   },
   "observability": {
-    "enabled": true
+    "enabled": true,
   },
   "d1_databases": [
     {
       "binding": "DB",
       "database_name": "tehran-laser-db",
-      "database_id": "6ded6ab1-c8db-4071-aee9-bb74a7d61455"
-    }
+      "database_id": "6ded6ab1-c8db-4071-aee9-bb74a7d61455",
+    },
   ],
   "vars": {
     "BUSINESS_TIMEZONE": "Asia/Tehran",
     // Public origin used for canonical/OG/sitemap URLs. Must be the LIVE origin.
     // Do NOT set this to https://tehranlaser.ir until that domain actually serves
     // this app — it currently answers with a domain-parking page.
-    "SITE_URL": "https://tehran-laser.samerkhaldounmarefi.workers.dev"
-  }
+    "SITE_URL": "https://tehran-laser.samerkhaldounmarefi.workers.dev",
+  },
 }

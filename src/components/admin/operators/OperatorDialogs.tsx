@@ -32,8 +32,19 @@ function DialogShell({ title, description, children, onClose, labelledBy }: Dial
   }, [onClose]);
 
   return (
-    <div className="ops-dialog-scrim" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
-      <div className="ops-dialog" role="dialog" aria-modal="true" aria-labelledby={labelledBy} ref={ref} tabIndex={-1}>
+    <div
+      className="ops-dialog-scrim"
+      role="presentation"
+      onMouseDown={(event) => event.target === event.currentTarget && onClose()}
+    >
+      <div
+        className="ops-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={labelledBy}
+        ref={ref}
+        tabIndex={-1}
+      >
         <div>
           <h2 id={labelledBy}>{title}</h2>
           {description && <p>{description}</p>}
@@ -56,7 +67,15 @@ interface ConfirmDialogProps {
   onCancel: () => void;
 }
 
-export function ConfirmDialog({ title, body, confirmLabel, tone = 'danger', busy = false, onConfirm, onCancel }: ConfirmDialogProps) {
+export function ConfirmDialog({
+  title,
+  body,
+  confirmLabel,
+  tone = 'danger',
+  busy = false,
+  onConfirm,
+  onCancel,
+}: ConfirmDialogProps) {
   return (
     <DialogShell title={title} onClose={onCancel} labelledBy="ops-confirm-title">
       <p>{body}</p>
@@ -85,7 +104,11 @@ interface AccountDialogProps {
   catalog: OperatorCatalog;
   busy: boolean;
   onClose: () => void;
-  onSubmit: (payload: { email?: string; role?: RoleKey; password?: string }) => Promise<IssuedAccountResponse>;
+  onSubmit: (payload: {
+    email?: string;
+    role?: RoleKey;
+    password?: string;
+  }) => Promise<IssuedAccountResponse>;
 }
 
 const ISSUABLE_ROLES: RoleKey[] = ['OPERATOR', 'STAFF', 'MANAGER', 'EDITOR'];
@@ -145,7 +168,8 @@ export function AccountDialog({ operator, catalog, busy, onClose, onSubmit }: Ac
         labelledBy="ops-account-done"
       >
         <p>
-          {operator.displayName} اکنون می‌تواند با ایمیل <b dir="ltr">{result.account.email}</b> وارد داشبورد شود.
+          {operator.displayName} اکنون می‌تواند با ایمیل <b dir="ltr">{result.account.email}</b>{' '}
+          وارد داشبورد شود.
           {result.account.mode === 'reset' && ' همه نشست‌های قبلی این حساب بسته شد.'}
         </p>
 
@@ -169,7 +193,10 @@ export function AccountDialog({ operator, catalog, busy, onClose, onSubmit }: Ac
 
         <div className="ops-warnbox">
           <IconReact name="warning" size={16} />
-          <span>نقش دسترسی: {result.account.roles.join(' · ')} — از این پس پروفایل با همین حساب به نشست‌ها وصل می‌شود.</span>
+          <span>
+            نقش دسترسی: {result.account.roles.join(' · ')} — از این پس پروفایل با همین حساب به
+            نشست‌ها وصل می‌شود.
+          </span>
         </div>
 
         <div className="ops-dialog__actions">
@@ -234,7 +261,8 @@ export function AccountDialog({ operator, catalog, busy, onClose, onSubmit }: Ac
             })}
           </select>
           <span className="ops-hint">
-            {catalog.teamRoles.find((entry) => entry.key === role)?.description ?? 'دسترسی‌های این نقش از ماتریس RBAC خوانده می‌شود.'}
+            {catalog.teamRoles.find((entry) => entry.key === role)?.description ??
+              'دسترسی‌های این نقش از ماتریس RBAC خوانده می‌شود.'}
           </span>
         </div>
 
@@ -252,7 +280,9 @@ export function AccountDialog({ operator, catalog, busy, onClose, onSubmit }: Ac
             aria-invalid={Boolean(serverErrors.password)}
           />
           {serverErrors.password && <span className="ops-error">{serverErrors.password[0]}</span>}
-          <span className="ops-hint">حداقل ۱۰ کاراکتر. اگر خالی بماند، رمز موقت خوانا ساخته و یک بار نمایش داده می‌شود.</span>
+          <span className="ops-hint">
+            حداقل ۱۰ کاراکتر. اگر خالی بماند، رمز موقت خوانا ساخته و یک بار نمایش داده می‌شود.
+          </span>
         </div>
 
         <div className="ops-warnbox">
@@ -261,10 +291,20 @@ export function AccountDialog({ operator, catalog, busy, onClose, onSubmit }: Ac
         </div>
 
         <div className="ops-dialog__actions">
-          <button type="button" className="ops-btn ops-btn--ghost" onClick={onClose} disabled={submitting || busy}>
+          <button
+            type="button"
+            className="ops-btn ops-btn--ghost"
+            onClick={onClose}
+            disabled={submitting || busy}
+          >
             انصراف
           </button>
-          <button type="submit" className="ops-btn ops-btn--primary" disabled={submitting || busy} aria-busy={submitting}>
+          <button
+            type="submit"
+            className="ops-btn ops-btn--primary"
+            disabled={submitting || busy}
+            aria-busy={submitting}
+          >
             <IconReact name={submitting ? 'refresh' : 'lock'} size={15} />
             {operator.account ? 'بازنشانی رمز' : 'ساخت حساب'}
           </button>

@@ -19,7 +19,9 @@
   flex-direction: column;
   gap: 4px;
   padding: 0;
-  transition: background 0.18s ease, border-color 0.18s ease;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease;
 }
 
 .admin-menu-btn .bar {
@@ -28,7 +30,9 @@
   height: 2px;
   border-radius: 2px;
   background: #f5d77f;
-  transition: transform 0.22s ease, opacity 0.18s ease;
+  transition:
+    transform 0.22s ease,
+    opacity 0.18s ease;
 }
 
 .admin-menu-btn:hover {
@@ -125,13 +129,27 @@ body.sidebar-open .admin-menu-btn .bar:nth-child(3) {
   gap: 24px;
 }
 
-.g-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.g-21 { grid-template-columns: 2fr minmax(0, 1fr); }
-.g-2-12 { grid-template-columns: 2fr minmax(0, 1.2fr); }
-.g-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.g-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-.g-side { grid-template-columns: 320px minmax(0, 1fr); }
-.g-side-r { grid-template-columns: minmax(0, 1fr) 380px; }
+.g-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.g-21 {
+  grid-template-columns: 2fr minmax(0, 1fr);
+}
+.g-2-12 {
+  grid-template-columns: 2fr minmax(0, 1.2fr);
+}
+.g-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.g-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.g-side {
+  grid-template-columns: 320px minmax(0, 1fr);
+}
+.g-side-r {
+  grid-template-columns: minmax(0, 1fr) 380px;
+}
 
 /* ── Tablet & below: 1024px ────────────────────────────────── */
 
@@ -442,9 +460,9 @@ body.sidebar-open .admin-menu-btn .bar:nth-child(3) {
    which must never wrap.                                       */
 
 @media (max-width: 640px) {
-  .admin-content div[style*="display: flex"]:not([style*="flex-direction: column"]),
-  .admin-content-pad div[style*="display: flex"]:not([style*="flex-direction: column"]),
-  .admin-main div[style*="display: flex"]:not([style*="flex-direction: column"]) {
+  .admin-content div[style*='display: flex']:not([style*='flex-direction: column']),
+  .admin-content-pad div[style*='display: flex']:not([style*='flex-direction: column']),
+  .admin-main div[style*='display: flex']:not([style*='flex-direction: column']) {
     flex-wrap: wrap !important;
     row-gap: 10px !important;
   }
@@ -455,4 +473,3 @@ body.sidebar-open .admin-menu-btn .bar:nth-child(3) {
     flex-wrap: nowrap !important;
   }
 }
-

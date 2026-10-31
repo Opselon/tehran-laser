@@ -191,7 +191,12 @@ describe('operators API', () => {
     expect(res.status).toBe(200);
     const body = await json<{
       data: {
-        roles: Array<{ key: string; label: string; accessRole: string; performsSessions?: boolean }>;
+        roles: Array<{
+          key: string;
+          label: string;
+          accessRole: string;
+          performsSessions?: boolean;
+        }>;
         workdays: Array<{ index: number; label: string }>;
         accents: Array<{ hex: string }>;
         templates: Array<{ key: string; roleKey: string }>;
@@ -206,7 +211,9 @@ describe('operators API', () => {
     expect(body.data.templates.length).toBeGreaterThan(0);
     expect(body.data.shifts.some((shift) => shift.label === 'تمام‌وقت')).toBe(true);
     const operatorRole = body.data.teamRoles.find((role) => role.key === 'OPERATOR');
-    expect(operatorRole?.permissions).toEqual(expect.arrayContaining(['operator.read', 'booking.read']));
+    expect(operatorRole?.permissions).toEqual(
+      expect.arrayContaining(['operator.read', 'booking.read']),
+    );
   });
 
   /* ── Create ────────────────────────────────────────────────────────── */
@@ -253,21 +260,53 @@ describe('operators API', () => {
 
   it('refuses invalid input with per-field Persian messages', async () => {
     const cases: Array<{ payload: Record<string, unknown>; field: string }> = [
-      { payload: { displayName: 'x', phone: '09121110000', roleKey: 'doctor' }, field: 'displayName' },
-      { payload: { displayName: 'نام معتبر', phone: '123', roleKey: 'doctor' }, field: 'phone' },
-      { payload: { displayName: 'نام معتبر', phone: '09121110001', roleKey: 'wizard' }, field: 'roleKey' },
       {
-        payload: { displayName: 'نام معتبر', phone: '09121110002', roleKey: 'doctor', shiftStart: '20:00', shiftEnd: '09:00' },
+        payload: { displayName: 'x', phone: '09121110000', roleKey: 'doctor' },
+        field: 'displayName',
+      },
+      { payload: { displayName: 'نام معتبر', phone: '123', roleKey: 'doctor' }, field: 'phone' },
+      {
+        payload: { displayName: 'نام معتبر', phone: '09121110001', roleKey: 'wizard' },
+        field: 'roleKey',
+      },
+      {
+        payload: {
+          displayName: 'نام معتبر',
+          phone: '09121110002',
+          roleKey: 'doctor',
+          shiftStart: '20:00',
+          shiftEnd: '09:00',
+        },
         field: 'shiftStart',
       },
-      { payload: { displayName: 'نام معتبر', phone: '09121110003', roleKey: 'doctor', workdays: [] }, field: 'workdays' },
-      { payload: { displayName: 'نام معتبر', phone: '09121110004', roleKey: 'doctor', commissionPercent: 140 }, field: 'commissionPercent' },
+      {
+        payload: {
+          displayName: 'نام معتبر',
+          phone: '09121110003',
+          roleKey: 'doctor',
+          workdays: [],
+        },
+        field: 'workdays',
+      },
+      {
+        payload: {
+          displayName: 'نام معتبر',
+          phone: '09121110004',
+          roleKey: 'doctor',
+          commissionPercent: 140,
+        },
+        field: 'commissionPercent',
+      },
     ];
 
     for (const { payload, field } of cases) {
       const res = await api(
         '/api/v1/admin/operators',
-        asAdmin({ method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) }),
+        asAdmin({
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(payload),
+        }),
       );
       expect(res.status).toBe(422);
       const body = await json<{ error: { code: string; fields?: Record<string, string[]> } }>(res);
@@ -282,7 +321,11 @@ describe('operators API', () => {
       asAdmin({
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ displayName: 'تکرار شماره', phone: '09121234567', roleKey: 'assistant' }),
+        body: JSON.stringify({
+          displayName: 'تکرار شماره',
+          phone: '09121234567',
+          roleKey: 'assistant',
+        }),
       }),
     );
     expect(res.status).toBe(422);
@@ -296,7 +339,12 @@ describe('operators API', () => {
       asAdmin({
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ displayName: 'کاربر مخفی', phone: '09121112222', roleKey: 'doctor', role: 'SUPER_ADMIN' }),
+        body: JSON.stringify({
+          displayName: 'کاربر مخفی',
+          phone: '09121112222',
+          roleKey: 'doctor',
+          role: 'SUPER_ADMIN',
+        }),
       }),
     );
     expect(res.status).toBe(422);
@@ -335,7 +383,11 @@ describe('operators API', () => {
     const body = await json<{
       data: {
         operator: Operator;
-        stats: { totals: { sessions: number }; daily: Array<{ date: string }>; insights: Array<{ text: string }> };
+        stats: {
+          totals: { sessions: number };
+          daily: Array<{ date: string }>;
+          insights: Array<{ text: string }>;
+        };
         agenda: unknown[];
         unassigned: unknown[];
         today: { localDate: string };
@@ -390,14 +442,22 @@ describe('operators API', () => {
   it('toggles active state and revokes a linked session when deactivated', async () => {
     const off = await api(
       `/api/v1/admin/operators/${secondId}/status`,
-      asAdmin({ method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ active: false }) }),
+      asAdmin({
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ active: false }),
+      }),
     );
     expect(off.status).toBe(200);
     expect((await json<{ data: { operator: Operator } }>(off)).data.operator.active).toBe(false);
 
     const on = await api(
       `/api/v1/admin/operators/${secondId}/status`,
-      asAdmin({ method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ active: true }) }),
+      asAdmin({
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ active: true }),
+      }),
     );
     expect(on.status).toBe(200);
     expect((await json<{ data: { operator: Operator } }>(on)).data.operator.active).toBe(true);
@@ -409,7 +469,12 @@ describe('operators API', () => {
       asAdmin({
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ order: [{ id: primaryId, sortOrder: 90 }, { id: secondId, sortOrder: 10 }] }),
+        body: JSON.stringify({
+          order: [
+            { id: primaryId, sortOrder: 90 },
+            { id: secondId, sortOrder: 10 },
+          ],
+        }),
       }),
     );
     expect(res.status).toBe(200);
@@ -456,32 +521,44 @@ describe('operators API', () => {
   /* ── Accounts ──────────────────────────────────────────────────────── */
 
   it('lets a manager write the roster but not issue a login', async () => {
-    const create = await api(
-      '/api/v1/admin/operators',
-      {
-        method: 'POST',
-        headers: { cookie: managerCookie, 'content-type': 'application/json' },
-        body: JSON.stringify({ displayName: 'دستیار موقت', phone: '09127770000', roleKey: 'assistant' }),
-      },
-    );
+    const create = await api('/api/v1/admin/operators', {
+      method: 'POST',
+      headers: { cookie: managerCookie, 'content-type': 'application/json' },
+      body: JSON.stringify({
+        displayName: 'دستیار موقت',
+        phone: '09127770000',
+        roleKey: 'assistant',
+      }),
+    });
     expect(create.status).toBe(201);
 
-    const account = await api(
-      `/api/v1/admin/operators/${secondId}/account`,
-      { method: 'POST', headers: { cookie: managerCookie, 'content-type': 'application/json' }, body: '{}' },
-    );
+    const account = await api(`/api/v1/admin/operators/${secondId}/account`, {
+      method: 'POST',
+      headers: { cookie: managerCookie, 'content-type': 'application/json' },
+      body: '{}',
+    });
     expect(account.status).toBe(403);
   });
 
   it('issues a login and returns the temporary password exactly once', async () => {
     const res = await api(
       `/api/v1/admin/operators/${secondId}/account`,
-      asAdmin({ method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email: 'mina@tehranlaser.ir' }) }),
+      asAdmin({
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ email: 'mina@tehranlaser.ir' }),
+      }),
     );
     expect(res.status).toBe(200);
     const body = await json<{
       data: {
-        account: { mode: string; userId: string; email: string; temporaryPassword: string | null; roles: string[] };
+        account: {
+          mode: string;
+          userId: string;
+          email: string;
+          temporaryPassword: string | null;
+          roles: string[];
+        };
         operator: Operator;
       };
     }>(res);
@@ -502,7 +579,12 @@ describe('operators API', () => {
     const body = await json<{ data: { roles: string[]; permissions: string[] } }>(me);
     expect(body.data.roles).toContain('OPERATOR');
     expect(body.data.permissions).toEqual(
-      expect.arrayContaining(['operator.read', 'booking.read', 'booking.complete', 'customer.read']),
+      expect.arrayContaining([
+        'operator.read',
+        'booking.read',
+        'booking.complete',
+        'customer.read',
+      ]),
     );
     expect(body.data.permissions).not.toContain('operator.write');
     expect(body.data.permissions).not.toContain('operator.account');
@@ -511,14 +593,15 @@ describe('operators API', () => {
     // Reads the roster, cannot write it.
     const roster = await api('/api/v1/admin/operators', { headers: { cookie: operatorCookie } });
     expect(roster.status).toBe(200);
-    const write = await api(
-      '/api/v1/admin/operators',
-      {
-        method: 'POST',
-        headers: { cookie: operatorCookie, 'content-type': 'application/json' },
-        body: JSON.stringify({ displayName: 'تلاش غیرمجاز', phone: '09120001111', roleKey: 'doctor' }),
-      },
-    );
+    const write = await api('/api/v1/admin/operators', {
+      method: 'POST',
+      headers: { cookie: operatorCookie, 'content-type': 'application/json' },
+      body: JSON.stringify({
+        displayName: 'تلاش غیرمجاز',
+        phone: '09120001111',
+        roleKey: 'doctor',
+      }),
+    });
     expect(write.status).toBe(403);
   });
 
@@ -534,7 +617,9 @@ describe('operators API', () => {
       body: JSON.stringify({ bio: 'کارشناس لیزر و پوست' }),
     });
     expect(patch.status).toBe(200);
-    expect((await json<{ data: { operator: Operator } }>(patch)).data.operator.bio).toBe('کارشناس لیزر و پوست');
+    expect((await json<{ data: { operator: Operator } }>(patch)).data.operator.bio).toBe(
+      'کارشناس لیزر و پوست',
+    );
 
     const forbidden = await api('/api/v1/me/operator', {
       method: 'PATCH',
@@ -555,7 +640,10 @@ describe('operators API', () => {
     );
     expect(res.status).toBe(200);
     const body = await json<{
-      data: { account: { mode: string; userId: string; temporaryPassword: string | null }; operator: Operator };
+      data: {
+        account: { mode: string; userId: string; temporaryPassword: string | null };
+        operator: Operator;
+      };
     }>(res);
     expect(body.data.account.mode).toBe('reset');
     expect(body.data.account.userId).toBe(accountUserId);
@@ -570,11 +658,19 @@ describe('operators API', () => {
   });
 
   it('refuses an account for an archived profile', async () => {
-    const created = await createOperator({ displayName: 'موقت', phone: '09125550000', roleKey: 'assistant' });
+    const created = await createOperator({
+      displayName: 'موقت',
+      phone: '09125550000',
+      roleKey: 'assistant',
+    });
     await api(`/api/v1/admin/operators/${created.id}/archive`, asAdmin({ method: 'POST' }));
     const res = await api(
       `/api/v1/admin/operators/${created.id}/account`,
-      asAdmin({ method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email: 'temp@tehranlaser.ir' }) }),
+      asAdmin({
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ email: 'temp@tehranlaser.ir' }),
+      }),
     );
     expect(res.status).toBe(422);
   });
@@ -620,7 +716,11 @@ describe('operators API', () => {
   it('refuses assigning to an inactive operator', async () => {
     await api(
       `/api/v1/admin/operators/${secondId}/status`,
-      asAdmin({ method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ active: false }) }),
+      asAdmin({
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ active: false }),
+      }),
     );
     const res = await api(
       `/api/v1/admin/bookings/${createdBookingId}/operator`,
@@ -634,14 +734,22 @@ describe('operators API', () => {
 
     await api(
       `/api/v1/admin/operators/${secondId}/status`,
-      asAdmin({ method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ active: true }) }),
+      asAdmin({
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ active: true }),
+      }),
     );
   });
 
   it('unassigns with a null operatorId', async () => {
     const res = await api(
       `/api/v1/admin/bookings/${createdBookingId}/operator`,
-      asAdmin({ method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ operatorId: null }) }),
+      asAdmin({
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ operatorId: null }),
+      }),
     );
     expect(res.status).toBe(200);
     expect((await json<{ data: { operatorId: null } }>(res)).data.operatorId).toBeNull();
@@ -682,13 +790,20 @@ describe('operators API', () => {
   it('refuses to change status of an archived profile', async () => {
     const res = await api(
       `/api/v1/admin/operators/${secondId}/status`,
-      asAdmin({ method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ active: true }) }),
+      asAdmin({
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ active: true }),
+      }),
     );
     expect(res.status).toBe(422);
   });
 
   it('refuses to restore into a phone number a live operator now holds', async () => {
-    const res = await api(`/api/v1/admin/operators/${secondId}/restore`, asAdmin({ method: 'POST' }));
+    const res = await api(
+      `/api/v1/admin/operators/${secondId}/restore`,
+      asAdmin({ method: 'POST' }),
+    );
     expect(res.status).toBe(422);
     const body = await json<{ error: { fields?: Record<string, string[]> } }>(res);
     expect(body.error.fields?.phone?.[0]).toContain('جانشین مینا');
@@ -696,10 +811,16 @@ describe('operators API', () => {
 
   it('restores an archived profile and its login once the number is free', async () => {
     // The replacement keeps the number; archiving it frees the phone again.
-    const archiveReplacement = await api(`/api/v1/admin/operators/${replacementId}`, asAdmin({ method: 'DELETE' }));
+    const archiveReplacement = await api(
+      `/api/v1/admin/operators/${replacementId}`,
+      asAdmin({ method: 'DELETE' }),
+    );
     expect(archiveReplacement.status).toBe(200);
 
-    const res = await api(`/api/v1/admin/operators/${secondId}/restore`, asAdmin({ method: 'POST' }));
+    const res = await api(
+      `/api/v1/admin/operators/${secondId}/restore`,
+      asAdmin({ method: 'POST' }),
+    );
     expect(res.status).toBe(200);
     const operator = (await json<{ data: { operator: Operator } }>(res)).data.operator;
     expect(operator.archivedAt).toBeNull();
@@ -714,15 +835,28 @@ describe('operators API', () => {
   });
 
   it('hard-deletes a profile that never owned a session, and its login', async () => {
-    const created = await createOperator({ displayName: 'اشتباه ساخته شد', phone: '09124440000', roleKey: 'assistant' });
+    const created = await createOperator({
+      displayName: 'اشتباه ساخته شد',
+      phone: '09124440000',
+      roleKey: 'assistant',
+    });
     const accountRes = await api(
       `/api/v1/admin/operators/${created.id}/account`,
-      asAdmin({ method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email: 'oops@tehranlaser.ir' }) }),
+      asAdmin({
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ email: 'oops@tehranlaser.ir' }),
+      }),
     );
     expect(accountRes.status).toBe(200);
-    const issued = await json<{ data: { account: { userId: string; temporaryPassword: string } } }>(accountRes);
+    const issued = await json<{ data: { account: { userId: string; temporaryPassword: string } } }>(
+      accountRes,
+    );
 
-    const res = await api(`/api/v1/admin/operators/${created.id}?hard=1`, asAdmin({ method: 'DELETE' }));
+    const res = await api(
+      `/api/v1/admin/operators/${created.id}?hard=1`,
+      asAdmin({ method: 'DELETE' }),
+    );
     expect(res.status).toBe(200);
     expect((await json<{ data: { deleted: boolean } }>(res)).data.deleted).toBe(true);
 
@@ -732,7 +866,10 @@ describe('operators API', () => {
     const orphanLogin = await api('/api/v1/auth/login', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ email: 'oops@tehranlaser.ir', password: issued.data.account.temporaryPassword }),
+      body: JSON.stringify({
+        email: 'oops@tehranlaser.ir',
+        password: issued.data.account.temporaryPassword,
+      }),
     });
     expect(orphanLogin.status).toBe(403);
   });
@@ -747,7 +884,10 @@ describe('operators API', () => {
         body: JSON.stringify({ operatorId: primaryId }),
       }),
     );
-    const res = await api(`/api/v1/admin/operators/${primaryId}?hard=1`, asAdmin({ method: 'DELETE' }));
+    const res = await api(
+      `/api/v1/admin/operators/${primaryId}?hard=1`,
+      asAdmin({ method: 'DELETE' }),
+    );
     expect(res.status).toBe(422);
     const body = await json<{ error: { message: string } }>(res);
     expect(body.error.message).toContain('بایگانی');

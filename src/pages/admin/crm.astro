@@ -2,37 +2,66 @@
 import AdminLayout from '../../layouts/AdminLayout.astro';
 import { env } from 'cloudflare:workers';
 import { listAdminCustomers } from '../../server/repositories';
+import type { AdminCustomerRowDto } from '../../domain/api/dto.types';
 import { formatJalaliDate } from '../../lib/datetime/jalali';
 import Icon from '../../components/ui/Icon.astro';
 
-let customersList: any[] = [];
-let clinicalRecords: any[] = [];
+/** Raw clinical-record row (`SELECT r.*` + joined customer columns, migration 0007). */
+interface ClinicalRecordRow {
+  customerName: string | null;
+  customerPhone: string | null;
+  customer_id: string | null;
+  session_number: number | null;
+  total_sessions: number | null;
+  shot_count: number | null;
+  joules_energy: number | null;
+  pulse_width_ms: number | null;
+  operator_name: string | null;
+  treated_areas: string | null;
+  skin_reaction: string | null;
+  created_at: string;
+  [key: string]: unknown;
+}
+
+let customersList: AdminCustomerRowDto[] = [];
+let clinicalRecords: ClinicalRecordRow[] = [];
 
 try {
   const custRes = await listAdminCustomers(env.DB, 100);
   customersList = custRes.items;
 
   // fetch latest clinical records
-  clinicalRecords = (await env.DB.prepare(`
+  clinicalRecords =
+    ((
+      await env.DB.prepare(
+        `
     SELECT r.*, c.name AS customerName, c.phone AS customerPhone
       FROM customer_clinical_records r
       JOIN customers c ON c.id = r.customer_id
      ORDER BY r.created_at DESC LIMIT 50
-  `).all()).results as any[] || [];
+  `,
+      ).all()
+    ).results as ClinicalRecordRow[]) || [];
 } catch (e) {
   console.error('Failed to load CRM data:', e);
 }
 
 // Real KPIs computed from live data (no hardcoded fakes)
-const totalSessionsBooked = clinicalRecords.reduce((s, r) => s + (Number(r.total_sessions) || 0), 0);
+const totalSessionsBooked = clinicalRecords.reduce(
+  (s, r) => s + (Number(r.total_sessions) || 0),
+  0,
+);
 const completedSessions = clinicalRecords.length;
-const avgProgress = totalSessionsBooked > 0
-  ? Math.min(100, Math.round((completedSessions / totalSessionsBooked) * 100))
-  : 0;
+const avgProgress =
+  totalSessionsBooked > 0
+    ? Math.min(100, Math.round((completedSessions / totalSessionsBooked) * 100))
+    : 0;
 const totalShots = clinicalRecords.reduce((s, r) => s + (Number(r.shot_count) || 0), 0);
-const avgJoules = clinicalRecords.length > 0
-  ? clinicalRecords.reduce((s, r) => s + (Number(r.joules_energy) || 0), 0) / clinicalRecords.length
-  : 0;
+const avgJoules =
+  clinicalRecords.length > 0
+    ? clinicalRecords.reduce((s, r) => s + (Number(r.joules_energy) || 0), 0) /
+      clinicalRecords.length
+    : 0;
 
 const DEVICE_LABEL = 'لیزر تماسی رادو پلاس';
 ---
@@ -46,7 +75,8 @@ const DEVICE_LABEL = 'لیزر تماسی رادو پلاس';
           <span>پرونده بالینی و ارتباط با مراجعین (Clinical CRM)</span>
         </h1>
         <p class="section-block-sub">
-          مدیریت پرونده‌های درمانی، رصد دوره‌های لیزر تماسی، شات‌ها، انرژی ژول و حافظه مراجعین (API First)
+          مدیریت پرونده‌های درمانی، رصد دوره‌های لیزر تماسی، شات‌ها، انرژی ژول و حافظه مراجعین (API
+          First)
         </p>
       </div>
       <div class="actions">
@@ -62,7 +92,9 @@ const DEVICE_LABEL = 'لیزر تماسی رادو پلاس';
       <div class="kpi-card-3d">
         <div class="kpi-header">
           <span class="kpi-title">کل مراجعین ثبت‌شده</span>
-          <span class="kpi-icon crm-kpi-icon-gold"><Icon name="users" size={20} /></span>
+          <span class="kpi-icon crm-kpi-icon-gold">
+            <Icon name="users" size={20} />
+          </span>
         </div>
         <div class="kpi-value">{customersList.length.toLocaleString('fa-IR')}</div>
         <div class="kpi-footer">بانک فعال مراجعین کلینیک</div>
@@ -71,7 +103,9 @@ const DEVICE_LABEL = 'لیزر تماسی رادو پلاس';
       <div class="kpi-card-3d">
         <div class="kpi-header">
           <span class="kpi-title">جلسات ثبت‌شده در پرونده</span>
-          <span class="kpi-icon crm-kpi-icon-blue"><Icon name="doctor" size={20} /></span>
+          <span class="kpi-icon crm-kpi-icon-blue">
+            <Icon name="doctor" size={20} />
+          </span>
         </div>
         <div class="kpi-value">{completedSessions.toLocaleString('fa-IR')}</div>
         <div class="kpi-footer">سوابق دوز و انرژی دستگاه</div>
@@ -80,18 +114,25 @@ const DEVICE_LABEL = 'لیزر تماسی رادو پلاس';
       <div class="kpi-card-3d">
         <div class="kpi-header">
           <span class="kpi-title">میانگین پیشرفت جلسات</span>
-          <span class="kpi-icon crm-kpi-icon-green"><Icon name="chart" size={20} /></span>
+          <span class="kpi-icon crm-kpi-icon-green">
+            <Icon name="chart" size={20} />
+          </span>
         </div>
         <div class="kpi-value crm-kpi-progress-value">
-          {avgProgress.toLocaleString('fa-IR')}<span class="crm-kpi-unit">٪</span>
+          {avgProgress.toLocaleString('fa-IR')}
+          <span class="crm-kpi-unit">٪</span>
         </div>
-        <div class="kpi-footer">{totalSessionsBooked.toLocaleString('fa-IR')} جلسه برنامه‌ریزی‌شده کل</div>
+        <div class="kpi-footer">
+          {totalSessionsBooked.toLocaleString('fa-IR')} جلسه برنامه‌ریزی‌شده کل
+        </div>
       </div>
 
       <div class="kpi-card-3d">
         <div class="kpi-header">
           <span class="kpi-title">مجموع شات‌های لیزر</span>
-          <span class="kpi-icon crm-kpi-icon-gold"><Icon name="lightning" size={20} /></span>
+          <span class="kpi-icon crm-kpi-icon-gold">
+            <Icon name="lightning" size={20} />
+          </span>
         </div>
         <div class="kpi-value">{totalShots.toLocaleString('fa-IR')}</div>
         <div class="kpi-footer">
@@ -135,22 +176,28 @@ const DEVICE_LABEL = 'لیزر تماسی رادو پلاس';
               role="button"
               tabindex={0}
             >
-              <span class="crm-cust-avatar" aria-hidden="true">{c.name?.trim()?.charAt(0) || '؟'}</span>
+              <span class="crm-cust-avatar" aria-hidden="true">
+                {c.name?.trim()?.charAt(0) || '؟'}
+              </span>
               <span class="crm-cust-body">
                 <span class="crm-cust-top">
                   <span class="crm-cust-name">{c.name}</span>
-                  <span class="crm-cust-cat">{c.pricingCategory === 'female' ? 'بانوان' : 'آقایان'}</span>
+                  <span class="crm-cust-cat">
+                    {c.pricingCategory === 'female' ? 'بانوان' : 'آقایان'}
+                  </span>
                 </span>
                 <span class="crm-cust-meta">
-                  <span dir="ltr" class="crm-cust-phone">{c.phone}</span>
-                  <span class="crm-cust-count">{(c.bookingsCount || 1).toLocaleString('fa-IR')} نوبت</span>
+                  <span dir="ltr" class="crm-cust-phone">
+                    {c.phone}
+                  </span>
+                  <span class="crm-cust-count">
+                    {(c.bookingsCount || 1).toLocaleString('fa-IR')} نوبت
+                  </span>
                 </span>
               </span>
             </div>
           ))}
-          {customersList.length === 0 && (
-            <p class="crm-side-empty">هنوز مراجعی ثبت نشده است.</p>
-          )}
+          {customersList.length === 0 && <p class="crm-side-empty">هنوز مراجعی ثبت نشده است.</p>}
         </div>
       </div>
 
@@ -164,11 +211,15 @@ const DEVICE_LABEL = 'لیزر تماسی رادو پلاس';
             <div class="crm-dossier-meta">
               <span class="crm-dossier-phone">
                 <Icon name="phone" size={14} class="meta-icon" />
-                <span id="dossierPhone" dir="ltr">{customersList[0]?.phone || ''}</span>
+                <span id="dossierPhone" dir="ltr">
+                  {customersList[0]?.phone || ''}
+                </span>
               </span>
               <span class="crm-dossier-cat">
                 <Icon name="tag" size={14} class="meta-icon" />
-                <span id="dossierCategory">دسته: {customersList[0]?.pricingCategory === 'female' ? 'بانوان' : 'آقایان'}</span>
+                <span id="dossierCategory">
+                  دسته: {customersList[0]?.pricingCategory === 'female' ? 'بانوان' : 'آقایان'}
+                </span>
               </span>
             </div>
           </div>
@@ -195,7 +246,9 @@ const DEVICE_LABEL = 'لیزر تماسی رادو پلاس';
 
           <div class="crm-progress-head">
             <span class="crm-progress-label">وضعیت پیشرفت پکیج لیزر (تعداد جلسات سپری شده):</span>
-            <span id="dossierProgressText" class="crm-progress-value">جلسه ۲ از ۸ (۲۵٪)</span>
+            <span id="dossierProgressText" class="crm-progress-value">
+              جلسه ۲ از ۸ (۲۵٪)
+            </span>
           </div>
           <div class="crm-progress-track">
             <div id="dossierProgressBar" class="crm-progress-fill"></div>
@@ -212,21 +265,47 @@ const DEVICE_LABEL = 'لیزر تماسی رادو پلاس';
           <table class="admin-table-3d crm-table">
             <thead>
               <tr>
-                <th><Icon name="clock" size={14} class="th-icon" />جلسه</th>
-                <th><Icon name="calendar" size={14} class="th-icon" />تاریخ جلسه</th>
-                <th><Icon name="pin" size={14} class="th-icon" />ناحیه تحت درمان</th>
-                <th><Icon name="lightning" size={14} class="th-icon" />انرژی (J/cm²)</th>
-                <th><Icon name="clock" size={14} class="th-icon" />عرض پالس</th>
-                <th><Icon name="target" size={14} class="th-icon" />شات‌ها</th>
-                <th><Icon name="eye" size={14} class="th-icon" />واکنش پوست</th>
-                <th><Icon name="users" size={14} class="th-icon" />اپراتور</th>
+                <th>
+                  <Icon name="clock" size={14} class="th-icon" />
+                  جلسه
+                </th>
+                <th>
+                  <Icon name="calendar" size={14} class="th-icon" />
+                  تاریخ جلسه
+                </th>
+                <th>
+                  <Icon name="pin" size={14} class="th-icon" />
+                  ناحیه تحت درمان
+                </th>
+                <th>
+                  <Icon name="lightning" size={14} class="th-icon" />
+                  انرژی (J/cm²)
+                </th>
+                <th>
+                  <Icon name="clock" size={14} class="th-icon" />
+                  عرض پالس
+                </th>
+                <th>
+                  <Icon name="target" size={14} class="th-icon" />
+                  شات‌ها
+                </th>
+                <th>
+                  <Icon name="eye" size={14} class="th-icon" />
+                  واکنش پوست
+                </th>
+                <th>
+                  <Icon name="users" size={14} class="th-icon" />
+                  اپراتور
+                </th>
               </tr>
             </thead>
             <tbody id="clinicalRecordsTbody">
               {clinicalRecords.map((r) => (
                 <tr data-custid={r.customer_id}>
                   <td>
-                    <span class="crm-session-badge">جلسه {r.session_number} از {r.total_sessions}</span>
+                    <span class="crm-session-badge">
+                      جلسه {r.session_number} از {r.total_sessions}
+                    </span>
                   </td>
                   <td class="crm-date-cell">{formatJalaliDate(r.created_at)}</td>
                   <td class="crm-area-cell">{r.treated_areas}</td>
@@ -237,7 +316,9 @@ const DEVICE_LABEL = 'لیزر تماسی رادو پلاس';
                     <span class="crm-pulse-chip">{r.pulse_width_ms} ms</span>
                   </td>
                   <td>
-                    <span class="crm-shot-chip">{(Number(r.shot_count) || 0).toLocaleString('fa-IR')}</span>
+                    <span class="crm-shot-chip">
+                      {(Number(r.shot_count) || 0).toLocaleString('fa-IR')}
+                    </span>
                   </td>
                   <td class="crm-reaction-cell">{r.skin_reaction}</td>
                   <td class="crm-operator-cell">{r.operator_name || 'اپراتور'}</td>
@@ -246,8 +327,12 @@ const DEVICE_LABEL = 'لیزر تماسی رادو پلاس';
               {clinicalRecords.length === 0 && (
                 <tr>
                   <td colspan="8" class="crm-empty-row">
-                    <span class="empty-icon-3d"><Icon name="doctor" size={34} /></span>
-                    <span>هنوز جلسه بالینی ثبت نشده است. از دکمه بالا برای ثبت اولین جلسه استفاده کنید.</span>
+                    <span class="empty-icon-3d">
+                      <Icon name="doctor" size={34} />
+                    </span>
+                    <span>
+                      هنوز جلسه بالینی ثبت نشده است. از دکمه بالا برای ثبت اولین جلسه استفاده کنید.
+                    </span>
                   </td>
                 </tr>
               )}
@@ -280,14 +365,30 @@ const DEVICE_LABEL = 'لیزر تماسی رادو پلاس';
               <Icon name="clock" size={14} class="field-icon" />
               <span>شماره جلسه:</span>
             </label>
-            <input type="number" id="recSessionNum" class="form-control-modal" value="1" min="1" max="15" required />
+            <input
+              type="number"
+              id="recSessionNum"
+              class="form-control-modal"
+              value="1"
+              min="1"
+              max="15"
+              required
+            />
           </div>
           <div class="customers-field">
             <label class="form-label-modal" for="recTotalSessions">
               <Icon name="calendar" size={14} class="field-icon" />
               <span>کل جلسات پکیج:</span>
             </label>
-            <input type="number" id="recTotalSessions" class="form-control-modal" value="8" min="1" max="15" required />
+            <input
+              type="number"
+              id="recTotalSessions"
+              class="form-control-modal"
+              value="8"
+              min="1"
+              max="15"
+              required
+            />
           </div>
         </div>
 
@@ -296,7 +397,13 @@ const DEVICE_LABEL = 'لیزر تماسی رادو پلاس';
             <Icon name="pin" size={14} class="field-icon" />
             <span>نواحی تحت درمان:</span>
           </label>
-          <input type="text" id="recAreas" class="form-control-modal" value="فول بادی کاربردی (ساق، ساعد، زیربغل، بیکینی)" required />
+          <input
+            type="text"
+            id="recAreas"
+            class="form-control-modal"
+            value="فول بادی کاربردی (ساق، ساعد، زیربغل، بیکینی)"
+            required
+          />
         </div>
 
         <div class="crm-dose-grid">
@@ -305,21 +412,41 @@ const DEVICE_LABEL = 'لیزر تماسی رادو پلاس';
               <Icon name="lightning" size={14} class="field-icon" />
               <span>انرژی (J/cm²):</span>
             </label>
-            <input type="number" id="recJoules" step="0.5" class="form-control-modal crm-dose-input" value="14.0" required />
+            <input
+              type="number"
+              id="recJoules"
+              step="0.5"
+              class="form-control-modal crm-dose-input"
+              value="14.0"
+              required
+            />
           </div>
           <div class="customers-field">
             <label class="form-label-modal" for="recPulse">
               <Icon name="clock" size={14} class="field-icon" />
               <span>عرض پالس (ms):</span>
             </label>
-            <input type="number" id="recPulse" step="0.5" class="form-control-modal crm-dose-input" value="3.0" required />
+            <input
+              type="number"
+              id="recPulse"
+              step="0.5"
+              class="form-control-modal crm-dose-input"
+              value="3.0"
+              required
+            />
           </div>
           <div class="customers-field">
             <label class="form-label-modal" for="recShots">
               <Icon name="target" size={14} class="field-icon" />
               <span>تعداد شات:</span>
             </label>
-            <input type="number" id="recShots" class="form-control-modal crm-dose-input" value="550" required />
+            <input
+              type="number"
+              id="recShots"
+              class="form-control-modal crm-dose-input"
+              value="550"
+              required
+            />
           </div>
         </div>
 
@@ -328,7 +455,12 @@ const DEVICE_LABEL = 'لیزر تماسی رادو پلاس';
             <Icon name="eye" size={14} class="field-icon" />
             <span>واکنش پوست مراجع:</span>
           </label>
-          <input type="text" id="recReaction" class="form-control-modal" value="اریتم خفیف طبیعی، بدون سوختگی، کمپرس سرد اعمال شد" />
+          <input
+            type="text"
+            id="recReaction"
+            class="form-control-modal"
+            value="اریتم خفیف طبیعی، بدون سوختگی، کمپرس سرد اعمال شد"
+          />
         </div>
 
         <div class="customers-field">
@@ -381,9 +513,15 @@ const DEVICE_LABEL = 'لیزر تماسی رادو پلاس';
       margin-bottom: 24px;
     }
 
-    .crm-kpi-icon-gold { color: #f5d77f; }
-    .crm-kpi-icon-blue { color: #38bdf8; }
-    .crm-kpi-icon-green { color: #34d399; }
+    .crm-kpi-icon-gold {
+      color: #f5d77f;
+    }
+    .crm-kpi-icon-blue {
+      color: #38bdf8;
+    }
+    .crm-kpi-icon-green {
+      color: #34d399;
+    }
 
     .crm-kpi-progress-value {
       color: #34d399;
@@ -408,9 +546,15 @@ const DEVICE_LABEL = 'لیزر تماسی رادو پلاس';
 
     .crm-side-card {
       padding: 18px !important;
-      background: linear-gradient(160deg, rgba(22, 27, 40, 0.96) 0%, rgba(11, 14, 22, 0.96) 100%) !important;
+      background: linear-gradient(
+        160deg,
+        rgba(22, 27, 40, 0.96) 0%,
+        rgba(11, 14, 22, 0.96) 100%
+      ) !important;
       border: 1px solid rgba(212, 175, 55, 0.22) !important;
-      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.06), 0 14px 34px rgba(0, 0, 0, 0.4) !important;
+      box-shadow:
+        inset 0 1px 1px rgba(255, 255, 255, 0.06),
+        0 14px 34px rgba(0, 0, 0, 0.4) !important;
     }
 
     .crm-side-title {
@@ -497,9 +641,15 @@ const DEVICE_LABEL = 'لیزر تماسی رادو پلاس';
     }
 
     .crm-cust-item.active {
-      background: linear-gradient(160deg, rgba(212, 175, 55, 0.18) 0%, rgba(212, 175, 55, 0.05) 100%);
+      background: linear-gradient(
+        160deg,
+        rgba(212, 175, 55, 0.18) 0%,
+        rgba(212, 175, 55, 0.05) 100%
+      );
       border-color: rgba(212, 175, 55, 0.55);
-      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1), 0 6px 16px rgba(0, 0, 0, 0.3);
+      box-shadow:
+        inset 0 1px 1px rgba(255, 255, 255, 0.1),
+        0 6px 16px rgba(0, 0, 0, 0.3);
     }
 
     .crm-cust-avatar {
@@ -514,7 +664,9 @@ const DEVICE_LABEL = 'لیزر تماسی رادو پلاس';
       font-weight: 900;
       color: #0d0a02;
       background: linear-gradient(160deg, #f5d77f 0%, #d4af37 55%, #9e7822 100%);
-      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.6);
+      box-shadow:
+        0 3px 8px rgba(0, 0, 0, 0.45),
+        inset 0 1px 1px rgba(255, 255, 255, 0.6);
     }
 
     .crm-cust-body {
@@ -560,7 +712,9 @@ const DEVICE_LABEL = 'لیزر تماسی رادو پلاس';
       gap: 8px;
     }
 
-    .crm-cust-count { white-space: nowrap; }
+    .crm-cust-count {
+      white-space: nowrap;
+    }
 
     .crm-side-empty {
       text-align: center;
@@ -574,9 +728,15 @@ const DEVICE_LABEL = 'لیزر تماسی رادو پلاس';
 
     .crm-dossier-card {
       padding: 24px !important;
-      background: linear-gradient(160deg, rgba(22, 27, 40, 0.96) 0%, rgba(11, 14, 22, 0.96) 100%) !important;
+      background: linear-gradient(
+        160deg,
+        rgba(22, 27, 40, 0.96) 0%,
+        rgba(11, 14, 22, 0.96) 100%
+      ) !important;
       border: 1px solid rgba(212, 175, 55, 0.22) !important;
-      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.06), 0 14px 34px rgba(0, 0, 0, 0.4) !important;
+      box-shadow:
+        inset 0 1px 1px rgba(255, 255, 255, 0.06),
+        0 14px 34px rgba(0, 0, 0, 0.4) !important;
     }
 
     .crm-dossier-head {
@@ -657,7 +817,9 @@ const DEVICE_LABEL = 'لیزر تماسی رادو پلاس';
       border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     }
 
-    .crm-device-name { color: #94a3b8; }
+    .crm-device-name {
+      color: #94a3b8;
+    }
     .crm-device-value {
       color: #f5d77f;
       font-weight: 800;
@@ -674,7 +836,9 @@ const DEVICE_LABEL = 'لیزر تماسی رادو پلاس';
       font-weight: 700;
     }
 
-    .crm-progress-label { color: #cbd5e1; }
+    .crm-progress-label {
+      color: #cbd5e1;
+    }
 
     .crm-progress-value {
       color: #38bdf8;
@@ -947,7 +1111,7 @@ const DEVICE_LABEL = 'لیزر تماسی رادو پلاس';
     // Select customer item
     custItems.forEach((el) => {
       el.addEventListener('click', () => {
-        custItems.forEach(i => i.classList.remove('active'));
+        custItems.forEach((i) => i.classList.remove('active'));
         el.classList.add('active');
         const item = el as HTMLElement;
         activeCustId = item.dataset.id || '';
@@ -959,12 +1123,14 @@ const DEVICE_LABEL = 'لیزر تماسی رادو پلاس';
 
         if (nameEl) nameEl.innerText = item.dataset.name || '';
         if (phoneEl) phoneEl.innerText = item.dataset.phone || '';
-        if (catEl) catEl.innerText = `دسته: ${item.dataset.category === 'female' ? 'بانوان' : 'آقایان'}`;
+        if (catEl)
+          catEl.innerText = `دسته: ${item.dataset.category === 'female' ? 'بانوان' : 'آقایان'}`;
         if (recCustId) recCustId.value = activeCustId;
 
         // Update progress bar from this customer's latest recorded session
-        const visible = Array.from(document.querySelectorAll('#clinicalRecordsTbody tr[data-custid]'))
-          .filter((r) => (r as HTMLElement).dataset.custid === activeCustId);
+        const visible = Array.from(
+          document.querySelectorAll('#clinicalRecordsTbody tr[data-custid]'),
+        ).filter((r) => (r as HTMLElement).dataset.custid === activeCustId);
         const barEl = document.getElementById('dossierProgressBar');
         const textEl = document.getElementById('dossierProgressText');
         if (visible.length > 0 && barEl && textEl) {
@@ -984,7 +1150,7 @@ const DEVICE_LABEL = 'لیزر تماسی رادو پلاس';
 
         // Filter clinical records table
         const rows = document.querySelectorAll('#clinicalRecordsTbody tr');
-        rows.forEach(r => {
+        rows.forEach((r) => {
           const row = r as HTMLElement;
           if (!row.dataset.custid || row.dataset.custid === activeCustId) {
             row.style.display = '';
@@ -1035,7 +1201,9 @@ const DEVICE_LABEL = 'لیزر تماسی رادو پلاس';
       const payload = {
         customerId: activeCustId,
         sessionNumber: Number((document.getElementById('recSessionNum') as HTMLInputElement).value),
-        totalSessions: Number((document.getElementById('recTotalSessions') as HTMLInputElement).value),
+        totalSessions: Number(
+          (document.getElementById('recTotalSessions') as HTMLInputElement).value,
+        ),
         treatedAreas: (document.getElementById('recAreas') as HTMLInputElement).value.trim(),
         joulesEnergy: Number((document.getElementById('recJoules') as HTMLInputElement).value),
         pulseWidthMs: Number((document.getElementById('recPulse') as HTMLInputElement).value),

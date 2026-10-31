@@ -59,7 +59,15 @@ export function wallClockOf(instantIso: string, timeZone: string): WallClock {
 /** Offset (ms) of `timeZone` from UTC at the given instant. */
 export function timezoneOffsetMs(instant: Date, timeZone: string): number {
   const wall = wallClockOf(instant.toISOString(), timeZone);
-  const asUtc = Date.UTC(wall.year, wall.month - 1, wall.day, wall.hour, wall.minute, instant.getUTCSeconds(), instant.getUTCMilliseconds());
+  const asUtc = Date.UTC(
+    wall.year,
+    wall.month - 1,
+    wall.day,
+    wall.hour,
+    wall.minute,
+    instant.getUTCSeconds(),
+    instant.getUTCMilliseconds(),
+  );
   return asUtc - instant.getTime();
 }
 
@@ -80,7 +88,9 @@ export function weekdayOf(localDate: string): number {
  *  Slot grids are built on this axis so alignment never depends on UTC offsets. */
 export function localMinutesOf(instantIso: string, timeZone: string): number {
   const wall = wallClockOf(instantIso, timeZone);
-  return Math.round(Date.UTC(wall.year, wall.month - 1, wall.day, wall.hour, wall.minute) / MS_PER_MINUTE);
+  return Math.round(
+    Date.UTC(wall.year, wall.month - 1, wall.day, wall.hour, wall.minute) / MS_PER_MINUTE,
+  );
 }
 
 /** Inverse of localMinutesOf: the instant whose wall clock equals those minutes. */
@@ -120,11 +130,6 @@ export function minutesBetween(aIso: string, bIso: string): number {
 }
 
 /** True when [aStart, aEnd) overlaps [bStart, bEnd). */
-export function overlaps(
-  aStart: string,
-  aEnd: string,
-  bStart: string,
-  bEnd: string,
-): boolean {
+export function overlaps(aStart: string, aEnd: string, bStart: string, bEnd: string): boolean {
   return Date.parse(aStart) < Date.parse(bEnd) && Date.parse(bStart) < Date.parse(aEnd);
 }

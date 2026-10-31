@@ -72,6 +72,8 @@ export function buildRequestLog(input: RequestLogInput): Record<string, string |
 export function logRequest(input: RequestLogInput): void {
   if (!input.pathname.startsWith('/api')) return;
   try {
+    /* eslint-disable-next-line no-console -- structured JSON request log: Workers
+       logpush/tail capture requires console output; `warn`/`error` would skew severity. */
     console.log(JSON.stringify(buildRequestLog(input)));
   } catch {
     /* a logging failure must never fail a request */

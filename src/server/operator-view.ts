@@ -46,7 +46,9 @@ export async function loadOperatorCatalog(db: Queryable) {
   };
 }
 
-export async function loadServiceOptions(db: Queryable): Promise<Array<{ id: string; name: string }>> {
+export async function loadServiceOptions(
+  db: Queryable,
+): Promise<Array<{ id: string; name: string }>> {
   const services = await listAdminServices(db);
   return services.map((service) => ({ id: service.id, name: service.name }));
 }
@@ -96,7 +98,9 @@ export async function buildRosterView(options: {
     console.error('[operators] failed to load SSR roster:', error);
   }
 
-  const activeToday = operators.filter((operator) => operator.active && operator.workdays.includes(todayIndex));
+  const activeToday = operators.filter(
+    (operator) => operator.active && operator.workdays.includes(todayIndex),
+  );
 
   return {
     initial: {

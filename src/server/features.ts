@@ -14,7 +14,12 @@
 import { ApiError } from '../lib/api/errors';
 import { all, one, run } from '../db/query';
 import type { Queryable } from '../db/query';
-import { getModuleDef, isKnownModuleKey, buildConfigSchema, defaultConfig } from '../domain/features/registry';
+import {
+  getModuleDef,
+  isKnownModuleKey,
+  buildConfigSchema,
+  defaultConfig,
+} from '../domain/features/registry';
 import {
   mergeAdminModules,
   mergeModuleStates,
@@ -125,7 +130,8 @@ export async function persistModule(
       : existing
         ? existing.enabled === 1
         : def.defaultEnabled;
-  const order = input.order !== undefined ? input.order : existing ? existing.displayOrder : def.defaultOrder;
+  const order =
+    input.order !== undefined ? input.order : existing ? existing.displayOrder : def.defaultOrder;
 
   let config: ModuleConfig;
   if (input.config !== undefined) {

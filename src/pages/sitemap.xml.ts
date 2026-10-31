@@ -110,7 +110,10 @@ export const GET: APIRoute = async () => {
   }));
 
   // Newest catalog timestamp drives <lastmod> for the content-backed static pages.
-  const newestContent = [...validServices.map((s) => s.updatedAt), ...validBlog.map((b) => b.updatedAt || b.publishedAt)]
+  const newestContent = [
+    ...validServices.map((s) => s.updatedAt),
+    ...validBlog.map((b) => b.updatedAt || b.publishedAt),
+  ]
     .filter((d): d is string => Boolean(d))
     .sort()
     .pop();

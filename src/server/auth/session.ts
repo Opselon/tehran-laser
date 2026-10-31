@@ -100,7 +100,11 @@ export async function loadAuthUser(
   };
 }
 
-export async function revokeSession(db: D1Database, token: string, now: Date = new Date()): Promise<void> {
+export async function revokeSession(
+  db: D1Database,
+  token: string,
+  now: Date = new Date(),
+): Promise<void> {
   if (!token) return;
   const sessionId = await sha256Hex(token);
   await db

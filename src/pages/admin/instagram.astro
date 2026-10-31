@@ -4,7 +4,10 @@ import { env } from 'cloudflare:workers';
 import { getAllSettings } from '../../server/repositories';
 import Icon from '../../components/ui/Icon.astro';
 
-let settings: { public: Record<string, string>; private: Record<string, string> } = { public: {}, private: {} };
+let settings: { public: Record<string, string>; private: Record<string, string> } = {
+  public: {},
+  private: {},
+};
 
 try {
   settings = await getAllSettings(env.DB);
@@ -15,7 +18,8 @@ try {
 const igUser = settings.public.instagram_username || 'tehranlaser_clinic';
 const igBio = settings.public.instagram_bio_link || 'https://tehranlaser.ir';
 const igPromo = settings.public.instagram_promo_code || 'INSTA20';
-const igReel = settings.public.instagram_latest_reel_url || 'https://instagram.com/reel/C7-placeholder';
+const igReel =
+  settings.public.instagram_latest_reel_url || 'https://instagram.com/reel/C7-placeholder';
 const igDisc = settings.public.instagram_follower_discount_percent || '15';
 ---
 
@@ -24,14 +28,18 @@ const igDisc = settings.public.instagram_follower_discount_percent || '15';
     <!-- Header -->
     <div class="dashboard-header-row">
       <div>
-        <h1 class="admin-page-title" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+        <h1
+          class="admin-page-title"
+          style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;"
+        >
           <span class="ig-title-emblem">
             <Icon name="instagram" size={24} />
           </span>
           <span>سوشال هاب و تنظیمات یکپارچه‌سازی اینستاگرام</span>
         </h1>
         <p class="section-block-sub">
-          اتصال پیج رسمی، کدهای تخفیف فالوورها، ریلزهای آموزشی لیزر تماسی و تبدیل بازدیدکنندگان به مراجعین وفادار (API First)
+          اتصال پیج رسمی، کدهای تخفیف فالوورها، ریلزهای آموزشی لیزر تماسی و تبدیل بازدیدکنندگان به
+          مراجعین وفادار (API First)
         </p>
       </div>
       <div class="actions">
@@ -59,7 +67,10 @@ const igDisc = settings.public.instagram_follower_discount_percent || '15';
     </div>
 
     <!-- KPI Grid -->
-    <div class="kpi-grid-3d" style="grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); margin-bottom: 26px;">
+    <div
+      class="kpi-grid-3d"
+      style="grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); margin-bottom: 26px;"
+    >
       <div class="kpi-card-3d">
         <div class="kpi-header">
           <span class="kpi-title">دنبال‌کنندگان (فالوورها)</span>
@@ -70,7 +81,10 @@ const igDisc = settings.public.instagram_follower_discount_percent || '15';
         <div class="kpi-value" style="color: #f5d77f;">
           ۴۸.۵K
         </div>
-        <div class="kpi-footer" style="color: #34d399; display: flex; align-items: center; gap: 6px;">
+        <div
+          class="kpi-footer"
+          style="color: #34d399; display: flex; align-items: center; gap: 6px;"
+        >
           <span class="live-dot"></span>
           <span>جامعه فعال مراجعین کلینیک</span>
         </div>
@@ -102,7 +116,10 @@ const igDisc = settings.public.instagram_follower_discount_percent || '15';
           {igDisc}٪
         </div>
         <div class="kpi-footer" style="color: #cbd5e1;">
-          کد فعال: <code style="color: #f5d77f;" id="kpiPromoCode">{igPromo}</code>
+          کد فعال:{' '}
+          <code style="color: #f5d77f;" id="kpiPromoCode">
+            {igPromo}
+          </code>
         </div>
       </div>
 
@@ -264,7 +281,8 @@ const igDisc = settings.public.instagram_follower_discount_percent || '15';
             </h4>
             <span class="ig-profile-badge">کلینیک تخصصی تهران لیزر | پاسداران</span>
             <p class="ig-profile-bio">
-              مرکز تخصصی لیزر موهای زائد با دستگاه اورجینال لیزر تماسی رادو پلاس • با پروتکل بهداشتی اختصاصی
+              مرکز تخصصی لیزر موهای زائد با دستگاه اورجینال لیزر تماسی رادو پلاس • با پروتکل بهداشتی
+              اختصاصی
             </p>
           </div>
 
@@ -297,8 +315,12 @@ const igDisc = settings.public.instagram_follower_discount_percent || '15';
               </button>
             </div>
             <div class="ig-coupon-bottom">
-              <code id="mockPromo" class="ig-coupon-code">{igPromo}</code>
-              <span id="mockDisc" class="ig-coupon-rate">({igDisc}٪ تخفیف)</span>
+              <code id="mockPromo" class="ig-coupon-code">
+                {igPromo}
+              </code>
+              <span id="mockDisc" class="ig-coupon-rate">
+                ({igDisc}٪ تخفیف)
+              </span>
             </div>
           </div>
 
@@ -306,7 +328,9 @@ const igDisc = settings.public.instagram_follower_discount_percent || '15';
           <div class="ig-bio-link-box">
             <a id="mockLink" href={igBio} target="_blank" rel="noopener" class="ig-bio-anchor">
               <Icon name="globe" size={14} />
-              <span id="mockLinkText" class="ig-bio-text">{igBio}</span>
+              <span id="mockLinkText" class="ig-bio-text">
+                {igBio}
+              </span>
               <Icon name="external" size={12} />
             </a>
           </div>
@@ -438,7 +462,9 @@ const igDisc = settings.public.instagram_follower_discount_percent || '15';
       border: 1px solid rgba(225, 48, 108, 0.35);
       border-radius: 28px;
       padding: 20px 22px 24px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75), 0 0 30px rgba(225, 48, 108, 0.15);
+      box-shadow:
+        0 20px 50px rgba(0, 0, 0, 0.75),
+        0 0 30px rgba(225, 48, 108, 0.15);
       overflow: hidden;
     }
     .ig-device-bar {
@@ -736,7 +762,8 @@ const igDisc = settings.public.instagram_follower_discount_percent || '15';
 
     form?.addEventListener('submit', async (e) => {
       e.preventDefault();
-      if (!saveBtn || !usernameInput || !bioInput || !promoInput || !discInput || !reelInput) return;
+      if (!saveBtn || !usernameInput || !bioInput || !promoInput || !discInput || !reelInput)
+        return;
 
       saveBtn.disabled = true;
       if (saveBtnText) saveBtnText.innerText = 'در حال ذخیره‌سازی...';

@@ -55,7 +55,8 @@ try {
           <span>تقویم زمان‌بندی روزانه کلینیک</span>
         </h1>
         <p class="section-block-sub">
-          نمایش نوبت‌ها به تفکیک روز انتخابی — <strong style="color: #f5d77f;">{formatJalaliDate(targetDate)}</strong>
+          نمایش نوبت‌ها به تفکیک روز انتخابی —{' '}
+          <strong style="color: #f5d77f;">{formatJalaliDate(targetDate)}</strong>
         </p>
       </div>
 
@@ -130,11 +131,19 @@ try {
           </div>
           <p class="empty-text">هیچ نوبتی برای این روز ثبت نشده است.</p>
           <div class="cal-empty-actions">
-            <a href={`/admin/calendar?date=${todayIso}`} class="btn-3d-gold" style="font-size: 0.85rem; padding: 8px 16px;">
+            <a
+              href={`/admin/calendar?date=${todayIso}`}
+              class="btn-3d-gold"
+              style="font-size: 0.85rem; padding: 8px 16px;"
+            >
               <Icon name="clock" size={15} />
               <span>مشاهده نوبت‌های امروز</span>
             </a>
-            <a href="/admin/bookings" class="btn-3d-secondary" style="font-size: 0.85rem; padding: 8px 16px;">
+            <a
+              href="/admin/bookings"
+              class="btn-3d-secondary"
+              style="font-size: 0.85rem; padding: 8px 16px;"
+            >
               <Icon name="bookings" size={15} />
               <span>کنسول مدیریت تمام نوبت‌ها</span>
             </a>
@@ -186,14 +195,18 @@ try {
                         <Icon name="users" size={14} />
                         <strong>بخش:</strong>
                       </span>
-                      <span class="meta-item-value">{b.pricingCategory === 'female' ? 'بانوان' : 'آقایان'}</span>
+                      <span class="meta-item-value">
+                        {b.pricingCategory === 'female' ? 'بانوان' : 'آقایان'}
+                      </span>
                     </div>
                     <div class="meta-item cal-meta-item">
                       <span class="meta-item-label">
                         <Icon name="cash" size={14} />
                         <strong>مبلغ:</strong>
                       </span>
-                      <span class="meta-item-value font-tabular">{(b.quotedAmount * 1000).toLocaleString('fa-IR')} ت</span>
+                      <span class="meta-item-value font-tabular">
+                        {(b.quotedAmount * 1000).toLocaleString('fa-IR')} ت
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -270,7 +283,11 @@ try {
       width: 44px;
       height: 44px;
       border-radius: 14px;
-      background: linear-gradient(135deg, rgba(212, 175, 55, 0.22) 0%, rgba(212, 175, 55, 0.06) 100%);
+      background: linear-gradient(
+        135deg,
+        rgba(212, 175, 55, 0.22) 0%,
+        rgba(212, 175, 55, 0.06) 100%
+      );
       border: 1px solid rgba(212, 175, 55, 0.4);
       color: #f5d77f;
       box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
@@ -336,7 +353,11 @@ try {
     }
 
     .btn-cal-today-active {
-      background: linear-gradient(135deg, rgba(212, 175, 55, 0.3) 0%, rgba(212, 175, 55, 0.15) 100%);
+      background: linear-gradient(
+        135deg,
+        rgba(212, 175, 55, 0.3) 0%,
+        rgba(212, 175, 55, 0.15) 100%
+      );
       border-color: rgba(212, 175, 55, 0.5);
       color: #f5d77f;
       box-shadow: 0 2px 8px rgba(212, 175, 55, 0.2);
@@ -387,7 +408,9 @@ try {
       border-radius: 22px;
       border: 1px solid rgba(212, 175, 55, 0.24);
       background: rgba(11, 14, 22, 0.95);
-      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.08);
+      box-shadow:
+        0 16px 36px rgba(0, 0, 0, 0.55),
+        inset 0 1px 1px rgba(255, 255, 255, 0.08);
     }
 
     .cal-section-header {
@@ -464,17 +487,24 @@ try {
       border: 1px solid rgba(212, 175, 55, 0.32);
       border-radius: 18px;
       padding: 20px;
-      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.08);
+      box-shadow:
+        0 14px 30px rgba(0, 0, 0, 0.5),
+        inset 0 1px 1px rgba(255, 255, 255, 0.08);
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+      transition:
+        transform 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
     }
 
     .cal-booking-card:hover {
       transform: translateY(-2px);
       border-color: rgba(212, 175, 55, 0.55);
-      box-shadow: 0 18px 36px rgba(0, 0, 0, 0.65), 0 0 16px rgba(212, 175, 55, 0.2);
+      box-shadow:
+        0 18px 36px rgba(0, 0, 0, 0.65),
+        0 0 16px rgba(212, 175, 55, 0.2);
     }
 
     .customer-name {

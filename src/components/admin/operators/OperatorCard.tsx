@@ -49,7 +49,8 @@ export function OperatorCard({
   onMove,
 }: OperatorCardProps) {
   const status = operatorStatusOf(operator);
-  const onShiftToday = !operator.archivedAt && operator.active && operator.workdays.includes(todayWeekday);
+  const onShiftToday =
+    !operator.archivedAt && operator.active && operator.workdays.includes(todayWeekday);
   const statusLabel = status === 'active' ? 'فعال' : status === 'inactive' ? 'غیرفعال' : 'بایگانی';
 
   return (
@@ -60,7 +61,9 @@ export function OperatorCard({
       <div className="ops-card__top">
         <div
           className="ops-avatar"
-          style={{ background: `linear-gradient(150deg, ${operator.avatarColor}, ${shade(operator.avatarColor)})` }}
+          style={{
+            background: `linear-gradient(150deg, ${operator.avatarColor}, ${shade(operator.avatarColor)})`,
+          }}
           aria-hidden="true"
         >
           {operator.initials}
@@ -95,7 +98,8 @@ export function OperatorCard({
         <div className="ops-card__meta-row">
           <IconReact name="clock" size={14} />
           <span>
-            {operator.shiftStart}–{operator.shiftEnd} · {Math.round(shiftMinutes(operator) / 60)} ساعت
+            {operator.shiftStart}–{operator.shiftEnd} · {Math.round(shiftMinutes(operator) / 60)}{' '}
+            ساعت
           </span>
         </div>
         <div className="ops-card__meta-row">
@@ -135,7 +139,10 @@ export function OperatorCard({
         </div>
         <div className="ops-stat">
           <span className="ops-stat__k">درآمد ثبت‌شده</span>
-          <span className="ops-stat__v" title={`${operator.stats.revenue.toLocaleString('fa-IR')} تومان`}>
+          <span
+            className="ops-stat__v"
+            title={`${operator.stats.revenue.toLocaleString('fa-IR')} تومان`}
+          >
             {formatToman(operator.stats.revenue)}
           </span>
         </div>
@@ -150,27 +157,52 @@ export function OperatorCard({
 
       <div className="ops-card__actions">
         {canWrite && status !== 'archived' && (
-          <button type="button" className="ops-btn ops-btn--sm" onClick={() => onEdit(operator)} disabled={busy}>
+          <button
+            type="button"
+            className="ops-btn ops-btn--sm"
+            onClick={() => onEdit(operator)}
+            disabled={busy}
+          >
             <IconReact name="edit" size={14} /> ویرایش
           </button>
         )}
         {canManageAccounts && status !== 'archived' && (
-          <button type="button" className="ops-btn ops-btn--sm" onClick={() => onAccount(operator)} disabled={busy}>
+          <button
+            type="button"
+            className="ops-btn ops-btn--sm"
+            onClick={() => onAccount(operator)}
+            disabled={busy}
+          >
             <IconReact name="lock" size={14} /> {operator.account ? 'بازنشانی رمز' : 'صدور حساب'}
           </button>
         )}
         {canWrite && status !== 'archived' && (
-          <button type="button" className="ops-btn ops-btn--sm ops-btn--ghost" onClick={() => onToggleActive(operator)} disabled={busy}>
+          <button
+            type="button"
+            className="ops-btn ops-btn--sm ops-btn--ghost"
+            onClick={() => onToggleActive(operator)}
+            disabled={busy}
+          >
             {operator.active ? 'غیرفعال‌سازی' : 'فعال‌سازی'}
           </button>
         )}
         {canWrite && status !== 'archived' && (
-          <button type="button" className="ops-btn ops-btn--sm ops-btn--danger" onClick={() => onArchive(operator)} disabled={busy}>
+          <button
+            type="button"
+            className="ops-btn ops-btn--sm ops-btn--danger"
+            onClick={() => onArchive(operator)}
+            disabled={busy}
+          >
             بایگانی
           </button>
         )}
         {canWrite && status === 'archived' && (
-          <button type="button" className="ops-btn ops-btn--sm ops-btn--primary" onClick={() => onRestore(operator)} disabled={busy}>
+          <button
+            type="button"
+            className="ops-btn ops-btn--sm ops-btn--primary"
+            onClick={() => onRestore(operator)}
+            disabled={busy}
+          >
             <IconReact name="refresh" size={14} /> بازیابی
           </button>
         )}
@@ -214,7 +246,9 @@ function shade(hex: string): string {
   const match = /^#([0-9a-f]{6})$/i.exec(hex);
   if (!match) return '#0b1220';
   const value = match[1]!;
-  const channels = [0, 2, 4].map((offset) => Math.round(parseInt(value.slice(offset, offset + 2), 16) * 0.55));
+  const channels = [0, 2, 4].map((offset) =>
+    Math.round(parseInt(value.slice(offset, offset + 2), 16) * 0.55),
+  );
   return `#${channels.map((channel) => channel.toString(16).padStart(2, '0')).join('')}`;
 }
 

@@ -46,11 +46,7 @@ describe('purgeEdgeRoutes', () => {
 
     await purgeEdgeRoutes(ORIGIN, ['/', '/booking', '/blog']);
 
-    expect(deleted.sort()).toEqual([
-      `${ORIGIN}/`,
-      `${ORIGIN}/blog`,
-      `${ORIGIN}/booking`,
-    ]);
+    expect(deleted.sort()).toEqual([`${ORIGIN}/`, `${ORIGIN}/blog`, `${ORIGIN}/booking`]);
   });
 
   it('builds cache keys with GET and no headers, matching the middleware key', async () => {

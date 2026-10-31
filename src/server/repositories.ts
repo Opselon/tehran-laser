@@ -220,10 +220,18 @@ export async function listAdminServices(db: Queryable): Promise<AdminServiceDto[
     ),
   ]);
 
-  const priceMap = new Map<string, Array<{ id: string; pricingCategory: PricingCategory; amount: number; currency: string }>>();
+  const priceMap = new Map<
+    string,
+    Array<{ id: string; pricingCategory: PricingCategory; amount: number; currency: string }>
+  >();
   for (const p of prices) {
     const list = priceMap.get(p.serviceId) ?? [];
-    list.push({ id: p.id, pricingCategory: p.pricingCategory, amount: p.amount, currency: p.currency });
+    list.push({
+      id: p.id,
+      pricingCategory: p.pricingCategory,
+      amount: p.amount,
+      currency: p.currency,
+    });
     priceMap.set(p.serviceId, list);
   }
 
@@ -273,7 +281,15 @@ export async function listBusinessHours(db: Queryable): Promise<BusinessHoursDto
 export async function listScheduleExceptionsForDate(
   db: Queryable,
   localDate: string,
-): Promise<Array<{ date: string; kind: ScheduleExceptionKind; opensAt: string | null; closesAt: string | null; note: string | null }>> {
+): Promise<
+  Array<{
+    date: string;
+    kind: ScheduleExceptionKind;
+    opensAt: string | null;
+    closesAt: string | null;
+    note: string | null;
+  }>
+> {
   const rows = await all<{
     id: string;
     exceptionDate: string;
@@ -298,14 +314,16 @@ export async function listScheduleExceptionsForDate(
   }));
 }
 
-export async function listAllScheduleExceptions(db: Queryable): Promise<Array<{
-  id: string;
-  exceptionDate: string;
-  kind: ScheduleExceptionKind;
-  opensAt: string | null;
-  closesAt: string | null;
-  note: string | null;
-}>> {
+export async function listAllScheduleExceptions(db: Queryable): Promise<
+  Array<{
+    id: string;
+    exceptionDate: string;
+    kind: ScheduleExceptionKind;
+    opensAt: string | null;
+    closesAt: string | null;
+    note: string | null;
+  }>
+> {
   return all(
     db,
     `SELECT id, exception_date AS exceptionDate, kind, opens_at AS opensAt,
@@ -1221,6 +1239,7 @@ export async function adminQuickSearch(
     });
   }
 
-  return out.sort((a, b) => b.score - a.score || a.title.localeCompare(b.title)).slice(0, safeLimit);
+  return out
+    .sort((a, b) => b.score - a.score || a.title.localeCompare(b.title))
+    .slice(0, safeLimit);
 }
-

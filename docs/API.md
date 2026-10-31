@@ -28,18 +28,18 @@ buttons is never authorization.
 
 ## Public
 
-| Method | Path | Query/Body | Response `data` | Notes |
-| --- | --- | --- | --- | --- |
-| GET | `/api/v1/services` | – | `PublicServiceDto[]` | active services, ordered by `displayOrder`, with price rows |
-| GET | `/api/v1/services/:slug` | – | `PublicServiceDto` | `404 NOT_FOUND` if missing/inactive |
-| GET | `/api/v1/availability` | `service, date, category, staffId?` | `AvailabilityResponseDto` | `date` = `YYYY-MM-DD` clinic-local |
-| POST | `/api/v1/bookings` | `CreateBookingInput` | `PublicBookingSummaryDto` | `201`; rate limited; idempotent via `idempotencyKey` |
-| GET | `/api/v1/blog` | `cursor?, limit?` | `PageDto<PublicBlogPostDto>` | published only |
-| GET | `/api/v1/blog/:slug` | – | `PublicBlogPostDto` | `404` for non-published |
-| GET | `/api/v1/clinic` | – | `ClinicInfoDto` | `{ settings: PublicSettingsDto, hours: BusinessHoursDto[] }` |
-| GET | `/api/v1/settings/public` | – | `PublicSettingsDto` | public scope only — never private keys |
-| GET | `/api/v1/features` | – | `{ key, config }[]` | **enabled public modules only** — a disabled module is absent, not `enabled:false` |
-| GET | `/api/health` | – | `HealthDto` | lightweight; no heavy diagnostics |
+| Method | Path                      | Query/Body                          | Response `data`              | Notes                                                                              |
+| ------ | ------------------------- | ----------------------------------- | ---------------------------- | ---------------------------------------------------------------------------------- |
+| GET    | `/api/v1/services`        | –                                   | `PublicServiceDto[]`         | active services, ordered by `displayOrder`, with price rows                        |
+| GET    | `/api/v1/services/:slug`  | –                                   | `PublicServiceDto`           | `404 NOT_FOUND` if missing/inactive                                                |
+| GET    | `/api/v1/availability`    | `service, date, category, staffId?` | `AvailabilityResponseDto`    | `date` = `YYYY-MM-DD` clinic-local                                                 |
+| POST   | `/api/v1/bookings`        | `CreateBookingInput`                | `PublicBookingSummaryDto`    | `201`; rate limited; idempotent via `idempotencyKey`                               |
+| GET    | `/api/v1/blog`            | `cursor?, limit?`                   | `PageDto<PublicBlogPostDto>` | published only                                                                     |
+| GET    | `/api/v1/blog/:slug`      | –                                   | `PublicBlogPostDto`          | `404` for non-published                                                            |
+| GET    | `/api/v1/clinic`          | –                                   | `ClinicInfoDto`              | `{ settings: PublicSettingsDto, hours: BusinessHoursDto[] }`                       |
+| GET    | `/api/v1/settings/public` | –                                   | `PublicSettingsDto`          | public scope only — never private keys                                             |
+| GET    | `/api/v1/features`        | –                                   | `{ key, config }[]`          | **enabled public modules only** — a disabled module is absent, not `enabled:false` |
+| GET    | `/api/health`             | –                                   | `HealthDto`                  | lightweight; no heavy diagnostics                                                  |
 
 ### POST /api/v1/bookings (authoritative flow)
 
@@ -60,24 +60,24 @@ buttons is never authorization.
 
 ## Admin (all require session + permission)
 
-| Group | Endpoints | Permission |
-| --- | --- | --- |
-| dashboard | `GET /admin/dashboard` | `booking.read` |
-| bookings | `GET /admin/bookings`, `GET /admin/bookings/:id` | `booking.read` |
-| booking timeline | `GET /admin/bookings/:id/timeline` | `booking.read` |
-| booking actions | `POST /admin/bookings/:id/{accept,reject,cancel,reschedule,complete,no-show}` | `booking.accept` / `booking.reject` / `booking.cancel` / `booking.reschedule` / `booking.complete` |
-| services | `GET /admin/services` (`service.read`), `POST`, `PUT /:id`, `DELETE /:id` (`service.write`) | |
-| pricing | `GET /admin/pricing` → `AdminPriceDto[]` (`pricing.read`), `POST /admin/pricing` (upsert, `pricing.write`), `PUT /admin/pricing/:id` (`pricing.write`) | |
-| staff | `GET /admin/staff` (`staff.read`), `POST`, `PUT /:id` (`staff.write`) — body `{ name, active, serviceSlugs: string[] }` | |
-| schedule | `GET /admin/schedule` → `ScheduleDto`, `PUT /admin/schedule` body `ScheduleDto` (full replace, validated) (`schedule.*`) | |
-| customers | `GET /admin/customers` (`customer.read`), `GET /:id`, `PUT /:id` (`customer.update`) | |
-| blog | `GET /admin/blog` (`blog.read`), `POST`, `PUT /:id`, `DELETE /:id` (`blog.write`) | |
-| seo | `GET /admin/seo?entityType&entityId` → `SeoMetadataDto[]` (`seo.read`), `PUT /admin/seo` upsert body `{ entityType, entityId, title, description, canonicalUrl, ogImage, noindex }` (`seo.write`) | |
-| faq | `GET /admin/faq` → `FaqItemDto[]` (unpaginated, bounded) (`settings.read`), `POST`, `PUT /:id`, `DELETE /:id` (`settings.write`) | |
-| settings | `GET /admin/settings` (`settings.read`), `PUT /admin/settings` (`settings.write`) | |
-| notifications | `GET /admin/notifications` (`settings.read`) | |
-| audit | `GET /admin/audit` (`audit.read`) | |
-| features | `GET /admin/features` (`settings.read`), `PUT /admin/features/:key` (`settings.write`), `DELETE /admin/features/:key` (reset to registry default, `settings.write`), `POST /admin/features/order` (`settings.write`) | |
+| Group            | Endpoints                                                                                                                                                                                                            | Permission                                                                                         |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| dashboard        | `GET /admin/dashboard`                                                                                                                                                                                               | `booking.read`                                                                                     |
+| bookings         | `GET /admin/bookings`, `GET /admin/bookings/:id`                                                                                                                                                                     | `booking.read`                                                                                     |
+| booking timeline | `GET /admin/bookings/:id/timeline`                                                                                                                                                                                   | `booking.read`                                                                                     |
+| booking actions  | `POST /admin/bookings/:id/{accept,reject,cancel,reschedule,complete,no-show}`                                                                                                                                        | `booking.accept` / `booking.reject` / `booking.cancel` / `booking.reschedule` / `booking.complete` |
+| services         | `GET /admin/services` (`service.read`), `POST`, `PUT /:id`, `DELETE /:id` (`service.write`)                                                                                                                          |                                                                                                    |
+| pricing          | `GET /admin/pricing` → `AdminPriceDto[]` (`pricing.read`), `POST /admin/pricing` (upsert, `pricing.write`), `PUT /admin/pricing/:id` (`pricing.write`)                                                               |                                                                                                    |
+| staff            | `GET /admin/staff` (`staff.read`), `POST`, `PUT /:id` (`staff.write`) — body `{ name, active, serviceSlugs: string[] }`                                                                                              |                                                                                                    |
+| schedule         | `GET /admin/schedule` → `ScheduleDto`, `PUT /admin/schedule` body `ScheduleDto` (full replace, validated) (`schedule.*`)                                                                                             |                                                                                                    |
+| customers        | `GET /admin/customers` (`customer.read`), `GET /:id`, `PUT /:id` (`customer.update`)                                                                                                                                 |                                                                                                    |
+| blog             | `GET /admin/blog` (`blog.read`), `POST`, `PUT /:id`, `DELETE /:id` (`blog.write`)                                                                                                                                    |                                                                                                    |
+| seo              | `GET /admin/seo?entityType&entityId` → `SeoMetadataDto[]` (`seo.read`), `PUT /admin/seo` upsert body `{ entityType, entityId, title, description, canonicalUrl, ogImage, noindex }` (`seo.write`)                    |                                                                                                    |
+| faq              | `GET /admin/faq` → `FaqItemDto[]` (unpaginated, bounded) (`settings.read`), `POST`, `PUT /:id`, `DELETE /:id` (`settings.write`)                                                                                     |                                                                                                    |
+| settings         | `GET /admin/settings` (`settings.read`), `PUT /admin/settings` (`settings.write`)                                                                                                                                    |                                                                                                    |
+| notifications    | `GET /admin/notifications` (`settings.read`)                                                                                                                                                                         |                                                                                                    |
+| audit            | `GET /admin/audit` (`audit.read`)                                                                                                                                                                                    |                                                                                                    |
+| features         | `GET /admin/features` (`settings.read`), `PUT /admin/features/:key` (`settings.write`), `DELETE /admin/features/:key` (reset to registry default, `settings.write`), `POST /admin/features/order` (`settings.write`) |                                                                                                    |
 
 ### Feature modules (the plugin hub)
 
@@ -123,6 +123,6 @@ Return `429 RATE_LIMITED` with `meta.retryAfterSeconds`.
 ## Caching
 
 - Public service catalog / blog / clinic / settings responses: `Cache-Control:
-  public, max-age=60, stale-while-revalidate=300`.
+public, max-age=60, stale-while-revalidate=300`.
 - Availability, bookings, all admin: `no-store` (default in `json()`).
 - Never cache personalized/admin responses at the CDN.

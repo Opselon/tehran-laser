@@ -310,7 +310,9 @@ describe('W4 admin contracts — auth plumbing', () => {
 
     it('answers the palette search with at most 8 hits and no 500s', async () => {
       const res = await worker.fetch(
-        new Request('http://localhost/api/v1/admin/search?q=TL', { headers: { cookie: adminCookie } }),
+        new Request('http://localhost/api/v1/admin/search?q=TL', {
+          headers: { cookie: adminCookie },
+        }),
       );
       expect(res.status).toBe(200);
       const body = (await res.json()) as Envelope<unknown[]>;

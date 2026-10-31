@@ -5,10 +5,7 @@ import { env } from 'cloudflare:workers';
 import { findPublicServiceBySlug } from '../../server/repositories';
 import { toPersianDigits } from '../../lib/datetime/jalali';
 import Icon from '../../components/ui/Icon.astro';
-import {
-  createMedicalProcedureSchema,
-  createBreadcrumbSchema,
-} from '../../lib/seo';
+import { createMedicalProcedureSchema, createBreadcrumbSchema } from '../../lib/seo';
 
 const { slug } = Astro.params;
 if (!slug) return Astro.redirect('/services');
@@ -89,15 +86,14 @@ const areaMeta: Record<string, AreaMeta> = {
   },
 };
 
-const meta: AreaMeta =
-  areaMeta[service.slug] ?? {
-    wavelength: 'الکساندرایت ۷۵۵nm',
-    wavelengthShort: '۷۵۵nm',
-    sessions: '۶ الی ۸ جلسه',
-    interval: '۵ الی ۸ هفته',
-    painLevel: 'بدون درد (سرمایش TEC Double)',
-    results: 'کاهش دائمی ۸۵٪ الی ۹۵٪',
-  };
+const meta: AreaMeta = areaMeta[service.slug] ?? {
+  wavelength: 'الکساندرایت ۷۵۵nm',
+  wavelengthShort: '۷۵۵nm',
+  sessions: '۶ الی ۸ جلسه',
+  interval: '۵ الی ۸ هفته',
+  painLevel: 'بدون درد (سرمایش TEC Double)',
+  results: 'کاهش دائمی ۸۵٪ الی ۹۵٪',
+};
 
 const promoFinalPrice = 1940; // thousands — matches the /services catalogue offer
 const promoOriginalPrice = 2290;
@@ -278,14 +274,19 @@ const afterCareSteps = [
                   <span class="price-currency">تومان / هر جلسه</span>
                 </div>
               ) : (
-                <span class="tier-note">استعلام قیمت بر اساس تراکم و وسعت در کلینیک یا تماس تلفنی</span>
+                <span class="tier-note">
+                  استعلام قیمت بر اساس تراکم و وسعت در کلینیک یا تماس تلفنی
+                </span>
               )}
             </div>
           </div>
 
           <div class="tier-foot-note">
             <Icon name="info" size={13} />
-            <span>تمامی تعرفه‌ها شامل کاور یکبار مصرف اختصاصی، سرمایش پیوسته و پروتکل بهداشتی اختصاصی می‌باشد.</span>
+            <span>
+              تمامی تعرفه‌ها شامل کاور یکبار مصرف اختصاصی، سرمایش پیوسته و پروتکل بهداشتی اختصاصی
+              می‌باشد.
+            </span>
           </div>
         </div>
 
@@ -316,8 +317,8 @@ const afterCareSteps = [
           </div>
           <p class="wavelength-desc">
             طول موج الکساندرایت ۷۵۵ نانومتر با بیشترین میزان جذب ملانین، ریشه‌های موی ضخیم و سیاه را
-            هدف قرار می‌دهد؛ همزمان سیستم سرمایش پیوسته TEC Double،
-            پوست را بی‌حس کرده و درد و ریسک سوختگی را به صفر می‌رساند.
+            هدف قرار می‌دهد؛ همزمان سیستم سرمایش پیوسته TEC Double، پوست را بی‌حس کرده و درد و ریسک
+            سوختگی را به صفر می‌رساند.
           </p>
         </div>
 
@@ -425,23 +426,33 @@ const afterCareSteps = [
           </div>
           <ul class="sidebar-list">
             <li>
-              <span class="sb-label"><Icon name="clock" size={14} /> مدت جلسه</span>
+              <span class="sb-label">
+                <Icon name="clock" size={14} /> مدت جلسه
+              </span>
               <strong>{toPersianDigits(service.durationMinutes)} دقیقه</strong>
             </li>
             <li>
-              <span class="sb-label"><Icon name="calendar" size={14} /> تعداد جلسات</span>
+              <span class="sb-label">
+                <Icon name="calendar" size={14} /> تعداد جلسات
+              </span>
               <strong>{meta.sessions}</strong>
             </li>
             <li>
-              <span class="sb-label"><Icon name="shield" size={14} /> طول موج</span>
+              <span class="sb-label">
+                <Icon name="shield" size={14} /> طول موج
+              </span>
               <strong>{meta.wavelengthShort}</strong>
             </li>
             <li>
-              <span class="sb-label"><Icon name="snowflake" size={14} /> سرمایش</span>
+              <span class="sb-label">
+                <Icon name="snowflake" size={14} /> سرمایش
+              </span>
               <strong>TEC Double</strong>
             </li>
             <li>
-              <span class="sb-label"><Icon name="award" size={14} /> دستگاه</span>
+              <span class="sb-label">
+                <Icon name="award" size={14} /> دستگاه
+              </span>
               <strong>رادو پلاس</strong>
             </li>
           </ul>
@@ -486,4 +497,3 @@ const afterCareSteps = [
     </div>
   </section>
 </PublicLayout>
-

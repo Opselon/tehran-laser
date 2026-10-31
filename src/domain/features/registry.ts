@@ -28,7 +28,12 @@ export const CATEGORY_LABELS: Record<FeatureCategory, string> = {
   growth: 'رشد و بازاریابی',
 };
 
-export const CATEGORY_ORDER: readonly FeatureCategory[] = ['sections', 'chrome', 'social', 'growth'];
+export const CATEGORY_ORDER: readonly FeatureCategory[] = [
+  'sections',
+  'chrome',
+  'social',
+  'growth',
+];
 
 export interface FeatureFieldDef {
   /** camelCase key inside the module's JSON config. */
@@ -294,7 +299,13 @@ export const FEATURE_MODULES: readonly FeatureModuleDef[] = [
     offNote: 'ماژول آمار فعال نیست.',
     fields: [
       { key: 'clients', label: 'تعداد مراجعین', type: 'text', default: '۱۲٬۰۰۰+', maxLength: 20 },
-      { key: 'sessions', label: 'جلسات انجام‌شده', type: 'text', default: '۴۵٬۰۰۰+', maxLength: 20 },
+      {
+        key: 'sessions',
+        label: 'جلسات انجام‌شده',
+        type: 'text',
+        default: '۴۵٬۰۰۰+',
+        maxLength: 20,
+      },
       { key: 'rating', label: 'امتیاز رضایت', type: 'text', default: '۴.۹', maxLength: 10 },
       { key: 'years', label: 'سال فعالیت', type: 'text', default: '۹', maxLength: 10 },
     ],
@@ -413,7 +424,13 @@ export const FEATURE_MODULES: readonly FeatureModuleDef[] = [
     internal: false,
     offNote: 'فراخوان پایانی پنهان است.',
     fields: [
-      { key: 'title', label: 'عنوان', type: 'text', default: 'آماده‌اید شروع کنید؟', maxLength: 60 },
+      {
+        key: 'title',
+        label: 'عنوان',
+        type: 'text',
+        default: 'آماده‌اید شروع کنید؟',
+        maxLength: 60,
+      },
       {
         key: 'description',
         label: 'توضیح',
@@ -422,7 +439,13 @@ export const FEATURE_MODULES: readonly FeatureModuleDef[] = [
           'اولین مشاوره رایگان است؛ همین حالا نوبت بگیرید و ۱۵٪ تخفیف رزرو آنلاین را از دست ندهید.',
         maxLength: 300,
       },
-      { key: 'badge', label: 'برچسب دکمه رزرو', type: 'text', default: ' (۱۵٪ تخفیف)', maxLength: 30 },
+      {
+        key: 'badge',
+        label: 'برچسب دکمه رزرو',
+        type: 'text',
+        default: ' (۱۵٪ تخفیف)',
+        maxLength: 30,
+      },
     ],
   },
   {
@@ -499,7 +522,9 @@ export const FEATURE_MODULES: readonly FeatureModuleDef[] = [
 export function normalizeInstagramHandle(value: string): string {
   const trimmed = value.trim().replace(/^@/, '');
   // Accept a pasted profile URL by taking its last path segment.
-  const cleaned = /^https?:\/\//i.test(trimmed) ? (trimmed.split('/').filter(Boolean).pop() ?? '') : trimmed;
+  const cleaned = /^https?:\/\//i.test(trimmed)
+    ? (trimmed.split('/').filter(Boolean).pop() ?? '')
+    : trimmed;
   return cleaned.replace(/[^A-Za-z0-9._]/g, '').slice(0, 30);
 }
 

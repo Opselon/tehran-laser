@@ -198,12 +198,7 @@ export async function createBooking(
   const [businessHours, exceptions, occupied] = await Promise.all([
     listBusinessHours(db),
     listScheduleExceptionsForDate(db, localDate),
-    findOccupiedSlotStarts(
-      db,
-      slotStaffKey(null),
-      params.startsAtIso,
-      totalEndsAtIso,
-    ),
+    findOccupiedSlotStarts(db, slotStaffKey(null), params.startsAtIso, totalEndsAtIso),
   ]);
 
   // If ANY slot in the range is already occupied, abort immediately.
@@ -225,9 +220,7 @@ export async function createBooking(
     minLeadMinutes: settings.minLeadMinutes,
   });
 
-  const slotMatch = slots.find(
-    (s) => s.startsAt === params.startsAtIso && s.available,
-  );
+  const slotMatch = slots.find((s) => s.startsAt === params.startsAtIso && s.available);
   if (!slotMatch) {
     throw new ApiError('SLOT_UNAVAILABLE', 'زمان انتخابی در دسترس نیست.');
   }
@@ -322,9 +315,7 @@ export async function createBooking(
   for (const slotStart of requiredSlots) {
     batchStatements.push(
       db
-        .prepare(
-          `INSERT INTO booking_slots (staff_key, slot_start, booking_id) VALUES (?, ?, ?)`,
-        )
+        .prepare(`INSERT INTO booking_slots (staff_key, slot_start, booking_id) VALUES (?, ?, ?)`)
         .bind(slotStaffKey(null), slotStart, bookingId),
     );
   }
@@ -405,9 +396,7 @@ export async function transitionBooking(
 
   // If status transitions to cancelled or rejected, free the slot reservations.
   if (targetStatus === 'cancelled' || targetStatus === 'rejected') {
-    batch.push(
-      db.prepare(`DELETE FROM booking_slots WHERE booking_id = ?`).bind(bookingId),
-    );
+    batch.push(db.prepare(`DELETE FROM booking_slots WHERE booking_id = ?`).bind(bookingId));
   }
 
   batch.push(
@@ -458,7 +447,11 @@ export async function rescheduleBooking(
   );
   if (!booking) throw new ApiError('NOT_FOUND', 'رزرو یافت نشد.');
 
-  if (booking.status === 'cancelled' || booking.status === 'rejected' || booking.status === 'completed') {
+  if (
+    booking.status === 'cancelled' ||
+    booking.status === 'rejected' ||
+    booking.status === 'completed'
+  ) {
     throw new ApiError(
       'INVALID_BOOKING_STATUS',
       'تنها رزروهای در انتظار، تأییدشده یا عدم حضور قابل زمان‌بندی مجدد هستند.',
@@ -544,9 +537,7 @@ export async function rescheduleBooking(
   for (const s of newSlots) {
     batch.push(
       db
-        .prepare(
-          `INSERT INTO booking_slots (staff_key, slot_start, booking_id) VALUES (?, ?, ?)`,
-        )
+        .prepare(`INSERT INTO booking_slots (staff_key, slot_start, booking_id) VALUES (?, ?, ?)`)
         .bind(slotStaffKey(newStaffId), s, bookingId),
     );
   }

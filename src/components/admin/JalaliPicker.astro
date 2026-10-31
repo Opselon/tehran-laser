@@ -65,7 +65,7 @@ const {
     name={name}
     value={value}
     data-jp-hidden
-    {...required ? { required: true } : {}}
+    {...(required ? { required: true } : {})}
   />
   <button
     type="button"
@@ -76,11 +76,20 @@ const {
     aria-label={label ?? 'انتخاب تاریخ شمسی'}
   >
     <Icon name="calendar" size={16} class="jp-trigger-icon" />
-    <span class="jp-display" data-jp-display>—</span>
+    <span class="jp-display" data-jp-display>
+      —
+    </span>
     <Icon name="chevronDown" size={14} class="jp-caret" />
   </button>
 
-  <div class="jp-popover" data-jp-popover hidden role="dialog" aria-modal="false" aria-label="تقویم شمسی">
+  <div
+    class="jp-popover"
+    data-jp-popover
+    hidden
+    role="dialog"
+    aria-modal="false"
+    aria-label="تقویم شمسی"
+  >
     <div class="jp-head">
       <button type="button" class="jp-nav" data-jp-prev aria-label="ماه قبل">
         <Icon name="chevronRight" size={16} />
@@ -91,12 +100,22 @@ const {
       </button>
     </div>
     <div class="jp-weekdays">
-      <span>ش</span><span>ی</span><span>د</span><span>س</span><span>چ</span><span>پ</span><span>ج</span>
+      <span>ش</span>
+      <span>ی</span>
+      <span>د</span>
+      <span>س</span>
+      <span>چ</span>
+      <span>پ</span>
+      <span>ج</span>
     </div>
     <div class="jp-grid" data-jp-grid></div>
     <div class="jp-foot">
-      <button type="button" class="jp-foot-btn" data-jp-today>امروز</button>
-      <button type="button" class="jp-foot-btn jp-foot-clear" data-jp-clear>پاک کردن</button>
+      <button type="button" class="jp-foot-btn" data-jp-today>
+        امروز
+      </button>
+      <button type="button" class="jp-foot-btn jp-foot-clear" data-jp-clear>
+        پاک کردن
+      </button>
     </div>
   </div>
 </div>
@@ -121,7 +140,9 @@ const {
     font-weight: 700;
     cursor: pointer;
     text-align: right;
-    transition: border-color 0.15s ease, background 0.15s ease;
+    transition:
+      border-color 0.15s ease,
+      background 0.15s ease;
   }
 
   .jalali-picker .jp-trigger:hover,

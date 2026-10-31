@@ -52,7 +52,10 @@
 
 /* 1. Imperial Gold 3D Button (.btn-3d-gold) */
 .btn-3d-gold {
-  background: var(--gradient-gold-btn, linear-gradient(180deg, #6ee7b7 0%, #34d399 45%, #059669 100%));
+  background: var(
+    --gradient-gold-btn,
+    linear-gradient(180deg, #6ee7b7 0%, #34d399 45%, #059669 100%)
+  );
   color: var(--color-text-on-gold, #04211d);
   border-color: rgba(110, 231, 183, 0.5);
   box-shadow:
@@ -99,7 +102,10 @@
 /* 2. Emerald Accept / Success 3D Button (.btn-3d-accept / .btn-3d-success) */
 .btn-3d-accept,
 .btn-3d-success {
-  background: var(--gradient-accept-btn, linear-gradient(180deg, #10b981 0%, #059669 45%, #047857 100%));
+  background: var(
+    --gradient-accept-btn,
+    linear-gradient(180deg, #10b981 0%, #059669 45%, #047857 100%)
+  );
   color: #ffffff;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
   border-color: rgba(52, 211, 153, 0.4);
@@ -151,7 +157,10 @@
 /* 3. Ruby Danger / Reject 3D Button (.btn-3d-danger / .btn-3d-reject) */
 .btn-3d-danger,
 .btn-3d-reject {
-  background: var(--gradient-danger-btn, linear-gradient(180deg, #dc2626 0%, #b91c1c 45%, #991b1b 100%));
+  background: var(
+    --gradient-danger-btn,
+    linear-gradient(180deg, #dc2626 0%, #b91c1c 45%, #991b1b 100%)
+  );
   color: #ffffff;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
   border-color: rgba(248, 113, 113, 0.4);
@@ -334,7 +343,9 @@
   background: linear-gradient(180deg, rgba(239, 68, 68, 0.18) 0%, rgba(185, 28, 28, 0.24) 100%);
   border: 1px solid rgba(239, 68, 68, 0.38);
   color: #fca5a5;
-  box-shadow: 0 3px 0 #450a0a, 0 6px 14px rgba(239, 68, 68, 0.2);
+  box-shadow:
+    0 3px 0 #450a0a,
+    0 6px 14px rgba(239, 68, 68, 0.2);
 }
 
 .btn-3d-logout:hover:not(:disabled) {
@@ -342,7 +353,9 @@
   background: linear-gradient(180deg, rgba(239, 68, 68, 0.28) 0%, rgba(185, 28, 28, 0.38) 100%);
   border-color: rgba(239, 68, 68, 0.65);
   color: #ffffff;
-  box-shadow: 0 5px 0 #450a0a, 0 10px 20px rgba(239, 68, 68, 0.35);
+  box-shadow:
+    0 5px 0 #450a0a,
+    0 10px 20px rgba(239, 68, 68, 0.35);
 }
 
 .btn-3d-logout:active:not(:disabled) {
@@ -409,7 +422,13 @@
   position: absolute;
   inset: 0 0 auto 0;
   height: 3px;
-  background: linear-gradient(90deg, transparent 0%, rgba(52, 211, 153, 0.75) 40%, rgba(110, 231, 183, 0.95) 70%, transparent 100%);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(52, 211, 153, 0.75) 40%,
+    rgba(110, 231, 183, 0.95) 70%,
+    transparent 100%
+  );
   opacity: 0.85;
   pointer-events: none;
 }
@@ -679,8 +698,15 @@
 }
 
 @keyframes livePulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.45; transform: scale(0.75); }
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.45;
+    transform: scale(0.75);
+  }
 }
 
 .border-glow-gold {
@@ -761,7 +787,9 @@
   box-shadow:
     0 16px 40px rgba(0, 0, 0, 0.55),
     inset 0 1px 1px rgba(255, 255, 255, 0.07);
-  transition: box-shadow var(--motion-fast, 180ms) ease, border-color var(--motion-fast, 180ms) ease;
+  transition:
+    box-shadow var(--motion-fast, 180ms) ease,
+    border-color var(--motion-fast, 180ms) ease;
 }
 
 .admin-section-block:hover {
@@ -799,7 +827,9 @@
   border: 1px solid rgba(52, 211, 153, 0.32);
   color: #34d399;
   border-radius: 999px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 2px 6px rgba(0, 0, 0, 0.4);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 2px 6px rgba(0, 0, 0, 0.4);
 }
 
 /* Gold focus ring for all 3D buttons — visible accessible ring */

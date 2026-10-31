@@ -83,7 +83,8 @@ const CATALOG = `${BASE}/catalog`;
 const COVERAGE = `${BASE}/coverage`;
 const UNASSIGNED = '/api/v1/admin/sessions/unassigned';
 const BY_ID = /^\/api\/v1\/admin\/operators\/([^/]+)$/;
-const BY_ID_ACTION = /^\/api\/v1\/admin\/operators\/([^/]+)\/(status|archive|restore|account|stats|agenda)$/;
+const BY_ID_ACTION =
+  /^\/api\/v1\/admin\/operators\/([^/]+)\/(status|archive|restore|account|stats|agenda)$/;
 const BOOKING_OPERATOR = /^\/api\/v1\/admin\/bookings\/([^/]+)\/operator$/;
 
 /** Query params read by the roster list. Everything else is ignored rather than
@@ -228,10 +229,7 @@ export async function handleOperatorRoutes(
   if (pathname === BASE && method === 'GET') {
     requirePermission(locals, 'operator.read');
     const auth = requireAuth(locals);
-    const query = parseValue(
-      operatorListQuerySchema,
-      pick(getSearchParams(request), LIST_KEYS),
-    );
+    const query = parseValue(operatorListQuerySchema, pick(getSearchParams(request), LIST_KEYS));
     const timezone = await resolveTimezone();
     const now = new Date();
     const weekday = todayWeekday(timezone, now);
@@ -256,7 +254,11 @@ export async function handleOperatorRoutes(
     return ok({
       items,
       meta: summarizeOperators(items, weekday),
-      today: { weekday, label: workdayLabel(weekday), localDate: localDateOf(now.toISOString(), timezone) },
+      today: {
+        weekday,
+        label: workdayLabel(weekday),
+        localDate: localDateOf(now.toISOString(), timezone),
+      },
       capabilities: {
         canWrite: auth.permissions.includes('operator.write'),
         canManageAccounts: auth.permissions.includes('operator.account'),
@@ -293,7 +295,10 @@ export async function handleOperatorRoutes(
     requirePermission(locals, 'operator.read');
     const timezone = await resolveTimezone();
     const params = getSearchParams(request);
-    const localDate = localDateOfQuery(params.date, localDateOf(new Date().toISOString(), timezone));
+    const localDate = localDateOfQuery(
+      params.date,
+      localDateOf(new Date().toISOString(), timezone),
+    );
     const items = await listUnassignedSessions(env.DB, localDate, timezone);
     return ok({ localDate, items });
   }
@@ -327,7 +332,10 @@ export async function handleOperatorRoutes(
       requirePermission(locals, 'operator.read');
       const timezone = await resolveTimezone();
       const params = getSearchParams(request);
-      const localDate = localDateOfQuery(params.date, localDateOf(new Date().toISOString(), timezone));
+      const localDate = localDateOfQuery(
+        params.date,
+        localDateOf(new Date().toISOString(), timezone),
+      );
       const items = await getOperatorAgenda(env.DB, id, localDate, timezone);
       return ok({ localDate, items });
     }

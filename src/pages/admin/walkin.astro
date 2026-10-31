@@ -27,7 +27,8 @@ try {
           <span>پذیرش حضوری و تنظیم نوبت جلسه آینده</span>
         </h1>
         <p class="section-block-sub">
-          ثبت نوبت درجا برای مراجع حاضر در کلینیک، صدور خودکار تراکنش مالی و رزرو هوشمند جلسه بعد (API First)
+          ثبت نوبت درجا برای مراجع حاضر در کلینیک، صدور خودکار تراکنش مالی و رزرو هوشمند جلسه بعد
+          (API First)
         </p>
       </div>
       <div class="actions">
@@ -42,7 +43,10 @@ try {
       <span id="walkinAlertText"></span>
     </div>
 
-    <div id="walkinSuccess" style="display: none; margin-bottom: 20px; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); color: #34d399; padding: 18px 24px; border-radius: 14px; font-weight: 700;">
+    <div
+      id="walkinSuccess"
+      style="display: none; margin-bottom: 20px; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); color: #34d399; padding: 18px 24px; border-radius: 14px; font-weight: 700;"
+    >
       <span id="walkinSuccessText" style="display: inline-flex; align-items: center; gap: 8px;">
         <Icon name="checkCircle" size={16} />
         <span>نوبت مراجع و تراکنش مالی با موفقیت ثبت شد.</span>
@@ -52,7 +56,10 @@ try {
     <form id="walkinForm">
       <!-- 1. Customer Selection / Quick New -->
       <div class="admin-section-block" style="padding: 26px; margin-bottom: 24px;">
-        <h3 class="section-block-title" style="margin-bottom: 18px; display: flex; align-items: center; gap: 10px;">
+        <h3
+          class="section-block-title"
+          style="margin-bottom: 18px; display: flex; align-items: center; gap: 10px;"
+        >
           <Icon name="users" size={20} />
           <span>مشخصات مراجع حاضر در کلینیک</span>
         </h3>
@@ -65,7 +72,12 @@ try {
             <select id="custSelect" class="form-control-modal">
               <option value="">-- ثبت مراجع جدید (ورود دستی) --</option>
               {customers.items.map((c) => (
-                <option value={c.id} data-name={c.name} data-phone={c.phone} data-category={c.pricingCategory}>
+                <option
+                  value={c.id}
+                  data-name={c.name}
+                  data-phone={c.phone}
+                  data-category={c.pricingCategory}
+                >
                   {c.name} — {c.phone} ({c.pricingCategory === 'female' ? 'بانوان' : 'آقایان'})
                 </option>
               ))}
@@ -76,14 +88,27 @@ try {
             <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #f5d77f; margin-bottom: 6px;">
               نام و نام خانوادگی مراجع:
             </label>
-            <input type="text" id="custName" class="form-control-modal" placeholder="نام مراجع..." required />
+            <input
+              type="text"
+              id="custName"
+              class="form-control-modal"
+              placeholder="نام مراجع..."
+              required
+            />
           </div>
 
           <div>
             <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #f5d77f; margin-bottom: 6px;">
               شماره تلفن همراه (پیامک تایید):
             </label>
-            <input type="tel" id="custPhone" dir="ltr" class="form-control-modal" placeholder="۰۹۱۲..." required />
+            <input
+              type="tel"
+              id="custPhone"
+              dir="ltr"
+              class="form-control-modal"
+              placeholder="۰۹۱۲..."
+              required
+            />
           </div>
 
           <div>
@@ -100,7 +125,10 @@ try {
 
       <!-- 2. Treatment & Laser Service -->
       <div class="admin-section-block" style="padding: 26px; margin-bottom: 24px;">
-        <h3 class="section-block-title" style="margin-bottom: 18px; display: flex; align-items: center; gap: 10px;">
+        <h3
+          class="section-block-title"
+          style="margin-bottom: 18px; display: flex; align-items: center; gap: 10px;"
+        >
           <Icon name="gem" size={20} />
           <span>ناحیه تحت درمان و پارامترهای لیزر تماسی</span>
         </h3>
@@ -112,7 +140,11 @@ try {
             </label>
             <select id="serviceSelect" class="form-control-modal" required>
               {services.map((s) => (
-                <option value={s.slug} data-price={s.prices.find(p => p.pricingCategory === 'female')?.amount || 320} data-price-male={s.prices.find(p => p.pricingCategory === 'male')?.amount || 0}>
+                <option
+                  value={s.slug}
+                  data-price={s.prices.find((p) => p.pricingCategory === 'female')?.amount || 320}
+                  data-price-male={s.prices.find((p) => p.pricingCategory === 'male')?.amount || 0}
+                >
                   {s.name} ({s.durationMinutes} دقیقه)
                 </option>
               ))}
@@ -124,9 +156,25 @@ try {
               شماره جلسه درمانی:
             </label>
             <div style="display: flex; gap: 8px; align-items: center;">
-              <input type="number" id="sessionNumber" class="form-control-modal" value="1" min="1" max="15" required />
+              <input
+                type="number"
+                id="sessionNumber"
+                class="form-control-modal"
+                value="1"
+                min="1"
+                max="15"
+                required
+              />
               <span style="color: #94a3b8; font-size: 0.85rem;">از</span>
-              <input type="number" id="totalSessions" class="form-control-modal" value="8" min="1" max="15" required />
+              <input
+                type="number"
+                id="totalSessions"
+                class="form-control-modal"
+                value="8"
+                min="1"
+                max="15"
+                required
+              />
             </div>
           </div>
 
@@ -135,8 +183,22 @@ try {
               انرژی شات (J/cm²) و عرض پالس:
             </label>
             <div class="g-2" style="display: grid; gap: 8px">
-              <input type="number" id="joulesEnergy" step="0.5" class="form-control-modal" value="14.0" title="ژول بر سانتی‌متر مربع" />
-              <input type="number" id="pulseWidth" step="0.5" class="form-control-modal" value="3.0" title="عرض پالس میلی‌ثانیه" />
+              <input
+                type="number"
+                id="joulesEnergy"
+                step="0.5"
+                class="form-control-modal"
+                value="14.0"
+                title="ژول بر سانتی‌متر مربع"
+              />
+              <input
+                type="number"
+                id="pulseWidth"
+                step="0.5"
+                class="form-control-modal"
+                value="3.0"
+                title="عرض پالس میلی‌ثانیه"
+              />
             </div>
           </div>
 
@@ -151,7 +213,10 @@ try {
 
       <!-- 3. Financial & POS Payment -->
       <div class="admin-section-block" style="padding: 26px; margin-bottom: 24px;">
-        <h3 class="section-block-title" style="margin-bottom: 18px; display: flex; align-items: center; gap: 10px;">
+        <h3
+          class="section-block-title"
+          style="margin-bottom: 18px; display: flex; align-items: center; gap: 10px;"
+        >
           <Icon name="card" size={20} />
           <span>تسویه مالی و دریافت وجه (ثبت خودکار در حسابداری)</span>
         </h3>
@@ -161,8 +226,17 @@ try {
             <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #f5d77f; margin-bottom: 6px;">
               مبلغ دریافتی (هزار تومان):
             </label>
-            <input type="number" id="paymentAmount" class="form-control-modal" value="1940" required />
-            <span id="paymentHint" style="font-size: 0.76rem; color: #34d399; margin-top: 4px; display: block;">
+            <input
+              type="number"
+              id="paymentAmount"
+              class="form-control-modal"
+              value="1940"
+              required
+            />
+            <span
+              id="paymentHint"
+              style="font-size: 0.76rem; color: #34d399; margin-top: 4px; display: block;"
+            >
               مبلغ همراه با تعرفه خدمت و بخش انتخابی به‌روز می‌شود.
             </span>
           </div>
@@ -182,32 +256,54 @@ try {
             <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #f5d77f; margin-bottom: 6px;">
               شماره پیگیری / ارجاع پوز:
             </label>
-            <input type="text" id="trackingNumber" dir="ltr" class="form-control-modal" placeholder="POS-89312" />
+            <input
+              type="text"
+              id="trackingNumber"
+              dir="ltr"
+              class="form-control-modal"
+              placeholder="POS-89312"
+            />
           </div>
         </div>
       </div>
 
       <!-- 4. Next Session Scheduler (Auto) -->
-      <div class="admin-section-block" style="padding: 26px; margin-bottom: 24px; border-color: rgba(56, 189, 248, 0.4); background: rgba(14, 165, 233, 0.04);">
+      <div
+        class="admin-section-block"
+        style="padding: 26px; margin-bottom: 24px; border-color: rgba(56, 189, 248, 0.4); background: rgba(14, 165, 233, 0.04);"
+      >
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-          <h3 class="section-block-title" style="margin: 0; color: #38bdf8; display: flex; align-items: center; gap: 10px;">
+          <h3
+            class="section-block-title"
+            style="margin: 0; color: #38bdf8; display: flex; align-items: center; gap: 10px;"
+          >
             <Icon name="calendar" size={20} />
             <span>تنظیم هوشمند نوبت جلسه بعدی (Next Session Scheduler)</span>
           </h3>
           <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; color: #38bdf8; font-weight: 700;">
-            <input type="checkbox" id="scheduleNextCheckbox" checked style="width: 22px; height: 22px; accent-color: #e8cb8f;" />
+            <input
+              type="checkbox"
+              id="scheduleNextCheckbox"
+              checked
+              style="width: 22px; height: 22px; accent-color: #e8cb8f;"
+            />
             <span>رزرو نوبت جلسه بعدی مراجع</span>
           </label>
         </div>
 
-        <div id="nextSessionFields" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px;">
+        <div
+          id="nextSessionFields"
+          style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px;"
+        >
           <div>
             <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">
               فاصله استاندارد چرخه رشد مو:
             </label>
             <select id="intervalWeeks" class="form-control-modal">
               <option value="4">۴ هفته بعد (مناسب صورت و جلسات آغازین)</option>
-              <option value="6" selected>۶ هفته بعد (استاندارد نواحی بدن و لیزر تماسی)</option>
+              <option value="6" selected>
+                ۶ هفته بعد (استاندارد نواحی بدن و لیزر تماسی)
+              </option>
               <option value="8">۸ هفته بعد (جلسات پایانی و شارژ)</option>
             </select>
           </div>
@@ -223,14 +319,25 @@ try {
             <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">
               ساعت جلسه بعدی:
             </label>
-            <input type="time" id="nextSessionTime" class="form-control-modal" dir="ltr" value="16:00" />
+            <input
+              type="time"
+              id="nextSessionTime"
+              class="form-control-modal"
+              dir="ltr"
+              value="16:00"
+            />
           </div>
 
           <div>
             <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">
               یادداشت برای جلسه بعدی:
             </label>
-            <input type="text" id="nextSessionNote" class="form-control-modal" placeholder="بررسی واکنش پوست در جلسه دوم..." />
+            <input
+              type="text"
+              id="nextSessionNote"
+              class="form-control-modal"
+              placeholder="بررسی واکنش پوست در جلسه دوم..."
+            />
           </div>
         </div>
       </div>
@@ -291,6 +398,7 @@ try {
   </style>
 
   <script>
+    import type { ApiResponse } from '../../domain/shared/api.types';
     const custSelect = document.getElementById('custSelect') as unknown as HTMLSelectElement;
     const custName = document.getElementById('custName') as HTMLInputElement;
     const custPhone = document.getElementById('custPhone') as HTMLInputElement;
@@ -298,7 +406,9 @@ try {
     const serviceSelect = document.getElementById('serviceSelect') as unknown as HTMLSelectElement;
     const paymentAmount = document.getElementById('paymentAmount') as HTMLInputElement;
     const paymentHint = document.getElementById('paymentHint');
-    const scheduleNextCheckbox = document.getElementById('scheduleNextCheckbox') as HTMLInputElement;
+    const scheduleNextCheckbox = document.getElementById(
+      'scheduleNextCheckbox',
+    ) as HTMLInputElement;
     const nextSessionFields = document.getElementById('nextSessionFields');
     const intervalWeeks = document.getElementById('intervalWeeks') as unknown as HTMLSelectElement;
     const nextSessionTime = document.getElementById('nextSessionTime') as HTMLInputElement;
@@ -362,7 +472,8 @@ try {
     form?.addEventListener('submit', async (e) => {
       e.preventDefault();
       submitBtn.disabled = true;
-      submitBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" style="vertical-align:middle;display:inline-block"><path d="M12 3.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17Zm0 3.5v5l3.5 2"/></svg> در حال ثبت در سامانه و صدور فاکتور...';
+      submitBtn.innerHTML =
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" style="vertical-align:middle;display:inline-block"><path d="M12 3.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17Zm0 3.5v5l3.5 2"/></svg> در حال ثبت در سامانه و صدور فاکتور...';
       if (alertBox) alertBox.style.display = 'none';
       if (successBox) successBox.style.display = 'none';
 
@@ -373,15 +484,20 @@ try {
         pricingCategory: custCategory.value,
         serviceId: serviceSelect.value,
         amount: Number(paymentAmount.value),
-        paymentMethod: (document.getElementById('paymentMethod') as unknown as HTMLSelectElement).value,
-        trackingNumber: (document.getElementById('trackingNumber') as HTMLInputElement).value.trim(),
+        paymentMethod: (document.getElementById('paymentMethod') as unknown as HTMLSelectElement)
+          .value,
+        trackingNumber: (
+          document.getElementById('trackingNumber') as HTMLInputElement
+        ).value.trim(),
         sessionNumber: Number((document.getElementById('sessionNumber') as HTMLInputElement).value),
         totalSessions: Number((document.getElementById('totalSessions') as HTMLInputElement).value),
         joulesEnergy: Number((document.getElementById('joulesEnergy') as HTMLInputElement).value),
         pulseWidthMs: Number((document.getElementById('pulseWidth') as HTMLInputElement).value),
         shotCount: Number((document.getElementById('shotCount') as HTMLInputElement).value),
         scheduleNextSession: scheduleNextCheckbox.checked,
-        nextSessionDate: scheduleNextCheckbox.checked ? `${window.TLJalaliPicker?.get('nextSessionDate') || ''}T${nextSessionTime?.value || '16:00'}:00` : null,
+        nextSessionDate: scheduleNextCheckbox.checked
+          ? `${window.TLJalaliPicker?.get('nextSessionDate') || ''}T${nextSessionTime?.value || '16:00'}:00`
+          : null,
       };
 
       try {
@@ -391,9 +507,10 @@ try {
           body: JSON.stringify(payload),
         });
 
-        const json = await res.json() as any;
+        const json = (await res.json()) as ApiResponse<{ nextBookingId?: string | null }>;
         if (res.ok && json.data) {
-          submitBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" style="vertical-align:middle;display:inline-block"><path d="M12 2.5a9.5 9.5 0 1 0 0 19 9.5 9.5 0 0 0 0-19Zm-3 10 2.5 2.5 5-5"/></svg> ثبت نوبت و جلسه آینده انجام شد!';
+          submitBtn.innerHTML =
+            '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" style="vertical-align:middle;display:inline-block"><path d="M12 2.5a9.5 9.5 0 1 0 0 19 9.5 9.5 0 0 0 0-19Zm-3 10 2.5 2.5 5-5"/></svg> ثبت نوبت و جلسه آینده انجام شد!';
           if (successBox && successText) {
             successText.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" style="vertical-align:middle;display:inline-block"><path d="M12 2.5a9.5 9.5 0 1 0 0 19 9.5 9.5 0 0 0 0-19Zm-3 10 2.5 2.5 5-5"/></svg> نوبت حضوری با موفقیت ثبت شد. ${json.data.nextBookingId ? 'نوبت جلسه بعد نیز تنظیم گردید.' : ''}`;
             successBox.style.display = 'block';
@@ -405,13 +522,15 @@ try {
           if (alertText) alertText.innerText = json.error?.message || 'خطا در ثبت پذیرش حضوری.';
           if (alertBox) alertBox.style.display = 'flex';
           submitBtn.disabled = false;
-          submitBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" style="vertical-align:middle;display:inline-block"><path d="M13.5 2.5 5 14h6l-1 7.5L19.5 10h-6l1-7.5Z"/></svg> ثبت قطعی پذیرش، تراکنش مالی و نوبت جلسه بعد';
+          submitBtn.innerHTML =
+            '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" style="vertical-align:middle;display:inline-block"><path d="M13.5 2.5 5 14h6l-1 7.5L19.5 10h-6l1-7.5Z"/></svg> ثبت قطعی پذیرش، تراکنش مالی و نوبت جلسه بعد';
         }
       } catch {
         if (alertText) alertText.innerText = 'خطای ارتباط با سرور.';
         if (alertBox) alertBox.style.display = 'flex';
         submitBtn.disabled = false;
-        submitBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" style="vertical-align:middle;display:inline-block"><path d="M13.5 2.5 5 14h6l-1 7.5L19.5 10h-6l1-7.5Z"/></svg> ثبت قطعی پذیرش، تراکنش مالی و نوبت جلسه بعد';
+        submitBtn.innerHTML =
+          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" style="vertical-align:middle;display:inline-block"><path d="M13.5 2.5 5 14h6l-1 7.5L19.5 10h-6l1-7.5Z"/></svg> ثبت قطعی پذیرش، تراکنش مالی و نوبت جلسه بعد';
       }
     });
   </script>

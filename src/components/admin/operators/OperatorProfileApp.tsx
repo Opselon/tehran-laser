@@ -1,5 +1,9 @@
 import { useCallback, useMemo, useState } from 'react';
-import type { OperatorAgendaItem, OperatorCapabilities, OperatorCreateInput } from '../../../domain/operators/operators';
+import type {
+  OperatorAgendaItem,
+  OperatorCapabilities,
+  OperatorCreateInput,
+} from '../../../domain/operators/operators';
 import {
   formatPercent,
   formatPhone,
@@ -53,7 +57,12 @@ const STATUS_LABEL: Record<string, string> = {
  * panel. It re-reads the whole detail after every mutation, because a shift or
  * status change also moves the KPIs, the coverage and the assignable pool.
  */
-export function OperatorProfileApp({ initial, catalog, services, capabilities }: OperatorProfileAppProps) {
+export function OperatorProfileApp({
+  initial,
+  catalog,
+  services,
+  capabilities,
+}: OperatorProfileAppProps) {
   const [detail, setDetail] = useState<OperatorDetailResponse>(initial);
   const [tab, setTab] = useState<TabKey>('performance');
   const [editing, setEditing] = useState(false);
@@ -71,7 +80,10 @@ export function OperatorProfileApp({ initial, catalog, services, capabilities }:
       const fresh = await fetchOperator(operator.id);
       setDetail(fresh);
     } catch (err) {
-      push('error', err instanceof ApiClientError ? err.message : 'بارگذاری مجدد پروفایل ناموفق بود.');
+      push(
+        'error',
+        err instanceof ApiClientError ? err.message : 'بارگذاری مجدد پروفایل ناموفق بود.',
+      );
     }
   }, [operator.id, push]);
 
@@ -136,7 +148,9 @@ export function OperatorProfileApp({ initial, catalog, services, capabilities }:
         <div className="ops-profile__identity">
           <div
             className="ops-avatar ops-avatar--lg"
-            style={{ background: `linear-gradient(150deg, ${operator.avatarColor}, rgba(10, 16, 24, 0.9))` }}
+            style={{
+              background: `linear-gradient(150deg, ${operator.avatarColor}, rgba(10, 16, 24, 0.9))`,
+            }}
             aria-hidden="true"
           >
             {operator.initials}
@@ -159,14 +173,20 @@ export function OperatorProfileApp({ initial, catalog, services, capabilities }:
               ) : (
                 <span className="ops-status ops-status--inactive">بدون حساب ورود</span>
               )}
-              <span className="ops-status ops-status--archived">{workdaysLabel(operator.workdays)}</span>
+              <span className="ops-status ops-status--archived">
+                {workdaysLabel(operator.workdays)}
+              </span>
             </div>
           </div>
         </div>
 
         <div className="ops-hero__actions">
           {capabilities.canWrite && status !== 'archived' && (
-            <button type="button" className="ops-btn ops-btn--primary" onClick={() => setEditing(true)}>
+            <button
+              type="button"
+              className="ops-btn ops-btn--primary"
+              onClick={() => setEditing(true)}
+            >
               <IconReact name="edit" size={15} /> ویرایش پروفایل
             </button>
           )}
@@ -180,7 +200,12 @@ export function OperatorProfileApp({ initial, catalog, services, capabilities }:
               type="button"
               className="ops-btn ops-btn--ghost"
               disabled={busy}
-              onClick={() => void run(() => setOperatorActive(operator.id, !operator.active), operator.active ? 'اپراتور غیرفعال شد.' : 'اپراتور فعال شد.')}
+              onClick={() =>
+                void run(
+                  () => setOperatorActive(operator.id, !operator.active),
+                  operator.active ? 'اپراتور غیرفعال شد.' : 'اپراتور فعال شد.',
+                )
+              }
             >
               {operator.active ? 'غیرفعال‌سازی' : 'فعال‌سازی'}
             </button>
@@ -191,7 +216,9 @@ export function OperatorProfileApp({ initial, catalog, services, capabilities }:
               className="ops-btn ops-btn--danger"
               disabled={busy}
               onClick={() => {
-                if (confirm(`پروفایل ${operator.displayName} بایگانی شود؟ سابقه جلسات حفظ می‌شود.`)) {
+                if (
+                  confirm(`پروفایل ${operator.displayName} بایگانی شود؟ سابقه جلسات حفظ می‌شود.`)
+                ) {
                   void run(() => archiveOperator(operator.id), 'پروفایل بایگانی شد.');
                 }
               }}
@@ -232,12 +259,18 @@ export function OperatorProfileApp({ initial, catalog, services, capabilities }:
 
       {/* ── Performance ──────────────────────────────────────────── */}
       {tab === 'performance' && (
-        <div role="tabpanel" id="panel-performance" aria-labelledby="tab-performance" className="ops-panel">
+        <div
+          role="tabpanel"
+          id="panel-performance"
+          aria-labelledby="tab-performance"
+          className="ops-panel"
+        >
           <div className="ops-section-head">
             <IconReact name="chart" size={16} />
             <h3>عملکرد ۳۰ روز گذشته</h3>
             <span className="ops-count">
-              {formatJalaliDate(detail.stats.range.from)} تا {formatJalaliDate(detail.stats.range.to)}
+              {formatJalaliDate(detail.stats.range.from)} تا{' '}
+              {formatJalaliDate(detail.stats.range.to)}
             </span>
             <p>درآمد فقط از جلسات تکمیل‌شده و پس از کسر تخفیف محاسبه می‌شود.</p>
           </div>
@@ -257,7 +290,8 @@ export function OperatorProfileApp({ initial, catalog, services, capabilities }:
 
           {detail.stats.ranking.total > 0 && (
             <p className="ops-hint">
-              رتبه درآمدی در بازه: <b>{fa(detail.stats.ranking.position)}</b> از {fa(detail.stats.ranking.total)} اپراتور
+              رتبه درآمدی در بازه: <b>{fa(detail.stats.ranking.position)}</b> از{' '}
+              {fa(detail.stats.ranking.total)} اپراتور
               {detail.stats.ranking.position === 1 ? ' — بیشترین درآمد این بازه.' : '.'}
             </p>
           )}
@@ -281,7 +315,16 @@ export function OperatorProfileApp({ initial, catalog, services, capabilities }:
             <div className="ops-insights">
               {detail.stats.insights.map((insight, index) => (
                 <div key={index} className={`ops-insight ops-insight--${insight.tone}`}>
-                  <IconReact name={insight.tone === 'warn' ? 'warning' : insight.tone === 'good' ? 'checkCircle' : 'info'} size={14} />
+                  <IconReact
+                    name={
+                      insight.tone === 'warn'
+                        ? 'warning'
+                        : insight.tone === 'good'
+                          ? 'checkCircle'
+                          : 'info'
+                    }
+                    size={14}
+                  />
                   <span>{insight.text}</span>
                 </div>
               ))}
@@ -329,7 +372,8 @@ export function OperatorProfileApp({ initial, catalog, services, capabilities }:
                   <div className="ops-agenda__body">
                     <strong>{item.serviceName}</strong>
                     <span>
-                      {item.customerName} · {STATUS_LABEL[item.status] ?? item.status} · {item.reference}
+                      {item.customerName} · {STATUS_LABEL[item.status] ?? item.status} ·{' '}
+                      {item.reference}
                     </span>
                   </div>
                   {capabilities.canWrite && status === 'active' && (
@@ -380,8 +424,11 @@ export function OperatorProfileApp({ initial, catalog, services, capabilities }:
             <div className="ops-insight ops-insight--good">
               <IconReact name="checkCircle" size={14} />
               <span>
-                ورود با <b dir="ltr">{operator.account.email}</b> · نقش {operator.account.roles.join(' · ')}
-                {operator.account.lastSeenAt ? ` · آخرین فعالیت ${clock(operator.account.lastSeenAt)}` : ' · هنوز وارد نشده'}
+                ورود با <b dir="ltr">{operator.account.email}</b> · نقش{' '}
+                {operator.account.roles.join(' · ')}
+                {operator.account.lastSeenAt
+                  ? ` · آخرین فعالیت ${clock(operator.account.lastSeenAt)}`
+                  : ' · هنوز وارد نشده'}
               </span>
             </div>
           ) : (
@@ -414,13 +461,23 @@ export function OperatorProfileApp({ initial, catalog, services, capabilities }:
       {editing && (
         <>
           <div className="ops-drawer-scrim" onClick={() => setEditing(false)} role="presentation" />
-          <aside className="ops-drawer" role="dialog" aria-modal="true" aria-labelledby="op-edit-title">
+          <aside
+            className="ops-drawer"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="op-edit-title"
+          >
             <div className="ops-drawer__head">
               <div className="ops-drawer__title">
                 <h2 id="op-edit-title">ویرایش {operator.displayName}</h2>
                 <p>تغییر شیفت یا نقش، بلافاصله روی برنامه و پوشش شیفت اثر می‌گذارد.</p>
               </div>
-              <button type="button" className="ops-drawer__close" onClick={() => setEditing(false)} aria-label="بستن">
+              <button
+                type="button"
+                className="ops-drawer__close"
+                onClick={() => setEditing(false)}
+                aria-label="بستن"
+              >
                 <IconReact name="x" size={18} />
               </button>
             </div>
@@ -450,7 +507,10 @@ export function OperatorProfileApp({ initial, catalog, services, capabilities }:
             setBusy(true);
             try {
               const result = await issueAccount(operator.id, payload);
-              push('success', result.account.mode === 'created' ? 'حساب ورود ساخته شد.' : 'رمز عبور بازنشانی شد.');
+              push(
+                'success',
+                result.account.mode === 'created' ? 'حساب ورود ساخته شد.' : 'رمز عبور بازنشانی شد.',
+              );
               await reload();
               return result;
             } catch (err) {
@@ -465,8 +525,21 @@ export function OperatorProfileApp({ initial, catalog, services, capabilities }:
 
       <div className="ops-toasts" role="status" aria-live="polite">
         {toasts.map((toast) => (
-          <div key={toast.id} className={`ops-toast ops-toast--${toast.tone}`} onClick={() => dismiss(toast.id)}>
-            <IconReact name={toast.tone === 'success' ? 'checkCircle' : toast.tone === 'error' ? 'warning' : 'info'} size={16} />
+          <div
+            key={toast.id}
+            className={`ops-toast ops-toast--${toast.tone}`}
+            onClick={() => dismiss(toast.id)}
+          >
+            <IconReact
+              name={
+                toast.tone === 'success'
+                  ? 'checkCircle'
+                  : toast.tone === 'error'
+                    ? 'warning'
+                    : 'info'
+              }
+              size={16}
+            />
             <span>{toast.message}</span>
           </div>
         ))}
@@ -481,7 +554,11 @@ function Metric({ label, value, ltr = false }: { label: string; value: string; l
   return (
     <div className="ops-metric">
       <div className="ops-metric__k">{label}</div>
-      <div className="ops-metric__v" dir={ltr ? 'ltr' : undefined} style={ltr ? { textAlign: 'right' } : undefined}>
+      <div
+        className="ops-metric__v"
+        dir={ltr ? 'ltr' : undefined}
+        style={ltr ? { textAlign: 'right' } : undefined}
+      >
         {value}
       </div>
     </div>
@@ -501,7 +578,8 @@ function AgendaRow({ item }: { item: OperatorAgendaItem }) {
           {item.customerName} · {formatPhone(item.customerPhone)}
         </span>
         <span>
-          {STATUS_LABEL[item.status] ?? item.status} · {item.reference} · {formatToman(item.quotedAmount)}
+          {STATUS_LABEL[item.status] ?? item.status} · {item.reference} ·{' '}
+          {formatToman(item.quotedAmount)}
         </span>
       </div>
     </div>
@@ -509,7 +587,11 @@ function AgendaRow({ item }: { item: OperatorAgendaItem }) {
 }
 
 /** 30-day revenue bars. Rendered as SVG so it stays crisp and needs no library. */
-function DailyChart({ daily }: { daily: Array<{ date: string; sessions: number; revenue: number }> }) {
+function DailyChart({
+  daily,
+}: {
+  daily: Array<{ date: string; sessions: number; revenue: number }>;
+}) {
   const width = 320;
   const height = 118;
   const padX = 4;
@@ -546,7 +628,11 @@ function DailyChart({ daily }: { daily: Array<{ date: string; sessions: number; 
           return (
             <g key={point.date}>
               <rect
-                className={point.revenue === max && max > 0 ? 'ops-chart__bar ops-chart__bar--peak' : 'ops-chart__bar'}
+                className={
+                  point.revenue === max && max > 0
+                    ? 'ops-chart__bar ops-chart__bar--peak'
+                    : 'ops-chart__bar'
+                }
                 x={x}
                 y={usable - barHeight}
                 width={barWidth}
@@ -568,7 +654,11 @@ function DailyChart({ daily }: { daily: Array<{ date: string; sessions: number; 
           {shortDate(points[points.length - 1]?.date)}
         </text>
       </svg>
-      {max === 0 && <p className="ops-hint">در این بازه درآمدی ثبت نشده است؛ نمودار پس از اولین جلسه تکمیل‌شده پر می‌شود.</p>}
+      {max === 0 && (
+        <p className="ops-hint">
+          در این بازه درآمدی ثبت نشده است؛ نمودار پس از اولین جلسه تکمیل‌شده پر می‌شود.
+        </p>
+      )}
     </div>
   );
 }

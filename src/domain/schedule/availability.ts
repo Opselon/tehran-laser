@@ -16,11 +16,7 @@ import {
 } from '../../lib/datetime/timezone';
 
 export type ScheduleExceptionKind =
-  | 'holiday'
-  | 'closed'
-  | 'special_hours'
-  | 'blocked_time'
-  | 'temporary_change';
+  'holiday' | 'closed' | 'special_hours' | 'blocked_time' | 'temporary_change';
 
 export interface HoursSegment {
   /** 'HH:MM' clinic wall clock */
@@ -63,12 +59,7 @@ export interface AvailabilitySlot {
 }
 
 export type SlotRejectionReason =
-  | 'closed'
-  | 'outside_hours'
-  | 'too_soon'
-  | 'blocked'
-  | 'occupied'
-  | 'past';
+  'closed' | 'outside_hours' | 'too_soon' | 'blocked' | 'occupied' | 'past';
 
 const MAX_SLOTS_PER_DAY = 512; // hard request budget (contract §165)
 
@@ -84,7 +75,9 @@ export function effectiveDay(
   const weekday = weekdayOf(input.localDate);
   const dayExceptions = input.exceptions.filter((exception) => exception.date === input.localDate);
 
-  if (dayExceptions.some((exception) => exception.kind === 'closed' || exception.kind === 'holiday')) {
+  if (
+    dayExceptions.some((exception) => exception.kind === 'closed' || exception.kind === 'holiday')
+  ) {
     return { segments: [], blocked: [] };
   }
 
@@ -134,16 +127,22 @@ export function calculateAvailability(input: AvailabilityInput): AvailabilitySlo
     const segmentEnd = zonedTimeToUtc(localDate, segment.closesAt, timezone);
     if (segmentStart >= segmentEnd) continue;
 
-    const firstIdx = Math.ceil(localMinutesOf(segmentStart, timezone) / granularityMinutes) * granularityMinutes;
+    const firstIdx =
+      Math.ceil(localMinutesOf(segmentStart, timezone) / granularityMinutes) * granularityMinutes;
     const endIdx = localMinutesOf(segmentEnd, timezone);
 
-    for (let idx = firstIdx; idx < endIdx && slots.length < MAX_SLOTS_PER_DAY; idx += granularityMinutes) {
+    for (
+      let idx = firstIdx;
+      idx < endIdx && slots.length < MAX_SLOTS_PER_DAY;
+      idx += granularityMinutes
+    ) {
       if (idx < earliestIdx) continue;
       const startsAt = instantFromLocalMinutes(idx, timezone);
       const endsAt = addMinutes(startsAt, durationMinutes);
       if (Date.parse(endsAt) > Date.parse(segmentEnd)) break;
 
-      if (blocked.some((range) => overlaps(startsAt, endsAt, range.startsAt, range.endsAt))) continue;
+      if (blocked.some((range) => overlaps(startsAt, endsAt, range.startsAt, range.endsAt)))
+        continue;
 
       let occupied = false;
       const claimEnd = idx + durationMinutes + bufferMinutes;
@@ -183,9 +182,7 @@ export function validateSlotStart(
   const inSegment = segments.some((segment) => {
     const open = zonedTimeToUtc(localDate, segment.opensAt, timezone);
     const close = zonedTimeToUtc(localDate, segment.closesAt, timezone);
-    return (
-      Date.parse(startsAt) >= Date.parse(open) && Date.parse(endsAt) <= Date.parse(close)
-    );
+    return Date.parse(startsAt) >= Date.parse(open) && Date.parse(endsAt) <= Date.parse(close);
   });
   if (!inSegment) return { ok: false, reason: 'outside_hours' };
 

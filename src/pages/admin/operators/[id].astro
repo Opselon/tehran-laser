@@ -85,38 +85,56 @@ if (allowed && id) {
 }
 ---
 
-<AdminLayout title={operator ? `${operator.displayName} | تیم` : 'پروفایل اپراتور'} activeNav="operators">
+<AdminLayout
+  title={operator ? `${operator.displayName} | تیم` : 'پروفایل اپراتور'}
+  activeNav="operators"
+>
   <div class="admin-content-pad">
     {!allowed ? (
       <section class="ops-shell" style="margin-top: 12px">
         <div class="ops-empty">
-          <div class="ops-empty__icon"><Icon name="lock" size={24} /></div>
+          <div class="ops-empty__icon">
+            <Icon name="lock" size={24} />
+          </div>
           <h3>دسترسی به پروفایل اپراتور ندارید</h3>
           <p>این صفحه به مجوز «مشاهده تیم اپراتور» نیاز دارد و بررسی آن در سرور انجام می‌شود.</p>
           <div class="ops-hero__actions" style="justify-content: center">
-            <a class="ops-btn" href="/admin">بازگشت به داشبورد</a>
+            <a class="ops-btn" href="/admin">
+              بازگشت به داشبورد
+            </a>
           </div>
         </div>
       </section>
     ) : error ? (
       <section class="ops-shell" style="margin-top: 12px">
         <div class="ops-empty">
-          <div class="ops-empty__icon"><Icon name="warning" size={24} /></div>
+          <div class="ops-empty__icon">
+            <Icon name="warning" size={24} />
+          </div>
           <h3>خطا در بارگذاری</h3>
           <p>{error}</p>
           <div class="ops-hero__actions" style="justify-content: center">
-            <a class="ops-btn" href="/admin/operators">بازگشت به فهرست تیم</a>
+            <a class="ops-btn" href="/admin/operators">
+              بازگشت به فهرست تیم
+            </a>
           </div>
         </div>
       </section>
     ) : !page ? (
       <section class="ops-shell" style="margin-top: 12px">
         <div class="ops-empty">
-          <div class="ops-empty__icon"><Icon name="search" size={24} /></div>
+          <div class="ops-empty__icon">
+            <Icon name="search" size={24} />
+          </div>
           <h3>اپراتور پیدا نشد</h3>
-          <p>این پروفایل حذف شده یا شناسه آن معتبر نیست. فهرست تیم را ببینید و از آنجا اپراتور را انتخاب کنید.</p>
+          <p>
+            این پروفایل حذف شده یا شناسه آن معتبر نیست. فهرست تیم را ببینید و از آنجا اپراتور را
+            انتخاب کنید.
+          </p>
           <div class="ops-hero__actions" style="justify-content: center">
-            <a class="ops-btn ops-btn--primary" href="/admin/operators">فهرست تیم</a>
+            <a class="ops-btn ops-btn--primary" href="/admin/operators">
+              فهرست تیم
+            </a>
           </div>
         </div>
       </section>

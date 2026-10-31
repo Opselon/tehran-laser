@@ -60,9 +60,6 @@ export function calculateQuote(
 }
 
 /** Whether a public price row exists for the requested category (drives "price on request" UI). */
-export function hasPriceFor(
-  prices: readonly PriceRow[],
-  category: PricingCategory,
-): boolean {
+export function hasPriceFor(prices: readonly PriceRow[], category: PricingCategory): boolean {
   return prices.some((price) => price.pricingCategory === category);
 }

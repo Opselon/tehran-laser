@@ -18,6 +18,5 @@
      columns hold different product lines, so the men-only rows keep a
      neutral tint that is neither a gold nor an emerald fill. */
 main .gpt-row-mens {
-    background: rgba(30, 36, 48, 0.35);
-  }
-
+  background: rgba(30, 36, 48, 0.35);
+}

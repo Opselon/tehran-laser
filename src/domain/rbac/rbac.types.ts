@@ -92,7 +92,10 @@ export interface AuthUser {
   permissions: Permission[];
 }
 
-export function hasPermission(user: Pick<AuthUser, 'permissions'>, permission: Permission): boolean {
+export function hasPermission(
+  user: Pick<AuthUser, 'permissions'>,
+  permission: Permission,
+): boolean {
   return user.permissions.includes(permission);
 }
 

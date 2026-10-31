@@ -45,10 +45,14 @@ async function listModules(): Promise<AdminModule[]> {
   return body.data;
 }
 
-async function listPublicModules(): Promise<Array<{ key: string; config: Record<string, unknown> }>> {
+async function listPublicModules(): Promise<
+  Array<{ key: string; config: Record<string, unknown> }>
+> {
   const res = await api('/api/v1/features');
   expect(res.status).toBe(200);
-  const body = (await res.json()) as { data: Array<{ key: string; config: Record<string, unknown> }> };
+  const body = (await res.json()) as {
+    data: Array<{ key: string; config: Record<string, unknown> }>;
+  };
   return body.data;
 }
 
@@ -175,7 +179,9 @@ describe('feature plugins API', () => {
   });
 
   it('rejects an invalid config per field with VALIDATION_ERROR and stores nothing', async () => {
-    const beforeConfig = JSON.stringify((await listModules()).find((m) => m.key === 'instagram-hub')!.config);
+    const beforeConfig = JSON.stringify(
+      (await listModules()).find((m) => m.key === 'instagram-hub')!.config,
+    );
 
     const put = await api('/api/v1/admin/features/instagram-hub', {
       method: 'PUT',
@@ -183,11 +189,15 @@ describe('feature plugins API', () => {
       body: JSON.stringify({ config: { latestReelUrl: 'javascript:alert(1)' } }),
     });
     expect(put.status).toBe(422);
-    const err = (await put.json()) as { error: { code: string; fields?: Record<string, string[]> } };
+    const err = (await put.json()) as {
+      error: { code: string; fields?: Record<string, string[]> };
+    };
     expect(err.error.code).toBe('VALIDATION_ERROR');
     expect(Object.keys(err.error.fields ?? {})).toContain('latestReelUrl');
 
-    const afterConfig = JSON.stringify((await listModules()).find((m) => m.key === 'instagram-hub')!.config);
+    const afterConfig = JSON.stringify(
+      (await listModules()).find((m) => m.key === 'instagram-hub')!.config,
+    );
     expect(afterConfig).toBe(beforeConfig);
   });
 
@@ -266,7 +276,9 @@ describe('feature plugins API', () => {
     // A rejected payload, not a missing resource: the route exists and the body
     // is malformed, so it is a 422 carrying a per-key hint.
     expect(post.status).toBe(422);
-    const err = (await post.json()) as { error: { code: string; fields?: Record<string, string[]> } };
+    const err = (await post.json()) as {
+      error: { code: string; fields?: Record<string, string[]> };
+    };
     expect(err.error.code).toBe('VALIDATION_ERROR');
     expect(Object.keys(err.error.fields ?? {})).toContain('ghost-module');
 

@@ -29,7 +29,12 @@ export class ApiClientError extends Error {
   readonly status: number;
   readonly fields: Record<string, string[]>;
 
-  constructor(message: string, code: string, status: number, fields: Record<string, string[]> = {}) {
+  constructor(
+    message: string,
+    code: string,
+    status: number,
+    fields: Record<string, string[]> = {},
+  ) {
     super(message);
     this.name = 'ApiClientError';
     this.code = code;
@@ -133,7 +138,12 @@ export interface OperatorCatalog {
   shifts: ReadonlyArray<{ label: string; start: string; end: string }>;
   statuses: ReadonlyArray<{ key: OperatorStatus; label: string }>;
   sorts: ReadonlyArray<{ key: string; label: string }>;
-  teamRoles: ReadonlyArray<{ key: RoleKey; name: string; description: string; permissions: string[] }>;
+  teamRoles: ReadonlyArray<{
+    key: RoleKey;
+    name: string;
+    description: string;
+    permissions: string[];
+  }>;
 }
 
 export interface CoverageResponse {
@@ -204,13 +214,18 @@ export function fetchStats(id: string, days = 30): Promise<{ stats: OperatorStat
   );
 }
 
-export function fetchAgenda(id: string, date: string): Promise<{ localDate: string; items: OperatorAgendaItem[] }> {
+export function fetchAgenda(
+  id: string,
+  date: string,
+): Promise<{ localDate: string; items: OperatorAgendaItem[] }> {
   return request<{ localDate: string; items: OperatorAgendaItem[] }>(
     `/api/v1/admin/operators/${encodeURIComponent(id)}/agenda${qs({ date })}`,
   );
 }
 
-export function fetchUnassigned(date: string): Promise<{ localDate: string; items: OperatorAgendaItem[] }> {
+export function fetchUnassigned(
+  date: string,
+): Promise<{ localDate: string; items: OperatorAgendaItem[] }> {
   return request<{ localDate: string; items: OperatorAgendaItem[] }>(
     `/api/v1/admin/sessions/unassigned${qs({ date })}`,
   );
@@ -272,7 +287,11 @@ export function reorderOperators(
 
 export function issueAccount(
   id: string,
-  payload: { email?: string | undefined; role?: RoleKey | undefined; password?: string | undefined },
+  payload: {
+    email?: string | undefined;
+    role?: RoleKey | undefined;
+    password?: string | undefined;
+  },
 ): Promise<IssuedAccountResponse> {
   return request(`/api/v1/admin/operators/${encodeURIComponent(id)}/account`, {
     method: 'POST',

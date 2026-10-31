@@ -9,42 +9,48 @@
 سایت به‌صورت **Astro SSR** ساخته و روی **Cloudflare Workers** منتشر می‌شود؛ داده‌ها در **Cloudflare D1** هستند.
 
 ### مسیر استاندارد
+
 ```bash
 npm run typecheck        # astro sync + tsc --noEmit + astro check  (باید ۰ خطا)
 npm test                 # تست واحد + یکپارچگی D1
 npm run build            # astro build  →  خروجی در ./dist
 npx wrangler deploy      # انتشار روی Cloudflare Workers
 ```
+
 یا یک‌مرحله‌ای: `npm run cf:deploy` (معادل `astro build && wrangler deploy`).
 
 ### پیکربندی (`wrangler.jsonc`)
-| کلید | معنا |
-| :--- | :--- |
-| `name` | `tehran-laser` |
-| `assets.directory` | `./dist` (خروجی Astro) |
-| `d1_databases[].binding` | `DB` → دیتابیس `tehran-laser-db` |
-| `vars.BUSINESS_TIMEZONE` | `Asia/Tehran` |
-| `vars.SITE_URL` | نشانی زندهٔ سایت (برای canonical/OG/sitemap) |
+
+| کلید                     | معنا                                         |
+| :----------------------- | :------------------------------------------- |
+| `name`                   | `tehran-laser`                               |
+| `assets.directory`       | `./dist` (خروجی Astro)                       |
+| `d1_databases[].binding` | `DB` → دیتابیس `tehran-laser-db`             |
+| `vars.BUSINESS_TIMEZONE` | `Asia/Tehran`                                |
+| `vars.SITE_URL`          | نشانی زندهٔ سایت (برای canonical/OG/sitemap) |
 
 > ⚠️ **`SITE_URL` را روی دامنهٔ زنده بگذارید.** دامنهٔ `tehranlaser.ir` در حال حاضر به‌صورت پارک‌شده پاسخ می‌دهد و **نباید** به‌عنوان origin منتشر شود؛ تا زمانی که واقعاً همین اپ را سرو نکند، نشانی Workers درست است.
 
 ### مایگریشن‌های پایگاه‌داده
+
 ```bash
 npm run db:migrate:local    # اعمال مایگریشن‌ها روی D1 محلی
 npm run db:migrate:remote   # اعمال روی D1 لایو
 # یا مستقیماً:
 npx wrangler d1 migrations apply tehran-laser-db --remote
 ```
+
 مایگریشن‌ها در `migrations/` **ترتیبی** هستند و باید فقط از طریق ابزار مایگریشن اعمال شوند (نه SQL دستی روی DB زنده).
 
 ### بررسی سلامت پس از استقرار
-| مسیر | انتظار |
-| :--- | :--- |
-| `GET /` | صفحهٔ اصلی با تعرفه‌ها و متادیتای سئو |
-| `GET /services` | کاتالوگ خدمات و تب بانوان/آقایان |
-| `GET /booking` | جادوگر رزرو با اسلات‌های زنده |
-| `GET /sitemap.xml` · `GET /robots.txt` | درست و بلاک‌بودن مسیر ادمین |
-| `GET /api/health` | `{ status: "ok", database: "ok" }` |
+
+| مسیر                                   | انتظار                                |
+| :------------------------------------- | :------------------------------------ |
+| `GET /`                                | صفحهٔ اصلی با تعرفه‌ها و متادیتای سئو |
+| `GET /services`                        | کاتالوگ خدمات و تب بانوان/آقایان      |
+| `GET /booking`                         | جادوگر رزرو با اسلات‌های زنده         |
+| `GET /sitemap.xml` · `GET /robots.txt` | درست و بلاک‌بودن مسیر ادمین           |
+| `GET /api/health`                      | `{ status: "ok", database: "ok" }`    |
 
 ---
 

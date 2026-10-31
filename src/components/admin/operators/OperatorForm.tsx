@@ -77,14 +77,18 @@ export function OperatorForm({
   const toggleService = (id: string) => {
     update(
       'serviceIds',
-      draft.serviceIds.includes(id) ? draft.serviceIds.filter((entry) => entry !== id) : [...draft.serviceIds, id],
+      draft.serviceIds.includes(id)
+        ? draft.serviceIds.filter((entry) => entry !== id)
+        : [...draft.serviceIds, id],
     );
   };
 
   const toggleWorkday = (index: number) => {
     update(
       'workdays',
-      draft.workdays.includes(index) ? draft.workdays.filter((entry) => entry !== index) : [...draft.workdays, index],
+      draft.workdays.includes(index)
+        ? draft.workdays.filter((entry) => entry !== index)
+        : [...draft.workdays, index],
     );
   };
 
@@ -303,7 +307,11 @@ export function OperatorForm({
               type="button"
               className="ops-preset"
               onClick={() => {
-                setDraft((current) => ({ ...current, shiftStart: shift.start, shiftEnd: shift.end }));
+                setDraft((current) => ({
+                  ...current,
+                  shiftStart: shift.start,
+                  shiftEnd: shift.end,
+                }));
                 setTouched(true);
               }}
             >
@@ -316,7 +324,9 @@ export function OperatorForm({
       <fieldset className="ops-fieldset">
         <legend>خدمات قابل اجرا</legend>
         {services.length === 0 ? (
-          <p className="ops-hint">هنوز خدمتی ثبت نشده است؛ می‌توانید بعداً از پروفایل اپراتور خدمات را وصل کنید.</p>
+          <p className="ops-hint">
+            هنوز خدمتی ثبت نشده است؛ می‌توانید بعداً از پروفایل اپراتور خدمات را وصل کنید.
+          </p>
         ) : (
           <div className="ops-services" role="group" aria-label="خدمات">
             {services.map((service) => (
@@ -327,14 +337,19 @@ export function OperatorForm({
                 aria-pressed={draft.serviceIds.includes(service.id)}
                 onClick={() => toggleService(service.id)}
               >
-                <IconReact name={draft.serviceIds.includes(service.id) ? 'check' : 'plus'} size={15} />
+                <IconReact
+                  name={draft.serviceIds.includes(service.id) ? 'check' : 'plus'}
+                  size={15}
+                />
                 <span>{service.name}</span>
               </button>
             ))}
           </div>
         )}
         {showErrors && errors.serviceIds && <span className="ops-error">{errors.serviceIds}</span>}
-        <span className="ops-hint">{draft.serviceIds.length} خدمت انتخاب شده — در پیشنهاد اپراتور برای آن خدمات دیده می‌شود.</span>
+        <span className="ops-hint">
+          {draft.serviceIds.length} خدمت انتخاب شده — در پیشنهاد اپراتور برای آن خدمات دیده می‌شود.
+        </span>
       </fieldset>
 
       <fieldset className="ops-fieldset">

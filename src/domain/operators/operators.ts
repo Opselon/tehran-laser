@@ -385,7 +385,9 @@ export function shiftMinutes(operator: Pick<OperatorDto, 'shiftStart' | 'shiftEn
   return Math.max(0, to - from);
 }
 
-export function weeklyShiftMinutes(operator: Pick<OperatorDto, 'shiftStart' | 'shiftEnd' | 'workdays'>): number {
+export function weeklyShiftMinutes(
+  operator: Pick<OperatorDto, 'shiftStart' | 'shiftEnd' | 'workdays'>,
+): number {
   return shiftMinutes(operator) * operator.workdays.length;
 }
 
@@ -463,7 +465,10 @@ export interface CoverageSegment {
 }
 
 export function coverageSegments(
-  operators: readonly Pick<OperatorDto, 'id' | 'displayName' | 'workdays' | 'shiftStart' | 'shiftEnd' | 'active'>[],
+  operators: readonly Pick<
+    OperatorDto,
+    'id' | 'displayName' | 'workdays' | 'shiftStart' | 'shiftEnd' | 'active'
+  >[],
   weekday: number,
 ): CoverageSegment[] {
   const boundaries = new Set<number>();
@@ -475,7 +480,10 @@ export function coverageSegments(
       from: parseClock(op.shiftStart),
       to: parseClock(op.shiftEnd),
     }))
-    .filter((w): w is { id: string; name: string; from: number; to: number } => w.from !== null && w.to !== null && w.to > w.from);
+    .filter(
+      (w): w is { id: string; name: string; from: number; to: number } =>
+        w.from !== null && w.to !== null && w.to > w.from,
+    );
 
   for (const window of windows) {
     boundaries.add(window.from);
@@ -600,9 +608,13 @@ export function sortOperators(
     case 'revenue':
       return copy.sort((a, b) => b.stats.revenue - a.stats.revenue || a.sortOrder - b.sortOrder);
     case 'utilization':
-      return copy.sort((a, b) => b.stats.utilization - a.stats.utilization || a.sortOrder - b.sortOrder);
+      return copy.sort(
+        (a, b) => b.stats.utilization - a.stats.utilization || a.sortOrder - b.sortOrder,
+      );
     case 'recent':
-      return copy.sort((a, b) => (a.createdAt < b.createdAt ? 1 : a.createdAt > b.createdAt ? -1 : 0));
+      return copy.sort((a, b) =>
+        a.createdAt < b.createdAt ? 1 : a.createdAt > b.createdAt ? -1 : 0,
+      );
     case 'order':
     default:
       return copy.sort(
@@ -650,7 +662,8 @@ export function canHardDelete(stats: OperatorStatsSummary): boolean {
 /* ── Metrics ─────────────────────────────────────────────────────────────── */
 
 export function utilizationPercent(bookedMinutes: number, capacityMinutes: number): number {
-  if (!Number.isFinite(bookedMinutes) || !Number.isFinite(capacityMinutes) || capacityMinutes <= 0) return 0;
+  if (!Number.isFinite(bookedMinutes) || !Number.isFinite(capacityMinutes) || capacityMinutes <= 0)
+    return 0;
   return Math.max(0, Math.min(100, Math.round((bookedMinutes / capacityMinutes) * 100)));
 }
 
@@ -679,28 +692,52 @@ export function capacityMinutes(weeklyMinutes: number, days: number): number {
 }
 
 export function buildInsights(
-  operator: Pick<OperatorDto, 'active' | 'archivedAt' | 'account' | 'workdays' | 'serviceIds' | 'commissionPercent'>,
+  operator: Pick<
+    OperatorDto,
+    'active' | 'archivedAt' | 'account' | 'workdays' | 'serviceIds' | 'commissionPercent'
+  >,
   stats: Pick<OperatorStatsDto, 'totals'>,
 ): OperatorInsight[] {
   const insights: OperatorInsight[] = [];
   if (operator.archivedAt) {
-    insights.push({ tone: 'warn', text: 'این پروفایل بایگانی شده است؛ در نوبت‌دهی و فهرست فعال دیده نمی‌شود.' });
+    insights.push({
+      tone: 'warn',
+      text: 'این پروفایل بایگانی شده است؛ در نوبت‌دهی و فهرست فعال دیده نمی‌شود.',
+    });
   } else if (!operator.active) {
-    insights.push({ tone: 'warn', text: 'پروفایل غیرفعال است و در پیشنهاد شیفت امروز ظاهر نمی‌شود.' });
+    insights.push({
+      tone: 'warn',
+      text: 'پروفایل غیرفعال است و در پیشنهاد شیفت امروز ظاهر نمی‌شود.',
+    });
   }
   if (!operator.account) {
-    insights.push({ tone: 'info', text: 'حساب ورود ندارد؛ برای ثبت جلسه توسط خود او یک حساب صادر کنید.' });
+    insights.push({
+      tone: 'info',
+      text: 'حساب ورود ندارد؛ برای ثبت جلسه توسط خود او یک حساب صادر کنید.',
+    });
   }
   if (operator.workdays.length === 0) {
-    insights.push({ tone: 'warn', text: 'هیچ روز کاری انتخاب نشده است؛ ظرفیت هفتگی صفر محاسبه می‌شود.' });
+    insights.push({
+      tone: 'warn',
+      text: 'هیچ روز کاری انتخاب نشده است؛ ظرفیت هفتگی صفر محاسبه می‌شود.',
+    });
   }
   if (operator.serviceIds.length === 0) {
-    insights.push({ tone: 'info', text: 'خدمتی به این پروفایل وصل نشده؛ در انتخاب اپراتور برای آن خدمات پیشنهاد نمی‌شود.' });
+    insights.push({
+      tone: 'info',
+      text: 'خدمتی به این پروفایل وصل نشده؛ در انتخاب اپراتور برای آن خدمات پیشنهاد نمی‌شود.',
+    });
   }
   if (stats.totals.sessions === 0) {
-    insights.push({ tone: 'info', text: 'هنوز جلسه‌ای به این اپراتور تخصیص نیافته است؛ از تب برنامه، نوبت‌ها را وصل کنید.' });
+    insights.push({
+      tone: 'info',
+      text: 'هنوز جلسه‌ای به این اپراتور تخصیص نیافته است؛ از تب برنامه، نوبت‌ها را وصل کنید.',
+    });
   } else if (stats.totals.utilization >= 85) {
-    insights.push({ tone: 'warn', text: 'ظرفیت شیفت تقریباً پر است؛ برای جذب مراجع بیشتر شیفت را گسترش دهید.' });
+    insights.push({
+      tone: 'warn',
+      text: 'ظرفیت شیفت تقریباً پر است؛ برای جذب مراجع بیشتر شیفت را گسترش دهید.',
+    });
   } else if (stats.totals.utilization > 0 && stats.totals.utilization < 25) {
     insights.push({ tone: 'info', text: 'بهره‌وری شیفت پایین است؛ توزیع نوبت‌ها را متعادل کنید.' });
   }
@@ -787,12 +824,17 @@ export function validateOperatorDraft(draft: OperatorDraft): Record<string, stri
 
   if (!isOperatorRoleKey(draft.roleKey)) errors.roleKey = 'نقش انتخابی معتبر نیست.';
 
-  if (normalizeWorkdays(draft.workdays).length === 0) errors.workdays = 'حداقل یک روز کاری انتخاب کنید.';
+  if (normalizeWorkdays(draft.workdays).length === 0)
+    errors.workdays = 'حداقل یک روز کاری انتخاب کنید.';
 
   const shift = validateShiftWindow(draft.shiftStart, draft.shiftEnd);
   if (shift !== 'ok') errors.shift = SHIFT_ERROR_MESSAGES[shift];
 
-  if (!Number.isInteger(draft.commissionPercent) || draft.commissionPercent < 0 || draft.commissionPercent > 100) {
+  if (
+    !Number.isInteger(draft.commissionPercent) ||
+    draft.commissionPercent < 0 ||
+    draft.commissionPercent > 100
+  ) {
     errors.commissionPercent = 'کمیسیون باید عددی بین ۰ تا ۱۰۰ باشد.';
   }
   if (!Number.isFinite(draft.monthlyTarget) || draft.monthlyTarget < 0) {

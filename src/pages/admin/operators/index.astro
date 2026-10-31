@@ -14,7 +14,11 @@ import Icon from '../../../components/ui/Icon.astro';
 import { OperatorsApp } from '../../../components/admin/operators/OperatorsApp';
 import { env } from 'cloudflare:workers';
 import { getPublicSettings } from '../../../server/repositories';
-import { buildRosterView, loadOperatorCatalog, loadServiceOptions } from '../../../server/operator-view';
+import {
+  buildRosterView,
+  loadOperatorCatalog,
+  loadServiceOptions,
+} from '../../../server/operator-view';
 import { hasPermission } from '../../../domain/rbac/rbac.types';
 
 const auth = Astro.locals.auth;
@@ -35,7 +39,10 @@ if (allowed) {
   }
 
   try {
-    [catalog, services] = await Promise.all([loadOperatorCatalog(env.DB), loadServiceOptions(env.DB)]);
+    [catalog, services] = await Promise.all([
+      loadOperatorCatalog(env.DB),
+      loadServiceOptions(env.DB),
+    ]);
   } catch (error) {
     console.error('[operators] failed to load the page vocabulary:', error);
   }
@@ -73,7 +80,9 @@ if (allowed) {
               : 'برای مشاهده و مدیریت اپراتورها به مجوز «مشاهده تیم اپراتور» نیاز دارید. این محدودیت در سرور اعمال می‌شود، نه فقط در رابط کاربری.'}
           </p>
           <div class="ops-hero__actions" style="justify-content: center">
-            <a class="ops-btn" href="/admin">بازگشت به داشبورد</a>
+            <a class="ops-btn" href="/admin">
+              بازگشت به داشبورد
+            </a>
           </div>
         </div>
       </section>
