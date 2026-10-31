@@ -6,14 +6,14 @@
 
 ## 1. Measured state
 
-| Check | Result | Evidence |
-| --- | --- | --- |
-| DNS `tehranlesar.ir` | ✅ Cloudflare edge (`188.114.99.0`) | `nslookup`, 2026-11-01 |
-| `https://tehranlesar.ir/` | ✅ HTTP 200, `server: cloudflare`, TLS OK | `curl` |
-| Serves THIS worker | ✅ `/api/health` envelope, `x-request-id`, `server-timing`, brand markup | live probes |
-| Old spelling `tehranlaser.ir` | ❌ foreign host `5.61.28.239` (`nginx/1.18.0 (Ubuntu)`), TLS fails — **not under this account's control, never emitted as canonical** | `curl`/`nslookup` |
-| `https://tehran-laser.opcelon.workers.dev/` | ✅ same worker, owner account's workers.dev origin | live probes |
-| Legacy `tehran-laser.samerkhaldounmarefi.workers.dev` | old account's deployment; scheduled for decommission after data migration | live probes |
+| Check                                                 | Result                                                                                                                                | Evidence               |
+| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
+| DNS `tehranlesar.ir`                                  | ✅ Cloudflare edge (`188.114.99.0`)                                                                                                   | `nslookup`, 2026-11-01 |
+| `https://tehranlesar.ir/`                             | ✅ HTTP 200, `server: cloudflare`, TLS OK                                                                                             | `curl`                 |
+| Serves THIS worker                                    | ✅ `/api/health` envelope, `x-request-id`, `server-timing`, brand markup                                                              | live probes            |
+| Old spelling `tehranlaser.ir`                         | ❌ foreign host `5.61.28.239` (`nginx/1.18.0 (Ubuntu)`), TLS fails — **not under this account's control, never emitted as canonical** | `curl`/`nslookup`      |
+| `https://tehran-laser.opcelon.workers.dev/`           | ✅ same worker, owner account's workers.dev origin                                                                                    | live probes            |
+| Legacy `tehran-laser.samerkhaldounmarefi.workers.dev` | old account's deployment; scheduled for decommission after data migration                                                             | live probes            |
 
 ## 2. Configuration that makes the domain canonical (all in git)
 
