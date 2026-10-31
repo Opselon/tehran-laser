@@ -14,7 +14,10 @@
     {
       "binding": "DB",
       "database_name": "tehran-laser-db",
-      "database_id": "6ded6ab1-c8db-4071-aee9-bb74a7d61455",
+      // Owner-account database (created 2026-11-01 during the account migration;
+      // see issue #16 and docs/DOMAIN-CUTOVER.md). The previous id 6ded6ab1-…
+      // belongs to the workers.dev account the platform is moving away from.
+      "database_id": "bcbc46f0-16dd-4aec-82da-8201496b9036",
     },
   ],
   "vars": {
@@ -22,6 +25,6 @@
     // Public origin used for canonical/OG/sitemap URLs. Must be the LIVE origin.
     // Do NOT set this to https://tehranlaser.ir until that domain actually serves
     // this app — it currently answers with a domain-parking page.
-    "SITE_URL": "https://tehran-laser.samerkhaldounmarefi.workers.dev",
+    "SITE_URL": "https://tehran-laser.opcelon.workers.dev",
   },
 }

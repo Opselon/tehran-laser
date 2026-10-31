@@ -90,7 +90,7 @@ jobs:
       - name: Post-deploy smoke tests
         if: steps.creds.outputs.present == 'true'
         env:
-          SMOKE_BASE: https://tehran-laser.samerkhaldounmarefi.workers.dev
+          SMOKE_BASE: https://tehran-laser.opcelon.workers.dev
         run: |
           set -euo pipefail
 

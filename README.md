@@ -3,7 +3,7 @@
 > وب‌سایت رسمی + پنل مدیریت «کلینیک تخصصی تهران لیزر» — کلینیک لیزر موهای زائد در پاسداران، تهران.
 > سایت عمومی **فارسی و راست‌به‌چپ (`lang="fa-IR"`, `dir="rtl"`)**، ساخته‌شده با **Astro SSR روی Cloudflare Workers** و پایگاه‌داده **Cloudflare D1 (SQLite)**.
 
-نشانی زنده: `https://tehran-laser.samerkhaldounmarefi.workers.dev/`
+نشانی زنده: `https://tehran-laser.opcelon.workers.dev/`
 
 ---
 

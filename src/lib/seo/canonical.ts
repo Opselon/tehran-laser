@@ -13,7 +13,7 @@ import { env } from 'cloudflare:workers';
  * NOTE: tehranlaser.ir is the intended future vanity domain. It is NOT live yet
  * (it currently serves a domain-parking page), so it must never be emitted as a
  * canonical/OG/sitemap URL until it points at this worker. The live origin is
- * https://tehran-laser.samerkhaldounmarefi.workers.dev.
+ * https://tehran-laser.opcelon.workers.dev.
  */
 
 /**
@@ -21,7 +21,7 @@ import { env } from 'cloudflare:workers';
  * (e.g. unit tests, local builds). Keep this pointed at the LIVE workers
  * origin, never the parked vanity domain.
  */
-export const DEFAULT_CANONICAL_ORIGIN = 'https://tehran-laser.samerkhaldounmarefi.workers.dev';
+export const DEFAULT_CANONICAL_ORIGIN = 'https://tehran-laser.opcelon.workers.dev';
 
 /**
  * Single source of truth for the origin used in canonical links, og:url,
