@@ -10,10 +10,10 @@ import { env } from 'cloudflare:workers';
  * - Trailing slash normalization (single slash for root, no trailing slash for subpaths)
  * - Strip transient marketing query params (utm_*, gclid, fbclid, etc.)
  *
- * NOTE: tehranlaser.ir is the intended future vanity domain. It is NOT live yet
- * (it currently serves a domain-parking page), so it must never be emitted as a
- * canonical/OG/sitemap URL until it points at this worker. The live origin is
- * https://tehran-laser.samerkhaldounmarefi.workers.dev.
+ * NOTE: tehranlesar.ir is the clinic's live custom domain, bound to this worker
+ * in the owner's Cloudflare account (TLS verified 2026-11-01). tehranlaser.ir —
+ * a DIFFERENT spelling — answers from a foreign nginx host outside this
+ * account's control and must never be emitted as a canonical/OG/sitemap URL.
  */
 
 /**
@@ -21,7 +21,7 @@ import { env } from 'cloudflare:workers';
  * (e.g. unit tests, local builds). Keep this pointed at the LIVE workers
  * origin, never the parked vanity domain.
  */
-export const DEFAULT_CANONICAL_ORIGIN = 'https://tehran-laser.samerkhaldounmarefi.workers.dev';
+export const DEFAULT_CANONICAL_ORIGIN = 'https://tehranlesar.ir';
 
 /**
  * Single source of truth for the origin used in canonical links, og:url,

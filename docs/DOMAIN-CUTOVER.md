@@ -1,61 +1,40 @@
-# Domain Cutover Runbook — `tehranlaser.ir`
+# Domain & Account Cutover — `tehranlesar.ir`
 
-**Status: BLOCKED (external)** — measured 2026-11-01.
-
-The platform's canonical origin is and remains
-`https://tehran-laser.samerkhaldounmarefi.workers.dev` until every check in
-§3 passes. This document is the exact, evidence-based runbook for the day the
-domain becomes available; do not skip it.
+**Status: LIVE on the owner's Cloudflare account** (verified 2026-11-01).
 
 ---
 
-## 1. Current measured state (2026-11-01)
+## 1. Measured state
 
-| Check                             | Result                                                                  | Evidence                      |
-| --------------------------------- | ----------------------------------------------------------------------- | ----------------------------- |
-| DNS A record `tehranlaser.ir`     | ❌ `5.61.28.239` — not a Cloudflare edge IP                             | `nslookup tehranlaser.ir`     |
-| DNS A record `www.tehranlaser.ir` | ❌ `5.61.28.239`                                                        | `nslookup www.tehranlaser.ir` |
-| `https://tehranlaser.ir/`         | ❌ TLS handshake fails (curl exit 60, HTTP 000)                         | `curl -vI`                    |
-| `http://tehranlaser.ir/`          | ❌ answers `Server: nginx/1.18.0 (Ubuntu)` — an unrelated origin        | `curl -sI`                    |
-| Production worker                 | ✅ `GET /` → 200, `GET /api/health` → `{"status":"ok","database":"ok"}` | live probe                    |
+| Check                                                 | Result                                                                                                                                | Evidence               |
+| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
+| DNS `tehranlesar.ir`                                  | ✅ Cloudflare edge (`188.114.99.0`)                                                                                                   | `nslookup`, 2026-11-01 |
+| `https://tehranlesar.ir/`                             | ✅ HTTP 200, `server: cloudflare`, TLS OK                                                                                             | `curl`                 |
+| Serves THIS worker                                    | ✅ `/api/health` envelope, `x-request-id`, `server-timing`, brand markup                                                              | live probes            |
+| Old spelling `tehranlaser.ir`                         | ❌ foreign host `5.61.28.239` (`nginx/1.18.0 (Ubuntu)`), TLS fails — **not under this account's control, never emitted as canonical** | `curl`/`nslookup`      |
+| `https://tehran-laser.opcelon.workers.dev/`           | ✅ same worker, owner account's workers.dev origin                                                                                    | live probes            |
+| Legacy `tehran-laser.samerkhaldounmarefi.workers.dev` | old account's deployment; scheduled for decommission after data migration                                                             | live probes            |
 
-Root cause: the registrar's DNS still points at a previous/foreign host.
-No code change can fix this; it requires the domain owner's registrar login.
+## 2. Configuration that makes the domain canonical (all in git)
 
-## 2. Code-side policy already in place (no action needed)
+- `wrangler.jsonc` → `SITE_URL: https://tehranlesar.ir` (wins over the fallback in `resolveCanonicalOrigin`)
+- `src/lib/seo/canonical.ts` → `DEFAULT_CANONICAL_ORIGIN = 'https://tehranlesar.ir'`
+- Canonical `<link>`, `og:url`, `og:image`, JSON-LD `@id`, sitemap `<loc>` and robots `Sitemap:` all derive from that single resolver.
 
-- `src/lib/seo/canonical.ts` — `resolveCanonicalOrigin()` prefers the `SITE_URL`
-  wrangler var and falls back to the live workers origin; the vanity domain is
-  deliberately never emitted while it is unreachable.
-- `src/pages/sitemap.xml.ts` / `src/pages/robots.txt.ts` — emit `<loc>`/`Sitemap:`
-  from that same resolver.
-- Comments in all three files already document this policy.
+## 3. Verification after the deploy that bakes `SITE_URL`
 
-## 3. Cutover checklist (execute in order; halt on first failure)
+```bash
+curl -s https://tehranlesar.ir/robots.txt | tail -1   # Sitemap: https://tehranlesar.ir/sitemap.xml
+curl -s https://tehranlesar.ir/sitemap.xml | grep -c '<loc>https://tehranlesar.ir'
+curl -s https://tehranlesar.ir/ | grep -o '<link rel="canonical" href="[^"]*"'
+```
 
-1. **Registrar/DNS (owner):** repoint `tehranlaser.ir` and `www` to the
-   Cloudflare zone (proxied `A`/`CNAME` records on Cloudflare's edge).
-2. **Cloudflare (owner):** add the Worker custom domain
-   (Workers → tehran-laser → Settings → Domains & Routes → add
-   `tehranlaser.ir` + `www.tehranlaser.ir`); wait for the universal-SSL cert.
-3. **Verify TLS from an outside network:** `curl -sI https://tehranlaser.ir/`
-   must return 200 over HTTPS with a Cloudflare certificate.
-4. **Pick one canonical host** (recommended: apex `tehranlaser.ir`), and make the
-   other a 301 redirect (`www` → apex) via a Cloudflare Redirect Rule.
-5. **Set `SITE_URL`:** `wrangler vars put SITE_URL --name tehran-laser` →
-   `https://tehranlaser.ir`. `resolveCanonicalOrigin()` picks it up at runtime.
-6. **Verify SEO endpoints on the new origin:**
-   - `curl -s https://tehranlaser.ir/sitemap.xml | head` — every `<loc>` must use the apex.
-   - `curl -s https://tehranlaser.ir/robots.txt | tail -1` — `Sitemap: https://tehranlaser.ir/sitemap.xml`.
-   - `<link rel="canonical">` and `og:url` on `/` must show the apex.
-7. **Run the CD smoke suite** against the new origin (same route list as the
-   post-deploy smoke step in `cd.yml`), plus the auth boundary checks.
-8. **Update `DEFAULT_CANONICAL_ORIGIN` fallback** in `src/lib/seo/canonical.ts`
-   only after step 7 passes, then re-verify.
-9. **Search consoles:** submit the new sitemap in Google Search Console /
-   Bing Webmaster; keep the workers.dev property until traffic moves.
+The CD post-deploy smoke suite probes this origin on every deploy (8 routes, health,
+SEO endpoints, anonymous auth boundary).
 
-## 4. Rollback
+## 4. Remaining items
 
-If anything fails after `SITE_URL` is changed: `wrangler vars delete SITE_URL --name tehran-laser`
-restores the workers.dev canonical origin on the next deploy; the code needs no change.
+1. **www redirect**: if `www.tehranlesar.ir` is added as a custom domain later, add a Cloudflare redirect rule `www → apex` so only one canonical host exists.
+2. **Search consoles**: submit `https://tehranlesar.ir/sitemap.xml` in Google Search Console / Bing Webmaster.
+3. **Decommission the legacy origin** (`tehran-laser.samerkhaldounmarefi.workers.dev`) only after the data migration completes and the owner confirms.
+4. `tehranlaser.ir` (old spelling) points at an unrelated server — either reclaim it at the registrar or ignore it; the platform must never emit it as canonical.

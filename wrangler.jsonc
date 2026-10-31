@@ -14,14 +14,19 @@
     {
       "binding": "DB",
       "database_name": "tehran-laser-db",
-      "database_id": "6ded6ab1-c8db-4071-aee9-bb74a7d61455",
+      // Owner-account database (created 2026-11-01 during the account migration;
+      // see issue #16 and docs/DOMAIN-CUTOVER.md). The previous id 6ded6ab1-…
+      // belongs to the workers.dev account the platform is moving away from.
+      "database_id": "bcbc46f0-16dd-4aec-82da-8201496b9036",
     },
   ],
   "vars": {
     "BUSINESS_TIMEZONE": "Asia/Tehran",
     // Public origin used for canonical/OG/sitemap URLs. Must be the LIVE origin.
-    // Do NOT set this to https://tehranlaser.ir until that domain actually serves
-    // this app — it currently answers with a domain-parking page.
-    "SITE_URL": "https://tehran-laser.samerkhaldounmarefi.workers.dev",
+    // tehranlesar.ir is the clinic's custom domain, bound to this worker in the
+    // owner's Cloudflare account (TLS verified 2026-11-01). Do NOT set this to
+    // https://tehranlaser.ir — that different domain answers from a foreign
+    // nginx host and is not under this account's control.
+    "SITE_URL": "https://tehranlesar.ir",
   },
 }
