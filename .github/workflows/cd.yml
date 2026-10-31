@@ -83,6 +83,44 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: npx wrangler deploy
 
+      # Post-deploy verification: public routes render, health reports a live DB,
+      # SEO endpoints exist, and the anonymous auth boundary holds. All checks are
+      # read-only. Update SMOKE_BASE when the domain cutover lands
+      # (docs/DOMAIN-CUTOVER.md §3 step 7).
+      - name: Post-deploy smoke tests
+        if: steps.creds.outputs.present == 'true'
+        env:
+          SMOKE_BASE: https://tehran-laser.samerkhaldounmarefi.workers.dev
+        run: |
+          set -euo pipefail
+
+          for path in / /services /booking /clinic /faq /blog /contact /admin/login; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$SMOKE_BASE$path")
+            echo "$path -> $code"
+            [ "$code" = "200" ] || { echo "::error title=Smoke failed::$path returned $code"; exit 1; }
+          done
+
+          health=$(curl -sf --max-time 20 "$SMOKE_BASE/api/health")
+          echo "$health"
+          echo "$health" | grep -q '"status":"ok"' \
+            || { echo "::error title=Smoke failed::health check: $health"; exit 1; }
+
+          for path in /sitemap.xml /robots.txt; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$SMOKE_BASE$path")
+            echo "$path -> $code"
+            [ "$code" = "200" ] || { echo "::error title=Smoke failed::$path returned $code"; exit 1; }
+          done
+
+          code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$SMOKE_BASE/api/v1/admin/dashboard")
+          echo "/api/v1/admin/dashboard (anonymous) -> $code"
+          [ "$code" = "401" ] || { echo "::error title=Smoke failed::anonymous admin API returned $code (expected 401)"; exit 1; }
+
+          code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$SMOKE_BASE/admin")
+          echo "/admin (anonymous) -> $code"
+          [ "$code" = "302" ] || { echo "::error title=Smoke failed::anonymous /admin returned $code (expected 302 redirect to login)"; exit 1; }
+
+          echo "All post-deploy smoke checks passed."
+
       - name: Report deployment
         if: steps.creds.outputs.present == 'true'
         run: echo "Deployed commit $(git rev-parse HEAD)"
