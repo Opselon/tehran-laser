@@ -1034,3 +1034,365 @@ span.loc-phone-link,
     font-size: 10pt;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   15. UX-V4 REFRESH — "warm ink, one gold action, no black gradients"
+   ═══════════════════════════════════════════════════════════════════════════
+   Owner feedback (2026-11-01): the white-on-black-gradient combination reads
+   harsh and cheap, the site feels laggy on a phone, and booking is pitched
+   twice on one screen. This pass fixes all three, and it is deliberately the
+   ONLY place the new values are declared:
+
+   · The canvas and every card move off the near-black #06080a/#0c1114 pair
+     onto a WARM ink scale (#171b1f canvas, #1e242a surfaces) with a paper-
+     warm undertone — the black-vs-white contrast that read as "cheap" is
+     gone, replaced by a soft ivory ink (#f2ede4) on warm slate.
+   · Gold stops being a gradient. ONE solid champagne fill (#e8cb8f) for the
+     single primary action in a viewport; gradients survive only as 1px
+     hairline accents, never as a button or a heading.
+   · Perf: the hero's perspective grid + noise + 8s beam pulse are retired
+     (three always-on composited layers painting a 1287px-tall phone hero),
+     `animation-timeline: view()` reveals lose their opacity start state
+     (content sat at opacity 0 in every scroll capture) and the heavy
+     `backdrop-filter` glass is replaced by opaque surfaces. backdrop-filter
+     is kept ONLY on the sticky header, where it is 63px tall and off-screen
+     most of the time.
+   · Duplicate CTA: the mobile sticky bar keeps the single gold booking
+     button; the hero CTA becomes outline so a scrolled viewport never shows
+     two identical gold "رزرو آنلاین نوبت" buttons (the exact complaint).
+
+   Token additions only — no value above is redeclared, so the v3 floors
+   (11px type, 44px taps, single accent, single focus ring) still hold.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+body.theme-dark-obsidian {
+  /* Warm ink scale — warm undertone, never neutral black */
+  --ux-canvas: #161a1e;
+  --ux-surface: #1c2228;
+  --ux-surface-2: #232a31;
+  --ux-surface-3: #2a323a;
+  --ux-line: rgba(242, 237, 228, 0.1);
+  --ux-line-soft: rgba(242, 237, 228, 0.06);
+  --ux-line-strong: rgba(242, 237, 228, 0.16);
+  /* Ivory ink replaces near-white: the white-on-black pair read as harsh */
+  --ux-ink: #f2ede4;
+  --ux-ink-soft: #d6cfc3;
+  --ux-muted: #a79f93;
+  --ux-faint: #8f8880;
+  /* Solid accent — one filled action per viewport, never a gradient */
+  --ux-accent-solid: #e8cb8f;
+  --ux-accent-ink: #2a1f0d;
+}
+
+/* ── 15.1 Canvas: one quiet warmth, no light-spot soup ─────────────────── */
+body.theme-dark-obsidian {
+  background-color: var(--ux-canvas);
+  background-image: radial-gradient(
+    900px 480px at 92% -6%,
+    rgba(232, 203, 143, 0.06),
+    transparent 64%
+  );
+}
+
+/* ── 15.2 Cards: warm surfaces, hairline border, no glass ──────────────── */
+body.theme-dark-obsidian .trust-card,
+body.theme-dark-obsidian .candela-feature-card,
+body.theme-dark-obsidian .testimonial-card,
+body.theme-dark-obsidian .protocol-step,
+body.theme-dark-obsidian .faq-card,
+body.theme-dark-obsidian .ig-card,
+body.theme-dark-obsidian .location-card,
+body.theme-dark-obsidian .journal-card,
+body.theme-dark-obsidian .stat-band-card,
+body.theme-dark-obsidian .closing-cta-inner {
+  background-color: var(--ux-surface);
+  background-image: none;
+  border: 1px solid var(--ux-line);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+/* Gradient-clip numerals were the loudest black-gradient on the page. Solid
+   champagne keeps the premium read and survives every contrast composite. */
+body.theme-dark-obsidian .stat-band-value,
+body.theme-dark-obsidian .gold-gradient-text {
+  background: none;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  color: var(--ux-accent-solid);
+  -webkit-text-fill-color: var(--ux-accent-solid);
+}
+
+/* The closing band keeps a single hairline accent, not a gold wash. */
+body.theme-dark-obsidian .closing-cta-inner {
+  border-color: rgba(232, 203, 143, 0.22);
+  background:
+    linear-gradient(180deg, rgba(232, 203, 143, 0.04), transparent 46%), var(--ux-surface);
+}
+
+/* Ledger rows + gallery frames pick up the same warm surface language. */
+body.theme-dark-obsidian .gender-price-table tbody tr,
+body.theme-dark-obsidian .gender-price-table thead th {
+  background-color: var(--ux-surface);
+}
+body.theme-dark-obsidian .cg-frame {
+  background: var(--ux-surface-2);
+}
+
+/* ── 15.3 ONE gold action per viewport ─────────────────────────────────── */
+body.theme-dark-obsidian .btn-primary,
+body.theme-dark-obsidian .header-cta,
+body.theme-dark-obsidian .hero-btn-book,
+body.theme-dark-obsidian .sticky-book {
+  background: var(--ux-accent-solid);
+  background-image: none;
+  color: var(--ux-accent-ink) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 10px 26px -18px rgba(232, 203, 143, 0.9);
+}
+
+body.theme-dark-obsidian .btn-primary:hover,
+body.theme-dark-obsidian .header-cta:hover,
+body.theme-dark-obsidian .hero-btn-book:hover,
+body.theme-dark-obsidian .sticky-book:hover {
+  background: var(--ux-accent-hi);
+  background-image: none;
+}
+
+/* The hover sheen is retired with the gradient — a moving highlight across a
+   solid fill is exactly the "glassy" effect the owner flagged. */
+body.theme-dark-obsidian .btn-primary::after,
+body.theme-dark-obsidian .header-cta::after,
+body.theme-dark-obsidian .hero-btn-book::after,
+body.theme-dark-obsidian .gpt-book-btn::after {
+  content: none;
+}
+
+/* The hero's own CTA stays the ONE filled gold action of the first viewport:
+   the sticky-bar dock script already keeps the bar hidden until the hero CTA
+   has scrolled away, so the two can never share a screen — the duplicate the
+   owner saw was the HEADER button (repaired in 15.6), not this one. */
+body.theme-dark-obsidian .hero-cta-group .hero-btn-book .promo-tag {
+  background: rgba(42, 31, 13, 0.16);
+  color: var(--ux-accent-ink);
+}
+
+/* Per-row tariff buttons keep their quiet tint; they sit 20× per page. */
+body.theme-dark-obsidian .gpt-book-btn {
+  background: rgba(232, 203, 143, 0.08);
+  border: 1px solid rgba(232, 203, 143, 0.26);
+  color: var(--ux-accent-solid);
+}
+
+/* ── 15.4 Chrome: opaque surfaces, one glass (the sticky header) ───────── */
+body.theme-dark-obsidian .bottom-nav,
+body.theme-dark-obsidian .mobile-sticky-bar,
+body.theme-dark-obsidian .mobile-drawer,
+body.theme-dark-obsidian .basket-drawer,
+body.theme-dark-obsidian .site-footer {
+  background-color: #14181b;
+  background-image: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+/* Location card: the booking text link that replaced the second gold button */
+body.theme-dark-obsidian .loc-book-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  color: var(--ux-accent-solid);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(232, 203, 143, 0.34);
+  padding-block: 4px;
+}
+
+body.theme-dark-obsidian .loc-book-link:hover {
+  color: var(--ux-accent-hi);
+  border-bottom-color: rgba(232, 203, 143, 0.7);
+}
+
+body.theme-dark-obsidian .loc-book-link svg {
+  color: var(--ux-accent-solid);
+}
+
+/* ── 15.5 Perf: retire the always-on hero stage and view-timeline opacity ─ */
+/* The perspective grid, the noise field and the 8s beam pulse are three
+   always-on composited layers behind a 1287px-tall phone hero. Static is
+   visually identical and stops the compositor work on every frame. */
+body.theme-dark-obsidian .hero-grid-lines,
+body.theme-dark-obsidian .hero-noise,
+body.theme-dark-obsidian .hero-visual::before {
+  display: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  body.theme-dark-obsidian .hero-beam-line {
+    animation: none;
+  }
+}
+
+/* Scroll reveals started at opacity 0 — with `animation-timeline: view()`
+   unsupported on iOS Safari the element stays at 0 until the animation
+   fires, so content vanished in every scroll capture. The entrance is now a
+   pure transform rise with NO opacity change. */
+@keyframes ux-v4-rise {
+  from {
+    transform: translateY(16px);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  body.theme-dark-obsidian .section-header,
+  body.theme-dark-obsidian .trust-card,
+  body.theme-dark-obsidian .candela-showcase-card,
+  body.theme-dark-obsidian .faq-card,
+  body.theme-dark-obsidian .location-card,
+  body.theme-dark-obsidian .ig-card,
+  body.theme-dark-obsidian .closing-cta-inner {
+    animation: ux-v4-rise linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 55%;
+  }
+}
+
+/* Where the scroll-driven API is unavailable the animation never runs, so
+   pin the resting transform to leave every card exactly in place. */
+@supports not (animation-timeline: view()) {
+  body.theme-dark-obsidian .section-header,
+  body.theme-dark-obsidian .trust-card,
+  body.theme-dark-obsidian .candela-showcase-card,
+  body.theme-dark-obsidian .faq-card,
+  body.theme-dark-obsidian .location-card,
+  body.theme-dark-obsidian .ig-card,
+  body.theme-dark-obsidian .closing-cta-inner {
+    animation: none;
+  }
+}
+
+/* The gold title glint animates background-position on a 9s loop — retired
+   with the gradient text it decorated. */
+@media (prefers-reduced-motion: no-preference) {
+  body.theme-dark-obsidian .gold-gradient-text {
+    animation: none;
+  }
+}
+
+/* ── 15.6 Header CTA cascade repair ─────────────────────────────────────── */
+/* Pre-existing cascade bug this pass fixes: the `.btn` family rule above
+   (`body.theme-dark-obsidian .btn { display: inline-flex }`) sits LATER in the
+   cascade than site-v2's `.header-cta { display: none }` at EQUAL specificity,
+   so the gold booking button rendered in the phone header right beside the
+   sticky bar's identical gold booking button — two filled CTAs for the same
+   action on one 390px screen. Re-assert the hide AFTER every button-family
+   display rule, and keep the desktop show inside its own query. */
+body.theme-dark-obsidian .header-cta {
+  display: none;
+}
+
+@media (min-width: 992px) {
+  body.theme-dark-obsidian .header-cta {
+    display: inline-flex;
+  }
+}
+
+/* ── 15.7 Promo band + gradient-title cleanup (v4) ─────────────────────── */
+/* The featured promo card kept the old black wash (#0b1013) and the pricing
+   box a translucent black plate — both read as the "black gradient" the owner
+   flagged. Same warm surface language as every other card. */
+body.theme-dark-obsidian .featured-promo-card {
+  background:
+    linear-gradient(180deg, rgba(232, 203, 143, 0.05), transparent 52%), var(--ux-surface);
+  border-color: rgba(232, 203, 143, 0.24);
+}
+
+body.theme-dark-obsidian .promo-pricing-box {
+  background: var(--ux-surface-2);
+  border-color: var(--ux-line);
+}
+
+body.theme-dark-obsidian .promo-badge-ribbon {
+  background: rgba(232, 203, 143, 0.1);
+  border-color: rgba(232, 203, 143, 0.32);
+  color: var(--ux-accent-solid);
+}
+
+body.theme-dark-obsidian .final-amount {
+  color: var(--ux-accent-solid);
+}
+
+/* The hero's gradient-clip phrase overrides the v3 gradient rule above via a
+   later, more specific selector pair. */
+body.theme-dark-obsidian h1 .gold-gradient-text,
+body.theme-dark-obsidian .hero-title .gold-gradient-text {
+  background: none;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  color: var(--ux-accent-solid);
+  -webkit-text-fill-color: var(--ux-accent-solid);
+}
+
+/* The stat-band numeral keeps its solid accent. */
+body.theme-dark-obsidian .stat-band-value {
+  color: var(--ux-accent-solid);
+  -webkit-text-fill-color: var(--ux-accent-solid);
+}
+
+/* ── 15.8 Kill the 9s foil glint ────────────────────────────────────────── */
+/* The gradient title it decorated is now solid champagne (15.2/15.7), so the
+   9s background-position loop would animate a property with no visible
+   gradient — pure compositor churn. The earlier generic `animation: none`
+   rule lost the cascade to site-v2's `body.theme-dark-obsidian
+   .hero-title .gold-gradient-text` (later + more specific). */
+body.theme-dark-obsidian .hero-title .gold-gradient-text {
+  animation: none;
+  background-size: auto;
+}
+
+/* ── 15.9 The remaining 3D button family + journal CTA (v4) ─────────────── */
+/* `btn-3d-gold` / `btn-3d-primary-sm` still carried the v3 135deg gold
+   gradient (24 of them on /services alone), and the journal strip's CTA its
+   own copy. With the solid accent policy they all become one fill. */
+body.theme-dark-obsidian .btn-3d-gold,
+body.theme-dark-obsidian .btn-3d-primary-sm,
+body.theme-dark-obsidian .btn-table-book,
+body.theme-dark-obsidian .journal-cta-btn {
+  background: var(--ux-accent-solid);
+  background-image: none;
+  color: var(--ux-accent-ink) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 10px 24px -18px rgba(232, 203, 143, 0.8);
+}
+
+body.theme-dark-obsidian .btn-3d-gold:hover,
+body.theme-dark-obsidian .btn-3d-primary-sm:hover,
+body.theme-dark-obsidian .btn-table-book:hover,
+body.theme-dark-obsidian .journal-cta-btn:hover {
+  background: var(--ux-accent-hi);
+  background-image: none;
+}
+
+/* The services page's non-dark-theme gradient phrase joins the solid accent. */
+.gold-gradient-text {
+  background: none;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  color: #a98a54;
+  -webkit-text-fill-color: #a98a54;
+}
+
+/* The services (and services/[slug]) page-local gradient phrase — the last
+   remaining 135deg gold gradient on the public site. */
+body.theme-dark-obsidian main .gold-gradient {
+  background: none;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  color: var(--ux-accent-solid);
+  -webkit-text-fill-color: var(--ux-accent-solid);
+}

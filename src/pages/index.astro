@@ -8,6 +8,7 @@ import ClinicGallery from '../components/public/ClinicGallery.astro';
 import JournalStrip from '../components/public/JournalStrip.astro';
 import { defaultFaqs } from '../data/faqs';
 import { MENS_ONLY_SLUG_SET } from '../data/male-pricing';
+import { CLINIC_CONTACT } from '../lib/seo/meta';
 import { env } from 'cloudflare:workers';
 import {
   listPublicServices,
@@ -742,9 +743,12 @@ function faDigits(value: string): string {
               <Icon name="pin" size={17} />
               <span>مسیریابی روی نقشه گوگل</span>
             </a>
-            <a href="/booking" class="btn btn-primary loc-book-btn">
-              <Icon name="calendar" size={17} />
-              <span>رزرو آنلاین نوبت{str(closingCfg.badge, ' (۱۵٪ تخفیف)')}</span>
+            {/* One booking CTA per section: the sticky bar + bottom nav already
+                carry the booking action on every viewport, so the location card
+                keeps the map action and links to booking by text only. */}
+            <a href="/booking" class="loc-book-link">
+              مشاهده و رزرو نوبت آنلاین
+              <Icon name="arrowLeft" size={15} aria-hidden="true" />
             </a>
           </div>
         </div>
@@ -859,15 +863,15 @@ function faDigits(value: string): string {
           </p>
         </div>
         <div class="closing-cta-actions">
-          <a href="/booking" class="btn btn-primary closing-cta-book">
-            <Icon name="calendar" size={17} />
-            <span>رزرو آنلاین نوبت (۱۵٪ تخفیف)</span>
-          </a>
-          <a href="tel:+989035555090" class="btn btn-outline closing-cta-call">
+          <a href={`tel:${CLINIC_CONTACT.telephone}`} class="btn btn-primary closing-cta-call">
             <Icon name="phone" size={17} />
             <span>
-              تماس: <bdi dir="ltr">۰۹۰۳ ۵۵۵ ۵۰۹۰</bdi>
+              تماس و مشاوره رایگان: <bdi dir="ltr">{CLINIC_CONTACT.phoneDisplay}</bdi>
             </span>
+          </a>
+          <a href="/booking" class="btn btn-outline closing-cta-book">
+            <Icon name="calendar" size={17} />
+            <span>رزرو آنلاین نوبت (۱۵٪ تخفیف)</span>
           </a>
         </div>
       </div>
