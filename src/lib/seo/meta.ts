@@ -4,29 +4,29 @@
  */
 
 export const DEFAULT_SEO_TITLE =
-  'کلینیک تهران لیزر — مرکز تخصصی لیزر موهای زائد با رادو پلاس در پاسداران';
+  'کلینیک تهران لیزر — مرکز تخصصی لیزر موهای زائد با رادو پلاس در قیطریه';
 
 export const DEFAULT_SEO_DESCRIPTION =
-  'کلینیک تخصصی تهران لیزر در خیابان پایدارفرد پاسداران. مجهز به دستگاه لیزر تماسی رادو پلاس با سه طول موج ۷۵۵ و ۸۰۸ و ۱۰۶۴ نانومتر، کاور یکبار مصرف استریل، سرمایش بدون درد، تعرفه شفاف و ۱۵٪ تخفیف رزرو آنلاین.';
+  'کلینیک تخصصی تهران لیزر در قیطریه، خیابان قلندری شمالی. مجهز به دستگاه لیزر تماسی رادو پلاس با سه طول موج ۷۵۵ و ۸۰۸ و ۱۰۶۴ نانومتر، کاور یکبار مصرف استریل، سرمایش بدون درد، تعرفه شفاف و ۱۵٪ تخفیف رزرو آنلاین.';
 
 export const PRIMARY_KEYWORDS = [
   'لیزر موهای زائد تهران',
-  'لیزر پاسداران',
+  'لیزر قیطریه',
   'لیزر تماسی رادو پلاس',
-  'کلینیک لیزر پایدارفرد',
+  'کلینیک لیزر قلندری شمالی',
   'لیزر تماسی تهران',
   'قیمت لیزر فول بادی بانوان',
   'لیزر بدون درد با کولینگ',
-  'رزرو آنلاین لیزر پاسداران',
-  'بهترین مرکز لیزر شمال شرق تهران',
+  'رزرو آنلاین لیزر قیطریه',
+  'بهترین مرکز لیزر شمال تهران',
   'لیزر موهای زائد آقایان و بانوان',
 ];
 
 export const CLINIC_GEO_LOCATION = {
   region: 'IR-07', // Tehran province ISO 3166-2
-  placename: 'Tehran, Pasdaran',
-  position: '35.7645;51.4628',
-  icbm: '35.7645, 51.4628',
+  placename: 'Tehran, Qeytarieh',
+  position: '35.785564;51.440842',
+  icbm: '35.785564, 51.440842',
 };
 
 /**
@@ -39,13 +39,12 @@ export const CLINIC_CONTACT = {
   phoneDisplay: '۰۹۰۳ ۵۵۵ ۵۰۹۰',
   /** E.164 dial string for tel: links and schema.org telephone. */
   telephone: '+989035555090',
-  streetAddress: 'خیابان پاسداران، خیابان پایدارفرد، نبش بوستان هفتم',
+  streetAddress: 'قیطریه، خیابان قلندری شمالی، نبش کوچه چهاردهم',
   addressLocality: 'تهران',
-  addressRegion: 'منطقه ۴ - پاسداران',
-  postalCode: '1666612345',
+  addressRegion: 'منطقه ۱ - قیطریه',
   addressCountry: 'IR',
-  latitude: 35.7645,
-  longitude: 51.4628,
+  latitude: 35.785564,
+  longitude: 51.440842,
   /** Public social/contact profiles — only verified, live handles belong here. */
   sameAs: ['https://www.instagram.com/tehranlaser_clinic/', 'https://wa.me/989035555090'],
 } as const;
@@ -82,7 +81,7 @@ export const DEVICE_WAVELENGTHS_NM = [755, 808, 1064] as const;
  * keep the canonical-origin resolution in one place (see buildOgImageUrl).
  */
 export const DEFAULT_OG_IMAGE_PATH = '/images/og-share.jpg';
-export const DEFAULT_OG_IMAGE_ALT = 'کلینیک تخصصی تهران لیزر — مرکز لیزر موهای زائد پاسداران';
+export const DEFAULT_OG_IMAGE_ALT = 'کلینیک تخصصی تهران لیزر — مرکز لیزر موهای زائد قیطریه';
 
 /** Persian digits helper for metadata that must read as Persian numerals. */
 export function toPersianDigits(value: string | number): string {

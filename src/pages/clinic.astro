@@ -16,9 +16,9 @@ const aboutJsonLd = {
   '@type': ['AboutPage', 'MedicalWebPage'],
   '@id': `${origin}/clinic#about`,
   url: `${origin}/clinic`,
-  name: 'درباره کلینیک تخصصی تهران لیزر پاسداران',
+  name: 'درباره کلینیک تخصصی تهران لیزر قیطریه',
   description:
-    'مرکز تخصصی لیزر و زیبایی تهران لیزر در پاسداران با دستگاه لیزر تماسی رادو پلاس، سه طول موج ۷۵۵ و ۸۰۸ و ۱۰۶۴ نانومتر، سیستم خنک‌کننده TEC Double و کادر آموزش‌دیده.',
+    'مرکز تخصصی لیزر و زیبایی تهران لیزر در قیطریه با دستگاه لیزر تماسی رادو پلاس، سه طول موج ۷۵۵ و ۸۰۸ و ۱۰۶۴ نانومتر، سیستم خنک‌کننده TEC Double و کادر آموزش‌دیده.',
   inLanguage: 'fa-IR',
   mainEntity: { '@id': `${origin}/#clinic` },
   isPartOf: { '@id': `${origin}/#website` },
@@ -33,14 +33,14 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
 ---
 
 <PublicLayout
-  title="درباره کلینیک و تکنولوژی لیزر تماسی رادو پلاس — کلینیک تهران لیزر پاسداران"
+  title="درباره کلینیک و تکنولوژی لیزر تماسی رادو پلاس — کلینیک تهران لیزر قیطریه"
   description="معرفی فناوری لیزر تماسی رادو پلاس با سه طول موج ۷۵۵ و ۸۰۸ و ۱۰۶۴ نانومتر، توان خروجی ۱۶۰۰ وات، خنک‌کننده TEC Double و پروتکل‌های بهداشتی کلینیک تهران لیزر."
   canonicalUrl="/clinic"
   keywords={[
-    'کلینیک لیزر پاسداران',
+    'کلینیک لیزر قیطریه',
     'لیزر تماسی رادو پلاس',
     'مرکز لیزر تماسی تهران',
-    'کلینیک زیبایی پایدارفرد',
+    'کلینیک زیبایی قلندری شمالی',
   ]}
   jsonLd={[aboutJsonLd, breadcrumbJsonLd]}
   bodyClass="clinic-obsidian-root"
@@ -52,7 +52,7 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
       <div class="container">
         <div class="hero-chip">
           <Icon name="sparkles" size={16} class="gold-icon" />
-          <span>مرکز تخصصی لیزر و زیبایی پاسداران</span>
+          <span>مرکز تخصصی لیزر و زیبایی قیطریه</span>
         </div>
         <h1 class="hero-title">
           تکنولوژی لیزر تماسی <span class="gold-gradient-text">رادو پلاس</span> در تهران
@@ -804,7 +804,7 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
       </div>
     </section>
 
-    <!-- Clinic Highlights & Pasdaran Location -->
+    <!-- Clinic Highlights & Qeytarieh Location -->
     <section class="section location-info-section">
       <div class="container">
         <div class="location-card-3d">
@@ -813,18 +813,18 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
               <div class="pill-label">
                 <Icon name="pin" size={14} /> دسترسی و لوکیشن
               </div>
-              <h3 class="loc-title">محیطی لوکس و آرام در قلب منطقه پاسداران</h3>
+              <h3 class="loc-title">محیطی لوکس و آرام در قلب منطقه قیطریه</h3>
               <p class="loc-desc">
-                کلینیک تهران لیزر در خیابان پایدارفرد، نبش بوستان هفتم واقع شده است؛ موقعیتی دنج و
-                با دسترسی آسان به بزرگراه‌های شهید صیاد شیرازی و شهید همت با امکان پارک خودرو بدون
-                دغدغه ترافیک.
+                کلینیک تهران لیزر در خیابان قلندری شمالی، نبش کوچه چهاردهم واقع شده است؛ موقعیتی دنج
+                و با دسترسی آسان از خیابان شریعتی و ایستگاه متروی قیطریه (خط ۱)، با امکان پارک خودرو
+                در خیابان‌های اطراف.
               </p>
 
               <div class="loc-meta">
                 <div class="meta-row">
                   <Icon name="pin" size={18} class="gold-icon" />
                   <span>
-                    <strong>آدرس:</strong> تهران، پاسداران، خیابان پایدارفرد، نبش بوستان هفتم
+                    <strong>آدرس:</strong> تهران، قیطریه، خیابان قلندری شمالی، نبش کوچه چهاردهم
                   </span>
                 </div>
                 <div class="meta-row">
@@ -863,6 +863,61 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
                 </li>
               </ul>
             </div>
+          </div>
+
+          <div class="loc-photos">
+            <figure class="loc-photo">
+              <picture>
+                <source
+                  type="image/avif"
+                  srcset="/images/clinic-building-560.avif 560w, /images/clinic-building-800.avif 800w"
+                  sizes="(max-width: 992px) 86vw, 40vw"
+                />
+                <source
+                  type="image/webp"
+                  srcset="/images/clinic-building-560.webp 560w, /images/clinic-building-800.webp 800w"
+                  sizes="(max-width: 992px) 86vw, 40vw"
+                />
+                <img
+                  src="/images/clinic-building-800.jpg"
+                  srcset="/images/clinic-building-560.jpg 560w, /images/clinic-building-800.jpg 800w"
+                  sizes="(max-width: 992px) 86vw, 40vw"
+                  alt="نمای ساختمان کلینیک تهران لیزر در قیطریه؛ ورودی لیزر در همکف ساختمان است"
+                  width="810"
+                  height="1080"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </picture>
+              <figcaption>
+                ساختمان کلینیک در نبش کوچه چهاردهم، قیطریه — ورودی لیزر در همکف است
+              </figcaption>
+            </figure>
+            <figure class="loc-photo">
+              <picture>
+                <source
+                  type="image/avif"
+                  srcset="/images/clinic-entrance-560.avif 560w, /images/clinic-entrance-800.avif 800w"
+                  sizes="(max-width: 992px) 86vw, 40vw"
+                />
+                <source
+                  type="image/webp"
+                  srcset="/images/clinic-entrance-560.webp 560w, /images/clinic-entrance-800.webp 800w"
+                  sizes="(max-width: 992px) 86vw, 40vw"
+                />
+                <img
+                  src="/images/clinic-entrance-800.jpg"
+                  srcset="/images/clinic-entrance-560.jpg 560w, /images/clinic-entrance-800.jpg 800w"
+                  sizes="(max-width: 992px) 86vw, 40vw"
+                  alt="ورودی شیشه‌ای همکف کلینیک تهران لیزر؛ سالن انتظار از پشت شیشه دیده می‌شود"
+                  width="810"
+                  height="1080"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </picture>
+              <figcaption>ورودی همکف کلینیک؛ سالن انتظار از پشت شیشه دیده می‌شود</figcaption>
+            </figure>
           </div>
         </div>
       </div>

@@ -15,9 +15,9 @@ const contactJsonLd = {
   '@type': ['ContactPage', 'MedicalWebPage'],
   '@id': `${origin}/contact#contact`,
   url: `${origin}/contact`,
-  name: 'تماس و آدرس کلینیک تهران لیزر پاسداران',
+  name: 'تماس و آدرس کلینیک تهران لیزر قیطریه',
   description:
-    'راه‌های ارتباطی، آدرس دقیق در پاسداران خیابان پایدارفرد، شماره تماس مستقیم پذیرش، مشاوره فوری در واتساپ و لوکیشن مسیریابی.',
+    'راه‌های ارتباطی، آدرس دقیق در قیطریه، خیابان قلندری شمالی، شماره تماس مستقیم پذیرش، مشاوره فوری در واتساپ و لوکیشن مسیریابی.',
   inLanguage: 'fa-IR',
   mainEntity: { '@id': `${origin}/#clinic` },
   isPartOf: { '@id': `${origin}/#website` },
@@ -32,13 +32,13 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
 ---
 
 <PublicLayout
-  title="تماس و آدرس کلینیک تهران لیزر — پاسداران، خیابان پایدارفرد"
-  description="راه‌های ارتباطی، آدرس دقیق در پاسداران خیابان پایدارفرد، شماره تماس مستقیم پذیرش، مشاوره فوری در واتساپ و لوکیشن مسیریابی کلینیک تهران لیزر."
+  title="تماس و آدرس کلینیک تهران لیزر — قیطریه، خیابان قلندری شمالی"
+  description="راه‌های ارتباطی، آدرس دقیق در قیطریه، خیابان قلندری شمالی، شماره تماس مستقیم پذیرش، مشاوره فوری در واتساپ و لوکیشن مسیریابی کلینیک تهران لیزر."
   canonicalUrl="/contact"
   keywords={[
     'تماس کلینیک تهران لیزر',
-    'آدرس لیزر پاسداران',
-    'شماره تلفن لیزر پایدارفرد',
+    'آدرس لیزر قیطریه',
+    'شماره تلفن لیزر قلندری شمالی',
     'واتساپ کلینیک لیزر تهران',
   ]}
   jsonLd={[contactJsonLd, breadcrumbJsonLd]}
@@ -51,7 +51,7 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
       <div class="container text-center">
         <div class="luxury-badge">
           <Icon name="sparkles" size={14} class="badge-icon" />
-          <span>ارتباط مستقیم با مرکز تخصصی پاسداران</span>
+          <span>ارتباط مستقیم با مرکز تخصصی قیطریه</span>
         </div>
         <h1 class="page-title">تماس با کلینیک تهران لیزر</h1>
         <p class="page-subtitle">
@@ -213,7 +213,7 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
               <div>
                 <h2 class="location-card-title">نشانی حضوری و نقشه کلینیک تهران لیزر</h2>
                 <p class="location-card-subtitle">
-                  دسترسی سرراست و بدون ترافیک در منطقه پاسداران تهران
+                  دسترسی سرراست و بدون ترافیک در منطقه قیطریه تهران
                 </p>
               </div>
             </div>
@@ -221,7 +221,7 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
               <button
                 type="button"
                 class="btn-contact-outline copy-trigger-btn copy-address-btn"
-                data-copy="تهران، خیابان پاسداران، خیابان پایدارفرد، نبش بوستان هفتم، کلینیک تهران لیزر"
+                data-copy="تهران، قیطریه، خیابان قلندری شمالی، نبش کوچه چهاردهم، کلینیک تهران لیزر"
                 data-label="نشانی کامل"
                 aria-label="کپی نشانی کامل کلینیک"
               >
@@ -234,7 +234,7 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
           <div class="address-highlight-box">
             <Icon name="pin" size={20} class="pin-gold" />
             <span class="address-main-text">
-              تهران، خیابان پاسداران، خیابان پایدارفرد، نبش بوستان هفتم
+              تهران، قیطریه، خیابان قلندری شمالی، نبش کوچه چهاردهم
             </span>
           </div>
 
@@ -253,7 +253,7 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
                 <span>مسیریابی با نشان</span>
               </a>
               <a
-                href="https://balad.ir/location?latitude=35.7645&longitude=51.4628"
+                href="https://balad.ir/location?latitude=35.785564&longitude=51.440842&zoom=16.500000"
                 target="_blank"
                 rel="noopener noreferrer"
                 class="nav-app-btn"
@@ -263,7 +263,7 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
                 <span>مسیریابی با بلد</span>
               </a>
               <a
-                href="https://maps.google.com/?q=35.7645,51.4628+(Tehran+Laser+Clinic)"
+                href="https://maps.google.com/?q=35.785564,51.440842+(Tehran+Laser+Clinic)"
                 target="_blank"
                 rel="noopener noreferrer"
                 class="nav-app-btn"
@@ -273,7 +273,7 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
                 <span>Google Maps</span>
               </a>
               <a
-                href="https://waze.com/ul?ll=35.7645,51.4628&navigate=yes"
+                href="https://waze.com/ul?ll=35.785564,51.440842&navigate=yes"
                 target="_blank"
                 rel="noopener noreferrer"
                 class="nav-app-btn"
@@ -297,11 +297,11 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
                 </div>
                 <div class="pin-popup">
                   <strong>کلینیک تهران لیزر</strong>
-                  <span>پاسداران، نبش بوستان ۷</span>
+                  <span>قیطریه، نبش کوچه چهاردهم</span>
                 </div>
               </div>
               <div class="map-coords-badge">
-                <span>35.7645° N, 51.4628° E</span>
+                <span>35.785564° N, 51.440842° E</span>
               </div>
             </div>
           </div>
@@ -331,14 +331,14 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
               <div class="access-text-col">
                 <h3 class="access-item-title">راهنمای دسترسی و پارکینگ</h3>
                 <p class="access-item-desc">
-                  <strong>دسترسی خودرو:</strong> دسترسی روان از بزرگراه صیاد شیرازی و شهید همت به
-                  پاسداران.
+                  <strong>دسترسی خودرو:</strong> دسترسی روان از خیابان شریعتی و بزرگراه صدر به
+                  قیطریه.
                   <br />
-                  <strong>جای پارک:</strong> امکان پارک خودرو در خیابان پایدارفرد و بوستان هفتم
+                  <strong>جای پارک:</strong> امکان پارک خودرو در خیابان قلندری شمالی و کوچه چهاردهم
                   فراهم است.
                   <br />
-                  <strong>مترو:</strong> ایستگاه میدان نوبنیاد (خط ۳) یا شریعتی + تاکسی خطی
-                  پاسداران.
+                  <strong>مترو:</strong> ایستگاه قیطریه (خط ۱) در خیابان شریعتی، با چند دقیقه
+                  پیاده‌روی تا کلینیک.
                 </p>
               </div>
             </div>

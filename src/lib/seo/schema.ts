@@ -62,7 +62,7 @@ export function createMedicalClinicSchema(origin = DEFAULT_CANONICAL_ORIGIN) {
     name: 'کلینیک تخصصی تهران لیزر',
     alternateName: [
       'Tehran Laser Clinic',
-      'کلینیک تهران لیزر پاسداران',
+      'کلینیک تهران لیزر قیطریه',
       'مرکز تخصصی لیزر موهای زائد تهران',
     ],
     url: origin,
@@ -80,7 +80,6 @@ export function createMedicalClinicSchema(origin = DEFAULT_CANONICAL_ORIGIN) {
       streetAddress: CLINIC_CONTACT.streetAddress,
       addressLocality: CLINIC_CONTACT.addressLocality,
       addressRegion: CLINIC_CONTACT.addressRegion,
-      postalCode: CLINIC_CONTACT.postalCode,
       addressCountry: CLINIC_CONTACT.addressCountry,
     },
     geo: {
@@ -90,7 +89,7 @@ export function createMedicalClinicSchema(origin = DEFAULT_CANONICAL_ORIGIN) {
     },
     areaServed: [
       { '@type': 'City', name: 'تهران' },
-      { '@type': 'AdministrativeArea', name: 'منطقه ۴ تهران' },
+      { '@type': 'AdministrativeArea', name: 'منطقه ۱ تهران' },
       { '@type': 'Country', name: 'ایران' },
     ],
     availableLanguage: [{ '@type': 'Language', name: 'Persian', alternateName: 'fa-IR' }],
@@ -274,7 +273,7 @@ export function createMedicalProcedureSchema(
     bodyLocation: service.name,
     description:
       service.description ||
-      `خدمات تخصصی لیزر موهای زائد ناحیه ${service.name} با دستگاه لیزر تماسی رادو پلاس در کلینیک تهران لیزر پاسداران.`,
+      `خدمات تخصصی لیزر موهای زائد ناحیه ${service.name} با دستگاه لیزر تماسی رادو پلاس در کلینیک تهران لیزر قیطریه.`,
     preparation:
       'شیو کامل ناحیه با تیغ یا ژیلت ۲۴ ساعت قبل از جلسه، عدم مصرف داروهای لایه‌بردار و پرهیز از برنزه کردن و آفتاب گرفتن.',
     followup:

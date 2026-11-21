@@ -2,10 +2,10 @@
 import Icon from '../ui/Icon.astro';
 
 // ── Clinic ambience band (Lane L2) ───────────────────────────────────────────
-// Imagery-led "visual proof" band: real clinic ambience instead of more prose.
-// All photos are decorative ambience — no fabricated device, staff or
-// before/after claims (@CONTRACT "Do not fabricate"). CSP is img-src 'self',
-// so every source is a self-hosted /images/*.avif with a .webp sibling.
+// Imagery-led "visual proof" band: REAL clinic photos (Qeytarieh, Nov 2026)
+// instead of stock ambience — no fabricated device, staff or before/after
+// claims (@CONTRACT "Do not fabricate"). CSP is img-src 'self', so every
+// source is a self-hosted /images/*.avif with a .webp sibling.
 interface AmbienceTile {
   /** Manifest basename under /images (AVIF + WebP + JPEG at 1600w and 800w). */
   src: string;
@@ -18,26 +18,26 @@ interface AmbienceTile {
 
 const tiles: AmbienceTile[] = [
   {
-    src: 'spa-treatment-room',
-    alt: 'سنگ‌های گرم ماساژ و گل‌های سفید روی ملحفه تمیز؛ نمایی از آرامش فضای درمان',
-    title: 'آرامش از لحظه ورود',
-    desc: 'فضای درمانی آرام و بی‌استرس، پوشش یکبار مصرف و تهویه مطبوع در هر جلسه.',
-    icon: 'clean',
+    src: 'clinic-lobby',
+    alt: 'سالن انتظار کلینیک تهران لیزر در قیطریه؛ مبل‌های طوسی و سرمه‌ای، گل‌های سفید و نور طبیعی',
+    title: 'سالن انتظار VIP',
+    desc: 'فضای انتظار آرام با پذیرایی و هماهنگی دقیق نوبت‌ها بدون معطلی.',
+    icon: 'gem',
     wide: true,
   },
   {
-    src: 'facial-clay-mask',
-    alt: 'ماسک صورت رس‌دار سفید روی پوست به‌همراه هدبند بهداشتی',
-    title: 'حساسیت به پوست شما',
-    desc: 'تنظیم انرژی ژول بر اساس فوتوتایپ، ریسک لک و سوختگی را به حداقل می‌رساند.',
+    src: 'clinic-treatment-room',
+    alt: 'اتاق درمان کلینیک؛ تخت فیروزه‌ای، دستگاه‌های لیزر تماسی و تابلوی نئون روی دیوار',
+    title: 'اتاق درمان اختصاصی',
+    desc: 'اتاق‌های ایزوله با دستگاه لیزر تماسی رادو پلاس و پوشش یکبار مصرف در هر جلسه.',
     icon: 'target',
   },
   {
-    src: 'spa-massage',
-    alt: 'ماساژ پشت و شانه در فضایی آرام با ملحفه تمیز',
-    title: 'رفاه و آرامش در انتظار',
-    desc: 'فضای انتظار آرام، پذیرایی و هماهنگی دقیق نوبت‌ها بدون معطلی.',
-    icon: 'gem',
+    src: 'clinic-entrance',
+    alt: 'ورودی شیشه‌ای کلینیک تهران لیزر در نبش کوچه چهاردهم قیطریه',
+    title: 'ورودی کلینیک',
+    desc: 'ورودی همکف ساختمان در نبش کوچه چهاردهم؛ دسترسی آسان از خیابان شریعتی.',
+    icon: 'clean',
   },
 ];
 ---
@@ -47,12 +47,12 @@ const tiles: AmbienceTile[] = [
     <header class="section-header text-center">
       <span class="section-subtitle">نگاهی به فضای درمان</span>
       <h2 class="section-title" id="clinic-gallery-title">
-        محیطی VIP، آرام و کاملاً بهداشتی در قلب پاسداران
+        محیطی VIP، آرام و کاملاً بهداشتی در قلب قیطریه
       </h2>
       <p class="section-desc">
         استانداردهای بهداشتی کلینیک تهران لیزر پیش از هر جلسه اجرا می‌شود؛ از تعویض پوشش تخت تا
-        استریل‌سازی سری دستگاه رادو پلاس. تصاویر زیر صرفاً حال‌وهوای آرام و حرفه‌ای این فضا را نشان
-        می‌دهند.
+        استریل‌سازی سری دستگاه رادو پلاس. تصاویر زیر فضای واقعی کلینیک در قیطریه را نشان می‌دهند —
+        سالن انتظار، اتاق درمان و ورودی.
       </p>
     </header>
 
@@ -95,8 +95,8 @@ const tiles: AmbienceTile[] = [
                   tile.wide ? '(max-width: 900px) 86vw, 40vw' : '(max-width: 900px) 86vw, 30vw'
                 }
                 alt={tile.alt}
-                width="1600"
-                height="1067"
+                width="810"
+                height="1080"
                 loading="lazy"
                 fetchpriority="low"
                 decoding="async"
