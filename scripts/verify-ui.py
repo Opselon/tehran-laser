@@ -220,6 +220,33 @@ PROBE = r"""
     }
   });
 
+  // ── gold CTA label spill ───────────────────────────────────────────
+  // On phones .package-actions / .service-card-footer become a 1fr 1fr
+  // grid, so each button gets ~half the card width — but the shared
+  // button rule pins .btn-3d-gold to white-space: nowrap. The golden
+  // package label ("رزرو نوبت پکیج طلایی با تخفیف") needs ~175px while
+  // its column is ~157px at 390px, so the nowrap text painted past the
+  // button on both sides (2026-11-22). The fix lets these labels wrap;
+  // compare each label span against its own button box, same as
+  // metricSpill — document overflow cannot see an intra-card spill.
+  out.ctaSpill = [];
+  document.querySelectorAll('.package-actions .btn-3d-gold, .service-card-footer .btn-3d-gold').forEach((btn) => {
+    const span = btn.querySelector('span');
+    if (!span) return;
+    const br = btn.getBoundingClientRect();
+    const sr = span.getBoundingClientRect();
+    if (br.width <= 0) return;
+    const spillL = br.left - sr.left;
+    const spillR = sr.right - br.right;
+    if (spillL > 1 || spillR > 1) {
+      out.ctaSpill.push({
+        label: (span.textContent || '').trim().slice(0, 32),
+        spillLeft: Math.round(spillL * 10) / 10,
+        spillRight: Math.round(spillR * 10) / 10,
+      });
+    }
+  });
+
   // ── tap targets ────────────────────────────────────────────────────
   out.smallTargets = [];
   document.querySelectorAll('a, button, [role=button], summary, input[type=submit]').forEach((el) => {
@@ -350,6 +377,9 @@ def main() -> int:
         if r.get("metricSpill"):
             names = sorted({(m["val"], m["spillLeft"]) for m in r["metricSpill"]})
             failures.append(f"{tag}: trust-metric value(s) spill out of their cell: {names[:4]}")
+        if r.get("ctaSpill"):
+            names = sorted({(m["label"], m["spillLeft"]) for m in r["ctaSpill"]})
+            failures.append(f"{tag}: gold CTA label(s) spill out of their button: {names[:4]}")
         big = [t for t in r["smallTargets"] if t["h"] < TAP_AA or t["w"] < TAP_AA]
         if big:
             failures.append(f"{tag}: {len(big)} target(s) below 24px (WCAG 2.5.8)")

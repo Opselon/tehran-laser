@@ -934,6 +934,26 @@ body.theme-dark-obsidian .mobile-sticky-bar {
   body.theme-dark-obsidian .package-actions > * {
     width: 100%;
   }
+
+  /* Gold CTA labels can wrap inside the half-width cells. The shared
+     button rule pins .btn-3d-gold to white-space: nowrap, but the
+     golden package label ("رزرو نوبت پکیج طلایی با تخفیف") needs ~175px
+     at 14px bold while its grid column is only ~157px at a 390px
+     viewport — measured 2026-11-22, it spilled 12.8px left + 4.8px
+     right out of the button and painted over the card. The sibling
+     .btn-3d-subtle already wraps to two lines; let the gold button do
+     the same instead of clipping the site's main booking CTA. */
+  body.theme-dark-obsidian .service-card-footer .btn-3d-gold,
+  body.theme-dark-obsidian .package-actions .btn-3d-gold {
+    white-space: normal;
+    text-align: center;
+    min-width: 0;
+  }
+
+  body.theme-dark-obsidian .service-card-footer .btn-3d-gold span,
+  body.theme-dark-obsidian .package-actions .btn-3d-gold span {
+    min-width: 0;
+  }
 }
 
 /* ── 11. UTILITIES & A11Y ───────────────────────────────────────────────── */
