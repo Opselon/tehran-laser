@@ -1200,7 +1200,15 @@ body.theme-dark-obsidian .metric-top {
   display: flex;
   align-items: center;
   gap: 7px;
+  min-width: 0;
+  /* No flex-wrap here on purpose: the value must shrink beside its icon
+     (like the other cells) and wrap its own text internally. Wrapping the
+     flex row instead drops the icon onto a line of its own above the value. */
   color: var(--v2-gold);
+}
+
+body.theme-dark-obsidian .metric-top .metric-icon {
+  flex-shrink: 0;
 }
 
 body.theme-dark-obsidian .metric-val {
@@ -1209,6 +1217,16 @@ body.theme-dark-obsidian .metric-val {
   font-weight: 800;
   line-height: 1.4;
   font-variant-numeric: tabular-nums;
+  /* The wavelength value is one long LTR string ("۷۵۵ · ۸۰۸ · ۱۰۶۴").
+     The shared .metric-val rule pins it to white-space: nowrap, and at
+     19px its min-content (~160px) plus the icon exceeds a narrow grid
+     column — measured 2026-11-22, it spilled 34px out of its cell at a
+     390px viewport (20px at 768px) and covered the pin icon + "قیطریه"
+     of the neighbouring cell. Let the value wrap inside its own cell
+     instead of overflowing it; on wide columns it still fits on one line. */
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: break-word;
 }
 
 body.theme-dark-obsidian .metric-label {
@@ -1238,6 +1256,18 @@ body.theme-dark-obsidian .metric-label {
 
   body.theme-dark-obsidian .metric-label {
     font-size: 12px;
+  }
+}
+
+@media (max-width: 1023px) {
+  /* The decorative index (۰۱–۰۴) is absolutely positioned at the cell's
+     inline-end edge, in the same band as the value row. Below 1024px the
+     columns are narrow enough that a long value's first line starts
+     exactly where the index sits, so the index prints on top of the
+     digits. Hide it until the rail spans the full width (≥1024px),
+     where the value clears it; the metrics read fine without it. */
+  body.theme-dark-obsidian .metric-item::after {
+    display: none;
   }
 }
 
