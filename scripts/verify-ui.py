@@ -196,6 +196,30 @@ PROBE = r"""
     }
   });
 
+  // ── hero trust-metrics spill ───────────────────────────────────────
+  // The rail is a 2-col grid on phones, 4-col up to 1024px. A value that
+  // sticks out of its own .metric-item box paints over the neighbouring
+  // cell (2026-11-22: the LTR wavelength "۷۵۵ · ۸۰۸ · ۱۰۶۴" spilled 34px
+  // left at a 390px viewport and covered the pin icon + "قیطریه").
+  // Document-level overflow does not see this — the spill stays inside
+  // the viewport — so compare each value against its own cell directly.
+  out.metricSpill = [];
+  document.querySelectorAll('.hero-trust-metrics .metric-item').forEach((item) => {
+    const val = item.querySelector('.metric-val');
+    if (!val) return;
+    const ir = item.getBoundingClientRect();
+    const vr = val.getBoundingClientRect();
+    const spillL = ir.left - vr.left;
+    const spillR = vr.right - ir.right;
+    if (spillL > 1 || spillR > 1) {
+      out.metricSpill.push({
+        val: (val.textContent || '').trim().slice(0, 24),
+        spillLeft: Math.round(spillL * 10) / 10,
+        spillRight: Math.round(spillR * 10) / 10,
+      });
+    }
+  });
+
   // ── tap targets ────────────────────────────────────────────────────
   out.smallTargets = [];
   document.querySelectorAll('a, button, [role=button], summary, input[type=submit]').forEach((el) => {
@@ -323,6 +347,9 @@ def main() -> int:
         if r["overflow"]["offenders"]:
             names = sorted({o["sel"] for o in r["overflow"]["offenders"]})
             failures.append(f"{tag}: element(s) past viewport: {names[:6]}")
+        if r.get("metricSpill"):
+            names = sorted({(m["val"], m["spillLeft"]) for m in r["metricSpill"]})
+            failures.append(f"{tag}: trust-metric value(s) spill out of their cell: {names[:4]}")
         big = [t for t in r["smallTargets"] if t["h"] < TAP_AA or t["w"] < TAP_AA]
         if big:
             failures.append(f"{tag}: {len(big)} target(s) below 24px (WCAG 2.5.8)")
