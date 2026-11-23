@@ -227,6 +227,19 @@ main .device-toggle-btn.active .device-toggle-note {
   opacity: 0.8;
 }
 
+main .mens-device-note {
+  margin: 10px auto 0;
+  max-width: 560px;
+  text-align: center;
+  font-size: 0.85rem;
+  line-height: 1.8;
+  color: #c8cdd4;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: 10px;
+  padding: 8px 14px;
+}
+
 main .pill-discount-badge {
   background: linear-gradient(90deg, #10b981, #34d399);
   color: #0a0b0d;

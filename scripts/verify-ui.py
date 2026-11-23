@@ -291,6 +291,38 @@ PROBE = r"""
     out.mensToggleMissing.push({ panel: 'male' });
   }
 
+  // ── men's Deka note ──────────────────────────────────────────────────
+  // Men's packages are Rado-only, so switching the men's toggle to Deka
+  // changes no visible price (2026-11-23: the live check read it as a
+  // broken toggle). A note must exist in the men's panel explaining that
+  // packages are Rado-only and Deka is priced per-zone in booking.
+  out.mensDekaNoteMissing = [];
+  if (
+    document.querySelector('#panel-male') &&
+    !document.querySelector('#panel-male [data-device-note-mens]')
+  ) {
+    out.mensDekaNoteMissing.push({ panel: 'male' });
+  }
+
+  // ── blog cover icon ──────────────────────────────────────────────────
+  // The failed-image layer (.img-failed-layer) must stay hidden while the
+  // cover photo loads (2026-11-23: a CSS cascade let the fallback's
+  // display:flex win, so the document icon overlaid a good photo).
+  out.blogCoverIcon = [];
+  document
+    .querySelectorAll('.article-card-img-wrap, .featured-image-col')
+    .forEach((wrap) => {
+      const img = wrap.querySelector('img');
+      const layer = wrap.querySelector('.img-failed-layer');
+      if (img && img.complete && img.naturalWidth > 0 && layer) {
+        if (getComputedStyle(layer).display !== 'none') {
+          out.blogCoverIcon.push({
+            card: (img.getAttribute('alt') || '').slice(0, 24),
+          });
+        }
+      }
+    });
+
   // ── tap targets ────────────────────────────────────────────────────
   out.smallTargets = [];
   document.querySelectorAll('a, button, [role=button], summary, input[type=submit]').forEach((el) => {
@@ -429,6 +461,11 @@ def main() -> int:
             failures.append(f"{tag}: tier(s) with a Rado price but no Deka row: {names[:4]}")
         if r.get("mensToggleMissing"):
             failures.append(f"{tag}: men's tab has no device toggle")
+        if r.get("mensDekaNoteMissing"):
+            failures.append(f"{tag}: men's tab has no Rado-only packages note for Deka")
+        if r.get("blogCoverIcon"):
+            names = sorted({b["card"] for b in r["blogCoverIcon"]})
+            failures.append(f"{tag}: document icon visible over a loaded blog cover: {names[:4]}")
         big = [t for t in r["smallTargets"] if t["h"] < TAP_AA or t["w"] < TAP_AA]
         if big:
             failures.append(f"{tag}: {len(big)} target(s) below 24px (WCAG 2.5.8)")

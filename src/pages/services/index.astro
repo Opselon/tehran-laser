@@ -1185,7 +1185,9 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
         <!-- Device switch — same toggle as the women's panel (the page script
              syncs every .device-toggle-btn): it swaps the banner device text
              and carries the choice into the booking links. Men's packages
-             have no Deka tariff of their own, so their prices stay Rado. -->
+             have no Deka tariff of their own, so their prices stay Rado;
+             the note below (shown only on Deka) says so plainly, so the
+             toggle never looks inert. -->
         <div class="device-toggle-row" role="tablist" aria-label="انتخاب دستگاه">
           <span class="device-toggle-label">دستگاه:</span>
           <button
@@ -1209,6 +1211,10 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
             <span class="device-toggle-note">شاتی</span>
           </button>
         </div>
+        <p class="mens-device-note" data-device-note-mens hidden>
+          پکیج‌های آقایان فقط با دستگاه رادو پلاس ارائه می‌شوند؛ برای دکا، در رزرو آنلاین نواحی را
+          جداگانه انتخاب کنید — تعرفه دکا هر ناحیه همان‌جا نمایش داده می‌شود.
+        </p>
 
         <!-- Men's Introduction Banner -->
         <div class="mens-banner-card mb-5">
@@ -1615,6 +1621,7 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
     const priceEls = document.querySelectorAll('[data-price-rado]');
     const techEls = document.querySelectorAll('[data-tech-rado]');
     const bookingLinks = document.querySelectorAll('a[href^="/booking?"]');
+    const mensDeviceNote = document.querySelector('[data-device-note-mens]');
 
     function applyDevice(device) {
       deviceBtns.forEach((b) => {
@@ -1622,6 +1629,9 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
         b.classList.toggle('active', isActive);
         b.setAttribute('aria-selected', isActive ? 'true' : 'false');
       });
+      // Men's packages are Rado-only: when Deka is chosen, say so plainly
+      // instead of leaving the prices unchanged with no explanation.
+      if (mensDeviceNote) mensDeviceNote.hidden = device !== 'deka';
       priceEls.forEach((el) => {
         const val = el.getAttribute(device === 'deka' ? 'data-price-deka' : 'data-price-rado');
         if (val !== null) el.textContent = val;

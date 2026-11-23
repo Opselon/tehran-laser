@@ -435,6 +435,19 @@ main .article-card-img-fallback {
   color: rgba(16, 185, 129, 0.35);
 }
 
+/* The failed-image layer must stay hidden while the cover loads: this rule
+   outranks the fallback's display:flex above (two classes beat one), so the
+   document icon no longer overlays a good photo. The .img-load-failed rule
+   still shows the icon when the image really fails (2026-11-23: the icon
+   overlaid the second article card's photo). */
+main .article-card-img-wrap .img-failed-layer {
+  display: none;
+}
+
+main .featured-image-col .img-failed-layer {
+  display: none;
+}
+
 main .card-category-tag {
   position: absolute;
   bottom: 12px;
