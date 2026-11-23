@@ -124,4 +124,24 @@ describe('calculateQuote with devices (migration 0016)', () => {
     expect(hasPriceFor([dekaMale], 'male', 'deka')).toBe(true);
     expect(hasPriceFor([dekaMale], 'male', 'rado')).toBe(false);
   });
+
+  it('treats a zero-amount row as no price (never a free booking)', () => {
+    const zeroed = { pricingCategory: 'female' as const, amount: 0, currency: 'IRT' };
+    expect(hasPriceFor([zeroed], 'female')).toBe(false);
+    expect(hasPriceFor([zeroed], 'female', 'rado')).toBe(false);
+    expect(() => calculateQuote(service, [zeroed], 'female', 15)).toThrow(PricingError);
+    try {
+      calculateQuote(service, [zeroed], 'female', 15);
+    } catch (error) {
+      expect((error as PricingError).code).toBe('PRICE_NOT_CONFIGURED');
+    }
+    // A zeroed Deka row must not shadow the Rado tariff.
+    expect(
+      calculateQuote(service, [femalePrice, { ...zeroed, device: 'deka' as const }], 'female', 0)
+        .totalAmount,
+    ).toBe(320);
+    expect(
+      hasPriceFor([femalePrice, { ...zeroed, device: 'deka' as const }], 'female', 'deka'),
+    ).toBe(false);
+  });
 });

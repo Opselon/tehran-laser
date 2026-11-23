@@ -857,8 +857,9 @@ const draftCount = posts.items.filter((p) => p.status === 'draft').length;
       titleInput.value = '';
       slugInput.value = '';
       excerptInput.value = '';
-      coverInput.value =
-        'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=1200&q=80';
+      // No default cover: an off-site URL is refused by the public image CSP
+      // (see migration 0017) — staff paste a self-hosted /images/... path.
+      coverInput.value = '';
       authorInput.value = 'تیم علمی کلینیک تهران لیزر';
       statusSelect.value = 'published';
       seoTitleInput.value = '';

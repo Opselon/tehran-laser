@@ -333,6 +333,7 @@ describe('W4 admin contracts — auth plumbing', () => {
             customerName: 'پذیرش حضوری تست',
             customerPhone: '+989121119999',
             serviceId: svc!.id,
+            device: 'deka',
             amount: 900,
             paymentMethod: 'pos',
             sessionNumber: 1,
@@ -341,8 +342,15 @@ describe('W4 admin contracts — auth plumbing', () => {
         }),
       );
       expect(res.status).toBe(200);
-      const body = (await res.json()) as Envelope<{ customerId: string }>;
+      const body = (await res.json()) as Envelope<{ customerId: string; bookingId: string }>;
       expect(body.data.customerId).toBeTruthy();
+
+      // The walk-in device picker (migration 0016 follow-up) must reach the
+      // booking row — a Rado-only insert would silently lose the choice.
+      const booked = await env.DB.prepare(`SELECT device FROM bookings WHERE id = ?`)
+        .bind(body.data.bookingId)
+        .first<{ device: string }>();
+      expect(booked?.device).toBe('deka');
 
       const probe = await env.DB.prepare(
         `SELECT COUNT(*) AS c FROM audit_logs a

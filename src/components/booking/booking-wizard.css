@@ -301,6 +301,16 @@
   line-height: 1.5;
 }
 
+/* Promo tile: the struck tariff next to the discounted final the quote
+   actually charges (full-body ۲٬۹۸۰ → ۲٬۵۳۳ رادو / ۴٬۹۸۰ → ۴٬۲۳۳ دکا). */
+.booking-wizard-container .services-grid-compact .price-original {
+  font-size: 12px;
+  line-height: 1.5;
+  text-decoration: line-through;
+  opacity: 0.55;
+  margin-inline-end: 6px;
+}
+
 .booking-wizard-container .services-grid-compact .badge-promo {
   padding: 2px 6px;
   font-size: 11px; /* 11px floor */

@@ -104,8 +104,12 @@ function toman(amountInThousands: number): string {
 // then name — so men's-only zones land after the 20 shared zones with no
 // client-side sorting.
 const priceRows: PriceRowView[] = services.map((s) => {
-  const female = s.prices.find((p) => p.pricingCategory === 'female' && p.device === 'rado');
-  const male = s.prices.find((p) => p.pricingCategory === 'male' && p.device === 'rado');
+  const female = s.prices.find(
+    (p) => p.pricingCategory === 'female' && p.device === 'rado' && p.amount > 0,
+  );
+  const male = s.prices.find(
+    (p) => p.pricingCategory === 'male' && p.device === 'rado' && p.amount > 0,
+  );
   return {
     name: s.name,
     slug: s.slug,
@@ -575,7 +579,11 @@ function faDigits(value: string): string {
                   </td>
                   <td class="gpt-cell-action">
                     <a
-                      href={`/booking?service=${row.slug}`}
+                      href={
+                        row.mensOnly
+                          ? `/booking?service=${row.slug}&category=male`
+                          : `/booking?service=${row.slug}`
+                      }
                       class="gpt-book-btn"
                       aria-label={`رزرو ${row.name}`}
                     >
@@ -617,7 +625,7 @@ function faDigits(value: string): string {
           </p>
         </div>
         <div class="male-cta">
-          <a href="/booking" class="btn btn-outline btn-lg">
+          <a href="/booking?category=male" class="btn btn-outline btn-lg">
             <Icon name="calendar" size={18} />
             <span>رزرو نوبت لاین اختصاصی آقایان</span>
           </a>

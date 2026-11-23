@@ -14,14 +14,16 @@ const service = await findPublicServiceBySlug(env.DB, slug);
 if (!service) return Astro.redirect('/404');
 
 const femalePrice = service.prices.find(
-  (p) => p.pricingCategory === 'female' && p.device === 'rado',
+  (p) => p.pricingCategory === 'female' && p.device === 'rado' && p.amount > 0,
 );
-const malePrice = service.prices.find((p) => p.pricingCategory === 'male' && p.device === 'rado');
+const malePrice = service.prices.find(
+  (p) => p.pricingCategory === 'male' && p.device === 'rado' && p.amount > 0,
+);
 const femaleDekaPrice = service.prices.find(
-  (p) => p.pricingCategory === 'female' && p.device === 'deka',
+  (p) => p.pricingCategory === 'female' && p.device === 'deka' && p.amount > 0,
 );
 const maleDekaPrice = service.prices.find(
-  (p) => p.pricingCategory === 'male' && p.device === 'deka',
+  (p) => p.pricingCategory === 'male' && p.device === 'deka' && p.amount > 0,
 );
 const isPromo = service.slug === 'full-body';
 const basePrice = femalePrice?.amount ?? 0; // in thousands (IRT)
@@ -256,23 +258,31 @@ const afterCareSteps = [
               ) : (
                 <span class="tier-note">استعلام تلفنی</span>
               )}
-              {femaleDekaPrice && (
-                <div class="tier-device-row">
-                  <span class="tier-device-label">دستگاه دکا:</span>
-                  {isPromo ? (
-                    <div class="promo-price-block">
-                      <span class="strikethrough-price">{formatToman(promoDekaOriginalPrice)}</span>
-                      <span class="promo-final-price">{formatToman(promoDekaFinalPrice)}</span>
-                      <span class="price-currency">تومان / هر جلسه</span>
-                    </div>
-                  ) : (
-                    <div class="price-block">
-                      <span class="final-price">{formatToman(femaleDekaPrice.amount)}</span>
-                      <span class="price-currency">تومان / هر جلسه</span>
-                    </div>
-                  )}
-                </div>
-              )}
+              {femalePrice &&
+                (femaleDekaPrice ? (
+                  <div class="tier-device-row">
+                    <span class="tier-device-label">دستگاه دکا:</span>
+                    {isPromo ? (
+                      <div class="promo-price-block">
+                        <span class="strikethrough-price">
+                          {formatToman(promoDekaOriginalPrice)}
+                        </span>
+                        <span class="promo-final-price">{formatToman(promoDekaFinalPrice)}</span>
+                        <span class="price-currency">تومان / هر جلسه</span>
+                      </div>
+                    ) : (
+                      <div class="price-block">
+                        <span class="final-price">{formatToman(femaleDekaPrice.amount)}</span>
+                        <span class="price-currency">تومان / هر جلسه</span>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div class="tier-device-row">
+                    <span class="tier-device-label">دستگاه دکا:</span>
+                    <span class="tier-note">استعلام قیمت</span>
+                  </div>
+                ))}
             </div>
           </div>
 
@@ -309,15 +319,21 @@ const afterCareSteps = [
                   استعلام قیمت بر اساس تراکم و وسعت در کلینیک یا تماس تلفنی
                 </span>
               )}
-              {maleDekaPrice && (
-                <div class="tier-device-row">
-                  <span class="tier-device-label">دستگاه دکا:</span>
-                  <div class="price-block">
-                    <span class="final-price">{formatToman(maleDekaPrice.amount)}</span>
-                    <span class="price-currency">تومان / هر جلسه</span>
+              {malePrice &&
+                (maleDekaPrice ? (
+                  <div class="tier-device-row">
+                    <span class="tier-device-label">دستگاه دکا:</span>
+                    <div class="price-block">
+                      <span class="final-price">{formatToman(maleDekaPrice.amount)}</span>
+                      <span class="price-currency">تومان / هر جلسه</span>
+                    </div>
                   </div>
-                </div>
-              )}
+                ) : (
+                  <div class="tier-device-row">
+                    <span class="tier-device-label">دستگاه دکا:</span>
+                    <span class="tier-note">استعلام قیمت</span>
+                  </div>
+                ))}
             </div>
           </div>
 
@@ -511,16 +527,22 @@ const afterCareSteps = [
             ) : (
               <span class="sb-note">استعلام تلفنی</span>
             )}
-            {femaleDekaPrice && (
-              <div>
-                <span class="sb-price-label">دستگاه دکا:</span>{' '}
-                {isPromo ? (
-                  <span class="sb-final">{formatToman(promoDekaFinalPrice)} تومان</span>
-                ) : (
-                  <span class="sb-final">{formatToman(femaleDekaPrice.amount)} تومان</span>
-                )}
-              </div>
-            )}
+            {femalePrice &&
+              (femaleDekaPrice ? (
+                <div>
+                  <span class="sb-price-label">دستگاه دکا:</span>{' '}
+                  {isPromo ? (
+                    <span class="sb-final">{formatToman(promoDekaFinalPrice)} تومان</span>
+                  ) : (
+                    <span class="sb-final">{formatToman(femaleDekaPrice.amount)} تومان</span>
+                  )}
+                </div>
+              ) : (
+                <div>
+                  <span class="sb-price-label">دستگاه دکا:</span>{' '}
+                  <span class="sb-note">استعلام قیمت</span>
+                </div>
+              ))}
           </div>
 
           <a href={`/booking?service=${service.slug}`} class="btn-3d-gold btn-block">

@@ -34,6 +34,10 @@ BASE = os.environ.get("VERIFY_BASE", "http://127.0.0.1:4399")
 ROUTES = [
     "/",
     "/services",
+    # Detail pages carry the Deka-row probe: upper-arm is the Rado-only
+    # regression case (no Deka tariff), face has a Deka tariff.
+    "/services/upper-arm",
+    "/services/face",
     "/clinic",
     "/contact",
     "/faq",
@@ -247,6 +251,46 @@ PROBE = r"""
     }
   });
 
+  // ── Deka price-on-request rows ───────────────────────────────────────
+  // A tier that has a Rado tariff must always show its Deka row — a price
+  // when one exists, «استعلام قیمت» when the owner gave none (2026-11-23:
+  // detail pages rendered no Deka row at all for the 18 DB-None cells, so a
+  // customer could not tell whether Deka was unavailable or the page was
+  // incomplete). The sidebar price box follows the same rule.
+  out.dekaRowsMissing = [];
+  document.querySelectorAll('.tier-row').forEach((row) => {
+    const hasRadoPrice = !!row.querySelector(
+      '.price-block .final-price, .promo-price-block .promo-final-price',
+    );
+    const dekaRow = [...row.querySelectorAll('.tier-device-row')].find((r) =>
+      (r.querySelector('.tier-device-label')?.textContent || '').includes('دکا'),
+    );
+    if (hasRadoPrice && !dekaRow) {
+      out.dekaRowsMissing.push({
+        tier: (row.querySelector('.tier-label')?.textContent || '').trim().slice(0, 24),
+      });
+    }
+  });
+  const sb = document.querySelector('.sidebar-price-box');
+  if (sb) {
+    const hasRado = !!sb.querySelector('.sb-final');
+    const hasDeka = [...sb.querySelectorAll('.sb-price-label')].some((l) =>
+      (l.textContent || '').includes('دکا'),
+    );
+    if (hasRado && !hasDeka) out.dekaRowsMissing.push({ tier: 'sidebar' });
+  }
+
+  // ── men's device toggle ──────────────────────────────────────────────
+  // The device toggle used to live only on the women's tab (2026-11-23),
+  // so men could not switch to Deka prices from /services.
+  out.mensToggleMissing = [];
+  if (
+    document.querySelector('#panel-male') &&
+    !document.querySelector('#panel-male .device-toggle-row')
+  ) {
+    out.mensToggleMissing.push({ panel: 'male' });
+  }
+
   // ── tap targets ────────────────────────────────────────────────────
   out.smallTargets = [];
   document.querySelectorAll('a, button, [role=button], summary, input[type=submit]').forEach((el) => {
@@ -380,6 +424,11 @@ def main() -> int:
         if r.get("ctaSpill"):
             names = sorted({(m["label"], m["spillLeft"]) for m in r["ctaSpill"]})
             failures.append(f"{tag}: gold CTA label(s) spill out of their button: {names[:4]}")
+        if r.get("dekaRowsMissing"):
+            names = sorted({m["tier"] for m in r["dekaRowsMissing"]})
+            failures.append(f"{tag}: tier(s) with a Rado price but no Deka row: {names[:4]}")
+        if r.get("mensToggleMissing"):
+            failures.append(f"{tag}: men's tab has no device toggle")
         big = [t for t in r["smallTargets"] if t["h"] < TAP_AA or t["w"] < TAP_AA]
         if big:
             failures.append(f"{tag}: {len(big)} target(s) below 24px (WCAG 2.5.8)")
