@@ -43,7 +43,9 @@ export function calculateQuote(
   const row = prices.find(
     (price) => price.pricingCategory === category && (price.device ?? 'rado') === device,
   );
-  if (!row) {
+  // A row with amount <= 0 is not a price — it is a zeroed tariff (e.g. an
+  // admin cleared the price). Quoting it would book the service for free.
+  if (!row || row.amount <= 0) {
     throw new PricingError(
       'PRICE_NOT_CONFIGURED',
       'قیمت این خدمت برای این دسته هنوز ثبت نشده است.',
@@ -65,13 +67,15 @@ export function calculateQuote(
   };
 }
 
-/** Whether a public price row exists for the requested category + device (drives "price on request" UI). */
+/** Whether a public price row exists for the requested category + device (drives "price on request" UI).
+ *  A row with amount <= 0 is not a price — see calculateQuote. */
 export function hasPriceFor(
   prices: readonly PriceRow[],
   category: PricingCategory,
   device: Device = 'rado',
 ): boolean {
   return prices.some(
-    (price) => price.pricingCategory === category && (price.device ?? 'rado') === device,
+    (price) =>
+      price.pricingCategory === category && (price.device ?? 'rado') === device && price.amount > 0,
   );
 }

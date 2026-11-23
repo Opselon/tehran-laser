@@ -12,6 +12,7 @@ import m11 from '../../migrations/0011_feature_modules.sql?raw';
 import m12 from '../../migrations/0012_operators.sql?raw';
 import m13 from '../../migrations/0013_content_cleanup.sql?raw';
 import m16 from '../../migrations/0016_device_deka_prices.sql?raw';
+import m17 from '../../migrations/0017_blog_covers_local.sql?raw';
 import { hashPassword } from '../../src/lib/security/password';
 
 let migrated = false;
@@ -107,6 +108,9 @@ export async function ensureMigrated(): Promise<void> {
   // 0014/0015 are data-only refreshes the harness never imported; 0016 is
   // applied because it carries the device schema the booking flow depends on.
   await runMigration(m16);
+  // 0017 re-points the seeded blog covers at self-hosted files (the Unsplash
+  // URLs are refused by the public image CSP, so covers rendered as absent).
+  await runMigration(m17);
 
   // Seed a test super_admin for admin integration tests
   const adminId = 'usr_test_superadmin';

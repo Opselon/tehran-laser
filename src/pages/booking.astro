@@ -28,6 +28,9 @@ try {
 
 const serviceParam = Astro.url.searchParams.get('service') ?? undefined;
 const deviceParam = Astro.url.searchParams.get('device') ?? undefined;
+// Men's entry points (services men's tab / homepage men's strip) land the
+// wizard in the men's section instead of the default women's list.
+const categoryParam = Astro.url.searchParams.get('category') ?? undefined;
 
 // BreadcrumbList schema for the booking funnel (§31, §135)
 const breadcrumbJsonLd = createBreadcrumbSchema([
@@ -80,6 +83,7 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
         initialServices={services}
         preselectedSlug={serviceParam}
         preselectedDevice={deviceParam}
+        preselectedCategory={categoryParam}
       />
     </div>
   </section>

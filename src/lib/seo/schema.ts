@@ -147,7 +147,7 @@ export function createMedicalClinicSchema(origin = DEFAULT_CANONICAL_ORIGIN) {
                 description:
                   'پکیج کامل دست، پا، بیکینی، زیر بغل، خط باسن، خط ناف و شکم با شات نامحدود دستگاه لیزر تماسی رادو پلاس',
               },
-              price: '1940000',
+              price: '2530000',
               priceCurrency: 'IRT',
             },
             {

@@ -1206,15 +1206,16 @@ export async function handleApiRequest(
       await run(
         env.DB,
         `INSERT INTO bookings (
-           id, reference, customer_id, service_id, pricing_category,
+           id, reference, customer_id, service_id, pricing_category, device,
            starts_at, ends_at, status, quoted_amount, discount_amount,
            currency, customer_note, admin_note, created_at, updated_at
-         ) VALUES (?, ?, ?, ?, ?, ?, ?, 'completed', ?, 0, 'IRR_TOMAN', ?, ?, ?, ?)`,
+         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'completed', ?, 0, 'IRR_TOMAN', ?, ?, ?, ?)`,
         bookingId,
         ref,
         customerId,
         service.id,
         body.pricingCategory || 'female',
+        body.device || 'rado',
         startsAt,
         endsAt,
         amount,
@@ -1286,15 +1287,16 @@ export async function handleApiRequest(
         await run(
           env.DB,
           `INSERT INTO bookings (
-             id, reference, customer_id, service_id, pricing_category,
+             id, reference, customer_id, service_id, pricing_category, device,
              starts_at, ends_at, status, quoted_amount, discount_amount,
              currency, customer_note, admin_note, created_at, updated_at
-           ) VALUES (?, ?, ?, ?, ?, ?, ?, 'confirmed', ?, 0, 'IRR_TOMAN', ?, ?, ?, ?)`,
+           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'confirmed', ?, 0, 'IRR_TOMAN', ?, ?, ?, ?)`,
           nextBookingId,
           nextRef,
           customerId,
           service.id,
           body.pricingCategory || 'female',
+          body.device || 'rado',
           nextStartsAt,
           nextEndsAt,
           amount,

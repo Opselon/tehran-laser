@@ -438,16 +438,16 @@ try {
         if (!match) return def;
 
         const fPrice = match.prices.find(
-          (p) => p.pricingCategory === 'female' && p.device === 'rado',
+          (p) => p.pricingCategory === 'female' && p.device === 'rado' && p.amount > 0,
         );
         const mPrice = match.prices.find(
-          (p) => p.pricingCategory === 'male' && p.device === 'rado',
+          (p) => p.pricingCategory === 'male' && p.device === 'rado' && p.amount > 0,
         );
         const fDekaPrice = match.prices.find(
-          (p) => p.pricingCategory === 'female' && p.device === 'deka',
+          (p) => p.pricingCategory === 'female' && p.device === 'deka' && p.amount > 0,
         );
         const mDekaPrice = match.prices.find(
-          (p) => p.pricingCategory === 'male' && p.device === 'deka',
+          (p) => p.pricingCategory === 'male' && p.device === 'deka' && p.amount > 0,
         );
 
         return {
@@ -550,7 +550,7 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
         </div>
         <div class="tech-badge">
           <Icon name="shield" size={16} />
-          <span>طول موج الکساندرایت ۷۵۵nm + ان‌دی‌یاگ ۱۰۶۴nm</span>
+          <span>طول موج رادو پلاس: الکساندرایت ۷۵۵nm + ان‌دی‌یاگ ۱۰۶۴nm</span>
         </div>
         <div class="tech-badge">
           <Icon name="snowflake" size={16} />
@@ -663,7 +663,7 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
               <div class="spec-item">
                 <Icon name="clock" size={16} />
                 <span>
-                  مدت هر جلسه: <strong>۶۰ دقیقه</strong>
+                  مدت هر جلسه: <strong>۳۰ دقیقه</strong>
                 </span>
               </div>
               <div class="spec-item">
@@ -1182,6 +1182,34 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
       <!-- PANEL 2: MEN'S PRICING & SPECIALIZED LINE -->
       <!-- ============================================================== -->
       <div id="panel-male" class="tab-panel hidden" role="tabpanel" aria-labelledby="tab-male">
+        <!-- Device switch — same toggle as the women's panel (the page script
+             syncs every .device-toggle-btn): it swaps the banner device text
+             and carries the choice into the booking links. Men's packages
+             have no Deka tariff of their own, so their prices stay Rado. -->
+        <div class="device-toggle-row" role="tablist" aria-label="انتخاب دستگاه">
+          <span class="device-toggle-label">دستگاه:</span>
+          <button
+            type="button"
+            class="device-toggle-btn active"
+            data-device="rado"
+            role="tab"
+            aria-selected="true"
+          >
+            رادو پلاس
+            <span class="device-toggle-note">لیزر تماسی</span>
+          </button>
+          <button
+            type="button"
+            class="device-toggle-btn"
+            data-device="deka"
+            role="tab"
+            aria-selected="false"
+          >
+            دکا
+            <span class="device-toggle-note">شاتی</span>
+          </button>
+        </div>
+
         <!-- Men's Introduction Banner -->
         <div class="mens-banner-card mb-5">
           <div class="mens-banner-content">
@@ -1191,10 +1219,15 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
             </div>
             <h2 class="mens-banner-title">خدمات لیزر آقایان با فضای تفکیک‌شده و نوبت‌دهی خصوصی</h2>
             <p class="mens-banner-desc">
-              با توجه به اینکه ریشه موهای آقایان تراکم و ضخامت بیشتری دارد، دستگاه لیزر تماسی رادو
-              پلاس با بهره‌گیری از
-              <strong>طول موج نفوذی ان‌دی‌یاگ (Nd:YAG 1064nm)</strong> عمیق‌ترین فولیکول‌ها را بدون
-              سوختگی پوست درمان می‌کند. کلیه خدمات در فضایی کاملاً خصوصی انجام می‌پذیرد.
+              با توجه به اینکه ریشه موهای آقایان تراکم و ضخامت بیشتری دارد،
+              <span
+                data-tech-rado="دستگاه لیزر تماسی رادو پلاس با بهره‌گیری از طول موج نفوذی ان‌دی‌یاگ (Nd:YAG 1064nm)"
+                data-tech-deka="دستگاه لیزر شاتی دکا"
+              >
+                دستگاه لیزر تماسی رادو پلاس با بهره‌گیری از طول موج نفوذی ان‌دی‌یاگ (Nd:YAG 1064nm)
+              </span>
+              عمیق‌ترین فولیکول‌ها را بدون سوختگی پوست درمان می‌کند. کلیه خدمات در فضایی کاملاً
+              خصوصی انجام می‌پذیرد.
             </p>
 
             <div class="mens-features-row">
@@ -1208,7 +1241,12 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
               </div>
               <div class="m-feat">
                 <Icon name="checkCircle" size={16} />
-                <span>طول موج Nd:YAG 1064nm مناسب ریشه‌های متراکم</span>
+                <span
+                  data-tech-rado="طول موج Nd:YAG 1064nm مناسب ریشه‌های متراکم"
+                  data-tech-deka="دستگاه لیزر شاتی دکا"
+                >
+                  طول موج Nd:YAG 1064nm مناسب ریشه‌های متراکم
+                </span>
               </div>
               <div class="m-feat">
                 <Icon name="checkCircle" size={16} />
@@ -1228,7 +1266,7 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
                 تماس مستقیم: <bdi dir="ltr">۰۹۰۳ ۵۵۵ ۵۰۹۰</bdi>
               </span>
             </a>
-            <a href="/booking" class="btn-3d-subtle btn-block mt-2">
+            <a href="/booking?category=male" class="btn-3d-subtle btn-block mt-2">
               <Icon name="calendar" size={18} />
               <span>رزرو آنلاین نوبت مشاوره</span>
             </a>
@@ -1282,7 +1320,7 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
             </div>
 
             <div class="package-actions">
-              <a href="/booking?service=face" class="btn-3d-gold btn-block">
+              <a href="/booking?service=beard-line&category=male" class="btn-3d-gold btn-block">
                 <Icon name="calendar" size={18} />
                 <span>رزرو آنلاین آنکارد ریش</span>
               </a>
@@ -1332,7 +1370,7 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
             </div>
 
             <div class="package-actions">
-              <a href="/booking?service=chest" class="btn-3d-gold btn-block">
+              <a href="/booking?service=chest&category=male" class="btn-3d-gold btn-block">
                 <Icon name="calendar" size={18} />
                 <span>رزرو بالاتنه آقایان</span>
               </a>
@@ -1382,7 +1420,7 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
             </div>
 
             <div class="package-actions">
-              <a href="/booking?service=back" class="btn-3d-gold btn-block">
+              <a href="/booking?service=back&category=male" class="btn-3d-gold btn-block">
                 <Icon name="calendar" size={18} />
                 <span>رزرو پکیج کمر و کتف</span>
               </a>

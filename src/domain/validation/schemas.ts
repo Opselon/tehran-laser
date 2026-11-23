@@ -321,6 +321,7 @@ export const walkinBookSchema = z
     customerName: nameSchema.optional(),
     customerPhone: phoneSchema.optional(),
     pricingCategory: pricingCategorySchema.optional(),
+    device: deviceSchema.optional().default('rado'),
     serviceId: z.string().trim().max(64).optional(),
     startsAt: isoInstantSchema.optional(),
     amount: z.number().int().min(0).max(1_000_000_000).optional(),

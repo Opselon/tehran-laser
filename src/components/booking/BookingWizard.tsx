@@ -34,6 +34,8 @@ interface BookingWizardProps {
   preselectedSlug?: string | undefined;
   /** Device preselected from the ?device= link param (services page toggle). */
   preselectedDevice?: string | undefined;
+  /** Section preselected from the ?category= link param (men's entry points). */
+  preselectedCategory?: string | undefined;
 }
 
 const EMPTY_CUSTOMER: CustomerDraft = { name: '', phone: '', email: '', note: '' };
@@ -48,6 +50,7 @@ export function BookingWizard({
   initialServices = [],
   preselectedSlug,
   preselectedDevice,
+  preselectedCategory,
 }: BookingWizardProps) {
   const [step, setStep] = useState<number>(1);
   const [services, setServices] = useState<PublicServiceDto[]>(initialServices);
@@ -57,7 +60,9 @@ export function BookingWizard({
   const [selectedServiceSlugs, setSelectedServiceSlugs] = useState<string[]>(() =>
     preselectedSlug ? [preselectedSlug] : [],
   );
-  const [pricingCategory, setPricingCategory] = useState<PricingCategory>('female');
+  const [pricingCategory, setPricingCategory] = useState<PricingCategory>(() =>
+    preselectedCategory === 'male' ? 'male' : 'female',
+  );
   /** Which laser the customer wants — the price list, quote and booking follow it. */
   const [device, setDevice] = useState<Device>(() =>
     preselectedDevice === 'deka' ? 'deka' : 'rado',
@@ -155,26 +160,58 @@ export function BookingWizard({
   const selectedServices = services.filter((s) => selectedServiceSlugs.includes(s.slug));
   const totalDurationMinutes = selectedServices.reduce((sum, s) => sum + s.durationMinutes, 0);
 
-  /** Price of one service for the chosen section + device (undefined = "price on request"). */
+  /** Price of one service for the chosen section + device (undefined = "price on request").
+   *  A zero-amount row is not a price — see domain pricing (a zeroed tariff
+   *  must never quote ۰ تومان). */
   const priceFor = useCallback(
-    (s: PublicServiceDto) =>
-      s.prices.find((p) => p.pricingCategory === pricingCategory && p.device === device),
+    (s: PublicServiceDto) => {
+      const row = s.prices.find(
+        (p) => p.pricingCategory === pricingCategory && p.device === device,
+      );
+      return row && row.amount > 0 ? row : undefined;
+    },
     [pricingCategory, device],
   );
 
-  /** Step 1 lists 27 areas; a live filter is the fastest way to reach one.
-   *  Selected areas always stay visible so nothing silently disappears. */
+  /** Step 1 lists only areas bookable for the chosen section + device.
+   *  A zone with no tariff for this combination (men's-only zones in the
+   *  women's list, Deka-less zones under Deka) is hidden, not shown as
+   *  «استعلام قیمت» — it cannot be booked, and keeping it selectable
+   *  produced a ۰ تومان quote. */
+  const bookableServices = useMemo<PublicServiceDto[]>(
+    () => services.filter((s) => priceFor(s) !== undefined),
+    [services, priceFor],
+  );
+  const hiddenServiceCount = services.length - bookableServices.length;
+
+  /** A live filter is the fastest way to reach one area. */
   const filteredServices = useMemo<PublicServiceDto[]>(() => {
     const needle = normalizeSearch(serviceQuery);
-    if (!needle) return services;
-    return services.filter(
+    if (!needle) return bookableServices;
+    return bookableServices.filter(
       (s) =>
-        selectedServiceSlugs.includes(s.slug) ||
         normalizeSearch(s.name).includes(needle) ||
         normalizeSearch(s.shortDescription ?? '').includes(needle) ||
         normalizeSearch(s.description).includes(needle),
     );
-  }, [services, serviceQuery, selectedServiceSlugs]);
+  }, [bookableServices, serviceQuery]);
+
+  /* A section/device switch can invalidate a selection (e.g. صورت picked
+   * for women/Rado, then switched to men/Deka where face has no Deka
+   * tariff). Drop those slugs instead of keeping them with a ۰ تومان
+   * quote — validateStep already blocks submit on missingPrice, but the
+   * summary bar showed the zero first. Guarded on services being loaded
+   * so the preselected slug is not dropped before the list arrives. */
+  useEffect(() => {
+    if (services.length === 0) return;
+    setSelectedServiceSlugs((prev) => {
+      const next = prev.filter((slug) => {
+        const s = services.find((x) => x.slug === slug);
+        return s !== undefined && priceFor(s) !== undefined;
+      });
+      return next.length === prev.length ? prev : next;
+    });
+  }, [pricingCategory, device, services, priceFor]);
 
   const quote: QuoteTotals = useMemo(() => {
     let base = 0;
@@ -429,7 +466,14 @@ export function BookingWizard({
                   type="button"
                   className="pill-quick-btn"
                   onClick={() => {
-                    setSelectedServiceSlugs(['underarm', 'bikini', 'full-legs']);
+                    // Bikini has no men's Deka tariff — only pick areas that
+                    // are actually bookable for the current section + device.
+                    setSelectedServiceSlugs(
+                      ['underarm', 'bikini', 'full-legs'].filter((slug) => {
+                        const s = services.find((x) => x.slug === slug);
+                        return s !== undefined && priceFor(s) !== undefined;
+                      }),
+                    );
                     setErrorMessage(null);
                   }}
                 >
@@ -569,6 +613,13 @@ export function BookingWizard({
               </div>
             )}
 
+            {hiddenServiceCount > 0 && !loadingServices && (
+              <p className="step-desc">
+                {hiddenServiceCount.toLocaleString('fa-IR')} ناحیه برای بخش و دستگاه انتخاب‌شده
+                تعرفه ندارد و نمایش داده نشده است؛ برای استعلام با کلینیک تماس بگیرید.
+              </p>
+            )}
+
             {loadingServices ? (
               <div className="service-skeleton-grid" aria-hidden="true">
                 {[0, 1, 2].map((i) => (
@@ -604,7 +655,17 @@ export function BookingWizard({
                   const fPrice = priceFor(s);
                   const isPromo = s.slug === 'full-body';
                   const isSelected = selectedServiceSlugs.includes(s.slug);
-                  const priceLabel = fPrice ? moneyFa(fPrice.amount) : 'استعلام قیمت';
+                  // The promo tile shows the same discounted final the quote
+                  // (step 4 / receipt) charges — the tariff with a ۱۵٪ badge
+                  // read as the price while the summary bar showed ۲۵۳۳.
+                  const promoFinal =
+                    isPromo && fPrice ? fPrice.amount - Math.round(fPrice.amount * 0.15) : null;
+                  const priceLabel =
+                    promoFinal !== null
+                      ? moneyFa(promoFinal)
+                      : fPrice
+                        ? moneyFa(fPrice.amount)
+                        : 'استعلام قیمت';
 
                   return (
                     <div
@@ -638,7 +699,14 @@ export function BookingWizard({
                           )}
                         </div>
                         <div className="card-price-row">
-                          <span className="price-val">{priceLabel}</span>
+                          {promoFinal !== null && fPrice ? (
+                            <>
+                              <span className="price-original">{moneyFa(fPrice.amount)}</span>
+                              <span className="price-val">{moneyFa(promoFinal)}</span>
+                            </>
+                          ) : (
+                            <span className="price-val">{priceLabel}</span>
+                          )}
                         </div>
                       </div>
                     </div>
