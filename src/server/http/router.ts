@@ -376,6 +376,7 @@ export async function handleApiRequest(
         serviceSlug: body.serviceSlug,
         serviceSlugs: body.serviceSlugs,
         pricingCategory: body.pricingCategory,
+        device: body.device,
         startsAtIso: body.startsAt,
         customerName: body.customerName,
         customerPhone: body.customerPhone,
@@ -393,6 +394,7 @@ export async function handleApiRequest(
         customerPhone: booking.customerPhone,
         serviceName: booking.serviceName,
         pricingCategory: booking.pricingCategory,
+        device: booking.device,
         startsAtIso: booking.startsAt,
         quotedAmount: booking.quotedAmount,
         discountAmount: booking.discountAmount,
@@ -655,12 +657,13 @@ export async function handleApiRequest(
       const body = await parseBody(request, updatePricingSchema);
       const nowIso = new Date().toISOString();
 
-      // Upsert price row for this service + category
+      // Upsert price row for this service + category + device
       const existing = await one<{ id: string }>(
         env.DB,
-        `SELECT id FROM service_prices WHERE service_id = ? AND pricing_category = ?`,
+        `SELECT id FROM service_prices WHERE service_id = ? AND pricing_category = ? AND device = ?`,
         serviceId,
         body.pricingCategory,
+        body.device,
       );
 
       if (existing) {
@@ -675,11 +678,12 @@ export async function handleApiRequest(
       } else {
         await run(
           env.DB,
-          `INSERT INTO service_prices (id, service_id, pricing_category, amount, currency, created_at, updated_at)
-           VALUES (?, ?, ?, ?, ?, ?, ?)`,
+          `INSERT INTO service_prices (id, service_id, pricing_category, device, amount, currency, created_at, updated_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
           crypto.randomUUID(),
           serviceId,
           body.pricingCategory,
+          body.device,
           body.amount,
           body.currency ?? 'IRT',
           nowIso,

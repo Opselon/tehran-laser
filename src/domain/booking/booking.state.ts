@@ -1,9 +1,10 @@
-import type { Booking, BookingStatus, PricingCategory } from './booking.types';
+import type { Booking, BookingStatus, Device, PricingCategory } from './booking.types';
 
 /** Server-authoritative quote. The client never supplies any of these. */
 export interface BookingQuote {
   serviceId: string;
   pricingCategory: PricingCategory;
+  device: Device;
   baseAmount: number;
   discountPercent: number;
   discountAmount: number;

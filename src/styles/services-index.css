@@ -171,6 +171,62 @@ main .toggle-pill.active {
     0 0 0 1px rgba(16, 185, 129, 0.45);
 }
 
+/* Device switch (migration 0016): Rado Plus vs Deka — compact segmented
+   control above the women's packages; swaps every price on the panel. */
+main .device-toggle-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+main .device-toggle-label {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #e8e4db;
+}
+
+main .device-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #0f1218;
+  color: #b5ada0;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 12px;
+  padding: 9px 18px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+  white-space: nowrap;
+}
+
+main .device-toggle-btn:hover {
+  color: #ffffff;
+}
+
+main .device-toggle-btn.active {
+  background: linear-gradient(145deg, #1e2430 0%, #131720 100%);
+  color: var(--gold-light);
+  box-shadow:
+    0 4px 15px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(16, 185, 129, 0.45);
+}
+
+main .device-toggle-note {
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: #9aa1ab;
+}
+
+main .device-toggle-btn.active .device-toggle-note {
+  color: var(--gold-light);
+  opacity: 0.8;
+}
+
 main .pill-discount-badge {
   background: linear-gradient(90deg, #10b981, #34d399);
   color: #0a0b0d;

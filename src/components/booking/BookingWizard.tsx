@@ -1,7 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toJalaali } from 'jalaali-js';
 import type { PublicServiceDto, AvailabilitySlotDto } from '../../domain/api/dto.types';
-import type { PricingCategory } from '../../domain/booking/booking.types';
+import {
+  DEVICE_LABELS,
+  type Device,
+  type PricingCategory,
+} from '../../domain/booking/booking.types';
 import { IconReact } from '../ui/IconReact';
 import { JalaliCalendar } from './JalaliCalendar';
 import {
@@ -28,6 +32,8 @@ import './booking-wizard.css';
 interface BookingWizardProps {
   initialServices?: PublicServiceDto[] | undefined;
   preselectedSlug?: string | undefined;
+  /** Device preselected from the ?device= link param (services page toggle). */
+  preselectedDevice?: string | undefined;
 }
 
 const EMPTY_CUSTOMER: CustomerDraft = { name: '', phone: '', email: '', note: '' };
@@ -38,7 +44,11 @@ const NEXT_LABEL: Record<number, string> = {
   3: 'ادامه: بررسی و تأیید',
 };
 
-export function BookingWizard({ initialServices = [], preselectedSlug }: BookingWizardProps) {
+export function BookingWizard({
+  initialServices = [],
+  preselectedSlug,
+  preselectedDevice,
+}: BookingWizardProps) {
   const [step, setStep] = useState<number>(1);
   const [services, setServices] = useState<PublicServiceDto[]>(initialServices);
   const [loadingServices, setLoadingServices] = useState<boolean>(initialServices.length === 0);
@@ -48,6 +58,10 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
     preselectedSlug ? [preselectedSlug] : [],
   );
   const [pricingCategory, setPricingCategory] = useState<PricingCategory>('female');
+  /** Which laser the customer wants — the price list, quote and booking follow it. */
+  const [device, setDevice] = useState<Device>(() =>
+    preselectedDevice === 'deka' ? 'deka' : 'rado',
+  );
   const [serviceQuery, setServiceQuery] = useState<string>('');
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [availableSlots, setAvailableSlots] = useState<AvailabilitySlotDto[]>([]);
@@ -141,6 +155,13 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
   const selectedServices = services.filter((s) => selectedServiceSlugs.includes(s.slug));
   const totalDurationMinutes = selectedServices.reduce((sum, s) => sum + s.durationMinutes, 0);
 
+  /** Price of one service for the chosen section + device (undefined = "price on request"). */
+  const priceFor = useCallback(
+    (s: PublicServiceDto) =>
+      s.prices.find((p) => p.pricingCategory === pricingCategory && p.device === device),
+    [pricingCategory, device],
+  );
+
   /** Step 1 lists 27 areas; a live filter is the fastest way to reach one.
    *  Selected areas always stay visible so nothing silently disappears. */
   const filteredServices = useMemo<PublicServiceDto[]>(() => {
@@ -160,7 +181,7 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
     let discount = 0;
     let missingPrice = false;
     for (const s of selectedServices) {
-      const price = s.prices.find((p) => p.pricingCategory === pricingCategory);
+      const price = priceFor(s);
       if (!price) {
         missingPrice = true;
         continue;
@@ -169,7 +190,7 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
       if (s.slug === 'full-body') discount = Math.round(price.amount * 0.15);
     }
     return { base, discount, final: Math.max(0, base - discount), missingPrice };
-  }, [selectedServices, pricingCategory]);
+  }, [selectedServices, priceFor]);
 
   /* ── Selectable days (clinic is closed on Fridays) ────────── */
 
@@ -203,8 +224,14 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
     if (current === 1) {
       if (selectedServiceSlugs.length === 0)
         return 'لطفاً حداقل یک ناحیه یا خدمت را انتخاب فرمایید.';
-      if (pricingCategory === 'male' && quote.missingPrice) {
-        return 'تعرفه خدمات آقایان نیازمند مشاوره تلفنی است. لطفاً با کلینیک تماس حاصل فرمایید.';
+      if (quote.missingPrice) {
+        if (device === 'deka') {
+          return 'تعرفه دستگاه دکا برای برخی نواحی انتخاب‌شده ثبت نشده است؛ لطفاً با کلینیک تماس حاصل فرمایید.';
+        }
+        if (pricingCategory === 'male') {
+          return 'تعرفه خدمات آقایان نیازمند مشاوره تلفنی است. لطفاً با کلینیک تماس حاصل فرمایید.';
+        }
+        return 'تعرفه برخی نواحی انتخاب‌شده ثبت نشده است؛ لطفاً با کلینیک تماس حاصل فرمایید.';
       }
       return null;
     }
@@ -280,6 +307,7 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
           serviceSlugs: selectedServiceSlugs,
           serviceSlug: selectedServiceSlugs[0],
           pricingCategory,
+          device,
           startsAt: selectedSlot,
           customerName: customer.name.trim(),
           customerPhone: customer.phone.trim(),
@@ -467,6 +495,51 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
               })}
             </div>
 
+            <p className="step-desc mt-3">دستگاه مورد نظر خود را انتخاب فرمایید:</p>
+            <div
+              className="gender-selection-cards gender-compact"
+              role="radiogroup"
+              aria-label="انتخاب دستگاه"
+            >
+              {(
+                [
+                  { key: 'rado', title: 'رادو پلاس', note: 'لیزر تماسی' },
+                  { key: 'deka', title: 'دکا', note: 'شاتی' },
+                ] as const
+              ).map((d) => {
+                const isSel = device === d.key;
+                return (
+                  <div
+                    key={d.key}
+                    className={`gender-card ${isSel ? 'selected' : ''}`}
+                    onClick={() => {
+                      setDevice(d.key);
+                      setErrorMessage(null);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setDevice(d.key);
+                      }
+                    }}
+                    role="radio"
+                    aria-checked={isSel}
+                    tabIndex={0}
+                  >
+                    <span className="gender-title">
+                      {d.title}
+                      <span className="device-note"> — {d.note}</span>
+                      {isSel && (
+                        <span className="badge badge-selected">
+                          <IconReact name="check" size={12} strokeWidth={3} />
+                        </span>
+                      )}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+
             {!loadingServices && services.length > 0 && (
               <div className="service-filter-row">
                 <label htmlFor="serviceFilter" className="sr-only">
@@ -526,9 +599,9 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
             ) : (
               <div className="services-selection-grid services-grid-compact">
                 {filteredServices.map((s) => {
-                  // Show the price of the *chosen* section — tiles used to always
+                  // Show the price of the *chosen* section + device — tiles used to always
                   // quote the women's tariff even after «بخش آقایان» was picked.
-                  const fPrice = s.prices.find((p) => p.pricingCategory === pricingCategory);
+                  const fPrice = priceFor(s);
                   const isPromo = s.slug === 'full-body';
                   const isSelected = selectedServiceSlugs.includes(s.slug);
                   const priceLabel = fPrice ? moneyFa(fPrice.amount) : 'استعلام قیمت';
@@ -581,7 +654,9 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
                     <span className="badge-count">
                       {selectedServices.length.toLocaleString('fa-IR')}
                     </span>
-                    <strong>نواحی انتخاب‌شده برای این جلسه ({categoryLabel}):</strong>
+                    <strong>
+                      نواحی انتخاب‌شده برای این جلسه ({categoryLabel} — {DEVICE_LABELS[device]}):
+                    </strong>
                   </div>
                   <div className="selected-chips-list">
                     {selectedServices.map((s) => (
@@ -853,7 +928,7 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
 
               <div className="itemized-services-list mb-3">
                 {selectedServices.map((s) => {
-                  const p = s.prices.find((pr) => pr.pricingCategory === pricingCategory);
+                  const p = priceFor(s);
                   return (
                     <div key={s.slug} className="itemized-row">
                       <span className="item-name">
@@ -871,6 +946,10 @@ export function BookingWizard({ initialServices = [], preselectedSlug }: Booking
               <div className="summary-row">
                 <span className="label">بخش پذیرش</span>
                 <span className="value">{categoryLabel}</span>
+              </div>
+              <div className="summary-row">
+                <span className="label">دستگاه</span>
+                <span className="value">{DEVICE_LABELS[device]}</span>
               </div>
               <div className="summary-row">
                 <span className="label">مدت زمان کل</span>
@@ -1020,6 +1099,10 @@ function BookingReceiptInline({
           <span className="detail-value">
             {result.pricingCategory === 'female' ? 'بانوان' : 'آقایان'}
           </span>
+        </div>
+        <div className="detail-row">
+          <span className="detail-label">دستگاه</span>
+          <span className="detail-value">{result.device === 'deka' ? 'دکا' : 'رادو پلاس'}</span>
         </div>
         <div className="detail-row">
           <span className="detail-label">تاریخ مراجعه</span>

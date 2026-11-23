@@ -20,7 +20,12 @@ interface ServiceItem {
   femalePrice: number; // in thousands (IRT)
   femalePromoPrice?: number; // in thousands (IRT)
   malePriceText: string;
-  maleEstimatedPrice?: number;
+  /** Deka tariff for the same zone (absent = no Deka price for it). */
+  // `| undefined` is deliberate: exactOptionalPropertyTypes forbids assigning
+  // an explicit undefined to a bare `?: number` (the DB overlay below does).
+  femaleDekaPrice?: number | undefined;
+  femalePromoDekaPrice?: number;
+  maleDekaPrice?: number | undefined;
   wavelength: 'Alexandrite 755nm' | 'Nd:YAG 1064nm' | 'Dual Wavelength';
   wavelengthLabel: string;
   recommendedSessions: string;
@@ -41,9 +46,12 @@ const defaultServices: ServiceItem[] = [
     description:
       'کامل‌ترین و محبوب‌ترین پکیج لیزر بانوان با دستگاه لیزر تماسی رادو پلاس با شات نامحدود و سیستم خنک‌کننده TEC Double بدون درد.',
     durationMinutes: 60,
-    femalePrice: 2290,
-    femalePromoPrice: 1940,
-    malePriceText: 'استعلام حضوری بر اساس تراکم و وسعت',
+    femalePrice: 2980,
+    femalePromoPrice: 2530,
+    femalePromoDekaPrice: 4230,
+    femaleDekaPrice: 4980,
+    malePriceText: '۳٬۴۹۰٬۰۰۰ تومان',
+    maleDekaPrice: 5980,
     wavelength: 'Dual Wavelength',
     wavelengthLabel: 'الکساندرایت ۷۵۵nm + ان‌دی‌یاگ ۱۰۶۴nm',
     recommendedSessions: '۶ تا ۸ جلسه',
@@ -62,9 +70,10 @@ const defaultServices: ServiceItem[] = [
     description:
       'لیزر موهای زائد هر دو زیر بغل با طول موج الکساندرایت ۷۵۵ نانومتر رادو پلاس با سیستم سرمایش پیوسته.',
     durationMinutes: 20,
-    femalePrice: 390,
-    malePriceText: 'استعلام تلفنی / پذیرش در لاین آقایان',
-    maleEstimatedPrice: 490,
+    femalePrice: 400,
+    femaleDekaPrice: 650,
+    malePriceText: '۵۰۰٬۰۰۰ تومان',
+    maleDekaPrice: 700,
     wavelength: 'Alexandrite 755nm',
     wavelengthLabel: 'الکساندرایت ۷۵۵nm',
     recommendedSessions: '۶ تا ۸ جلسه',
@@ -81,8 +90,9 @@ const defaultServices: ServiceItem[] = [
     description:
       'لیزر تخصصی ناحیه حساس بیکینی با بالاترین پروتکل‌های بهداشتی، بدون درد با سرمایش پیوسته TEC Double.',
     durationMinutes: 25,
-    femalePrice: 590,
-    malePriceText: 'لاین اختصاصی ندارد',
+    femalePrice: 550,
+    femaleDekaPrice: 850,
+    malePriceText: '۶۵۰٬۰۰۰ تومان',
     wavelength: 'Alexandrite 755nm',
     wavelengthLabel: 'الکساندرایت ۷۵۵nm',
     recommendedSessions: '۶ تا ۸ جلسه',
@@ -100,8 +110,9 @@ const defaultServices: ServiceItem[] = [
       'لیزر کامل پاها با لیزر تماسی و نرخ بالای پرتاب شات برای حداکثر سرعت و پوشش یکنواخت.',
     durationMinutes: 45,
     femalePrice: 790,
-    malePriceText: 'استعلام قیمت تلفنی بر اساس وسعت',
-    maleEstimatedPrice: 990,
+    femaleDekaPrice: 1250,
+    malePriceText: '۹۰۰٬۰۰۰ تومان',
+    maleDekaPrice: 1400,
     wavelength: 'Alexandrite 755nm',
     wavelengthLabel: 'الکساندرایت ۷۵۵nm',
     recommendedSessions: '۶ تا ۸ جلسه',
@@ -118,9 +129,10 @@ const defaultServices: ServiceItem[] = [
     description:
       'لیزر کامل هر دو دست با تنظیم انرژی اختصاصی برای موهای نازک بازو و موهای ضخیم‌تر ساعد.',
     durationMinutes: 35,
-    femalePrice: 570,
-    malePriceText: 'استعلام قیمت بر اساس تراکم موها',
-    maleEstimatedPrice: 750,
+    femalePrice: 590,
+    femaleDekaPrice: 950,
+    malePriceText: '۷۵۰٬۰۰۰ تومان',
+    maleDekaPrice: 1150,
     wavelength: 'Alexandrite 755nm',
     wavelengthLabel: 'الکساندرایت ۷۵۵nm',
     recommendedSessions: '۶ تا ۸ جلسه',
@@ -136,9 +148,9 @@ const defaultServices: ServiceItem[] = [
     shortDescription: 'گونه‌ها، چانه، پیشانی، شقیقه‌ها و پشت لب',
     description: 'لیزر تخصصی پوست حساس صورت با عینک محافظ استاندارد و پروتکل بهداشتی اختصاصی.',
     durationMinutes: 30,
-    femalePrice: 320,
-    malePriceText: 'آنکارد ریش و گونه آقایان: ۳۹۰/۰۰۰ تومان',
-    maleEstimatedPrice: 390,
+    femalePrice: 390,
+    femaleDekaPrice: 650,
+    malePriceText: '۴۲۰٬۰۰۰ تومان',
     wavelength: 'Alexandrite 755nm',
     wavelengthLabel: 'الکساندرایت ۷۵۵nm',
     recommendedSessions: '۶ تا ۸ جلسه',
@@ -155,8 +167,9 @@ const defaultServices: ServiceItem[] = [
     description:
       'لیزر سریع ناحیه پشت لب با خنک‌کننده قوی بدون کوچک‌ترین احساس درد در ۵ الی ۱۰ دقیقه.',
     durationMinutes: 15,
-    femalePrice: 90,
-    malePriceText: 'شامل پکیج آنکارد ریش آقایان',
+    femalePrice: 200,
+    femaleDekaPrice: 300,
+    malePriceText: '۱۳۰٬۰۰۰ تومان',
     wavelength: 'Alexandrite 755nm',
     wavelengthLabel: 'الکساندرایت ۷۵۵nm',
     recommendedSessions: '۶ تا ۸ جلسه',
@@ -172,8 +185,9 @@ const defaultServices: ServiceItem[] = [
     shortDescription: 'ریشه‌کنی موهای هورمونی و ضخیم چانه',
     description: 'لیزر عمیق ریشه‌های ضخیم و هورمونی چانه با قدرت نفوذ بالای دستگاه لیزر تماسی.',
     durationMinutes: 15,
-    femalePrice: 145,
-    malePriceText: 'شامل پکیج آنکارد ریش آقایان',
+    femalePrice: 140,
+    femaleDekaPrice: 220,
+    malePriceText: '۱۹۰٬۰۰۰ تومان',
     wavelength: 'Dual Wavelength',
     wavelengthLabel: 'الکساندرایت + ان‌دی‌یاگ',
     recommendedSessions: '۶ تا ۸ جلسه',
@@ -190,9 +204,9 @@ const defaultServices: ServiceItem[] = [
     description:
       'لیزر دقیق ناحیه گردن با حفظ یکنواختی خط ریش و مو و پیشگیری از فولیکولیت بعد از شیو.',
     durationMinutes: 20,
-    femalePrice: 190,
-    malePriceText: 'خط گردن و زیر ریش آقایان: ۲۹۰/۰۰۰ تومان',
-    maleEstimatedPrice: 290,
+    femalePrice: 250,
+    femaleDekaPrice: 400,
+    malePriceText: '۲۵۰٬۰۰۰ تومان',
     wavelength: 'Alexandrite 755nm',
     wavelengthLabel: 'الکساندرایت ۷۵۵nm',
     recommendedSessions: '۶ تا ۸ جلسه',
@@ -208,9 +222,10 @@ const defaultServices: ServiceItem[] = [
     shortDescription: 'از آرنج تا مچ هر دو دست',
     description: 'لیزر سریع و مؤثر موهای ساعد با پوشش ۳۶۰ درجه‌ای و سرمایش پیوسته.',
     durationMinutes: 25,
-    femalePrice: 320,
-    malePriceText: 'استعلام قیمت تلفنی بر اساس وسعت',
-    maleEstimatedPrice: 420,
+    femalePrice: 450,
+    femaleDekaPrice: 700,
+    malePriceText: '۵۰۰٬۰۰۰ تومان',
+    maleDekaPrice: 750,
     wavelength: 'Alexandrite 755nm',
     wavelengthLabel: 'الکساندرایت ۷۵۵nm',
     recommendedSessions: '۶ تا ۸ جلسه',
@@ -228,8 +243,7 @@ const defaultServices: ServiceItem[] = [
       'تنظیم فرکانس هوشمند برای پیشگیری از تحریک ریشه‌های کرکی بازو با طول موج الکساندرایت.',
     durationMinutes: 25,
     femalePrice: 370,
-    malePriceText: 'استعلام قیمت تلفنی',
-    maleEstimatedPrice: 480,
+    malePriceText: '۵۷۰٬۰۰۰ تومان',
     wavelength: 'Alexandrite 755nm',
     wavelengthLabel: 'الکساندرایت ۷۵۵nm',
     recommendedSessions: '۶ تا ۸ جلسه',
@@ -247,8 +261,8 @@ const defaultServices: ServiceItem[] = [
       'لیزر ایمن موهای زائد دور سینه با کولینگ بهینه و عایق‌بندی حرارتی برای حفظ سلامت بافت.',
     durationMinutes: 20,
     femalePrice: 145,
-    malePriceText: 'سینه کامل آقایان: ۵۹۰/۰۰۰ تومان',
-    maleEstimatedPrice: 590,
+    malePriceText: '۶۰۰٬۰۰۰ تومان',
+    maleDekaPrice: 900,
     wavelength: 'Alexandrite 755nm',
     wavelengthLabel: 'الکساندرایت ۷۵۵nm',
     recommendedSessions: '۶ تا ۸ جلسه',
@@ -264,9 +278,10 @@ const defaultServices: ServiceItem[] = [
     shortDescription: 'پوشش کامل سطح پوست شکم',
     description: 'لیزر یکدست ناحیه شکم با شات‌های متوالی و سرعت بالای پرتاب پالس دستگاه رادو پلاس.',
     durationMinutes: 30,
-    femalePrice: 470,
-    malePriceText: 'شکم کامل آقایان: ۵۵۰/۰۰۰ تومان',
-    maleEstimatedPrice: 550,
+    femalePrice: 350,
+    femaleDekaPrice: 550,
+    malePriceText: '۵۵۰٬۰۰۰ تومان',
+    maleDekaPrice: 750,
     wavelength: 'Alexandrite 755nm',
     wavelengthLabel: 'الکساندرایت ۷۵۵nm',
     recommendedSessions: '۶ تا ۸ جلسه',
@@ -282,9 +297,9 @@ const defaultServices: ServiceItem[] = [
     shortDescription: 'خط باریک و عمودی بین ناف و بیکینی',
     description: 'لیزر دقیق خط ناف در کمتر از ۱۰ دقیقه با بازدهی بسیار بالا از جلسات ابتدایی.',
     durationMinutes: 15,
-    femalePrice: 190,
-    malePriceText: 'استعلام قیمت تلفنی',
-    maleEstimatedPrice: 250,
+    femalePrice: 150,
+    femaleDekaPrice: 250,
+    malePriceText: '۲۳۰٬۰۰۰ تومان',
     wavelength: 'Alexandrite 755nm',
     wavelengthLabel: 'الکساندرایت ۷۵۵nm',
     recommendedSessions: '۶ تا ۸ جلسه',
@@ -300,9 +315,10 @@ const defaultServices: ServiceItem[] = [
     shortDescription: 'پوشش کامل ناحیه پشت و گودی کمر',
     description: 'لیزر وسیع کمر با اسپات سایز ۲۴ میلی‌متری و بدون ایجاد جوش‌های چرکی بعد از لیزر.',
     durationMinutes: 35,
-    femalePrice: 540,
-    malePriceText: 'کمر کامل آقایان: ۷۵۰/۰۰۰ تومان',
-    maleEstimatedPrice: 750,
+    femalePrice: 450,
+    femaleDekaPrice: 750,
+    malePriceText: '۶۵۰٬۰۰۰ تومان',
+    maleDekaPrice: 900,
     wavelength: 'Dual Wavelength',
     wavelengthLabel: 'الکساندرایت + ان‌دی‌یاگ',
     recommendedSessions: '۶ تا ۸ جلسه',
@@ -319,9 +335,9 @@ const defaultServices: ServiceItem[] = [
     description:
       'لیزر بهداشتی و آرامش‌بخش باسن با حفظ کامل محرمانگی و حریم خصوصی در اتاق‌های ایزوله.',
     durationMinutes: 25,
-    femalePrice: 380,
-    malePriceText: 'استعلام تلفنی در کلینیک',
-    maleEstimatedPrice: 490,
+    femalePrice: 350,
+    femaleDekaPrice: 500,
+    malePriceText: '۴۶۰٬۰۰۰ تومان',
     wavelength: 'Alexandrite 755nm',
     wavelengthLabel: 'الکساندرایت ۷۵۵nm',
     recommendedSessions: '۶ تا ۸ جلسه',
@@ -337,9 +353,9 @@ const defaultServices: ServiceItem[] = [
     shortDescription: 'لیزر دقیق خط میانی باسن با سری باریک',
     description: 'حذف موهای زائد خط باسن با سری بهداشتی و زاویه پرتاب کنترل‌شده با ملایمت کامل.',
     durationMinutes: 15,
-    femalePrice: 240,
-    malePriceText: 'استعلام تلفنی در کلینیک',
-    maleEstimatedPrice: 320,
+    femalePrice: 200,
+    femaleDekaPrice: 300,
+    malePriceText: '۲۹۰٬۰۰۰ تومان',
     wavelength: 'Alexandrite 755nm',
     wavelengthLabel: 'الکساندرایت ۷۵۵nm',
     recommendedSessions: '۶ تا ۸ جلسه',
@@ -357,8 +373,7 @@ const defaultServices: ServiceItem[] = [
       'پوشش وسیع و پرقدرت ران‌ها با تنظیم فرکانس برای موهای نرم‌تر جلوی ران و ضخیم‌تر پشت ران.',
     durationMinutes: 30,
     femalePrice: 570,
-    malePriceText: 'استعلام قیمت تلفنی بر اساس وسعت',
-    maleEstimatedPrice: 690,
+    malePriceText: '۳۹۰٬۰۰۰ تومان',
     wavelength: 'Alexandrite 755nm',
     wavelengthLabel: 'الکساندرایت ۷۵۵nm',
     recommendedSessions: '۶ تا ۸ جلسه',
@@ -379,8 +394,7 @@ const defaultServices: ServiceItem[] = [
     description: 'رفع موهای زائد کشاله ران جهت جلوگیری از عرق‌سوز شدن و تیرگی اصطکاکی پوست.',
     durationMinutes: 20,
     femalePrice: 390,
-    malePriceText: 'استعلام تلفنی در کلینیک',
-    maleEstimatedPrice: 480,
+    malePriceText: '۴۷۰٬۰۰۰ تومان',
     wavelength: 'Alexandrite 755nm',
     wavelengthLabel: 'الکساندرایت ۷۵۵nm',
     recommendedSessions: '۶ تا ۸ جلسه',
@@ -396,9 +410,10 @@ const defaultServices: ServiceItem[] = [
     shortDescription: 'هر دو پا از زانو تا مچ پا و روی انگشتان',
     description: 'لیزر پرطرفدار ساق پا با حذف قطعی موهای ریشه‌دار و رهایی همیشگی از شیو هفتگی.',
     durationMinutes: 30,
-    femalePrice: 480,
-    malePriceText: 'استعلام تلفنی در کلینیک',
-    maleEstimatedPrice: 590,
+    femalePrice: 500,
+    femaleDekaPrice: 800,
+    malePriceText: '۶۵۰٬۰۰۰ تومان',
+    maleDekaPrice: 900,
     wavelength: 'Alexandrite 755nm',
     wavelengthLabel: 'الکساندرایت ۷۵۵nm',
     recommendedSessions: '۶ تا ۸ جلسه',
@@ -422,8 +437,18 @@ try {
         const match = dbServices.find((s) => s.slug === def.slug);
         if (!match) return def;
 
-        const fPrice = match.prices.find((p) => p.pricingCategory === 'female');
-        const mPrice = match.prices.find((p) => p.pricingCategory === 'male');
+        const fPrice = match.prices.find(
+          (p) => p.pricingCategory === 'female' && p.device === 'rado',
+        );
+        const mPrice = match.prices.find(
+          (p) => p.pricingCategory === 'male' && p.device === 'rado',
+        );
+        const fDekaPrice = match.prices.find(
+          (p) => p.pricingCategory === 'female' && p.device === 'deka',
+        );
+        const mDekaPrice = match.prices.find(
+          (p) => p.pricingCategory === 'male' && p.device === 'deka',
+        );
 
         return {
           ...def,
@@ -432,9 +457,11 @@ try {
           description: match.description || def.description,
           durationMinutes: match.durationMinutes || def.durationMinutes,
           femalePrice: fPrice ? fPrice.amount : def.femalePrice,
+          femaleDekaPrice: fDekaPrice ? fDekaPrice.amount : def.femaleDekaPrice,
           malePriceText: mPrice
             ? `${(mPrice.amount * 1000).toLocaleString('fa-IR')} تومان`
             : def.malePriceText,
+          maleDekaPrice: mDekaPrice ? mDekaPrice.amount : def.maleDekaPrice,
         };
       });
     }
@@ -489,7 +516,7 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
 
 <PublicLayout
   title="تعرفه لیزر موهای زائد ۱۴۰۵ — بانوان و آقایان | تهران لیزر قیطریه"
-  description="مشاهده لیست کامل تعرفه‌های لیزر موهای زائد بانوان و آقایان در کلینیک تهران لیزر قیطریه. مجهز به دستگاه لیزر تماسی رادو پلاس با ۱۵٪ تخفیف رزرو آنلاین پکیج طلایی."
+  description="مشاهده لیست کامل تعرفه‌های لیزر موهای زائد بانوان و آقایان در کلینیک تهران لیزر قیطریه. مجهز به دو دستگاه لیزر رادو پلاس و دکا با ۱۵٪ تخفیف رزرو آنلاین پکیج طلایی."
   canonicalUrl="/services"
   keywords={[
     'قیمت لیزر موهای زائد تهران',
@@ -510,17 +537,16 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
         تعرفه‌های مصوب خدمات تخصصی <span class="gold-gradient">تهران لیزر</span>
       </h1>
       <p class="hero-subtitle">
-        تمامی تعرفه‌ها بر اساس مصوبه رسمی کلینیک تهران لیزر (قیطریه) و با بهره‌گیری از قدرتمندترین
-        دستگاه لیزر جهان
-        <strong>دستگاه لیزر تماسی رادو پلاس</strong> بدون شات محدود و با سرمایش پیوسته TEC Double
-        ارائه می‌گردد.
+        تمامی تعرفه‌ها بر اساس مصوبه رسمی کلینیک تهران لیزر (قیطریه) و با بهره‌گیری از دو دستگاه
+        لیزر
+        <strong>رادو پلاس (تماسی)</strong> و <strong>دکا (شاتی)</strong> ارائه می‌گردد.
       </p>
 
-      <!-- Rado Plus Technology Badges -->
+      <!-- Technology Badges -->
       <div class="tech-badges-strip">
         <div class="tech-badge">
           <Icon name="lightning" size={16} />
-          <span>لیزر تماسی رادو پلاس (Rado Plus)</span>
+          <span>دو دستگاه لیزر: رادو پلاس (Rado Plus) و دکا (Deka)</span>
         </div>
         <div class="tech-badge">
           <Icon name="shield" size={16} />
@@ -586,9 +612,36 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
             <h2 class="section-h2">محبوب‌ترین پکیج‌های تخفیف‌دار بانوان</h2>
           </div>
           <p class="section-desc">
-            پکیج‌های تلفیقی با تخفیف ویژه در رزرو آنلاین سایت، شات نامحدود واقعی و دستگاه لیزر تماسی
-            رادو پلاس
+            پکیج‌های تلفیقی با تخفیف ویژه در رزرو آنلاین سایت. دستگاه مورد نظر را انتخاب کنید تا
+            همهٔ قیمت‌های همین بخش — پکیج‌ها، کارت‌ها و جدول تعرفه — برای همان دستگاه نمایش داده
+            شود.
           </p>
+        </div>
+
+        <!-- Device switch (migration 0016): Rado Plus vs Deka — swaps every
+             price on this panel and carries the choice into the booking links. -->
+        <div class="device-toggle-row" role="tablist" aria-label="انتخاب دستگاه">
+          <span class="device-toggle-label">دستگاه:</span>
+          <button
+            type="button"
+            class="device-toggle-btn active"
+            data-device="rado"
+            role="tab"
+            aria-selected="true"
+          >
+            رادو پلاس
+            <span class="device-toggle-note">لیزر تماسی</span>
+          </button>
+          <button
+            type="button"
+            class="device-toggle-btn"
+            data-device="deka"
+            role="tab"
+            aria-selected="false"
+          >
+            دکا
+            <span class="device-toggle-note">شاتی</span>
+          </button>
         </div>
 
         <div class="packages-grid">
@@ -628,7 +681,10 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
               <div class="spec-item">
                 <Icon name="shield" size={16} />
                 <span>
-                  طول موج: <strong>الکساندرایت ۷۵۵nm رادو پلاس</strong>
+                  طول موج:{' '}
+                  <strong data-tech-rado="الکساندرایت ۷۵۵nm رادو پلاس" data-tech-deka="دستگاه دکا">
+                    الکساندرایت ۷۵۵nm رادو پلاس
+                  </strong>
                 </span>
               </div>
             </div>
@@ -636,15 +692,28 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
             <div class="package-pricing-box">
               <div class="price-row-old">
                 <span class="label">تعرفه مصوب:</span>
-                <span class="old-amount strikethrough">۲/۲۹۰/۰۰۰ تومان</span>
+                <span
+                  class="old-amount strikethrough"
+                  data-price-rado="۲/۹۸۰/۰۰۰ تومان"
+                  data-price-deka="۴/۹۸۰/۰۰۰ تومان"
+                >
+                  ۲/۹۸۰/۰۰۰ تومان
+                </span>
               </div>
               <div class="price-row-final">
-                <span class="final-amount">۱/۹۴۰/۰۰۰</span>
+                <span class="final-amount" data-price-rado="۲/۵۳۰/۰۰۰" data-price-deka="۴/۲۳۰/۰۰۰">
+                  ۲/۵۳۰/۰۰۰
+                </span>
                 <span class="unit">تومان / هر جلسه</span>
               </div>
               <div class="save-tag">
                 <Icon name="percent" size={14} />
-                <span>۳۵۰/۰۰۰ تومان صرفه‌جویی در هر جلسه</span>
+                <span
+                  data-price-rado="۴۵۰/۰۰۰ تومان صرفه‌جویی در هر جلسه"
+                  data-price-deka="۷۵۰/۰۰۰ تومان صرفه‌جویی در هر جلسه"
+                >
+                  ۴۵۰/۰۰۰ تومان صرفه‌جویی در هر جلسه
+                </span>
               </div>
             </div>
 
@@ -666,7 +735,7 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
               <span class="package-badge-tag">پکیج اقتصادی و پرکاربرد</span>
               <h3 class="package-title">پکیج کاربردی (Essential Body)</h3>
               <p class="package-subtitle">
-                شامل: ساق دست، ساق پا، زیر بغل و بیکینی کامل — انتخابی سریع و بدون درد
+                شامل: پشت لب، زیر بغل، بیکینی، ساق دست و ساق پا — انتخابی سریع و بدون درد
               </p>
             </div>
 
@@ -694,15 +763,28 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
             <div class="package-pricing-box">
               <div class="price-row-old">
                 <span class="label">مجموع تک‌ناحیه‌ای:</span>
-                <span class="old-amount strikethrough">۱/۸۰۰/۰۰۰ تومان</span>
+                <span
+                  class="old-amount strikethrough"
+                  data-price-rado="۲/۱۰۰/۰۰۰ تومان"
+                  data-price-deka="۳/۳۰۰/۰۰۰ تومان"
+                >
+                  ۲/۱۰۰/۰۰۰ تومان
+                </span>
               </div>
               <div class="price-row-final">
-                <span class="final-amount">۱/۴۹۰/۰۰۰</span>
+                <span class="final-amount" data-price-rado="۱/۹۸۰/۰۰۰" data-price-deka="۲/۹۸۰/۰۰۰">
+                  ۱/۹۸۰/۰۰۰
+                </span>
                 <span class="unit">تومان / جلسه</span>
               </div>
               <div class="save-tag">
                 <Icon name="tag" size={14} />
-                <span>۱۷٪ تخفیف بسته تلفیقی</span>
+                <span
+                  data-price-rado="۱۲۰/۰۰۰ تومان صرفه‌جویی در هر جلسه"
+                  data-price-deka="۳۲۰/۰۰۰ تومان صرفه‌جویی در هر جلسه"
+                >
+                  ۱۲۰/۰۰۰ تومان صرفه‌جویی در هر جلسه
+                </span>
               </div>
             </div>
 
@@ -743,12 +825,18 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
                   پروتکل: <strong>سری کاملاً شخصی و استریل</strong>
                 </span>
               </div>
+              <div class="spec-item">
+                <Icon name="lightning" size={16} />
+                <span>
+                  دستگاه: <strong>رادو پلاس</strong>
+                </span>
+              </div>
             </div>
 
             <div class="package-pricing-box">
               <div class="price-row-old">
                 <span class="label">مجموع تک‌ناحیه‌ای:</span>
-                <span class="old-amount strikethrough">۱/۲۲۰/۰۰۰ تومان</span>
+                <span class="old-amount strikethrough">۱/۱۵۰/۰۰۰ تومان</span>
               </div>
               <div class="price-row-final">
                 <span class="final-amount">۹۸۰/۰۰۰</span>
@@ -756,7 +844,7 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
               </div>
               <div class="save-tag">
                 <Icon name="tag" size={14} />
-                <span>۲۰٪ تخفیف ویژه پکیج</span>
+                <span>۱۵٪ تخفیف ویژه پکیج — دستگاه رادو پلاس</span>
               </div>
             </div>
 
@@ -817,6 +905,10 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
           {services.map((service) => {
             const isFullBody = service.slug === 'full-body';
             const price = isFullBody ? service.femalePromoPrice! : service.femalePrice;
+            // Deka tariff for the device toggle (data-price-deka); zones the owner
+            // gave no Deka price for show «استعلام قیمت» under دکا.
+            const dekaPrice = isFullBody ? service.femalePromoDekaPrice : service.femaleDekaPrice;
+            const dekaPriceText = dekaPrice ? formatToman(dekaPrice) : 'استعلام قیمت';
 
             return (
               <div
@@ -846,7 +938,9 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
                 <!-- Rado Plus Wavelength Badge -->
                 <div class="card-wavelength-tag">
                   <Icon name="lightning" size={13} />
-                  <span>{service.wavelengthLabel}</span>
+                  <span data-tech-rado={service.wavelengthLabel} data-tech-deka="دستگاه دکا">
+                    {service.wavelengthLabel}
+                  </span>
                 </div>
 
                 <!-- Session Recommendation Pill -->
@@ -861,9 +955,21 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
                   <span class="price-title">تعرفه مصوب جلسه:</span>
                   <div class="price-value-box">
                     {isFullBody && (
-                      <span class="strikethrough-price">{formatToman(service.femalePrice)}</span>
+                      <span
+                        class="strikethrough-price"
+                        data-price-rado={formatToman(service.femalePrice)}
+                        data-price-deka={formatToman(service.femaleDekaPrice!)}
+                      >
+                        {formatToman(service.femalePrice)}
+                      </span>
                     )}
-                    <span class="bold-price">{formatToman(price)}</span>
+                    <span
+                      class="bold-price"
+                      data-price-rado={formatToman(price)}
+                      data-price-deka={dekaPriceText}
+                    >
+                      {formatToman(price)}
+                    </span>
                     <span class="price-currency">تومان</span>
                   </div>
                 </div>
@@ -914,6 +1020,15 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
               {services.map((service, index) => {
                 const isFullBody = service.slug === 'full-body';
                 const price = isFullBody ? service.femalePromoPrice! : service.femalePrice;
+                const dekaPrice = isFullBody
+                  ? service.femalePromoDekaPrice
+                  : service.femaleDekaPrice;
+                const dekaPriceText = dekaPrice
+                  ? `${formatToman(dekaPrice)} تومان`
+                  : 'استعلام قیمت';
+                const maleDekaText = service.maleDekaPrice
+                  ? `${formatToman(service.maleDekaPrice)} تومان`
+                  : 'استعلام قیمت';
 
                 return (
                   <tr class={isFullBody ? 'highlight-row' : ''} data-category={service.category}>
@@ -933,7 +1048,9 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
                     <td class="td-tech">
                       <span class="badge-wavelength-cell">
                         <Icon name="lightning" size={12} />
-                        <span>{service.wavelengthLabel}</span>
+                        <span data-tech-rado={service.wavelengthLabel} data-tech-deka="دستگاه دکا">
+                          {service.wavelengthLabel}
+                        </span>
                       </span>
                     </td>
                     <td class="td-duration">
@@ -948,18 +1065,38 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
                     <td class="td-price">
                       {isFullBody ? (
                         <div>
-                          <span class="strikethrough-mini">{formatToman(service.femalePrice)}</span>
-                          <span class="price-highlight">{formatToman(price)} تومان</span>
+                          <span
+                            class="strikethrough-mini"
+                            data-price-rado={formatToman(service.femalePrice)}
+                            data-price-deka={formatToman(service.femaleDekaPrice!)}
+                          >
+                            {formatToman(service.femalePrice)}
+                          </span>
+                          <span
+                            class="price-highlight"
+                            data-price-rado={`${formatToman(price)} تومان`}
+                            data-price-deka={dekaPriceText}
+                          >
+                            {formatToman(price)} تومان
+                          </span>
                         </div>
                       ) : (
-                        <span class="price-highlight">{formatToman(price)} تومان</span>
+                        <span
+                          class="price-highlight"
+                          data-price-rado={`${formatToman(price)} تومان`}
+                          data-price-deka={dekaPriceText}
+                        >
+                          {formatToman(price)} تومان
+                        </span>
                       )}
                     </td>
                     <td class="td-male">
-                      <span class="male-note-cell">
-                        {service.maleEstimatedPrice
-                          ? `از ${formatToman(service.maleEstimatedPrice)} تومان`
-                          : service.malePriceText}
+                      <span
+                        class="male-note-cell"
+                        data-price-rado={service.malePriceText}
+                        data-price-deka={maleDekaText}
+                      >
+                        {service.malePriceText}
                       </span>
                     </td>
                     <td class="td-action">
@@ -1429,5 +1566,43 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
       tableView?.classList.remove('hidden');
       cardGrid?.classList.add('hidden');
     });
+
+    // Device switch (migration 0016): every price on the women's panel carries
+    // both tariffs as data-price-rado / data-price-deka (and the tech badge as
+    // data-tech-*). Swapping the toggle rewrites the visible labels and carries
+    // the choice into every booking link on the page (?device=rado|deka), so the
+    // wizard opens on the same device. Prices without a Deka tariff show
+    // «استعلام قیمت» and their «تومان» unit is hidden.
+    const deviceBtns = document.querySelectorAll('.device-toggle-btn');
+    const priceEls = document.querySelectorAll('[data-price-rado]');
+    const techEls = document.querySelectorAll('[data-tech-rado]');
+    const bookingLinks = document.querySelectorAll('a[href^="/booking?"]');
+
+    function applyDevice(device) {
+      deviceBtns.forEach((b) => {
+        const isActive = b.getAttribute('data-device') === device;
+        b.classList.toggle('active', isActive);
+        b.setAttribute('aria-selected', isActive ? 'true' : 'false');
+      });
+      priceEls.forEach((el) => {
+        const val = el.getAttribute(device === 'deka' ? 'data-price-deka' : 'data-price-rado');
+        if (val !== null) el.textContent = val;
+        const unit = el.parentElement?.querySelector('.price-currency');
+        if (unit) unit.style.display = /^[۰-۹]/.test(val ?? '') ? '' : 'none';
+      });
+      techEls.forEach((el) => {
+        const val = el.getAttribute(device === 'deka' ? 'data-tech-deka' : 'data-tech-rado');
+        if (val !== null) el.textContent = val;
+      });
+      bookingLinks.forEach((a) => {
+        const url = new URL(a.getAttribute('href'), window.location.origin);
+        url.searchParams.set('device', device);
+        a.setAttribute('href', `${url.pathname}${url.search}`);
+      });
+    }
+
+    deviceBtns.forEach((b) =>
+      b.addEventListener('click', () => applyDevice(b.getAttribute('data-device') || 'rado')),
+    );
   </script>
 </PublicLayout>

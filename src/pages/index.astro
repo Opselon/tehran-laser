@@ -104,8 +104,8 @@ function toman(amountInThousands: number): string {
 // then name — so men's-only zones land after the 20 shared zones with no
 // client-side sorting.
 const priceRows: PriceRowView[] = services.map((s) => {
-  const female = s.prices.find((p) => p.pricingCategory === 'female');
-  const male = s.prices.find((p) => p.pricingCategory === 'male');
+  const female = s.prices.find((p) => p.pricingCategory === 'female' && p.device === 'rado');
+  const male = s.prices.find((p) => p.pricingCategory === 'male' && p.device === 'rado');
   return {
     name: s.name,
     slug: s.slug,

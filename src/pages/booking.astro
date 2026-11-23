@@ -27,6 +27,7 @@ try {
 }
 
 const serviceParam = Astro.url.searchParams.get('service') ?? undefined;
+const deviceParam = Astro.url.searchParams.get('device') ?? undefined;
 
 // BreadcrumbList schema for the booking funnel (§31, §135)
 const breadcrumbJsonLd = createBreadcrumbSchema([
@@ -74,7 +75,12 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
 
   <section class="section booking-page-section">
     <div class="container container-sm">
-      <BookingWizard client:load initialServices={services} preselectedSlug={serviceParam} />
+      <BookingWizard
+        client:load
+        initialServices={services}
+        preselectedSlug={serviceParam}
+        preselectedDevice={deviceParam}
+      />
     </div>
   </section>
 </PublicLayout>

@@ -14,6 +14,18 @@ export type BookingStatus = (typeof BOOKING_STATUSES)[number];
 export const PRICING_CATEGORIES = ['male', 'female'] as const;
 export type PricingCategory = (typeof PRICING_CATEGORIES)[number];
 
+/** Laser devices the clinic runs. Prices are per (service × category × device)
+ *  — migration 0016 added the device dimension (Rado Plus was the only device
+ *  until then; Deka is shot-based «شاتی»). */
+export const DEVICES = ['rado', 'deka'] as const;
+export type Device = (typeof DEVICES)[number];
+
+/** Persian device labels for UI — server messages stay language-neutral. */
+export const DEVICE_LABELS: Record<Device, string> = {
+  rado: 'رادو پلاس',
+  deka: 'دکا',
+};
+
 export interface Booking {
   id: string;
   reference: string;
@@ -21,6 +33,8 @@ export interface Booking {
   serviceId: string;
   staffId: string | null;
   pricingCategory: PricingCategory;
+  /** Laser device the reservation is for (migration 0016; 'rado' before then). */
+  device: Device;
   /** ISO-8601 UTC instant */
   startsAt: string;
   endsAt: string;

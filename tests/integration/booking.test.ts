@@ -31,16 +31,31 @@ describe('Tehran Laser — Full Integration Flow', () => {
       data: Array<{
         slug: string;
         name: string;
-        prices: Array<{ pricingCategory: string; amount: number }>;
+        prices: Array<{ pricingCategory: string; device: string; amount: number }>;
       }>;
     };
     expect(body.data.length).toBeGreaterThanOrEqual(18);
 
-    // Full body service check
+    // Full body service check — owner list 2026-11-23 (migration 0016):
+    // women Rado 2,980,000 / Deka 4,980,000; men Rado 3,490,000 / Deka 5,980,000.
     const fullBody = body.data.find((s) => s.slug === 'full-body');
     expect(fullBody).toBeDefined();
-    const femalePrice = fullBody?.prices.find((p) => p.pricingCategory === 'female');
-    expect(femalePrice?.amount).toBe(2290); // 2,290,000 Tomans base
+    const femaleRado = fullBody?.prices.find(
+      (p) => p.pricingCategory === 'female' && p.device === 'rado',
+    );
+    const femaleDeka = fullBody?.prices.find(
+      (p) => p.pricingCategory === 'female' && p.device === 'deka',
+    );
+    const maleRado = fullBody?.prices.find(
+      (p) => p.pricingCategory === 'male' && p.device === 'rado',
+    );
+    const maleDeka = fullBody?.prices.find(
+      (p) => p.pricingCategory === 'male' && p.device === 'deka',
+    );
+    expect(femaleRado?.amount).toBe(2980);
+    expect(femaleDeka?.amount).toBe(4980);
+    expect(maleRado?.amount).toBe(3490);
+    expect(maleDeka?.amount).toBe(5980);
   });
 
   it('3. GET /api/v1/availability returns available slots for a future day', async () => {
@@ -85,13 +100,71 @@ describe('Tehran Laser — Full Integration Flow', () => {
         reference: string;
         quotedAmount: number;
         discountAmount: number;
+        device: string;
       };
     };
     expect(body.data.bookingId).toBeDefined();
     expect(body.data.reference.startsWith('TL-')).toBe(true);
-    // Base 2290, 15% discount is applied: 2290 * 0.15 = 344 (or 350 promo -> net 1940)
-    expect(body.data.quotedAmount).toBe(2290);
-    expect(body.data.discountAmount).toBeGreaterThan(0);
+    // Base 2980 (owner list 2026-11-23), 15% discount: round(2980 * 0.15) = 447
+    expect(body.data.quotedAmount).toBe(2980);
+    expect(body.data.discountAmount).toBe(447);
+    expect(body.data.device).toBe('rado');
+  });
+
+  it('4b. POST /api/v1/bookings with device=deka quotes the Deka tariff', async () => {
+    const targetSlot = `${getFutureNonFriday(3)}T07:00:00.000Z`; // 10:30 Iran time
+    const res = await worker.fetch(
+      new Request('http://localhost/api/v1/bookings', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          serviceSlug: 'face',
+          pricingCategory: 'female',
+          device: 'deka',
+          startsAt: targetSlot,
+          customerName: 'نگار کریمی',
+          customerPhone: '09121112233',
+          idempotencyKey: 'idem-test-deka-1',
+        }),
+      }),
+    );
+
+    expect(res.status).toBe(201);
+    const body = (await res.json()) as {
+      data: {
+        bookingId: string;
+        quotedAmount: number;
+        discountAmount: number;
+        device: string;
+      };
+    };
+    // Deka face (women) 650, 15% discount: round(650 * 0.15) = 98
+    expect(body.data.quotedAmount).toBe(650);
+    expect(body.data.discountAmount).toBe(98);
+    expect(body.data.device).toBe('deka');
+  });
+
+  it('4c. POST /api/v1/bookings with device=deka rejects a zone with no Deka price', async () => {
+    // بازو (upper-arm) has a Rado price but the owner gave no Deka price for it.
+    const targetSlot = `${getFutureNonFriday(3)}T07:30:00.000Z`; // 11:00 Iran time
+    const res = await worker.fetch(
+      new Request('http://localhost/api/v1/bookings', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          serviceSlug: 'upper-arm',
+          pricingCategory: 'female',
+          device: 'deka',
+          startsAt: targetSlot,
+          customerName: 'نگار کریمی',
+          customerPhone: '09121112233',
+          idempotencyKey: 'idem-test-deka-2',
+        }),
+      }),
+    );
+
+    // VALIDATION_ERROR maps to 422 in this codebase (see src/lib/api/errors.ts).
+    expect(res.status).toBe(422);
   });
 
   it('5. DOUBLE-BOOKING CONCURRENCY RACE (§15, §102): Conflicting simultaneous writes resolve safely', async () => {
@@ -281,7 +354,7 @@ describe('Tehran Laser — Full Integration Flow', () => {
     };
 
     expect(bookBody.data.serviceName).toBe('صورت + زیر بغل + بیکینی');
-    expect(bookBody.data.quotedAmount).toBe(1300); // 320 + 390 + 590
+    expect(bookBody.data.quotedAmount).toBe(1340); // 390 + 400 + 550 (owner list 2026-11-23)
     const startMs = Date.parse(bookBody.data.startsAt);
     const endMs = Date.parse(bookBody.data.endsAt);
     expect(endMs - startMs).toBe(90 * 60_000); // 90 minutes allocated

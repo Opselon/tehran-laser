@@ -1,5 +1,5 @@
 /**
- * Male-price provenance register (Lane B, wave/b).
+ * Male-price provenance register (Lane B, wave/b; refreshed by migration 0016).
  *
  * Single source of truth for *which* men's amounts came from the owner's list
  * and which were derived for the homepage/dashboard. The database is the
@@ -7,6 +7,14 @@
  * derived numbers and so the migration and the UI agree on provenance.
  *
  * Amounts are in THOUSANDS of IRT (370 renders as ۳۷۰٬۰۰۰ تومان).
+ *
+ * 2026-11-23 (migration 0016): the owner sent a full new price list for both
+ * devices. Every men's Rado amount on that list replaced the older figure;
+ * amounts NOT on the new list keep their previous value (marked derived or
+ * with the older owner note). The Deka men's amounts from the same list live
+ * in MALE_DEKA_PRICE_REGISTER below. The two separate services «زیرگردن» and
+ * «پشت گردن» were merged into one combined service «زیر گردن و پشت سر»
+ * (under-chin-back-neck) per the owner's single row.
  */
 
 export type PriceProvenance = 'owner' | 'derived';
@@ -24,16 +32,15 @@ export interface MalePriceRegisterEntry {
 }
 
 /**
- * Zones that exist ONLY in the men's line. The owner listed these men's-only
- * items; «ساق دست» is not here because it maps to the existing `forearm` zone.
+ * Zones that exist ONLY in the men's line. «زیرگردن» and «پشت گردن» are gone —
+ * migration 0016 merged them into the combined «زیر گردن و پشت سر» service.
  */
 export const MENS_ONLY_SLUGS = [
   'forehead',
   'beard-line',
   'ear',
   'behind-ear',
-  'under-chin',
-  'back-neck',
+  'under-chin-back-neck',
   'shoulder',
 ] as const;
 
@@ -41,175 +48,286 @@ export type MensOnlySlug = (typeof MENS_ONLY_SLUGS)[number];
 
 export const MENS_ONLY_SLUG_SET: ReadonlySet<string> = new Set(MENS_ONLY_SLUGS);
 
-/** All men's amounts written by migrations/0009_male_prices.sql, with provenance. */
+/** All men's Rado amounts currently in the database, with provenance. */
 export const MALE_PRICE_REGISTER: MalePriceRegisterEntry[] = [
-  // ── OWNER: taken verbatim from the owner's combined list ──
+  // ── OWNER (list of 2026-11-23, device Rado Plus) ──
+  {
+    slug: 'ear',
+    amount: 250,
+    provenance: 'owner',
+    label: 'گوش',
+    note: 'لیست مالک ۱۴۰۵/۰۹/۰۲: گوش ۲۵۰',
+  },
+  {
+    slug: 'beard-line',
+    amount: 350,
+    provenance: 'owner',
+    label: 'خط ریش',
+    note: 'لیست مالک ۱۴۰۵/۰۹/۰۲: خط ریش ۳۵۰',
+  },
+  {
+    slug: 'under-chin-back-neck',
+    amount: 450,
+    provenance: 'owner',
+    label: 'زیر گردن و پشت سر',
+    note: 'لیست مالک ۱۴۰۵/۰۹/۰۲: زیر گردن و پشت سر ۴۵۰ — یک ردیف ترکیبی جایگزین زیرگردن و پشت گردن',
+  },
   {
     slug: 'underarm',
-    amount: 370,
+    amount: 500,
     provenance: 'owner',
     label: 'زیر بغل',
-    note: 'لیست مالک: زیر بغل ۳۷۰',
-  },
-  {
-    slug: 'full-arms',
-    amount: 770,
-    provenance: 'owner',
-    label: 'دست کامل',
-    note: 'لیست مالک: دست کامل ۷۷۰',
-  },
-  {
-    slug: 'upper-arm',
-    amount: 360,
-    provenance: 'owner',
-    label: 'بازو',
-    note: 'لیست مالک: بازو ۳۶۰',
-  },
-  {
-    slug: 'forearm',
-    amount: 360,
-    provenance: 'owner',
-    label: 'ساق دست',
-    note: 'لیست مالک: ساق دست ۳۶۰ (نقشه‌برداری به ناحیه موجود «ساق»)',
+    note: 'لیست مالک ۱۴۰۵/۰۹/۰۲: زیر بغل ۵۰۰',
   },
   {
     slug: 'chest',
-    amount: 360,
+    amount: 600,
     provenance: 'owner',
-    label: 'سینه کامل',
-    note: 'لیست مالک: سینه کامل ۳۶۰',
+    label: 'سینه',
+    note: 'لیست مالک ۱۴۰۵/۰۹/۰۲: سینه ۶۰۰',
   },
-  { slug: 'abdomen', amount: 390, provenance: 'owner', label: 'شکم', note: 'لیست مالک: شکم ۳۹۰' },
-  { slug: 'back', amount: 460, provenance: 'owner', label: 'کمر', note: 'لیست مالک: کمر ۴۶۰' },
+  {
+    slug: 'abdomen',
+    amount: 550,
+    provenance: 'owner',
+    label: 'شکم',
+    note: 'لیست مالک ۱۴۰۵/۰۹/۰۲: شکم ۵۵۰',
+  },
+  {
+    slug: 'back',
+    amount: 650,
+    provenance: 'owner',
+    label: 'کمر',
+    note: 'لیست مالک ۱۴۰۵/۰۹/۰۲: کمر ۶۵۰',
+  },
+  {
+    slug: 'full-arms',
+    amount: 750,
+    provenance: 'owner',
+    label: 'دست کامل',
+    note: 'لیست مالک ۱۴۰۵/۰۹/۰۲: دست کامل ۷۵۰',
+  },
+  {
+    slug: 'forearm',
+    amount: 500,
+    provenance: 'owner',
+    label: 'ساق دست',
+    note: 'لیست مالک ۱۴۰۵/۰۹/۰۲: ساق دست ۵۰۰',
+  },
   {
     slug: 'full-legs',
-    amount: 740,
+    amount: 900,
     provenance: 'owner',
-    label: 'کل پا',
-    note: 'لیست مالک: کل پا ۷۴۰',
+    label: 'پا کامل',
+    note: 'لیست مالک ۱۴۰۵/۰۹/۰۲: پا کامل ۹۰۰',
   },
-  { slug: 'thigh', amount: 390, provenance: 'owner', label: 'ران', note: 'لیست مالک: ران ۳۹۰' },
   {
     slug: 'lower-leg',
-    amount: 390,
+    amount: 650,
     provenance: 'owner',
     label: 'ساق پا',
-    note: 'لیست مالک: ساق پا ۳۹۰',
+    note: 'لیست مالک ۱۴۰۵/۰۹/۰۲: ساق پا ۶۵۰',
+  },
+  {
+    slug: 'full-body',
+    amount: 3490,
+    provenance: 'owner',
+    label: 'کل بدن',
+    note: 'لیست مالک ۱۴۰۵/۰۹/۰۲: فول‌بادی آقایان ۳٬۴۹۰',
+  },
+
+  // ── OWNER (older lists, unchanged by the 2026-11-23 list) ──
+  {
+    slug: 'upper-arm',
+    amount: 570,
+    provenance: 'owner',
+    label: 'بازو',
+    note: 'لیست مالک ۱۴۰۴: بازو ۵۷۰ — در لیست جدید نیامده',
+  },
+  {
+    slug: 'shoulder',
+    amount: 590,
+    provenance: 'owner',
+    label: 'سرشانه',
+    note: 'لیست مالک ۱۴۰۴: سرشانه ۵۹۰ — در لیست جدید نیامده',
+  },
+  {
+    slug: 'thigh',
+    amount: 390,
+    provenance: 'owner',
+    label: 'ران',
+    note: 'لیست مالک: ران ۳۹۰ — در لیست جدید نیامده',
   },
   {
     slug: 'forehead',
     amount: 190,
     provenance: 'owner',
     label: 'پیشانی',
-    note: 'لیست مالک: پیشانی ۱۹۰',
+    note: 'لیست مالک: پیشانی ۱۹۰ — در لیست جدید نیامده',
   },
-  {
-    slug: 'beard-line',
-    amount: 220,
-    provenance: 'owner',
-    label: 'خط ریش',
-    note: 'لیست مالک: خط ریش ۲۲۰',
-  },
-  { slug: 'ear', amount: 100, provenance: 'owner', label: 'گوش', note: 'لیست مالک: گوش ۱۰۰' },
   {
     slug: 'behind-ear',
     amount: 100,
     provenance: 'owner',
     label: 'پشت گوش',
-    note: 'لیست مالک: پشت گوش ۱۰۰',
-  },
-  {
-    slug: 'under-chin',
-    amount: 220,
-    provenance: 'owner',
-    label: 'زیرگردن',
-    note: 'لیست مالک: زیرگردن ۲۲۰',
-  },
-  {
-    slug: 'back-neck',
-    amount: 220,
-    provenance: 'owner',
-    label: 'پشت گردن',
-    note: 'لیست مالک: پشت گردن ۲۲۰',
-  },
-  {
-    slug: 'shoulder',
-    amount: 360,
-    provenance: 'owner',
-    label: 'سرشانه',
-    note: 'لیست مالک: سرشانه ۳۶۰',
+    note: 'لیست مالک: پشت گوش ۱۰۰ — در لیست جدید نیامده',
   },
 
-  // ── DERIVED: no owner figure — Iranian-market factor 1.0–1.5× the women's amount ──
+  // ── DERIVED: the owner gave no new figure for these — previous value kept ──
   {
     slug: 'face',
     amount: 420,
     provenance: 'derived',
     label: 'صورت',
-    note: 'استخراجی: ۱.۳۱× تعرفه بانوان (۳۲۰)',
+    note: 'استخراجی: مقدار قبلی حفظ شده — مالک برای ۱۴۰۵ مبلغ جدید نداد (مبنای قدیم: ۱.۳۱× ۳۲۰)',
   },
   {
     slug: 'upper-lip',
     amount: 130,
     provenance: 'derived',
     label: 'پشت لب',
-    note: 'استخراجی: ۱.۴۴× تعرفه بانوان (۹۰)',
+    note: 'استخراجی: مقدار قبلی حفظ شده — مالک برای ۱۴۰۵ مبلغ جدید نداد (مبنای قدیم: ۱.۴۴× ۹۰)',
   },
   {
     slug: 'chin',
     amount: 190,
     provenance: 'derived',
     label: 'چانه',
-    note: 'استخراجی: ۱.۳۱× تعرفه بانوان (۱۴۵)',
+    note: 'استخراجی: مقدار قبلی حفظ شده — مالک برای ۱۴۰۵ مبلغ جدید نداد (مبنای قدیم: ۱.۳۱× ۱۴۵)',
   },
   {
     slug: 'neck',
     amount: 250,
     provenance: 'derived',
     label: 'گردن',
-    note: 'استخراجی: ۱.۳۲× تعرفه بانوان (۱۹۰)',
+    note: 'استخراجی: مقدار قبلی حفظ شده — مالک برای ۱۴۰۵ مبلغ جدید نداد (مبنای قدیم: ۱.۳۲× ۱۹۰)',
   },
   {
     slug: 'navel-line',
     amount: 230,
     provenance: 'derived',
     label: 'خط ناف',
-    note: 'استخراجی: ۱.۲۱× تعرفه بانوان (۱۹۰)',
+    note: 'استخراجی: مقدار قبلی حفظ شده — مالک برای ۱۴۰۵ مبلغ جدید نداد (مبنای قدیم: ۱.۲۱× ۱۹۰)',
   },
   {
     slug: 'bikini',
     amount: 650,
     provenance: 'derived',
     label: 'بیکینی',
-    note: 'استخراجی: ۱.۱۰× تعرفه بانوان (۵۹۰) — در داشبورد تأیید یا صفر شود',
+    note: 'استخراجی: مقدار قبلی حفظ شده — مالک برای ۱۴۰۵ مبلغ جدید نداد (مبنای قدیم: ۱.۱۰× ۵۹۰)',
   },
   {
     slug: 'buttocks',
     amount: 460,
     provenance: 'derived',
     label: 'باسن',
-    note: 'استخراجی: ۱.۲۱× تعرفه بانوان (۳۸۰)',
+    note: 'استخراجی: مقدار قبلی حفظ شده — مالک برای ۱۴۰۵ مبلغ جدید نداد (مبنای قدیم: ۱.۲۱× ۳۸۰)',
   },
   {
     slug: 'gluteal-line',
     amount: 290,
     provenance: 'derived',
     label: 'خط باسن',
-    note: 'استخراجی: ۱.۲۱× تعرفه بانوان (۲۴۰) — در داشبورد تأیید یا صفر شود',
+    note: 'استخراجی: مقدار قبلی حفظ شده — مالک برای ۱۴۰۵ مبلغ جدید نداد (مبنای قدیم: ۱.۲۱× ۲۴۰)',
   },
   {
     slug: 'inner-thigh',
     amount: 470,
     provenance: 'derived',
     label: 'کشاله ران',
-    note: 'استخراجی: ۱.۲۱× تعرفه بانوان (۳۹۰)',
+    note: 'استخراجی: مقدار قبلی حفظ شده — مالک برای ۱۴۰۵ مبلغ جدید نداد (مبنای قدیم: ۱.۲۱× ۳۹۰)',
+  },
+];
+
+/**
+ * Men's Deka amounts (owner list of 2026-11-23, migration 0016). Zones the
+ * owner did not price for Deka have NO row here — the site shows
+ * «استعلام قیمت» and the booking form refuses a Deka booking for them.
+ */
+export const MALE_DEKA_PRICE_REGISTER: MalePriceRegisterEntry[] = [
+  {
+    slug: 'ear',
+    amount: 350,
+    provenance: 'owner',
+    label: 'گوش',
+    note: 'لیست مالک ۱۴۰۵/۰۹/۰۲ (دکا): گوش ۳۵۰',
+  },
+  {
+    slug: 'beard-line',
+    amount: 500,
+    provenance: 'owner',
+    label: 'خط ریش',
+    note: 'لیست مالک ۱۴۰۵/۰۹/۰۲ (دکا): خط ریش ۵۰۰',
+  },
+  {
+    slug: 'under-chin-back-neck',
+    amount: 600,
+    provenance: 'owner',
+    label: 'زیر گردن و پشت سر',
+    note: 'لیست مالک ۱۴۰۵/۰۹/۰۲ (دکا): زیر گردن و پشت سر ۶۰۰',
+  },
+  {
+    slug: 'underarm',
+    amount: 700,
+    provenance: 'owner',
+    label: 'زیر بغل',
+    note: 'لیست مالک ۱۴۰۵/۰۹/۰۲ (دکا): زیر بغل ۷۰۰',
+  },
+  {
+    slug: 'chest',
+    amount: 900,
+    provenance: 'owner',
+    label: 'سینه',
+    note: 'لیست مالک ۱۴۰۵/۰۹/۰۲ (دکا): سینه ۹۰۰',
+  },
+  {
+    slug: 'abdomen',
+    amount: 750,
+    provenance: 'owner',
+    label: 'شکم',
+    note: 'لیست مالک ۱۴۰۵/۰۹/۰۲ (دکا): شکم ۷۵۰',
+  },
+  {
+    slug: 'back',
+    amount: 900,
+    provenance: 'owner',
+    label: 'کمر',
+    note: 'لیست مالک ۱۴۰۵/۰۹/۰۲ (دکا): کمر ۹۰۰',
+  },
+  {
+    slug: 'full-arms',
+    amount: 1150,
+    provenance: 'owner',
+    label: 'دست کامل',
+    note: 'لیست مالک ۱۴۰۵/۰۹/۰۲ (دکا): دست کامل ۱٬۱۵۰',
+  },
+  {
+    slug: 'forearm',
+    amount: 750,
+    provenance: 'owner',
+    label: 'ساق دست',
+    note: 'لیست مالک ۱۴۰۵/۰۹/۰۲ (دکا): ساق دست ۷۵۰',
+  },
+  {
+    slug: 'full-legs',
+    amount: 1400,
+    provenance: 'owner',
+    label: 'پا کامل',
+    note: 'لیست مالک ۱۴۰۵/۰۹/۰۲ (دکا): پا کامل ۱٬۴۰۰',
+  },
+  {
+    slug: 'lower-leg',
+    amount: 900,
+    provenance: 'owner',
+    label: 'ساق پا',
+    note: 'لیست مالک ۱۴۰۵/۰۹/۰۲ (دکا): ساق پا ۹۰۰',
   },
   {
     slug: 'full-body',
-    amount: 2400,
-    provenance: 'derived',
+    amount: 5980,
+    provenance: 'owner',
     label: 'کل بدن',
-    note: 'استخراجی: ۱.۰۵× تعرفه بانوان (۲۲۹۰)',
+    note: 'لیست مالک ۱۴۰۵/۰۹/۰۲ (دکا): فول‌بادی آقایان ۵٬۹۸۰',
   },
 ];
 

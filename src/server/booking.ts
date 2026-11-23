@@ -12,7 +12,7 @@
 
 import { all, one, run } from '../db/query';
 import { canTransitionBookingState } from '../domain/booking/booking.state';
-import type { BookingStatus, PricingCategory } from '../domain/booking/booking.types';
+import type { BookingStatus, Device, PricingCategory } from '../domain/booking/booking.types';
 import { calculateQuote, hasPriceFor } from '../domain/pricing/pricing';
 import { calculateAvailability } from '../domain/schedule/availability';
 import { buildSlotInstants, slotStaffKey } from '../domain/booking/booking.slots';
@@ -49,6 +49,8 @@ export interface CreateBookingParams {
   serviceSlug?: string | undefined;
   serviceSlugs?: string[] | undefined;
   pricingCategory: PricingCategory;
+  /** Laser device for the reservation; absent (old clients) means Rado Plus. */
+  device?: Device | undefined;
   startsAtIso: string;
   customerName: string;
   customerPhone: string;
@@ -65,6 +67,7 @@ export interface BookingCreatedResult {
   endsAt: string;
   serviceName: string;
   pricingCategory: PricingCategory;
+  device: Device;
   quotedAmount: number;
   discountAmount: number;
   currency: string;
@@ -76,6 +79,8 @@ export async function createBooking(
   db: D1Database,
   params: CreateBookingParams,
 ): Promise<BookingCreatedResult> {
+  const device: Device = params.device ?? 'rado';
+
   // Idempotency: if an identical client key was already submitted, return the existing booking.
   if (params.idempotencyKey) {
     const existing = await one<{
@@ -86,6 +91,7 @@ export async function createBooking(
       endsAt: string;
       serviceName: string;
       pricingCategory: PricingCategory;
+      device: Device;
       quotedAmount: number;
       discountAmount: number;
       currency: string;
@@ -94,7 +100,7 @@ export async function createBooking(
     }>(
       db,
       `SELECT b.id, b.reference, b.status, b.starts_at AS startsAt, b.ends_at AS endsAt,
-              s.name AS serviceName, b.pricing_category AS pricingCategory,
+              s.name AS serviceName, b.pricing_category AS pricingCategory, b.device,
               b.quoted_amount AS quotedAmount, b.discount_amount AS discountAmount,
               b.currency, c.name AS customerName, c.phone AS customerPhone
          FROM bookings b
@@ -112,6 +118,7 @@ export async function createBooking(
         endsAt: existing.endsAt,
         serviceName: existing.serviceName,
         pricingCategory: existing.pricingCategory,
+        device: existing.device ?? 'rado',
         quotedAmount: existing.quotedAmount,
         discountAmount: existing.discountAmount,
         currency: existing.currency,
@@ -167,10 +174,10 @@ export async function createBooking(
   for (let i = 0; i < services.length; i++) {
     const s = services[i]!;
     const priceRows = pricesPerService[i] ?? [];
-    if (!hasPriceFor(priceRows, params.pricingCategory)) {
+    if (!hasPriceFor(priceRows, params.pricingCategory, device)) {
       throw new ApiError(
         'VALIDATION_ERROR',
-        `قیمت خدمت «${s.name}» برای دسته انتخابی تعریف نشده است. لطفاً با کلینیک تماس بگیرید.`,
+        `قیمت خدمت «${s.name}» برای دسته و دستگاه انتخابی تعریف نشده است. لطفاً با کلینیک تماس بگیرید.`,
       );
     }
   }
@@ -181,6 +188,7 @@ export async function createBooking(
       pricesPerService[i] ?? [],
       params.pricingCategory,
       settings.discountPercent,
+      device,
     ),
   );
 
@@ -288,10 +296,10 @@ export async function createBooking(
     db
       .prepare(
         `INSERT INTO bookings (
-           id, reference, customer_id, service_id, staff_id, pricing_category,
+           id, reference, customer_id, service_id, staff_id, pricing_category, device,
            starts_at, ends_at, status, quoted_amount, discount_amount, currency,
            customer_note, idempotency_key, created_at, updated_at
-         ) VALUES (?, ?, ?, ?, NULL, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?)`,
+         ) VALUES (?, ?, ?, ?, NULL, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?)`,
       )
       .bind(
         bookingId,
@@ -299,6 +307,7 @@ export async function createBooking(
         customer.id,
         services[0]!.id,
         params.pricingCategory,
+        device,
         params.startsAtIso,
         endsAtIso,
         totalBaseAmount,
@@ -348,6 +357,7 @@ export async function createBooking(
     endsAt: endsAtIso,
     serviceName: services.map((s) => s.name).join(' + '),
     pricingCategory: params.pricingCategory,
+    device,
     quotedAmount: totalBaseAmount,
     discountAmount: totalDiscountAmount,
     currency,

@@ -4,7 +4,7 @@
  *  them without a circular runtime dependency.
  */
 import type { PublicServiceDto, AvailabilitySlotDto } from '../../domain/api/dto.types';
-import type { PricingCategory } from '../../domain/booking/booking.types';
+import type { Device, PricingCategory } from '../../domain/booking/booking.types';
 
 export const TOTAL_STEPS = 4;
 
@@ -50,6 +50,8 @@ export interface BookingSuccessResult {
   startsAt: string;
   serviceName: string;
   pricingCategory: PricingCategory;
+  /** Laser device the reservation was made for (absent on pre-device responses). */
+  device?: Device;
   quotedAmount: number;
   discountAmount: number;
   currency: string;

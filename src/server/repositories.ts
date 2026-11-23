@@ -32,7 +32,7 @@ import type {
   PublicSettingsDto,
   SeoMetadataDto,
 } from '../domain/api/dto.types';
-import type { PricingCategory, BookingStatus } from '../domain/booking/booking.types';
+import type { Device, PricingCategory, BookingStatus } from '../domain/booking/booking.types';
 import type { PriceRow } from '../domain/pricing/pricing';
 import type { HoursRow, ScheduleExceptionKind } from '../domain/schedule/availability';
 
@@ -74,6 +74,7 @@ export async function getSettingValue(db: Queryable, key: string): Promise<strin
 interface RawPriceRow {
   serviceId: string;
   pricingCategory: PricingCategory;
+  device: Device;
   amount: number;
   currency: string;
 }
@@ -99,7 +100,8 @@ export async function listPublicServices(db: Queryable): Promise<PublicServiceDt
     ),
     all<RawPriceRow>(
       db,
-      `SELECT service_id AS serviceId, pricing_category AS pricingCategory, amount, currency
+      `SELECT service_id AS serviceId, pricing_category AS pricingCategory,
+              device, amount, currency
          FROM service_prices`,
     ),
   ]);
@@ -121,6 +123,7 @@ export async function listPublicServices(db: Queryable): Promise<PublicServiceDt
     displayOrder: s.displayOrder,
     prices: (priceMap.get(s.id) ?? []).map((p) => ({
       pricingCategory: p.pricingCategory,
+      device: p.device,
       amount: p.amount,
       currency: p.currency,
     })),
@@ -151,7 +154,8 @@ export async function findPublicServiceBySlug(
 
   const prices = await all<RawPriceRow>(
     db,
-    `SELECT service_id AS serviceId, pricing_category AS pricingCategory, amount, currency
+    `SELECT service_id AS serviceId, pricing_category AS pricingCategory,
+            device, amount, currency
        FROM service_prices
       WHERE service_id = ?`,
     service.id,
@@ -167,6 +171,7 @@ export async function findPublicServiceBySlug(
     displayOrder: 0,
     prices: prices.map((p) => ({
       pricingCategory: p.pricingCategory,
+      device: p.device,
       amount: p.amount,
       currency: p.currency,
     })),
@@ -179,13 +184,15 @@ export async function loadPriceRowsForService(
 ): Promise<PriceRow[]> {
   const rows = await all<RawPriceRow>(
     db,
-    `SELECT service_id AS serviceId, pricing_category AS pricingCategory, amount, currency
+    `SELECT service_id AS serviceId, pricing_category AS pricingCategory,
+            device, amount, currency
        FROM service_prices
       WHERE service_id = ?`,
     serviceId,
   );
   return rows.map((r) => ({
     pricingCategory: r.pricingCategory,
+    device: r.device,
     amount: r.amount,
     currency: r.currency,
   }));
@@ -215,20 +222,28 @@ export async function listAdminServices(db: Queryable): Promise<AdminServiceDto[
     ),
     all<RawPriceRow & { id: string }>(
       db,
-      `SELECT id, service_id AS serviceId, pricing_category AS pricingCategory, amount, currency
+      `SELECT id, service_id AS serviceId, pricing_category AS pricingCategory,
+              device, amount, currency
          FROM service_prices`,
     ),
   ]);
 
   const priceMap = new Map<
     string,
-    Array<{ id: string; pricingCategory: PricingCategory; amount: number; currency: string }>
+    Array<{
+      id: string;
+      pricingCategory: PricingCategory;
+      device: Device;
+      amount: number;
+      currency: string;
+    }>
   >();
   for (const p of prices) {
     const list = priceMap.get(p.serviceId) ?? [];
     list.push({
       id: p.id,
       pricingCategory: p.pricingCategory,
+      device: p.device,
       amount: p.amount,
       currency: p.currency,
     });
@@ -664,6 +679,8 @@ interface RawAdminBookingDbRow {
   staffId: string | null;
   staffName: string | null;
   pricingCategory: PricingCategory;
+  /** Absent on SELECTs that predate migration 0016 — mapper defaults to 'rado'. */
+  device?: Device;
   startsAt: string;
   endsAt: string;
   status: BookingStatus;
@@ -685,6 +702,7 @@ function mapRawToAdminBookingDto(row: RawAdminBookingDbRow): AdminBookingDto {
     startsAt: row.startsAt,
     endsAt: row.endsAt,
     pricingCategory: row.pricingCategory,
+    device: row.device ?? 'rado',
     quotedAmount: row.quotedAmount,
     discountAmount: row.discountAmount,
     currency: row.currency,
@@ -761,6 +779,7 @@ export async function listAdminBookings(
                     s.slug AS serviceSlug, s.duration_minutes AS serviceDurationMinutes,
                     b.staff_id AS staffId, st.name AS staffName,
                     b.pricing_category AS pricingCategory,
+                    b.device,
                     b.starts_at AS startsAt, b.ends_at AS endsAt,
                     b.status, b.quoted_amount AS quotedAmount,
                     b.discount_amount AS discountAmount, b.currency,
@@ -823,6 +842,7 @@ export async function getAdminDashboard(
               s.slug AS serviceSlug, s.duration_minutes AS serviceDurationMinutes,
               b.staff_id AS staffId, st.name AS staffName,
               b.pricing_category AS pricingCategory,
+              b.device,
               b.starts_at AS startsAt, b.ends_at AS endsAt,
               b.status, b.quoted_amount AS quotedAmount,
               b.discount_amount AS discountAmount, b.currency,
@@ -963,6 +983,7 @@ export async function findAdminBooking(db: Queryable, id: string): Promise<Admin
             s.slug AS serviceSlug, s.duration_minutes AS serviceDurationMinutes,
             b.staff_id AS staffId, st.name AS staffName,
             b.pricing_category AS pricingCategory,
+            b.device,
             b.starts_at AS startsAt, b.ends_at AS endsAt,
             b.status, b.quoted_amount AS quotedAmount,
             b.discount_amount AS discountAmount, b.currency,
@@ -1059,6 +1080,7 @@ export async function findAdminCustomer(
             s.slug AS serviceSlug, s.duration_minutes AS serviceDurationMinutes,
             b.staff_id AS staffId, st.name AS staffName,
             b.pricing_category AS pricingCategory,
+            b.device,
             b.starts_at AS startsAt, b.ends_at AS endsAt,
             b.status, b.quoted_amount AS quotedAmount,
             b.discount_amount AS discountAmount, b.currency,

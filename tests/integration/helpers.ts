@@ -11,6 +11,7 @@ import m10 from '../../migrations/0010_device_content_refresh.sql?raw';
 import m11 from '../../migrations/0011_feature_modules.sql?raw';
 import m12 from '../../migrations/0012_operators.sql?raw';
 import m13 from '../../migrations/0013_content_cleanup.sql?raw';
+import m16 from '../../migrations/0016_device_deka_prices.sql?raw';
 import { hashPassword } from '../../src/lib/security/password';
 
 let migrated = false;
@@ -103,6 +104,9 @@ export async function ensureMigrated(): Promise<void> {
   await runMigration(m11);
   await runMigration(m12);
   await runMigration(m13);
+  // 0014/0015 are data-only refreshes the harness never imported; 0016 is
+  // applied because it carries the device schema the booking flow depends on.
+  await runMigration(m16);
 
   // Seed a test super_admin for admin integration tests
   const adminId = 'usr_test_superadmin';

@@ -127,10 +127,11 @@ const inactiveCount = services.length - activeCount;
 const maxDisplayOrder = services.reduce((max, s) => Math.max(max, s.displayOrder || 0), 0);
 const nextDisplayOrder = maxDisplayOrder + 1;
 
-/** How many services already carry a real (non-zero) tariff for each gender list. */
+/** How many services already carry a real (non-zero) Rado tariff for each gender list. */
 const pricedCount = (category: 'female' | 'male') =>
-  services.filter((s) => s.prices.some((p) => p.pricingCategory === category && p.amount > 0))
-    .length;
+  services.filter((s) =>
+    s.prices.some((p) => p.pricingCategory === category && p.device === 'rado' && p.amount > 0),
+  ).length;
 const femalePricedCount = pricedCount('female');
 const malePricedCount = pricedCount('male');
 
@@ -178,7 +179,7 @@ for (const s of services) {
         </div>
         <p class="section-block-sub">
           مدیریت نواحی تحت پوشش لیزر، ویرایش زمان جلسات و به‌روزرسانی تعرفه مصوب بانوان و آقایان
-          (کاملاً API First)
+          برای هر دو دستگاه (رادو پلاس و دکا) — کاملاً API First
         </p>
       </div>
 
@@ -321,18 +322,32 @@ for (const s of services) {
               <th>نام خدمت و دسته‌بندی</th>
               <th>شناسه یکتا (Slug)</th>
               <th>مدت جلسه</th>
-              <th class="col-gender-female">تعرفه مصوب بانوان</th>
-              <th class="col-gender-male">تعرفه مصوب آقایان</th>
+              <th class="col-gender-female">تعرفه مصوب بانوان (رادو پلاس)</th>
+              <th class="col-gender-female">تعرفه دکا بانوان</th>
+              <th class="col-gender-male">تعرفه مصوب آقایان (رادو پلاس)</th>
+              <th class="col-gender-male">تعرفه دکا آقایان</th>
               <th style="text-align: center;">وضعیت سایت</th>
               <th style="text-align: center;">عملیات</th>
             </tr>
           </thead>
           <tbody id="servicesTableBody">
             {services.map((s) => {
-              const femalePrice = s.prices.find((p) => p.pricingCategory === 'female');
-              const malePrice = s.prices.find((p) => p.pricingCategory === 'male');
+              const femalePrice = s.prices.find(
+                (p) => p.pricingCategory === 'female' && p.device === 'rado',
+              );
+              const malePrice = s.prices.find(
+                (p) => p.pricingCategory === 'male' && p.device === 'rado',
+              );
+              const femaleDekaPrice = s.prices.find(
+                (p) => p.pricingCategory === 'female' && p.device === 'deka',
+              );
+              const maleDekaPrice = s.prices.find(
+                (p) => p.pricingCategory === 'male' && p.device === 'deka',
+              );
               const femalePriceAmount = femalePrice ? femalePrice.amount : 0;
               const malePriceAmount = malePrice ? malePrice.amount : 0;
+              const femaleDekaPriceAmount = femaleDekaPrice ? femaleDekaPrice.amount : 0;
+              const maleDekaPriceAmount = maleDekaPrice ? maleDekaPrice.amount : 0;
               const isPromo = s.slug === 'full-body';
               const cat = getServiceCategory(s.slug, s.name);
 
@@ -380,8 +395,8 @@ for (const s of services) {
                       {femalePrice ? (
                         isPromo ? (
                           <div class="promo-price-block">
-                            <span class="promo-old-price">۲٬۲۹۰٬۰۰۰</span>
-                            <span class="promo-new-price">۱٬۹۴۰٬۰۰۰ تومان</span>
+                            <span class="promo-old-price">۲٬۹۸۰٬۰۰۰</span>
+                            <span class="promo-new-price">۲٬۵۳۰٬۰۰۰ تومان</span>
                             <span class="promo-tag">ویژه سایت</span>
                           </div>
                         ) : (
@@ -406,6 +421,37 @@ for (const s of services) {
                       </button>
                     </div>
                   </td>
+                  <td class="col-gender-female">
+                    <div class="tariff-cell-wrap">
+                      {femaleDekaPrice && femaleDekaPrice.amount > 0 ? (
+                        isPromo ? (
+                          <div class="promo-price-block">
+                            <span class="promo-old-price">۴٬۹۸۰٬۰۰۰</span>
+                            <span class="promo-new-price">۴٬۲۳۰٬۰۰۰ تومان</span>
+                            <span class="promo-tag">ویژه سایت</span>
+                          </div>
+                        ) : (
+                          <span class="price-badge-female">
+                            {(femaleDekaPrice.amount * 1000).toLocaleString('fa-IR')} تومان
+                          </span>
+                        )
+                      ) : (
+                        <span class="price-badge-unset">
+                          <Icon name="info" size={11} />
+                          <span>استعلام تلفنی</span>
+                        </span>
+                      )}
+                      <button
+                        type="button"
+                        class="btn-quick-edit js-quick-edit-price"
+                        title="ویرایش سریع تعرفه دکا بانوان"
+                        data-id={s.id}
+                        data-target="female-deka"
+                      >
+                        <Icon name="edit" size={11} />
+                      </button>
+                    </div>
+                  </td>
                   <td class="col-gender-male">
                     <div class="tariff-cell-wrap">
                       {malePrice && malePrice.amount > 0 ? (
@@ -424,6 +470,29 @@ for (const s of services) {
                         title="ویرایش سریع تعرفه آقایان"
                         data-id={s.id}
                         data-target="male"
+                      >
+                        <Icon name="edit" size={11} />
+                      </button>
+                    </div>
+                  </td>
+                  <td class="col-gender-male">
+                    <div class="tariff-cell-wrap">
+                      {maleDekaPrice && maleDekaPrice.amount > 0 ? (
+                        <span class="price-badge-male">
+                          {(maleDekaPrice.amount * 1000).toLocaleString('fa-IR')} تومان
+                        </span>
+                      ) : (
+                        <span class="price-badge-unset">
+                          <Icon name="info" size={11} />
+                          <span>استعلام تلفنی</span>
+                        </span>
+                      )}
+                      <button
+                        type="button"
+                        class="btn-quick-edit js-quick-edit-price"
+                        title="ویرایش سریع تعرفه دکا آقایان"
+                        data-id={s.id}
+                        data-target="male-deka"
                       >
                         <Icon name="edit" size={11} />
                       </button>
@@ -457,6 +526,8 @@ for (const s of services) {
                       data-shortdesc={s.shortDescription || ''}
                       data-price-female={femalePriceAmount}
                       data-price-male={malePriceAmount}
+                      data-price-female-deka={femaleDekaPriceAmount}
+                      data-price-male-deka={maleDekaPriceAmount}
                     >
                       <Icon name="edit" size={13} />
                       <span>ویرایش خدمت</span>
@@ -479,10 +550,20 @@ for (const s of services) {
     <!-- 3D Mobile Cards View (< 768px, specifically 320px & 390px) -->
     <div class="services-cards-mobile" id="servicesMobileList">
       {services.map((s) => {
-        const femalePrice = s.prices.find((p) => p.pricingCategory === 'female');
-        const malePrice = s.prices.find((p) => p.pricingCategory === 'male');
+        const femalePrice = s.prices.find(
+          (p) => p.pricingCategory === 'female' && p.device === 'rado',
+        );
+        const malePrice = s.prices.find((p) => p.pricingCategory === 'male' && p.device === 'rado');
+        const femaleDekaPrice = s.prices.find(
+          (p) => p.pricingCategory === 'female' && p.device === 'deka',
+        );
+        const maleDekaPrice = s.prices.find(
+          (p) => p.pricingCategory === 'male' && p.device === 'deka',
+        );
         const femalePriceAmount = femalePrice ? femalePrice.amount : 0;
         const malePriceAmount = malePrice ? malePrice.amount : 0;
+        const femaleDekaPriceAmount = femaleDekaPrice ? femaleDekaPrice.amount : 0;
+        const maleDekaPriceAmount = maleDekaPrice ? maleDekaPrice.amount : 0;
         const isPromo = s.slug === 'full-body';
         const cat = getServiceCategory(s.slug, s.name);
 
@@ -538,12 +619,12 @@ for (const s of services) {
 
             <div class="card-mobile-tariffs">
               <div class="tariff-box-mobile col-gender-female">
-                <span class="tariff-box-label">تعرفه مصوب بانوان:</span>
+                <span class="tariff-box-label">تعرفه مصوب بانوان (رادو پلاس):</span>
                 <div class="tariff-box-val">
                   {femalePrice ? (
                     isPromo ? (
                       <span class="promo-new-price" style="font-size: 0.86rem;">
-                        ۱٬۹۴۰٬۰۰۰ تومان (تخفیف سایت)
+                        ۲٬۵۳۰٬۰۰۰ تومان (تخفیف سایت)
                       </span>
                     ) : (
                       <span class="price-badge-female">
@@ -556,12 +637,44 @@ for (const s of services) {
                 </div>
               </div>
 
+              <div class="tariff-box-mobile col-gender-female">
+                <span class="tariff-box-label">تعرفه دکا بانوان:</span>
+                <div class="tariff-box-val">
+                  {femaleDekaPrice && femaleDekaPrice.amount > 0 ? (
+                    isPromo ? (
+                      <span class="promo-new-price" style="font-size: 0.86rem;">
+                        ۴٬۲۳۰٬۰۰۰ تومان (تخفیف سایت)
+                      </span>
+                    ) : (
+                      <span class="price-badge-female">
+                        {(femaleDekaPrice.amount * 1000).toLocaleString('fa-IR')} تومان
+                      </span>
+                    )
+                  ) : (
+                    <span class="price-badge-unset">استعلام تلفنی</span>
+                  )}
+                </div>
+              </div>
+
               <div class="tariff-box-mobile col-gender-male">
-                <span class="tariff-box-label">تعرفه مصوب آقایان:</span>
+                <span class="tariff-box-label">تعرفه مصوب آقایان (رادو پلاس):</span>
                 <div class="tariff-box-val">
                   {malePrice && malePrice.amount > 0 ? (
                     <span class="price-badge-male">
                       {(malePrice.amount * 1000).toLocaleString('fa-IR')} تومان
+                    </span>
+                  ) : (
+                    <span class="price-badge-unset">استعلام تلفنی</span>
+                  )}
+                </div>
+              </div>
+
+              <div class="tariff-box-mobile col-gender-male">
+                <span class="tariff-box-label">تعرفه دکا آقایان:</span>
+                <div class="tariff-box-val">
+                  {maleDekaPrice && maleDekaPrice.amount > 0 ? (
+                    <span class="price-badge-male">
+                      {(maleDekaPrice.amount * 1000).toLocaleString('fa-IR')} تومان
                     </span>
                   ) : (
                     <span class="price-badge-unset">استعلام تلفنی</span>
@@ -583,6 +696,8 @@ for (const s of services) {
                 data-shortdesc={s.shortDescription || ''}
                 data-price-female={femalePriceAmount}
                 data-price-male={malePriceAmount}
+                data-price-female-deka={femaleDekaPriceAmount}
+                data-price-male-deka={maleDekaPriceAmount}
               >
                 <Icon name="edit" size={14} />
                 <span>ویرایش مشخصات و تعرفه خدمت</span>
@@ -618,8 +733,8 @@ for (const s of services) {
         </div>
 
         <p class="modal-subtitle-text">
-          تغییر نام ناحیه، زمان تخصیصی جلسه و نرخ‌گذاری هر فهرست تعرفه (بانوان / آقایان) به‌صورت
-          کاملاً جداگانه، مستقیماً در دیتابیس D1 ذخیره می‌شود.
+          تغییر نام ناحیه، زمان تخصیصی جلسه و نرخ‌گذاری هر فهرست تعرفه (بانوان / آقایان) برای هر
+          دستگاه (رادو پلاس / دکا) به‌صورت کاملاً جداگانه، مستقیماً در دیتابیس D1 ذخیره می‌شود.
         </p>
 
         <div id="serviceAlert" class="alert-3d-danger" style="display: none;">
@@ -754,7 +869,7 @@ for (const s of services) {
             <div class="modal-gender-pane" data-gender="female">
               <div class="form-group-item">
                 <label for="editServicePriceFemale" class="form-label-gold">
-                  تعرفه مصوب بانوان:
+                  تعرفه مصوب بانوان (رادو پلاس):
                 </label>
                 <div class="input-with-hint">
                   <input
@@ -770,12 +885,30 @@ for (const s of services) {
                   </div>
                 </div>
               </div>
+              <div class="form-group-item">
+                <label for="editServicePriceFemaleDeka" class="form-label-gold">
+                  تعرفه دکا بانوان:
+                </label>
+                <div class="input-with-hint">
+                  <input
+                    type="number"
+                    id="editServicePriceFemaleDeka"
+                    class="form-control-modal price-input"
+                    placeholder="مثال: ۶۵۰"
+                    min="0"
+                    step="5"
+                  />
+                  <div class="toman-live-preview" id="editFemaleDekaTomanPreview">
+                    معادل: استعلام تلفنی
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div class="modal-gender-pane" data-gender="male">
               <div class="form-group-item">
                 <label for="editServicePriceMale" class="form-label-gold">
-                  تعرفه مصوب آقایان:
+                  تعرفه مصوب آقایان (رادو پلاس):
                 </label>
                 <div class="input-with-hint">
                   <input
@@ -787,6 +920,24 @@ for (const s of services) {
                     step="5"
                   />
                   <div class="toman-live-preview" id="editMaleTomanPreview">
+                    معادل: استعلام تلفنی
+                  </div>
+                </div>
+              </div>
+              <div class="form-group-item">
+                <label for="editServicePriceMaleDeka" class="form-label-gold">
+                  تعرفه دکا آقایان:
+                </label>
+                <div class="input-with-hint">
+                  <input
+                    type="number"
+                    id="editServicePriceMaleDeka"
+                    class="form-control-modal price-input"
+                    placeholder="مثال: ۷۰۰"
+                    min="0"
+                    step="5"
+                  />
+                  <div class="toman-live-preview" id="editMaleDekaTomanPreview">
                     معادل: استعلام تلفنی
                   </div>
                 </div>
@@ -2248,6 +2399,18 @@ for (const s of services) {
     ) as HTMLInputElement | null;
     const editFemalePreview = document.getElementById('editFemaleTomanPreview');
     const editMalePreview = document.getElementById('editMaleTomanPreview');
+    const editPriceFemaleDekaInput = document.getElementById(
+      'editServicePriceFemaleDeka',
+    ) as HTMLInputElement | null;
+    const editPriceMaleDekaInput = document.getElementById(
+      'editServicePriceMaleDeka',
+    ) as HTMLInputElement | null;
+    const editFemaleDekaPreview = document.getElementById('editFemaleDekaTomanPreview');
+    const editMaleDekaPreview = document.getElementById('editMaleDekaTomanPreview');
+    // Whether the service already carries a Deka row (so clearing it back to 0
+    // still writes, instead of leaving a stale price behind).
+    let editFemaleDekaHadPrice = false;
+    let editMaleDekaHadPrice = false;
 
     // New Service Modal Elements
     const newModal = document.getElementById('newServiceModal');
@@ -2316,6 +2479,16 @@ for (const s of services) {
     if (editPriceMaleInput && editMalePreview) {
       editPriceMaleInput.addEventListener('input', () =>
         updateTomanPreview(editPriceMaleInput, editMalePreview),
+      );
+    }
+    if (editPriceFemaleDekaInput && editFemaleDekaPreview) {
+      editPriceFemaleDekaInput.addEventListener('input', () =>
+        updateTomanPreview(editPriceFemaleDekaInput, editFemaleDekaPreview),
+      );
+    }
+    if (editPriceMaleDekaInput && editMaleDekaPreview) {
+      editPriceMaleDekaInput.addEventListener('input', () =>
+        updateTomanPreview(editPriceMaleDekaInput, editMaleDekaPreview),
       );
     }
     if (newPriceFemaleInput && newFemalePreview) {
@@ -2489,7 +2662,10 @@ for (const s of services) {
     });
 
     // Populate and open edit modal
-    function openEditModal(btn: HTMLElement, focusTarget?: 'female' | 'male') {
+    function openEditModal(
+      btn: HTMLElement,
+      focusTarget?: 'female' | 'male' | 'female-deka' | 'male-deka',
+    ) {
       if (
         !editModal ||
         !editIdInput ||
@@ -2500,7 +2676,9 @@ for (const s of services) {
         !editActiveSelect ||
         !editShortDescInput ||
         !editPriceFemaleInput ||
-        !editPriceMaleInput
+        !editPriceMaleInput ||
+        !editPriceFemaleDekaInput ||
+        !editPriceMaleDekaInput
       )
         return;
 
@@ -2514,20 +2692,37 @@ for (const s of services) {
       editShortDescInput.value = btn.dataset.shortdesc || '';
       editPriceFemaleInput.value = btn.dataset.priceFemale || '0';
       editPriceMaleInput.value = btn.dataset.priceMale || '0';
+      editPriceFemaleDekaInput.value = btn.dataset.priceFemaleDeka || '0';
+      editPriceMaleDekaInput.value = btn.dataset.priceMaleDeka || '0';
+      editFemaleDekaHadPrice = Number(btn.dataset.priceFemaleDeka || '0') > 0;
+      editMaleDekaHadPrice = Number(btn.dataset.priceMaleDeka || '0') > 0;
 
       updateTomanPreview(editPriceFemaleInput, editFemalePreview);
       updateTomanPreview(editPriceMaleInput, editMalePreview);
+      updateTomanPreview(editPriceFemaleDekaInput, editFemaleDekaPreview);
+      updateTomanPreview(editPriceMaleDekaInput, editMaleDekaPreview);
 
       if (editAlertBox) editAlertBox.style.display = 'none';
       editModal.style.display = 'flex';
 
       // The edit modal opens on the same single-gender list the page is showing
-      // (or the list the quick-edit pencil was clicked from).
-      const target: 'female' | 'male' = focusTarget || activeGender;
+      // (or the list the quick-edit pencil was clicked from). A '-deka' target
+      // keeps the gender pane but focuses the Deka price field inside it.
+      const target: 'female' | 'male' = focusTarget
+        ? (focusTarget.replace('-deka', '') as 'female' | 'male')
+        : activeGender;
+      const focusDevice: 'rado' | 'deka' = focusTarget?.endsWith('-deka') ? 'deka' : 'rado';
       setPanelGender(editTariffsPanel, target);
 
       if (focusTarget) {
-        const focusField = target === 'female' ? editPriceFemaleInput : editPriceMaleInput;
+        const focusField =
+          focusDevice === 'deka'
+            ? target === 'female'
+              ? editPriceFemaleDekaInput
+              : editPriceMaleDekaInput
+            : target === 'female'
+              ? editPriceFemaleInput
+              : editPriceMaleInput;
         setTimeout(() => focusField.focus(), 100);
       } else {
         setTimeout(() => editNameInput.focus(), 100);
@@ -2545,12 +2740,13 @@ for (const s of services) {
     document.querySelectorAll('.js-quick-edit-price').forEach((btn) => {
       btn.addEventListener('click', (e) => {
         const target = e.currentTarget as HTMLElement;
-        const gender = target.dataset.target as 'female' | 'male';
+        const focusTarget = target.dataset.target as
+          'female' | 'male' | 'female-deka' | 'male-deka';
         const parentRow = target.closest('tr');
         if (!parentRow) return;
         const mainEditBtn = parentRow.querySelector('.edit-service-btn') as HTMLElement | null;
         if (mainEditBtn) {
-          openEditModal(mainEditBtn, gender);
+          openEditModal(mainEditBtn, focusTarget);
         }
       });
     });
@@ -2675,6 +2871,8 @@ for (const s of services) {
           !editShortDescInput ||
           !editPriceFemaleInput ||
           !editPriceMaleInput ||
+          !editPriceFemaleDekaInput ||
+          !editPriceMaleDekaInput ||
           !saveEditBtn
         )
           return;
@@ -2727,6 +2925,40 @@ for (const s of services) {
               }),
             }),
           );
+
+          // Deka prices: only write when a price is set, or when clearing an
+          // existing Deka tariff back to 0 — never invent a zero row.
+          const femaleDekaPriceVal = Number(editPriceFemaleDekaInput.value);
+          if (femaleDekaPriceVal > 0 || editFemaleDekaHadPrice) {
+            promises.push(
+              fetch(`/api/v1/admin/pricing/${serviceId}`, {
+                method: 'PUT',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({
+                  pricingCategory: 'female',
+                  device: 'deka',
+                  amount: femaleDekaPriceVal >= 0 ? femaleDekaPriceVal : 0,
+                  currency: 'IRT',
+                }),
+              }),
+            );
+          }
+
+          const maleDekaPriceVal = Number(editPriceMaleDekaInput.value);
+          if (maleDekaPriceVal > 0 || editMaleDekaHadPrice) {
+            promises.push(
+              fetch(`/api/v1/admin/pricing/${serviceId}`, {
+                method: 'PUT',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({
+                  pricingCategory: 'male',
+                  device: 'deka',
+                  amount: maleDekaPriceVal >= 0 ? maleDekaPriceVal : 0,
+                  currency: 'IRT',
+                }),
+              }),
+            );
+          }
 
           const results = await Promise.all(promises);
           const allOk = results.every((r) => r.ok);
