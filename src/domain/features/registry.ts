@@ -162,7 +162,7 @@ export const FEATURE_MODULES: readonly FeatureModuleDef[] = [
         key: 'promoOldPrice',
         label: 'قیمت قبل از تخفیف (تومان)',
         type: 'text',
-        default: '۲٬۲۹۰٬۰۰۰',
+        default: '۲٬۹۸۰٬۰۰۰',
         maxLength: 20,
         help: 'فقط برای نمایش؛ ارقام فارسی مجاز است.',
       },
@@ -170,7 +170,7 @@ export const FEATURE_MODULES: readonly FeatureModuleDef[] = [
         key: 'promoNewPrice',
         label: 'قیمت پس از تخفیف (تومان)',
         type: 'text',
-        default: '۱٬۹۴۰٬۰۰۰',
+        default: '۲٬۵۳۰٬۰۰۰',
         maxLength: 20,
       },
       {

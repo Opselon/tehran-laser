@@ -3599,6 +3599,11 @@ body.theme-dark-obsidian .metric-divider {
   box-sizing: border-box;
 }
 
+/* Second device card (Deka) sits below the Rado card in the same section. */
+.candela-showcase-card-deka {
+  margin-top: 24px;
+}
+
 .candela-badge-row {
   display: flex;
   align-items: center;

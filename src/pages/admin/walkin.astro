@@ -142,8 +142,14 @@ try {
               {services.map((s) => (
                 <option
                   value={s.slug}
-                  data-price={s.prices.find((p) => p.pricingCategory === 'female')?.amount || 320}
-                  data-price-male={s.prices.find((p) => p.pricingCategory === 'male')?.amount || 0}
+                  data-price={
+                    s.prices.find((p) => p.pricingCategory === 'female' && p.device === 'rado')
+                      ?.amount || 320
+                  }
+                  data-price-male={
+                    s.prices.find((p) => p.pricingCategory === 'male' && p.device === 'rado')
+                      ?.amount || 0
+                  }
                 >
                   {s.name} ({s.durationMinutes} دقیقه)
                 </option>

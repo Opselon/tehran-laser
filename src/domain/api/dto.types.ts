@@ -1,10 +1,16 @@
-import type { BookingEventType, BookingStatus, PricingCategory } from '../booking/booking.types';
+import type {
+  BookingEventType,
+  BookingStatus,
+  Device,
+  PricingCategory,
+} from '../booking/booking.types';
 import type { Permission, RoleKey } from '../rbac/rbac.types';
 
 /** ── Services & pricing ─────────────────────────────────────── */
 
 export interface ServicePriceDto {
   pricingCategory: PricingCategory;
+  device: Device;
   amount: number;
   currency: string;
 }
@@ -75,6 +81,7 @@ export interface AdminBookingDto {
   startsAt: string;
   endsAt: string;
   pricingCategory: PricingCategory;
+  device: Device;
   quotedAmount: number;
   discountAmount: number;
   currency: string;

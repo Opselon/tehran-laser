@@ -13,8 +13,16 @@ if (!slug) return Astro.redirect('/services');
 const service = await findPublicServiceBySlug(env.DB, slug);
 if (!service) return Astro.redirect('/404');
 
-const femalePrice = service.prices.find((p) => p.pricingCategory === 'female');
-const malePrice = service.prices.find((p) => p.pricingCategory === 'male');
+const femalePrice = service.prices.find(
+  (p) => p.pricingCategory === 'female' && p.device === 'rado',
+);
+const malePrice = service.prices.find((p) => p.pricingCategory === 'male' && p.device === 'rado');
+const femaleDekaPrice = service.prices.find(
+  (p) => p.pricingCategory === 'female' && p.device === 'deka',
+);
+const maleDekaPrice = service.prices.find(
+  (p) => p.pricingCategory === 'male' && p.device === 'deka',
+);
 const isPromo = service.slug === 'full-body';
 const basePrice = femalePrice?.amount ?? 0; // in thousands (IRT)
 
@@ -95,8 +103,11 @@ const meta: AreaMeta = areaMeta[service.slug] ?? {
   results: 'کاهش دائمی ۸۵٪ الی ۹۵٪',
 };
 
-const promoFinalPrice = 1940; // thousands — matches the /services catalogue offer
-const promoOriginalPrice = 2290;
+const promoFinalPrice = 2530; // thousands — matches the /services catalogue offer (2980 − 15%)
+const promoOriginalPrice = 2980;
+// Deka promo for the same package: 4980 − 15% = 4233, rounded to the 10s like 2530.
+const promoDekaFinalPrice = 4230;
+const promoDekaOriginalPrice = 4980;
 const isDualWavelength =
   meta.wavelengthShort.includes('دو طول موج') || meta.wavelengthShort.includes('Dual');
 
@@ -230,18 +241,37 @@ const afterCareSteps = [
               {femalePrice ? (
                 isPromo ? (
                   <div class="promo-price-block">
+                    <span class="tier-device-label">رادو پلاس:</span>
                     <span class="strikethrough-price">{formatToman(promoOriginalPrice)}</span>
                     <span class="promo-final-price">{formatToman(promoFinalPrice)}</span>
                     <span class="price-currency">تومان / هر جلسه</span>
                   </div>
                 ) : (
                   <div class="price-block">
+                    <span class="tier-device-label">رادو پلاس:</span>
                     <span class="final-price">{formatToman(basePrice)}</span>
                     <span class="price-currency">تومان / هر جلسه</span>
                   </div>
                 )
               ) : (
                 <span class="tier-note">استعلام تلفنی</span>
+              )}
+              {femaleDekaPrice && (
+                <div class="tier-device-row">
+                  <span class="tier-device-label">دستگاه دکا:</span>
+                  {isPromo ? (
+                    <div class="promo-price-block">
+                      <span class="strikethrough-price">{formatToman(promoDekaOriginalPrice)}</span>
+                      <span class="promo-final-price">{formatToman(promoDekaFinalPrice)}</span>
+                      <span class="price-currency">تومان / هر جلسه</span>
+                    </div>
+                  ) : (
+                    <div class="price-block">
+                      <span class="final-price">{formatToman(femaleDekaPrice.amount)}</span>
+                      <span class="price-currency">تومان / هر جلسه</span>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
           </div>
@@ -270,6 +300,7 @@ const afterCareSteps = [
             <div class="tier-value">
               {malePrice ? (
                 <div class="price-block">
+                  <span class="tier-device-label">رادو پلاس:</span>
                   <span class="final-price">{formatToman(malePrice.amount)}</span>
                   <span class="price-currency">تومان / هر جلسه</span>
                 </div>
@@ -277,6 +308,15 @@ const afterCareSteps = [
                 <span class="tier-note">
                   استعلام قیمت بر اساس تراکم و وسعت در کلینیک یا تماس تلفنی
                 </span>
+              )}
+              {maleDekaPrice && (
+                <div class="tier-device-row">
+                  <span class="tier-device-label">دستگاه دکا:</span>
+                  <div class="price-block">
+                    <span class="final-price">{formatToman(maleDekaPrice.amount)}</span>
+                    <span class="price-currency">تومان / هر جلسه</span>
+                  </div>
+                </div>
               )}
             </div>
           </div>
@@ -458,7 +498,7 @@ const afterCareSteps = [
           </ul>
 
           <div class="sidebar-price-box">
-            <span class="sb-price-label">تعرفه مصوب بانوان:</span>
+            <span class="sb-price-label">تعرفه مصوب بانوان (رادو پلاس):</span>
             {femalePrice ? (
               isPromo ? (
                 <div class="sb-promo">
@@ -470,6 +510,16 @@ const afterCareSteps = [
               )
             ) : (
               <span class="sb-note">استعلام تلفنی</span>
+            )}
+            {femaleDekaPrice && (
+              <div>
+                <span class="sb-price-label">دستگاه دکا:</span>{' '}
+                {isPromo ? (
+                  <span class="sb-final">{formatToman(promoDekaFinalPrice)} تومان</span>
+                ) : (
+                  <span class="sb-final">{formatToman(femaleDekaPrice.amount)} تومان</span>
+                )}
+              </div>
             )}
           </div>
 

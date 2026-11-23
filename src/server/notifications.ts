@@ -27,6 +27,8 @@ export interface NotificationPayload {
   customerPhone: string;
   serviceName: string;
   pricingCategory: 'male' | 'female';
+  /** Laser device for the reservation (migration 0016; absent = Rado Plus). */
+  device?: 'rado' | 'deka';
   startsAtIso: string;
   quotedAmount: number;
   discountAmount: number;
@@ -83,13 +85,14 @@ function formatTelegramMessage(p: NotificationPayload): string {
   };
 
   const categoryLabel = p.pricingCategory === 'female' ? 'بانوان' : 'آقایان';
+  const deviceLabel = p.device === 'deka' ? 'دکا' : 'رادو پلاس';
   const priceFormatted = (p.quotedAmount - p.discountAmount).toLocaleString('fa-IR');
 
   let msg = `${titles[p.eventType]}
 
 <b>کد رهگیری:</b> <code>${escapeHtml(p.reference)}</code>
 <b>مشتری:</b> ${escapeHtml(p.customerName)} (${escapeHtml(p.customerPhone)})
-<b>خدمت:</b> ${escapeHtml(p.serviceName)} (${categoryLabel})
+<b>خدمت:</b> ${escapeHtml(p.serviceName)} (${categoryLabel} — ${deviceLabel})
 <b>زمان (UTC):</b> ${p.startsAtIso}
 <b>مبلغ نهایی:</b> ${priceFormatted} ${escapeHtml(p.currency)}`;
 

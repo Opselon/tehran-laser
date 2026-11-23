@@ -1,10 +1,11 @@
 import { z } from 'zod';
-import { PRICING_CATEGORIES } from '../booking/booking.types';
+import { DEVICES, PRICING_CATEGORIES } from '../booking/booking.types';
 
 /** Validation shared by API routes and server services. Everything that crosses a
  *  boundary is parsed here — the client is never trusted. */
 
 export const pricingCategorySchema = z.enum(PRICING_CATEGORIES);
+export const deviceSchema = z.enum(DEVICES);
 
 /** Accepts 09121234567, +989****4567, 00989121234567, 9121234567 → canonical +989****4567.
  *  Persian/Arabic-Indic digits (۰-۹, ٠-٩) are normalised first — admins type them
@@ -77,6 +78,8 @@ export const createBookingSchema = z
     serviceSlug: slugSchema.optional(),
     serviceSlugs: z.array(slugSchema).min(1).optional(),
     pricingCategory: pricingCategorySchema,
+    /** Laser device for the reservation; absent (old clients) means Rado Plus. */
+    device: deviceSchema.optional().default('rado'),
     startsAt: isoInstantSchema,
     customerName: nameSchema,
     customerPhone: phoneSchema,
@@ -167,6 +170,8 @@ export const serviceWriteSchema = z.object({
 
 export const pricingWriteSchema = z.object({
   pricingCategory: pricingCategorySchema,
+  /** Which device's price row this writes; absent (old admin clients) means Rado Plus. */
+  device: deviceSchema.optional().default('rado'),
   amount: z.number().int().min(0).max(1_000_000_000),
 });
 

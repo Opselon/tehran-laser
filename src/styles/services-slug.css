@@ -333,6 +333,25 @@ main .tier-value {
   text-align: left;
 }
 
+/* Second device row inside a pricing tier (migration 0016): the Deka tariff
+   sits under the Rado tariff with its own label. */
+main .tier-device-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 7px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.12);
+}
+
+main .tier-device-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #b5ada0;
+}
+
 main .price-block,
 main .promo-price-block {
   display: flex;

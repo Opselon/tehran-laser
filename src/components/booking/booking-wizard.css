@@ -180,6 +180,13 @@
   justify-content: center;
 }
 
+/* Device picker (migration 0016): the «شاتی / لیزر تماسی» note rides inside the card. */
+.booking-wizard-container .device-note {
+  font-size: 12.5px;
+  font-weight: 400;
+  color: #9aa1ab;
+}
+
 /* ── Step 1: filter + compact area tiles ─────────────────────── */
 
 .booking-wizard-container .service-filter-row {

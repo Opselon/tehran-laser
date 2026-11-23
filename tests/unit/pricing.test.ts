@@ -71,3 +71,57 @@ describe('hasPriceFor', () => {
     expect(hasPriceFor([femalePrice], 'male')).toBe(false);
   });
 });
+
+describe('calculateQuote with devices (migration 0016)', () => {
+  const dekaFemale = {
+    pricingCategory: 'female' as const,
+    device: 'deka' as const,
+    amount: 650,
+    currency: 'IRT',
+  };
+  const dekaMale = {
+    pricingCategory: 'male' as const,
+    device: 'deka' as const,
+    amount: 350,
+    currency: 'IRT',
+  };
+
+  it('quotes the Deka price when device=deka', () => {
+    const quote = calculateQuote(service, [femalePrice, dekaFemale], 'female', 15, 'deka');
+    expect(quote.device).toBe('deka');
+    expect(quote.baseAmount).toBe(650);
+    expect(quote.discountAmount).toBe(98); // round(650 * 0.15) = 98 (97.5 rounds up)
+    expect(quote.totalAmount).toBe(552);
+  });
+
+  it('quotes the Rado price by default (device omitted)', () => {
+    const quote = calculateQuote(service, [femalePrice, dekaFemale], 'female', 15);
+    expect(quote.device).toBe('rado');
+    expect(quote.baseAmount).toBe(320);
+  });
+
+  it('treats a row without a device as Rado', () => {
+    const legacy = { pricingCategory: 'female' as const, amount: 320, currency: 'IRT' };
+    expect(calculateQuote(service, [legacy], 'female', 0, 'rado').totalAmount).toBe(320);
+    expect(() => calculateQuote(service, [legacy], 'female', 0, 'deka')).toThrow(PricingError);
+  });
+
+  it('rejects a device with no configured price', () => {
+    expect(() => calculateQuote(service, [femalePrice], 'female', 15, 'deka')).toThrow(
+      PricingError,
+    );
+    try {
+      calculateQuote(service, [femalePrice], 'female', 15, 'deka');
+    } catch (error) {
+      expect((error as PricingError).code).toBe('PRICE_NOT_CONFIGURED');
+    }
+  });
+
+  it('hasPriceFor is device-aware', () => {
+    expect(hasPriceFor([femalePrice, dekaFemale], 'female', 'deka')).toBe(true);
+    expect(hasPriceFor([femalePrice], 'female', 'deka')).toBe(false);
+    expect(hasPriceFor([femalePrice], 'female')).toBe(true);
+    expect(hasPriceFor([dekaMale], 'male', 'deka')).toBe(true);
+    expect(hasPriceFor([dekaMale], 'male', 'rado')).toBe(false);
+  });
+});
