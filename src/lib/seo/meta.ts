@@ -4,10 +4,10 @@
  */
 
 export const DEFAULT_SEO_TITLE =
-  'کلینیک تهران لیزر — مرکز تخصصی لیزر موهای زائد با رادو پلاس در قیطریه';
+  'کلینیک تهران لیزر — مرکز تخصصی لیزر موهای زائد با رادو پلاس و دکا در قیطریه';
 
 export const DEFAULT_SEO_DESCRIPTION =
-  'کلینیک تخصصی تهران لیزر در قیطریه، خیابان قلندری شمالی. مجهز به دستگاه لیزر تماسی رادو پلاس با سه طول موج ۷۵۵ و ۸۰۸ و ۱۰۶۴ نانومتر، کاور یکبار مصرف استریل، سرمایش بدون درد، تعرفه شفاف و ۱۵٪ تخفیف رزرو آنلاین.';
+  'کلینیک تخصصی تهران لیزر در قیطریه، خیابان قلندری شمالی. مجهز به دو دستگاه لیزر رادو پلاس (دایود ۸۰۸nm) و دکا (الکساندرایت ۷۵۵nm + ان‌دی‌یاگ ۱۰۶۴nm)، کاور یکبار مصرف استریل، سرمایش بدون درد، تعرفه شفاف و ۱۵٪ تخفیف رزرو آنلاین.';
 
 export const PRIMARY_KEYWORDS = [
   'لیزر موهای زائد تهران',
@@ -20,6 +20,7 @@ export const PRIMARY_KEYWORDS = [
   'رزرو آنلاین لیزر قیطریه',
   'بهترین مرکز لیزر شمال تهران',
   'لیزر موهای زائد آقایان و بانوان',
+  'لیزر دکا قیطریه',
 ];
 
 export const CLINIC_GEO_LOCATION = {
@@ -71,10 +72,14 @@ export const CLINIC_HOURS_FA = [
 ] as const;
 
 /**
- * The clinic's three treatment wavelengths, in nanometres. Kept here (not in a
- * page) because JSON-LD, the device copy and badge markup all cite them.
+ * The clinic's treatment wavelengths, in nanometres — per device, not one
+ * combined list: Rado Plus is a single-wavelength diode laser (808nm); Deka
+ * carries the two shot-based wavelengths (Alexandrite 755nm + Nd:YAG 1064nm).
+ * The old combined [755, 808, 1064] list wrongly attributed all three
+ * wavelengths to Rado Plus, so it was replaced by the per-device constants.
  */
-export const DEVICE_WAVELENGTHS_NM = [755, 808, 1064] as const;
+export const RADO_WAVELENGTH_NM = 808 as const;
+export const DEKA_WAVELENGTHS_NM = [755, 1064] as const;
 
 /**
  * Absolute default share image. Social crawlers reject relative og:image URLs;

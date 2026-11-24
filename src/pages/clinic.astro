@@ -18,7 +18,7 @@ const aboutJsonLd = {
   url: `${origin}/clinic`,
   name: 'درباره کلینیک تخصصی تهران لیزر قیطریه',
   description:
-    'مرکز تخصصی لیزر و زیبایی تهران لیزر در قیطریه با دستگاه لیزر تماسی رادو پلاس، سه طول موج ۷۵۵ و ۸۰۸ و ۱۰۶۴ نانومتر، سیستم خنک‌کننده TEC Double و کادر آموزش‌دیده.',
+    'مرکز تخصصی لیزر و زیبایی تهران لیزر در قیطریه با دو دستگاه لیزر رادو پلاس (دایود ۸۰۸nm) و دکا (الکساندرایت ۷۵۵nm + ان‌دی‌یاگ ۱۰۶۴nm)، سیستم خنک‌کننده TEC Double و کادر آموزش‌دیده.',
   inLanguage: 'fa-IR',
   mainEntity: { '@id': `${origin}/#clinic` },
   isPartOf: { '@id': `${origin}/#website` },
@@ -33,12 +33,13 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
 ---
 
 <PublicLayout
-  title="درباره کلینیک و تکنولوژی لیزر تماسی رادو پلاس — کلینیک تهران لیزر قیطریه"
-  description="معرفی فناوری لیزر تماسی رادو پلاس با سه طول موج ۷۵۵ و ۸۰۸ و ۱۰۶۴ نانومتر، توان خروجی ۱۶۰۰ وات، خنک‌کننده TEC Double و پروتکل‌های بهداشتی کلینیک تهران لیزر."
+  title="درباره کلینیک و تکنولوژی لیزر رادو پلاس و دکا — کلینیک تهران لیزر قیطریه"
+  description="معرفی فناوری دو دستگاه لیزر کلینیک تهران لیزر: رادو پلاس (دایود ۸۰۸nm، توان خروجی ۱۶۰۰ وات، خنک‌کننده TEC Double) و دکا (الکساندرایت ۷۵۵nm + ان‌دی‌یاگ ۱۰۶۴nm) و پروتکل‌های بهداشتی کلینیک."
   canonicalUrl="/clinic"
   keywords={[
     'کلینیک لیزر قیطریه',
     'لیزر تماسی رادو پلاس',
+    'لیزر دکا قیطریه',
     'مرکز لیزر تماسی تهران',
     'کلینیک زیبایی قلندری شمالی',
   ]}
@@ -55,11 +56,12 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
           <span>مرکز تخصصی لیزر و زیبایی قیطریه</span>
         </div>
         <h1 class="hero-title">
-          تکنولوژی لیزر تماسی <span class="gold-gradient-text">رادو پلاس</span> در تهران
+          تکنولوژی لیزر <span class="gold-gradient-text">رادو پلاس و دکا</span> در تهران
         </h1>
         <p class="hero-desc">
-          لیزر تماسی (لمسی) با تلفیق سه طول موج الکساندرایت، دیود و ان‌دی‌یاگ، سرمایش پیوسته TEC
-          Double و پروتکل بهداشتی اختصاصی در محیطی آرام و استاندارد.
+          دو دستگاه لیزر کلینیک: رادو پلاس، لیزر تماسی (لمسی) دایود ۸۰۸nm با سرمایش پیوسته TEC
+          Double، و دکا، لیزر شاتی با دو طول موج الکساندرایت ۷۵۵nm و ان‌دی‌یاگ ۱۰۶۴nm — با پروتکل
+          بهداشتی اختصاصی در محیطی آرام و استاندارد.
         </p>
 
         <div class="hero-cta-row">
@@ -89,9 +91,9 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
               <Icon name="lightning" size={22} />
             </div>
             <div>
-              <div class="badge-title">سه طول موج همزمان</div>
-              <div class="badge-sub" dir="ltr">
-                Alexandrite 755nm + Diode 808nm + Nd:YAG 1064nm
+              <div class="badge-title">دو دستگاه لیزر</div>
+              <div class="badge-sub">
+                رادو پلاس: دایود ۸۰۸nm — دکا: الکساندرایت ۷۵۵nm + ان‌دی‌یاگ ۱۰۶۴nm
               </div>
             </div>
           </div>
@@ -125,17 +127,17 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
             <Icon name="gem" size={14} /> شناسنامه فناوری
           </div>
           <h2 class="section-title">
-            بررسی تخصصی دستگاه <span class="gold-gradient-text">Rado Plus</span>
+            بررسی تخصصی دستگاه‌های <span class="gold-gradient-text">کلینیک</span>
           </h2>
           <p class="section-lead">
-            دستگاه رادو پلاس یک لیزر تماسی (لمسی) با توان خروجی ۱۶۰۰ وات و سه طول موج است که اثربخشی
-            قطعی را با حداکثر ایمنی و سرعت ترکیب کرده است.
+            رادو پلاس، لیزر تماسی (لمسی) دایود ۸۰۸nm با توان خروجی ۱۶۰۰ وات، و دکا، لیزر شاتی با دو
+            طول موج الکساندرایت ۷۵۵nm و ان‌دی‌یاگ ۱۰۶۴nm — اثربخشی قطعی با حداکثر ایمنی و سرعت.
           </p>
         </div>
 
         <!-- Interactive Wavelength Explorer -->
         <div class="tech-explorer-card">
-          <div class="wavelength-tabs" role="tablist" aria-label="انتخاب طول موج دستگاه رادو پلاس">
+          <div class="wavelength-tabs" role="tablist" aria-label="انتخاب طول موج دستگاه‌های کلینیک">
             <button
               id="tab-alex"
               class="wl-tab active"
@@ -145,7 +147,7 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
               aria-controls="panel-alex"
             >
               <Icon name="lightning" size={18} />
-              <span>الکساندرایت ۷۵۵ نانومتر (Alexandrite)</span>
+              <span>الکساندرایت ۷۵۵ نانومتر (Alexandrite) — دکا</span>
             </button>
             <button
               id="tab-diode"
@@ -156,7 +158,7 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
               aria-controls="panel-diode"
             >
               <Icon name="services" size={18} />
-              <span>دیود ۸۰۸ نانومتر (Diode)</span>
+              <span>دیود ۸۰۸ نانومتر (Diode) — رادو پلاس</span>
             </button>
             <button
               id="tab-yag"
@@ -167,7 +169,7 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
               aria-controls="panel-yag"
             >
               <Icon name="target" size={18} />
-              <span>ان‌دی‌یاگ ۱۰۶۴ نانومتر (Nd:YAG)</span>
+              <span>ان‌دی‌یاگ ۱۰۶۴ نانومتر (Nd:YAG) — دکا</span>
             </button>
           </div>
 
@@ -229,9 +231,9 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
                 <span class="wl-pill">تعادل طلایی عمق نفوذ و سرعت</span>
                 <h3 class="wl-title">طول موج ۸۰۸nm دیود؛ ستون فقرات لیزرهای تماسی</h3>
                 <p class="wl-text">
-                  طول موج ۸۰۸ نانومتر عمیق‌ترین نفوذ را در میان سه طول موج این دستگاه دارد و
-                  بالاترین توان پیوسته را برای حرکت سریع هندپیس روی پوست فراهم می‌کند. این ویژگی،
-                  تعداد جلسات نواحی وسیع مانند پا و پشت را کاهش می‌دهد.
+                  طول موج ۸۰۸ نانومتر عمق نفوذ بالایی دارد و بالاترین توان پیوسته را برای حرکت سریع
+                  هندپیس روی پوست فراهم می‌کند. این ویژگی، تعداد جلسات نواحی وسیع مانند پا و پشت را
+                  کاهش می‌دهد.
                 </p>
                 <ul class="spec-checks">
                   <li>
@@ -314,75 +316,71 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
           </div>
         </div>
 
-        <!-- Rado Plus Technical Datasheet -->
+        <!-- Two-Device Technical Datasheet: Rado Plus vs Deka. Only confirmed
+             specs are listed — Deka's power was never given, so it is marked
+             «اعلام نشده», never invented. -->
         <div class="spec-datasheet">
           <div class="spec-datasheet-head">
             <div class="spec-datasheet-title">
               <Icon name="gem" size={18} class="gold-icon" />
-              <span>شناسنامه فنی دستگاه — Rado Plus</span>
+              <span>شناسنامه فنی دو دستگاه کلینیک — رادو پلاس و دکا</span>
             </div>
-            <span class="spec-datasheet-model">لیزر تماسی (لمسی) · ساخت شرکت بهین جهد داتیس</span>
+            <span class="spec-datasheet-model">
+              رادو پلاس: لیزر تماسی دایود · دکا: لیزر شاتی دو طول موج
+            </span>
           </div>
           <div
             class="spec-table-wrap"
             role="region"
-            aria-label="جدول مشخصات فنی دستگاه رادو پلاس"
+            aria-label="جدول مقایسه مشخصات فنی رادو پلاس و دکا"
             tabindex="0"
           >
             <table class="spec-table">
-              <caption class="spec-caption">مشخصات فنی رسمی دستگاه لیزر تماسی رادو پلاس</caption>
+              <caption class="spec-caption">
+                مقایسه مشخصات فنی دو دستگاه لیزر کلینیک تهران لیزر
+              </caption>
               <thead>
                 <tr>
                   <th scope="col">پارامتر فنی</th>
-                  <th scope="col">الکساندرایت (Alexandrite)</th>
-                  <th scope="col">دیود (Diode)</th>
-                  <th scope="col">ان‌دی‌یاگ (Nd:YAG)</th>
+                  <th scope="col">رادو پلاس (Rado Plus)</th>
+                  <th scope="col">دکا (Deka)</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
+                  <th scope="row">نوع دستگاه</th>
+                  <td>لیزر تماسی (لمسی)</td>
+                  <td>لیزر شاتی</td>
+                </tr>
+                <tr>
                   <th scope="row">طول موج</th>
-                  <td>۷۵۵ نانومتر</td>
-                  <td>۸۰۸ نانومتر</td>
-                  <td>۱۰۶۴ نانومتر</td>
+                  <td>دایود ۸۰۸ نانومتر</td>
+                  <td>الکساندرایت ۷۵۵ نانومتر + ان‌دی‌یاگ ۱۰۶۴ نانومتر</td>
                 </tr>
                 <tr>
                   <th scope="row">حداکثر توان خروجی دستگاه</th>
-                  <td colspan="3">۱۶۰۰ وات (خروجی واقعی)</td>
-                </tr>
-                <tr>
-                  <th scope="row">مدت پالس</th>
-                  <td colspan="3">تنظیم‌پذیر بر اساس تیپ پوستی و ضخامت مو</td>
+                  <td>۱۶۰۰ وات (خروجی واقعی)</td>
+                  <td>اعلام نشده</td>
                 </tr>
                 <tr>
                   <th scope="row">سیستم خنک‌کننده</th>
-                  <td colspan="3">دو سیستم داخلی و خارجی — TEC Double و Continuous Cooling</td>
+                  <td>دو سیستم داخلی و خارجی — TEC Double و Continuous Cooling</td>
+                  <td>اعلام نشده</td>
                 </tr>
                 <tr>
-                  <th scope="row">نرخ پرتاب شات (FHR)</th>
-                  <td colspan="3">۱ تا ۲۰ شات در ثانیه</td>
-                </tr>
-                <tr>
-                  <th scope="row">عمر نوار لیزر</th>
-                  <td colspan="3">۱۰۰ میلیون شات (ساخت Coherent آمریکا)</td>
-                </tr>
-                <tr>
-                  <th scope="row">نمایشگر</th>
-                  <td colspan="3">صفحه لمسی ۱۰.۴ اینچ ثبت پارامترها و اطلاعات مراجع</td>
-                </tr>
-                <tr>
-                  <th scope="row">روشن‌کنندگی (Whitening)</th>
-                  <td colspan="3">دارد — بهبود نواحی تیره و یک تا دو درجه روشن‌تر شدن</td>
+                  <th scope="row">نرخ پرتاب شات</th>
+                  <td>۱ تا ۲۰ شات در ثانیه (FHR)</td>
+                  <td>تک‌شات دقیق (شاتی)</td>
                 </tr>
                 <tr>
                   <th scope="row">تیپ پوستی مطلوب</th>
-                  <td>Fitzpatrick I الی III</td>
                   <td>Fitzpatrick II الی V</td>
-                  <td>Fitzpatrick IV الی VI</td>
+                  <td>الکساندرایت: Fitzpatrick I الی III — ان‌دی‌یاگ: Fitzpatrick IV الی VI</td>
                 </tr>
                 <tr>
-                  <th scope="row">تاییدیه‌ها</th>
-                  <td colspan="3">مجوز تجهیزات پزشکی ایران · ISO 13485</td>
+                  <th scope="row">تعرفه</th>
+                  <td>تعرفه پایه کلینیک</td>
+                  <td>تعرفه بالاتر — دستگاه پریمیوم</td>
                 </tr>
               </tbody>
             </table>
@@ -439,9 +437,11 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
             <div class="m-icon">
               <Icon name="clock" size={22} />
             </div>
-            <div class="m-val">۳ طول موج</div>
-            <div class="m-label">پوشش همه رنگ‌های پوستی</div>
-            <div class="m-sub">الکساندرایت ۷۵۵ · دیود ۸۰۸ · ان‌دی‌یاگ ۱۰۶۴ نانومتر</div>
+            <div class="m-val">۲ دستگاه</div>
+            <div class="m-label">رادو پلاس و دکا برای همه رنگ‌های پوستی</div>
+            <div class="m-sub">
+              رادو: دایود ۸۰۸nm · دکا: الکساندرایت ۷۵۵ + ان‌دی‌یاگ ۱۰۶۴ نانومتر
+            </div>
           </div>
           <div class="metric-card">
             <div class="m-icon">
@@ -540,8 +540,8 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
           </div>
           <h2 class="section-title">چرا برای لیزر دستگاه رادو پلاس را انتخاب کنیم</h2>
           <p class="section-lead">
-            دستگاه لیزر تماسی رادو پلاس با توان خروجی واقعی و سه طول موج، ترکیبی از قدرت، ایمنی و
-            سرعت را در یک هندپیس سبک فراهم می‌کند.
+            دستگاه لیزر تماسی رادو پلاس با توان خروجی واقعی و طول موج دایود ۸۰۸nm، ترکیبی از قدرت،
+            ایمنی و سرعت را در یک هندپیس سبک فراهم می‌کند.
           </p>
         </div>
 
@@ -566,8 +566,9 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
               <h3 class="rado-title">پوشش همه رنگ‌های پوستی</h3>
             </div>
             <p class="rado-body">
-              سه طول موج متفاوت (الکساندرایت ۷۵۵، دیود ۸۰۸ و ان‌دی‌یاگ ۱۰۶۴ نانومتر) برای پوشش همه
-              طیف‌های رنگی پوست.
+              طول موج دایود ۸۰۸ نانومتر با عمق نفوذ بالا، طیف گسترده‌ای از تیپ‌های پوستی گندمی تا
+              سبزه را پوشش می‌دهد؛ در کنار دکا (الکساندرایت ۷۵۵ و ان‌دی‌یاگ ۱۰۶۴ نانومتر) همه
+              طیف‌های رنگی پوست پوشش داده می‌شوند.
             </p>
           </div>
           <div class="rado-card-3d">
@@ -956,12 +957,12 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
               </span>
             </summary>
             <div class="faq-answer">
-              رادو پلاس یک لیزر تماسی (لمسی) با سه طول موج ۷۵۵ و ۸۰۸ و ۱۰۶۴ نانومتر و توان خروجی
-              ۱۶۰۰ وات است. در لیزر تماسی، امواج از فاصله نزدیک‌تر به فولیکول‌ها می‌رسند و نتیجه
-              سریع‌تر و قوی‌تر می‌شود؛ پوشش نواحی کامل‌تر است و هیچ نقطه‌ای جا نمی‌ماند. به دلیل
-              تماس مستقیم هندپیس با پوست و استفاده از ژل خنک‌کننده، درد کمتر و پخش انرژی یکنواخت‌تر
-              است. برای هر مراجع کاور یکبار مصرف اختصاصی استفاده می‌شود و این روش برای همه رنگ‌های
-              پوستی مؤثر است.
+              رادو پلاس یک لیزر تماسی (لمسی) دایود ۸۰۸nm با توان خروجی ۱۶۰۰ وات است؛ دستگاه دوم
+              کلینیک، دکا، لیزر شاتی با دو طول موج الکساندرایت ۷۵۵nm و ان‌دی‌یاگ ۱۰۶۴nm است. در لیزر
+              تماسی، امواج از فاصله نزدیک‌تر به فولیکول‌ها می‌رسند و نتیجه سریع‌تر و قوی‌تر می‌شود؛
+              پوشش نواحی کامل‌تر است و هیچ نقطه‌ای جا نمی‌ماند. به دلیل تماس مستقیم هندپیس با پوست و
+              استفاده از ژل خنک‌کننده، درد کمتر و پخش انرژی یکنواخت‌تر است. برای هر مراجع کاور یکبار
+              مصرف اختصاصی استفاده می‌شود و این روش برای همه رنگ‌های پوستی مؤثر است.
             </div>
           </details>
 
@@ -989,7 +990,7 @@ const breadcrumbJsonLd = createBreadcrumbSchema(breadcrumbItems);
               </span>
             </summary>
             <div class="faq-answer">
-              بله، دستگاه ما مجهز به طول موج اختصاصی ان‌دی‌یاگ (Nd:YAG 1064nm) است که منحصراً برای
+              بله، دستگاه دکا مجهز به طول موج اختصاصی ان‌دی‌یاگ (Nd:YAG 1064nm) است که منحصراً برای
               تایپ‌های پوستی سبزه و تیره طراحی شده و ایمن‌ترین لیزر تاییدشده بدون هیچ‌گونه ریسک لک
               یا تغییر رنگدانه است.
             </div>
