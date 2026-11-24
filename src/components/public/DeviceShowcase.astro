@@ -8,7 +8,7 @@ import Icon from '../ui/Icon.astro';
       <div class="candela-badge-row">
         <span class="candela-gold-pill">
           <Icon name="award" size={16} />
-          <span>لیزر تماسی (لمسی) با سه طول موج</span>
+          <span>لیزر تماسی (لمسی) دایود</span>
         </span>
         <span class="candela-sub-tag">تجهیز رسمی دارای مجوز وزارت بهداشت</span>
       </div>
@@ -19,9 +19,9 @@ import Icon from '../ui/Icon.astro';
           <span class="candela-en-sub">Rado Plus Contact Laser</span>
         </h2>
         <p class="candela-lead">
-          دستگاه رادو پلاس یک لیزر تماسی (لمسی) با توان خروجی ۱۶۰۰ وات و سه طول موج ۷۵۵ و ۸۰۸ و ۱۰۶۴
-          نانومتر است. تماس مستقیم هندپیس با پوست، انرژی را از نزدیک‌ترین فاصله به فولیکول می‌رساند
-          و بالاترین اثربخشی بالینی با امنیت کامل برای همه رنگ‌های پوستی فراهم می‌گردد.
+          دستگاه رادو پلاس یک لیزر تماسی (لمسی) دایود ۸۰۸nm با توان خروجی ۱۶۰۰ وات است. تماس مستقیم
+          هندپیس با پوست، انرژی را از نزدیک‌ترین فاصله به فولیکول می‌رساند و بالاترین اثربخشی بالینی
+          با امنیت کامل برای همه رنگ‌های پوستی فراهم می‌گردد.
         </p>
       </div>
 
@@ -41,10 +41,10 @@ import Icon from '../ui/Icon.astro';
           <div class="candela-feat-icon">
             <Icon name="target" size={26} />
           </div>
-          <h3 class="candela-feat-title">سه طول موج Alex + Diode + Nd:YAG</h3>
+          <h3 class="candela-feat-title">طول موج دایود ۸۰۸nm</h3>
           <p class="candela-feat-desc">
-            طول موج ۷۵۵nm برای پوست‌های روشن و موهای نازک، ۸۰۸nm برای عمق نفوذ بالا در نواحی وسیع، و
-            ۱۰۶۴nm برای پوست‌های گندمی و تیره.
+            طول موج دایود ۸۰۸ نانومتر با عمق نفوذ بالا، ریشه‌های متراکم و ضخیم را هدف قرار می‌دهد و
+            برای همه تیپ‌های پوستی مناسب است.
           </p>
         </div>
 
@@ -72,14 +72,16 @@ import Icon from '../ui/Icon.astro';
       </div>
     </div>
 
-    <!-- Second device: Deka (shot-based). Only what the clinic confirmed is
-         stated here — no power or wavelength figures were given for it. -->
+    <!-- Second device: Deka (shot-based). The owner confirmed Deka's
+         wavelengths (Alexandrite 755nm + Nd:YAG 1064nm); its power was never
+         given, so no wattage is stated for it anywhere on the site. -->
     <div class="candela-showcase-card candela-showcase-card-deka">
       <div class="candela-badge-row">
         <span class="candela-gold-pill">
           <Icon name="award" size={16} />
-          <span>دستگاه دوم کلینیک — لیزر شاتی</span>
+          <span>لیزر شاتی با دو طول موج</span>
         </span>
+        <span class="candela-sub-tag">دستگاه پریمیوم کلینیک</span>
       </div>
 
       <div class="candela-header-block">
@@ -88,15 +90,51 @@ import Icon from '../ui/Icon.astro';
           <span class="candela-en-sub">Deka Shot-Based Laser</span>
         </h2>
         <p class="candela-lead">
-          دومین دستگاه کلینیک، دکا، به‌صورت شاتی کار می‌کند. تعرفه‌های دکا برای بانوان و آقایان در
-          صفحهٔ خدمات آمده است و هنگام رزرو آنلاین می‌توانید دستگاه مورد نظر خود را انتخاب کنید.
+          دومین دستگاه کلینیک، دکا، به‌صورت شاتی کار می‌کند و با دو طول موج الکساندرایت ۷۵۵nm و
+          ان‌دی‌یاگ ۱۰۶۴nm، برای پوست‌های روشن تا سبزه و موهای نازک تا ضخیم مناسب است. تعرفه‌های دکا
+          بالاتر از رادو پلاس است و هنگام رزرو آنلاین می‌توانید دستگاه مورد نظر خود را انتخاب کنید.
         </p>
-        <p>
-          <a href="/services" class="btn-3d-outline-sm">
-            <span>مشاهده تعرفه‌های دکا</span>
-            <Icon name="chevronLeft" size={14} />
-          </a>
-        </p>
+      </div>
+
+      <div class="candela-features-grid">
+        <div class="candela-feature-card">
+          <div class="candela-feat-icon">
+            <Icon name="target" size={26} />
+          </div>
+          <h3 class="candela-feat-title">دو طول موج الکساندرایت + ان‌دی‌یاگ</h3>
+          <p class="candela-feat-desc">
+            طول موج ۷۵۵nm برای پوست‌های روشن و موهای نازک، و ۱۰۶۴nm برای نفوذ عمیق و پوست‌های گندمی
+            و تیره.
+          </p>
+        </div>
+
+        <div class="candela-feature-card">
+          <div class="candela-feat-icon">
+            <Icon name="lightning" size={26} />
+          </div>
+          <h3 class="candela-feat-title">شات‌های دقیق تک‌تک</h3>
+          <p class="candela-feat-desc">
+            لیزر شاتی با پرتاب تک‌شات‌های دقیق و کنترل‌شده روی هر ناحیه — مناسب نواحی حساس و موهای
+            مقاوم.
+          </p>
+        </div>
+
+        <div class="candela-feature-card">
+          <div class="candela-feat-icon">
+            <Icon name="wallet" size={26} />
+          </div>
+          <h3 class="candela-feat-title">تعرفه‌های دکا و انتخاب دستگاه</h3>
+          <p class="candela-feat-desc">
+            تعرفه‌های دکا برای بانوان و آقایان در صفحهٔ خدمات آمده است و هنگام رزرو آنلاین می‌توانید
+            دستگاه مورد نظر خود را انتخاب کنید.
+          </p>
+          <p>
+            <a href="/services" class="btn-3d-outline-sm">
+              <span>مشاهده تعرفه‌های دکا</span>
+              <Icon name="chevronLeft" size={14} />
+            </a>
+          </p>
+        </div>
       </div>
     </div>
   </div>

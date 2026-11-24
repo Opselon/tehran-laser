@@ -5,6 +5,7 @@ import { listPublicServices } from '../../server/repositories';
 import { createBreadcrumbSchema, resolveCanonicalOrigin } from '../../lib/seo';
 import { toPersianDigits } from '../../lib/datetime/jalali';
 import Icon from '../../components/ui/Icon.astro';
+import { MALE_PRICE_REGISTER, MALE_DEKA_PRICE_REGISTER } from '../../data/male-pricing';
 import '../../styles/services-index.css';
 
 // Clinical services catalogue definition with fallback and rich metadata
@@ -26,7 +27,7 @@ interface ServiceItem {
   femaleDekaPrice?: number | undefined;
   femalePromoDekaPrice?: number;
   maleDekaPrice?: number | undefined;
-  wavelength: 'Alexandrite 755nm' | 'Nd:YAG 1064nm' | 'Dual Wavelength';
+  wavelength: 'Diode 808nm';
   wavelengthLabel: string;
   recommendedSessions: string;
   sessionInterval: string;
@@ -52,8 +53,8 @@ const defaultServices: ServiceItem[] = [
     femaleDekaPrice: 4980,
     malePriceText: '۳٬۴۹۰٬۰۰۰ تومان',
     maleDekaPrice: 5980,
-    wavelength: 'Dual Wavelength',
-    wavelengthLabel: 'الکساندرایت ۷۵۵nm + ان‌دی‌یاگ ۱۰۶۴nm',
+    wavelength: 'Diode 808nm',
+    wavelengthLabel: 'دایود ۸۰۸nm',
     recommendedSessions: '۶ تا ۸ جلسه',
     sessionInterval: '۶ تا ۸ هفته',
     isPromo: true,
@@ -68,14 +69,14 @@ const defaultServices: ServiceItem[] = [
     categoryName: 'بالاتنه',
     shortDescription: 'پوشش هر دو زیر بغل با رفع تیرگی ناشی از شیو',
     description:
-      'لیزر موهای زائد هر دو زیر بغل با طول موج الکساندرایت ۷۵۵ نانومتر رادو پلاس با سیستم سرمایش پیوسته.',
+      'لیزر موهای زائد هر دو زیر بغل با طول موج دایود ۸۰۸ نانومتر رادو پلاس با سیستم سرمایش پیوسته.',
     durationMinutes: 20,
     femalePrice: 400,
     femaleDekaPrice: 650,
     malePriceText: '۵۰۰٬۰۰۰ تومان',
     maleDekaPrice: 700,
-    wavelength: 'Alexandrite 755nm',
-    wavelengthLabel: 'الکساندرایت ۷۵۵nm',
+    wavelength: 'Diode 808nm',
+    wavelengthLabel: 'دایود ۸۰۸nm',
     recommendedSessions: '۶ تا ۸ جلسه',
     sessionInterval: '۵ تا ۶ هفته',
     features: ['روشن‌سازی تدریجی پوست', 'پیشگیری از کیست مویی', 'زمان کوتاه جلسه'],
@@ -93,8 +94,8 @@ const defaultServices: ServiceItem[] = [
     femalePrice: 550,
     femaleDekaPrice: 850,
     malePriceText: '۶۵۰٬۰۰۰ تومان',
-    wavelength: 'Alexandrite 755nm',
-    wavelengthLabel: 'الکساندرایت ۷۵۵nm',
+    wavelength: 'Diode 808nm',
+    wavelengthLabel: 'دایود ۸۰۸nm',
     recommendedSessions: '۶ تا ۸ جلسه',
     sessionInterval: '۶ تا ۸ هفته',
     features: ['سری کاملاً اختصاصی', 'حفظ صددرصد بهداشت', 'حذف موهای زیرپوستی'],
@@ -113,8 +114,8 @@ const defaultServices: ServiceItem[] = [
     femaleDekaPrice: 1250,
     malePriceText: '۹۰۰٬۰۰۰ تومان',
     maleDekaPrice: 1400,
-    wavelength: 'Alexandrite 755nm',
-    wavelengthLabel: 'الکساندرایت ۷۵۵nm',
+    wavelength: 'Diode 808nm',
+    wavelengthLabel: 'دایود ۸۰۸nm',
     recommendedSessions: '۶ تا ۸ جلسه',
     sessionInterval: '۶ تا ۸ هفته',
     features: ['اسپات سایز ۲۴mm فوق سریع', 'بدون سوزش و سوختگی', 'پوشش ران تا مچ پا'],
@@ -133,8 +134,8 @@ const defaultServices: ServiceItem[] = [
     femaleDekaPrice: 950,
     malePriceText: '۷۵۰٬۰۰۰ تومان',
     maleDekaPrice: 1150,
-    wavelength: 'Alexandrite 755nm',
-    wavelengthLabel: 'الکساندرایت ۷۵۵nm',
+    wavelength: 'Diode 808nm',
+    wavelengthLabel: 'دایود ۸۰۸nm',
     recommendedSessions: '۶ تا ۸ جلسه',
     sessionInterval: '۵ تا ۷ هفته',
     features: ['شات یکدست تا سرشانه', 'تنظیم فرکانس هوشمند', 'پوست لطیف و بدون لک'],
@@ -151,8 +152,8 @@ const defaultServices: ServiceItem[] = [
     femalePrice: 390,
     femaleDekaPrice: 650,
     malePriceText: '۴۲۰٬۰۰۰ تومان',
-    wavelength: 'Alexandrite 755nm',
-    wavelengthLabel: 'الکساندرایت ۷۵۵nm',
+    wavelength: 'Diode 808nm',
+    wavelengthLabel: 'دایود ۸۰۸nm',
     recommendedSessions: '۶ تا ۸ جلسه',
     sessionInterval: '۴ تا ۵ هفته',
     features: ['عینک محافظ فوتونیک', 'تنظیم انرژی موهای ریز صورت', 'پروتکل بهداشتی اختصاصی'],
@@ -170,8 +171,8 @@ const defaultServices: ServiceItem[] = [
     femalePrice: 200,
     femaleDekaPrice: 300,
     malePriceText: '۱۳۰٬۰۰۰ تومان',
-    wavelength: 'Alexandrite 755nm',
-    wavelengthLabel: 'الکساندرایت ۷۵۵nm',
+    wavelength: 'Diode 808nm',
+    wavelengthLabel: 'دایود ۸۰۸nm',
     recommendedSessions: '۶ تا ۸ جلسه',
     sessionInterval: '۴ هفته',
     features: ['انجام سریع در ۵ دقیقه', 'کولینگ مبرد نقطه به نقطه', 'حذف موهای مقاوم'],
@@ -188,8 +189,8 @@ const defaultServices: ServiceItem[] = [
     femalePrice: 140,
     femaleDekaPrice: 220,
     malePriceText: '۱۹۰٬۰۰۰ تومان',
-    wavelength: 'Dual Wavelength',
-    wavelengthLabel: 'الکساندرایت + ان‌دی‌یاگ',
+    wavelength: 'Diode 808nm',
+    wavelengthLabel: 'دایود ۸۰۸nm',
     recommendedSessions: '۶ تا ۸ جلسه',
     sessionInterval: '۴ تا ۵ هفته',
     features: ['نفوذ بالا در موهای هورمونی', 'جلوگیری از ضخیم شدن موها', 'پوست صاف و یکدست'],
@@ -207,8 +208,8 @@ const defaultServices: ServiceItem[] = [
     femalePrice: 250,
     femaleDekaPrice: 400,
     malePriceText: '۲۵۰٬۰۰۰ تومان',
-    wavelength: 'Alexandrite 755nm',
-    wavelengthLabel: 'الکساندرایت ۷۵۵nm',
+    wavelength: 'Diode 808nm',
+    wavelengthLabel: 'دایود ۸۰۸nm',
     recommendedSessions: '۶ تا ۸ جلسه',
     sessionInterval: '۵ تا ۶ هفته',
     features: ['خط‌گیری هندسی دقیق', 'رفع جوش‌های التهابی گردن', 'تنظیم خط رشد مو'],
@@ -226,8 +227,8 @@ const defaultServices: ServiceItem[] = [
     femaleDekaPrice: 700,
     malePriceText: '۵۰۰٬۰۰۰ تومان',
     maleDekaPrice: 750,
-    wavelength: 'Alexandrite 755nm',
-    wavelengthLabel: 'الکساندرایت ۷۵۵nm',
+    wavelength: 'Diode 808nm',
+    wavelengthLabel: 'دایود ۸۰۸nm',
     recommendedSessions: '۶ تا ۸ جلسه',
     sessionInterval: '۵ تا ۶ هفته',
     features: ['پوشش کامل مچ تا آرنج', 'بدون پوسته شدن یا سوزش', 'نتیجه‌گیری سریع'],
@@ -240,12 +241,12 @@ const defaultServices: ServiceItem[] = [
     categoryName: 'بالاتنه',
     shortDescription: 'بازوی هر دو دست از سرشانه تا بالای آرنج',
     description:
-      'تنظیم فرکانس هوشمند برای پیشگیری از تحریک ریشه‌های کرکی بازو با طول موج الکساندرایت.',
+      'تنظیم فرکانس هوشمند برای پیشگیری از تحریک ریشه‌های کرکی بازو با طول موج دایود ۸۰۸ نانومتر.',
     durationMinutes: 25,
     femalePrice: 370,
     malePriceText: '۵۷۰٬۰۰۰ تومان',
-    wavelength: 'Alexandrite 755nm',
-    wavelengthLabel: 'الکساندرایت ۷۵۵nm',
+    wavelength: 'Diode 808nm',
+    wavelengthLabel: 'دایود ۸۰۸nm',
     recommendedSessions: '۶ تا ۸ جلسه',
     sessionInterval: '۶ تا ۷ هفته',
     features: ['تنظیم مخصوص موهای کرکی', 'بدون تحریک ریشه‌های خفته', 'حفظ لطافت بازو'],
@@ -263,8 +264,8 @@ const defaultServices: ServiceItem[] = [
     femalePrice: 145,
     malePriceText: '۶۰۰٬۰۰۰ تومان',
     maleDekaPrice: 900,
-    wavelength: 'Alexandrite 755nm',
-    wavelengthLabel: 'الکساندرایت ۷۵۵nm',
+    wavelength: 'Diode 808nm',
+    wavelengthLabel: 'دایود ۸۰۸nm',
     recommendedSessions: '۶ تا ۸ جلسه',
     sessionInterval: '۵ تا ۶ هفته',
     features: ['حفظ کامل سلامت بافت سینه', 'کولینگ بسیار ملایم', 'رفع ریشه‌های زبر'],
@@ -282,8 +283,8 @@ const defaultServices: ServiceItem[] = [
     femaleDekaPrice: 550,
     malePriceText: '۵۵۰٬۰۰۰ تومان',
     maleDekaPrice: 750,
-    wavelength: 'Alexandrite 755nm',
-    wavelengthLabel: 'الکساندرایت ۷۵۵nm',
+    wavelength: 'Diode 808nm',
+    wavelengthLabel: 'دایود ۸۰۸nm',
     recommendedSessions: '۶ تا ۸ جلسه',
     sessionInterval: '۶ تا ۸ هفته',
     features: ['پوشش یکنواخت و بدون جاافتادگی', 'سرمایش پیوسته TEC Double', 'تخریب قطعی پیاز مو'],
@@ -300,8 +301,8 @@ const defaultServices: ServiceItem[] = [
     femalePrice: 150,
     femaleDekaPrice: 250,
     malePriceText: '۲۳۰٬۰۰۰ تومان',
-    wavelength: 'Alexandrite 755nm',
-    wavelengthLabel: 'الکساندرایت ۷۵۵nm',
+    wavelength: 'Diode 808nm',
+    wavelengthLabel: 'دایود ۸۰۸nm',
     recommendedSessions: '۶ تا ۸ جلسه',
     sessionInterval: '۵ تا ۶ هفته',
     features: ['انجام سریع در کمتر از ۱۰ دقیقه', 'خط‌کشی قرینه و منظم', 'تخفیف در ترکیب با بیکینی'],
@@ -319,8 +320,8 @@ const defaultServices: ServiceItem[] = [
     femaleDekaPrice: 750,
     malePriceText: '۶۵۰٬۰۰۰ تومان',
     maleDekaPrice: 900,
-    wavelength: 'Dual Wavelength',
-    wavelengthLabel: 'الکساندرایت + ان‌دی‌یاگ',
+    wavelength: 'Diode 808nm',
+    wavelengthLabel: 'دایود ۸۰۸nm',
     recommendedSessions: '۶ تا ۸ جلسه',
     sessionInterval: '۶ تا ۸ هفته',
     features: ['پوشش سریع با اسپات ۲۴mm', 'خنک‌سازی منهای ۳۰ درجه', 'پیشگیری از جوش‌های ناحیه پشت'],
@@ -338,8 +339,8 @@ const defaultServices: ServiceItem[] = [
     femalePrice: 350,
     femaleDekaPrice: 500,
     malePriceText: '۴۶۰٬۰۰۰ تومان',
-    wavelength: 'Alexandrite 755nm',
-    wavelengthLabel: 'الکساندرایت ۷۵۵nm',
+    wavelength: 'Diode 808nm',
+    wavelengthLabel: 'دایود ۸۰۸nm',
     recommendedSessions: '۶ تا ۸ جلسه',
     sessionInterval: '۶ تا ۸ هفته',
     features: ['رعایت صددرصد پروتکل‌های بهداشتی', 'کاهش زبری و جوش پوستی', 'محیط کاملاً خصوصی'],
@@ -356,8 +357,8 @@ const defaultServices: ServiceItem[] = [
     femalePrice: 200,
     femaleDekaPrice: 300,
     malePriceText: '۲۹۰٬۰۰۰ تومان',
-    wavelength: 'Alexandrite 755nm',
-    wavelengthLabel: 'الکساندرایت ۷۵۵nm',
+    wavelength: 'Diode 808nm',
+    wavelengthLabel: 'دایود ۸۰۸nm',
     recommendedSessions: '۶ تا ۸ جلسه',
     sessionInterval: '۶ تا ۸ هفته',
     features: ['سری یکبار مصرف ضدعفونی‌شده', 'دقت شات فوق‌العاده بالا', 'بدون کمترین احساس درد'],
@@ -374,8 +375,8 @@ const defaultServices: ServiceItem[] = [
     durationMinutes: 30,
     femalePrice: 570,
     malePriceText: '۳۹۰٬۰۰۰ تومان',
-    wavelength: 'Alexandrite 755nm',
-    wavelengthLabel: 'الکساندرایت ۷۵۵nm',
+    wavelength: 'Diode 808nm',
+    wavelengthLabel: 'دایود ۸۰۸nm',
     recommendedSessions: '۶ تا ۸ جلسه',
     sessionInterval: '۶ تا ۸ هفته',
     features: [
@@ -395,8 +396,8 @@ const defaultServices: ServiceItem[] = [
     durationMinutes: 20,
     femalePrice: 390,
     malePriceText: '۴۷۰٬۰۰۰ تومان',
-    wavelength: 'Alexandrite 755nm',
-    wavelengthLabel: 'الکساندرایت ۷۵۵nm',
+    wavelength: 'Diode 808nm',
+    wavelengthLabel: 'دایود ۸۰۸nm',
     recommendedSessions: '۶ تا ۸ جلسه',
     sessionInterval: '۶ تا ۸ هفته',
     features: ['رفع تیرگی ناشی از اصطکاک', 'جلوگیری از التهاب و سوزش', 'خنک‌کننده پیوسته'],
@@ -414,8 +415,8 @@ const defaultServices: ServiceItem[] = [
     femaleDekaPrice: 800,
     malePriceText: '۶۵۰٬۰۰۰ تومان',
     maleDekaPrice: 900,
-    wavelength: 'Alexandrite 755nm',
-    wavelengthLabel: 'الکساندرایت ۷۵۵nm',
+    wavelength: 'Diode 808nm',
+    wavelengthLabel: 'دایود ۸۰۸nm',
     recommendedSessions: '۶ تا ۸ جلسه',
     sessionInterval: '۶ تا ۸ هفته',
     features: [
@@ -475,6 +476,29 @@ function formatToman(amountInThousands: number): string {
   return (amountInThousands * 1000).toLocaleString('fa-IR');
 }
 
+// Men's-only zones for the men's tariff table: the six zones that exist only
+// in the men's line (no row in services[]). Amounts come from the owner price
+// registers (thousands of IRT); a missing Deka row renders as «استعلام قیمت»
+// — no price is ever invented here.
+const MENS_ONLY_TABLE_SLUGS = [
+  'ear',
+  'beard-line',
+  'under-chin-back-neck',
+  'shoulder',
+  'forehead',
+  'behind-ear',
+] as const;
+const mensOnlyRows = MENS_ONLY_TABLE_SLUGS.map((slug) => {
+  const rado = MALE_PRICE_REGISTER.find((e) => e.slug === slug);
+  const deka = MALE_DEKA_PRICE_REGISTER.find((e) => e.slug === slug);
+  return {
+    slug,
+    name: rado?.label ?? slug,
+    radoText: rado ? `${formatToman(rado.amount)} تومان` : 'استعلام قیمت',
+    dekaText: deka ? `${formatToman(deka.amount)} تومان` : 'استعلام قیمت',
+  };
+});
+
 // Structured Data: CollectionPage + OfferCatalog price list (§31, §135)
 // Linked to the canonical clinic node (@id /#clinic) emitted by the layout,
 // so there is exactly one MedicalClinic entity site-wide.
@@ -486,13 +510,13 @@ const priceListJsonLd = {
   '@type': ['CollectionPage', 'MedicalWebPage'],
   '@id': `${origin}/services#prices`,
   url: `${origin}/services`,
-  name: 'تعرفه‌های مصوب لیزر موهای زائد لیزر تماسی رادو پلاس',
+  name: 'تعرفه‌های مصوب لیزر موهای زائد با دو دستگاه رادو پلاس و دکا',
   inLanguage: 'fa-IR',
   mainEntity: { '@id': `${origin}/#clinic` },
   isPartOf: { '@id': `${origin}/#website` },
   about: {
     '@type': 'OfferCatalog',
-    name: 'تعرفه‌های مصوب لیزر لیزر تماسی رادو پلاس',
+    name: 'تعرفه‌های مصوب لیزر موهای زائد با دو دستگاه رادو پلاس و دکا',
     itemListElement: services.map((s, idx) => ({
       '@type': 'Offer',
       position: idx + 1,
@@ -523,6 +547,8 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
     'تعرفه لیزر قیطریه',
     'قیمت لیزر فول بادی بانوان',
     'لیزر بانوان و آقایان رادو پلاس',
+    'لیزر دکا قیطریه',
+    'قیمت لیزر دکا تهران',
   ]}
   jsonLd={[priceListJsonLd, breadcrumbJsonLd]}
 >
@@ -550,7 +576,7 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
         </div>
         <div class="tech-badge">
           <Icon name="shield" size={16} />
-          <span>طول موج رادو پلاس: الکساندرایت ۷۵۵nm + ان‌دی‌یاگ ۱۰۶۴nm</span>
+          <span>رادو پلاس: دایود ۸۰۸nm — دکا: الکساندرایت ۷۵۵nm + ان‌دی‌یاگ ۱۰۶۴nm</span>
         </div>
         <div class="tech-badge">
           <Icon name="snowflake" size={16} />
@@ -682,8 +708,11 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
                 <Icon name="shield" size={16} />
                 <span>
                   طول موج:{' '}
-                  <strong data-tech-rado="الکساندرایت ۷۵۵nm رادو پلاس" data-tech-deka="دستگاه دکا">
-                    الکساندرایت ۷۵۵nm رادو پلاس
+                  <strong
+                    data-tech-rado="دایود ۸۰۸nm رادو پلاس"
+                    data-tech-deka="الکساندرایت ۷۵۵nm + ان‌دی‌یاگ ۱۰۶۴nm"
+                  >
+                    دایود ۸۰۸nm رادو پلاس
                   </strong>
                 </span>
               </div>
@@ -836,15 +865,28 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
             <div class="package-pricing-box">
               <div class="price-row-old">
                 <span class="label">مجموع تک‌ناحیه‌ای:</span>
-                <span class="old-amount strikethrough">۱/۱۵۰/۰۰۰ تومان</span>
+                <span
+                  class="old-amount strikethrough"
+                  data-price-rado="۱/۱۵۰/۰۰۰ تومان"
+                  data-price-deka="استعلام قیمت"
+                >
+                  ۱/۱۵۰/۰۰۰ تومان
+                </span>
               </div>
               <div class="price-row-final">
-                <span class="final-amount">۹۸۰/۰۰۰</span>
+                <span class="final-amount" data-price-rado="۹۸۰/۰۰۰" data-price-deka="استعلام قیمت">
+                  ۹۸۰/۰۰۰
+                </span>
                 <span class="unit">تومان / جلسه</span>
               </div>
               <div class="save-tag">
                 <Icon name="tag" size={14} />
-                <span>۱۵٪ تخفیف ویژه پکیج — دستگاه رادو پلاس</span>
+                <span
+                  data-price-rado="۱۵٪ تخفیف ویژه پکیج — دستگاه رادو پلاس"
+                  data-price-deka="استعلام قیمت"
+                >
+                  ۱۵٪ تخفیف ویژه پکیج — دستگاه رادو پلاس
+                </span>
               </div>
             </div>
 
@@ -938,7 +980,10 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
                 <!-- Rado Plus Wavelength Badge -->
                 <div class="card-wavelength-tag">
                   <Icon name="lightning" size={13} />
-                  <span data-tech-rado={service.wavelengthLabel} data-tech-deka="دستگاه دکا">
+                  <span
+                    data-tech-rado={service.wavelengthLabel}
+                    data-tech-deka="الکساندرایت ۷۵۵nm + ان‌دی‌یاگ ۱۰۶۴nm"
+                  >
                     {service.wavelengthLabel}
                   </span>
                 </div>
@@ -1048,7 +1093,10 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
                     <td class="td-tech">
                       <span class="badge-wavelength-cell">
                         <Icon name="lightning" size={12} />
-                        <span data-tech-rado={service.wavelengthLabel} data-tech-deka="دستگاه دکا">
+                        <span
+                          data-tech-rado={service.wavelengthLabel}
+                          data-tech-deka="الکساندرایت ۷۵۵nm + ان‌دی‌یاگ ۱۰۶۴nm"
+                        >
                           {service.wavelengthLabel}
                         </span>
                       </span>
@@ -1183,11 +1231,11 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
       <!-- ============================================================== -->
       <div id="panel-male" class="tab-panel hidden" role="tabpanel" aria-labelledby="tab-male">
         <!-- Device switch — same toggle as the women's panel (the page script
-             syncs every .device-toggle-btn): it swaps the banner device text
-             and carries the choice into the booking links. Men's packages
-             have no Deka tariff of their own, so their prices stay Rado;
-             the note below (shown only on Deka) says so plainly, so the
-             toggle never looks inert. -->
+             syncs every .device-toggle-btn): it swaps the banner device text,
+             the men's tariff table prices, and carries the choice into the
+             booking links. Men's packages are priced on Rado Plus; the
+             tariff table below shows both devices, and the note below (shown
+             only on Deka) says so plainly, so the toggle never looks inert. -->
         <div class="device-toggle-row" role="tablist" aria-label="انتخاب دستگاه">
           <span class="device-toggle-label">دستگاه:</span>
           <button
@@ -1212,8 +1260,9 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
           </button>
         </div>
         <p class="mens-device-note" data-device-note-mens hidden>
-          پکیج‌های آقایان فقط با دستگاه رادو پلاس ارائه می‌شوند؛ برای دکا، در رزرو آنلاین نواحی را
-          جداگانه انتخاب کنید — تعرفه دکا هر ناحیه همان‌جا نمایش داده می‌شود.
+          قیمت پکیج‌های آقایان بر اساس دستگاه رادو پلاس است؛ جدول تعرفه آقایان در پایین همین صفحه،
+          تعرفه هر ناحیه را برای هر دو دستگاه (رادو پلاس و دکا) نشان می‌دهد و هنگام رزرو می‌توانید
+          دستگاه را انتخاب کنید.
         </p>
 
         <!-- Men's Introduction Banner -->
@@ -1227,10 +1276,10 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
             <p class="mens-banner-desc">
               با توجه به اینکه ریشه موهای آقایان تراکم و ضخامت بیشتری دارد،
               <span
-                data-tech-rado="دستگاه لیزر تماسی رادو پلاس با بهره‌گیری از طول موج نفوذی ان‌دی‌یاگ (Nd:YAG 1064nm)"
-                data-tech-deka="دستگاه لیزر شاتی دکا"
+                data-tech-rado="دستگاه لیزر تماسی دایود رادو پلاس"
+                data-tech-deka="دستگاه لیزر شاتی دکا با دو طول موج الکساندرایت ۷۵۵ و ان‌دی‌یاگ ۱۰۶۴ نانومتر"
               >
-                دستگاه لیزر تماسی رادو پلاس با بهره‌گیری از طول موج نفوذی ان‌دی‌یاگ (Nd:YAG 1064nm)
+                دستگاه لیزر تماسی دایود رادو پلاس
               </span>
               عمیق‌ترین فولیکول‌ها را بدون سوختگی پوست درمان می‌کند. کلیه خدمات در فضایی کاملاً
               خصوصی انجام می‌پذیرد.
@@ -1248,10 +1297,10 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
               <div class="m-feat">
                 <Icon name="checkCircle" size={16} />
                 <span
-                  data-tech-rado="طول موج Nd:YAG 1064nm مناسب ریشه‌های متراکم"
-                  data-tech-deka="دستگاه لیزر شاتی دکا"
+                  data-tech-rado="طول موج دایود ۸۰۸nm مناسب ریشه‌های متراکم"
+                  data-tech-deka="دو طول موج الکساندرایت + ان‌دی‌یاگ مناسب ریشه‌های متراکم"
                 >
-                  طول موج Nd:YAG 1064nm مناسب ریشه‌های متراکم
+                  طول موج دایود ۸۰۸nm مناسب ریشه‌های متراکم
                 </span>
               </div>
               <div class="m-feat">
@@ -1303,7 +1352,7 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
               <div class="spec-item">
                 <Icon name="lightning" size={16} />
                 <span>
-                  طول موج: <strong>Nd:YAG 1064nm</strong>
+                  طول موج: <strong>دایود ۸۰۸nm</strong>
                 </span>
               </div>
               <div class="spec-item">
@@ -1434,6 +1483,84 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
           </div>
         </div>
 
+        <!-- Men's tariff table — every men's zone, both devices. Shared zones
+             come from services[] (malePriceText / maleDekaPrice); the six
+             men's-only zones come from the owner price registers in
+             src/data/male-pricing.ts (amounts in thousands of IRT). Zones
+             with no Deka row show «استعلام قیمت». Prices swap with the
+             device toggle via data-price-rado / data-price-deka; the page
+             script appends ?device= to the booking links. -->
+        <div class="mens-tariff-table-wrap mt-5">
+          <h3 class="section-h2">جدول تعرفه لیزر آقایان — رادو پلاس و دکا</h3>
+          <p class="section-desc">
+            تعرفه هر ناحیه برای هر دو دستگاه؛ با انتخاب دستگاه در بالای صفحه، قیمت‌ها جابه‌جا
+            می‌شوند. نواحی بدون تعرفه دکا «استعلام قیمت» دارند.
+          </p>
+          <div class="table-responsive-wrapper">
+            <table class="table-obsidian-pricing" role="table">
+              <thead>
+                <tr>
+                  <th scope="col">ناحیه</th>
+                  <th scope="col">تعرفه</th>
+                  <th scope="col" class="th-action">
+                    رزرو
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {services.map((service) => {
+                  const maleDekaText = service.maleDekaPrice
+                    ? `${formatToman(service.maleDekaPrice)} تومان`
+                    : 'استعلام قیمت';
+                  return (
+                    <tr>
+                      <td class="td-service">{service.name}</td>
+                      <td class="td-price">
+                        <span
+                          class="price-highlight"
+                          data-price-rado={service.malePriceText}
+                          data-price-deka={maleDekaText}
+                        >
+                          {service.malePriceText}
+                        </span>
+                      </td>
+                      <td class="td-action">
+                        <a
+                          href={`/booking?service=${service.slug}&category=male`}
+                          class="btn-table-book"
+                        >
+                          <Icon name="calendar" size={14} />
+                          <span>رزرو</span>
+                        </a>
+                      </td>
+                    </tr>
+                  );
+                })}
+                {mensOnlyRows.map((row) => (
+                  <tr>
+                    <td class="td-service">{row.name}</td>
+                    <td class="td-price">
+                      <span
+                        class="price-highlight"
+                        data-price-rado={row.radoText}
+                        data-price-deka={row.dekaText}
+                      >
+                        {row.radoText}
+                      </span>
+                    </td>
+                    <td class="td-action">
+                      <a href={`/booking?service=${row.slug}&category=male`} class="btn-table-book">
+                        <Icon name="calendar" size={14} />
+                        <span>رزرو</span>
+                      </a>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
         <!-- Men's Clinical Advice Card -->
         <div class="mens-advice-card mt-5">
           <div class="guidance-header">
@@ -1467,12 +1594,12 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
               <div class="guidance-box">
                 <div class="box-title">
                   <Icon name="lightning" size={16} />
-                  <span>چرا طول موج Nd:YAG برای آقایان؟</span>
+                  <span>چرا لیزر دایود برای آقایان؟</span>
                 </div>
                 <p>
-                  طول موج ۱۰۶۴ نانومتر عمق نفوذ بالاتری دارد و انرژی را مستقیماً به پاپیلا و
-                  فولیکول‌های ضخیم ریش، سینه و کمر می‌رساند بدون اینکه ملانین سطحی پوست را بسوزاند؛
-                  بنابراین برای پوست‌های گندمی و سبزه آقایان ۱۰۰٪ ایمن است.
+                  طول موج دایود ۸۰۸ نانومتر عمق نفوذ بالایی دارد و انرژی را مستقیماً به پاپیلا و
+                  فولیکول‌های ضخیم ریش، سینه و کمر می‌رساند؛ برای پوست‌های گندمی و سبزه آقایان ایمن
+                  است و با سرمایش پیوسته TEC Double بدون درد و سوختگی انجام می‌شود.
                 </p>
               </div>
             </div>
@@ -1635,7 +1762,7 @@ const breadcrumbJsonLd = createBreadcrumbSchema([
       priceEls.forEach((el) => {
         const val = el.getAttribute(device === 'deka' ? 'data-price-deka' : 'data-price-rado');
         if (val !== null) el.textContent = val;
-        const unit = el.parentElement?.querySelector('.price-currency');
+        const unit = el.parentElement?.querySelector('.price-currency, .unit');
         if (unit) unit.style.display = /^[۰-۹]/.test(val ?? '') ? '' : 'none';
       });
       techEls.forEach((el) => {

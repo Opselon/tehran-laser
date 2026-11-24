@@ -33,9 +33,12 @@ function formatToman(amountInThousands: number): string {
   return (amountInThousands * 1000).toLocaleString('fa-IR');
 }
 
-// Clinical metadata per treatment area (wavelength, sessions, comfort, results).
-// Falls back to the Alexandrite 755nm default so every detail page renders
-// full clinical context even for slugs added later.
+// Clinical metadata per treatment area (Deka wavelength, sessions, comfort,
+// results). The wavelength here is DEKA's shot-based wavelength for the zone
+// (Alexandrite 755nm, or both wavelengths for full-body); Rado Plus is a
+// diode 808nm laser for every zone, so it needs no per-zone entry. Falls back
+// to the Alexandrite 755nm default so every detail page renders full clinical
+// context even for slugs added later.
 interface AreaMeta {
   wavelength: string;
   wavelengthShort: string;
@@ -187,7 +190,7 @@ const afterCareSteps = [
         </div>
         <div class="tech-badge">
           <Icon name="shield" size={15} />
-          <span>طول موج {meta.wavelengthShort} — دستگاه لیزر تماسی</span>
+          <span>رادو پلاس: دایود ۸۰۸nm — دکا: الکساندرایت ۷۵۵nm + ان‌دی‌یاگ ۱۰۶۴nm</span>
         </div>
         <div class="tech-badge">
           <Icon name="snowflake" size={15} />
@@ -346,35 +349,44 @@ const afterCareSteps = [
           </div>
         </div>
 
-        <!-- ════ Rado Plus Wavelength Badge ════ -->
+        <!-- ════ Two-Device Wavelength Card ════ -->
         <div class="wavelength-card">
           <div class="wavelength-card-head">
             <Icon name="lightning" size={18} />
-            <span>طول موج دستگاه لیزر تماسی رادو پلاس</span>
+            <span>طول موج دو دستگاه کلینیک — رادو پلاس و دکا</span>
           </div>
           <div class="wavelength-badges">
+            <span class="wave-badge">
+              <Icon name="shield" size={13} />
+              <span>رادو پلاس: دایود ۸۰۸nm</span>
+            </span>
             {isDualWavelength ? (
               <>
                 <span class="wave-badge">
                   <Icon name="shield" size={13} />
-                  <span>الکساندرایت ۷۵۵nm</span>
+                  <span>دکا: الکساندرایت ۷۵۵nm</span>
                 </span>
                 <span class="wave-badge">
                   <Icon name="shield" size={13} />
-                  <span>ان‌دی‌یاگ Nd:YAG ۱۰۶۴nm</span>
+                  <span>دکا: ان‌دی‌یاگ Nd:YAG ۱۰۶۴nm</span>
                 </span>
               </>
             ) : (
               <span class="wave-badge">
                 <Icon name="shield" size={13} />
-                <span>{meta.wavelength}</span>
+                <span>دکا: {meta.wavelength}</span>
               </span>
             )}
           </div>
           <p class="wavelength-desc">
-            طول موج الکساندرایت ۷۵۵ نانومتر با بیشترین میزان جذب ملانین، ریشه‌های موی ضخیم و سیاه را
-            هدف قرار می‌دهد؛ همزمان سیستم سرمایش پیوسته TEC Double، پوست را بی‌حس کرده و درد و ریسک
-            سوختگی را به صفر می‌رساند.
+            <strong>رادو پلاس — دایود ۸۰۸nm:</strong> طول موج دایود با عمق نفوذ بالا، ریشه‌های
+            متراکم و ضخیم را هدف قرار می‌دهد و برای همه تیپ‌های پوستی مناسب است؛ سیستم سرمایش پیوسته
+            TEC Double، پوست را بی‌حس کرده و درد و ریسک سوختگی را به صفر می‌رساند.
+          </p>
+          <p class="wavelength-desc">
+            <strong>دکا — الکساندرایت ۷۵۵nm + ان‌دی‌یاگ ۱۰۶۴nm:</strong> طول موج الکساندرایت ۷۵۵
+            نانومتر با بیشترین میزان جذب ملانین، ریشه‌های موی نازک و روشن را هدف قرار می‌دهد و
+            ان‌دی‌یاگ ۱۰۶۴ نانومتر با نفوذ عمیق، برای پوست‌های گندمی و تیره ایمن است.
           </p>
         </div>
 
@@ -497,7 +509,7 @@ const afterCareSteps = [
               <span class="sb-label">
                 <Icon name="shield" size={14} /> طول موج
               </span>
-              <strong>{meta.wavelengthShort}</strong>
+              <strong>رادو: دایود ۸۰۸nm — دکا: الکساندرایت ۷۵۵ + ان‌دی‌یاگ ۱۰۶۴nm</strong>
             </li>
             <li>
               <span class="sb-label">

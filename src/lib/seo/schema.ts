@@ -268,18 +268,18 @@ export function createMedicalProcedureSchema(
     '@context': 'https://schema.org',
     '@type': 'MedicalProcedure',
     '@id': `${serviceUrl}#procedure`,
-    name: `لیزر موهای زائد ${service.name} با رادو پلاس`,
+    name: `لیزر موهای زائد ${service.name} با رادو پلاس و دکا`,
     procedureType: 'https://schema.org/NonSurgicalProcedure',
     bodyLocation: service.name,
     description:
       service.description ||
-      `خدمات تخصصی لیزر موهای زائد ناحیه ${service.name} با دستگاه لیزر تماسی رادو پلاس در کلینیک تهران لیزر قیطریه.`,
+      `خدمات تخصصی لیزر موهای زائد ناحیه ${service.name} با دو دستگاه لیزر رادو پلاس و دکا در کلینیک تهران لیزر قیطریه.`,
     preparation:
       'شیو کامل ناحیه با تیغ یا ژیلت ۲۴ ساعت قبل از جلسه، عدم مصرف داروهای لایه‌بردار و پرهیز از برنزه کردن و آفتاب گرفتن.',
     followup:
       'استفاده از کرم زینک اکساید و ژل آلوئه‌ورا، پرهیز از دوش آب داغ، سونا و ورزش سنگین تا ۲۴ ساعت پس از جلسه.',
     howPerformed:
-      'تابش پالس‌های متمرکز لیزر تماسی در سه طول موج ۷۵۵ و ۸۰۸ و ۱۰۶۴ نانومتر همزمان با سرمایش پیوسته TEC Double و ژل خنک‌کننده جهت مهار قطعی فولیکول مو بدون کوچک‌ترین درد و سوختگی.',
+      'تابش پالس‌های متمرکز لیزر تماسی رادو پلاس (دایود ۸۰۸nm) یا لیزر شاتی دکا (الکساندرایت ۷۵۵nm + ان‌دی‌یاگ ۱۰۶۴nm) همزمان با سرمایش پیوسته TEC Double و ژل خنک‌کننده جهت مهار قطعی فولیکول مو بدون کوچک‌ترین درد و سوختگی.',
     provider: {
       '@type': 'MedicalClinic',
       '@id': `${origin}/#clinic`,
@@ -406,9 +406,9 @@ export function createArticleSchema(post: ArticleSchemaInput, origin = DEFAULT_C
     },
     about: {
       '@type': 'MedicalTherapy',
-      name: 'لیزر موهای زائد تماسی رادو پلاس',
+      name: 'لیزر موهای زائد با رادو پلاس و دکا',
       description:
-        'رفع موهای زائد با سه طول موج ۷۵۵ و ۸۰۸ و ۱۰۶۴ نانومتر و سیستم خنک‌کننده TEC Double',
+        'رفع موهای زائد با دو دستگاه لیزر رادو پلاس (دایود ۸۰۸nm) و دکا (الکساندرایت ۷۵۵nm + ان‌دی‌یاگ ۱۰۶۴nm) و سیستم خنک‌کننده TEC Double',
     },
   };
 }
